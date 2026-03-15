@@ -13,6 +13,7 @@ import {
   ShieldCheck, Star, Check, Users, ThumbsUp, Meh, ThumbsDown, Send,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
+import CrossSellBanner from "@/components/CrossSellBanner";
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [

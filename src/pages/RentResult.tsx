@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CrossSellBanner from "@/components/CrossSellBanner";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -35,6 +36,11 @@ const RentResult: React.FC = () => {
               </Link>
             </Button>
           </div>
+        </div>
+
+        {/* Cross-sell: Sell */}
+        <div className="mt-12">
+          <CrossSellBanner variant="rent-to-sell" />
         </div>
       </main>
       <Footer />
