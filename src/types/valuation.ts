@@ -129,8 +129,9 @@ export interface RentValuationData {
   // Features (rent-specific)
   condition: string;
   hasPool: boolean;
-  seaView: string;
+  views: string;
   hasAC: boolean;
+  propertyFeatures: string;
   furnished: string;
   hasWifi: boolean;
   beachProximity: string;
