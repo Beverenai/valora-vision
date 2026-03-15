@@ -98,11 +98,43 @@ export default {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "confetti-fall": {
+          "0%": { transform: "translateY(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateY(100vh) rotate(720deg)", opacity: "0" },
+        },
+        "confetti-fall-left": {
+          "0%": { transform: "translateY(0) translateX(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateY(100vh) translateX(200px) rotate(720deg)", opacity: "0" },
+        },
+        "confetti-fall-right": {
+          "0%": { transform: "translateY(0) translateX(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateY(100vh) translateX(-200px) rotate(720deg)", opacity: "0" },
+        },
+        "confetti-sway": {
+          "0%, 100%": { transform: "rotateY(0deg) rotateX(0deg)" },
+          "25%": { transform: "rotateY(90deg) rotateX(20deg)" },
+          "50%": { transform: "rotateY(180deg) rotateX(-20deg)" },
+          "75%": { transform: "rotateY(270deg) rotateX(20deg)" },
+        },
+        "confetti-shimmer": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "count-up": "count-up 0.6s ease-out forwards",
+        "confetti-fall": "confetti-fall linear forwards",
+        "confetti-fall-left": "confetti-fall-left linear forwards",
+        "confetti-fall-right": "confetti-fall-right linear forwards",
+        "confetti-sway": "confetti-sway ease-in-out infinite",
+        "confetti-shimmer": "confetti-shimmer ease-in-out infinite",
+        "fade-in": "fade-in 0.3s ease-out",
       },
     },
   },
