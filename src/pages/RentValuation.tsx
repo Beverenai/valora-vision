@@ -105,7 +105,7 @@ const RentValuation: React.FC = () => {
 
     try {
       const bedroomsNum = formData.bedrooms === "8+" ? 8 : parseInt(formData.bedrooms) || null;
-      const bathroomsNum = formData.bathrooms === "6+" ? 6 : parseInt(formData.bathrooms) || null;
+      const bathroomsNum = formData.bathrooms === "7+" ? 7 : parseInt(formData.bathrooms) || null;
 
       const { data, error } = await supabase
         .from("leads_rent")
@@ -120,7 +120,8 @@ const RentValuation: React.FC = () => {
           bedrooms: bedroomsNum,
           bathrooms: bathroomsNum,
           is_furnished: formData.furnished || null,
-          rental_preference: formData.beachProximity ? null : null,
+          views: formData.views || null,
+          property_features: formData.propertyFeatures || null,
         })
         .select("id")
         .single();

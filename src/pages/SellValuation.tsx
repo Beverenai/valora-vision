@@ -98,7 +98,7 @@ const SellValuation: React.FC = () => {
 
     try {
       const bedroomsNum = formData.bedrooms === "8+" ? 8 : parseInt(formData.bedrooms) || null;
-      const bathroomsNum = formData.bathrooms === "6+" ? 6 : parseInt(formData.bathrooms) || null;
+      const bathroomsNum = formData.bathrooms === "7+" ? 7 : parseInt(formData.bathrooms) || null;
 
       const { data, error } = await supabase
         .from("leads_sell")
@@ -115,11 +115,12 @@ const SellValuation: React.FC = () => {
           bedrooms: bedroomsNum,
           bathrooms: bathroomsNum,
           orientation: formData.orientation || null,
-          views: formData.seaView || null,
+          views: formData.views || null,
           condition: formData.condition || null,
           features: [
             formData.hasPool ? "pool" : "",
             formData.hasGarage ? "garage" : "",
+            formData.propertyFeatures || "",
           ].filter(Boolean).join(", ") || null,
           year_built: formData.yearBuilt ? parseInt(formData.yearBuilt) : null,
           energy_certificate: formData.energyCertificate || null,

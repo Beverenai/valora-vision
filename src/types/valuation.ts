@@ -91,8 +91,9 @@ export interface SellValuationData {
   // Features (sell-specific)
   condition: string;
   hasPool: boolean;
-  seaView: string;
+  views: string;
   hasGarage: boolean;
+  propertyFeatures: string;
   orientation: string;
   yearBuilt: string;
   energyCertificate: string;
@@ -128,8 +129,9 @@ export interface RentValuationData {
   // Features (rent-specific)
   condition: string;
   hasPool: boolean;
-  seaView: string;
+  views: string;
   hasAC: boolean;
+  propertyFeatures: string;
   furnished: string;
   hasWifi: boolean;
   beachProximity: string;
@@ -160,8 +162,9 @@ export const INITIAL_SELL_DATA: SellValuationData = {
   floor: "",
   condition: "",
   hasPool: false,
-  seaView: "",
+  views: "",
   hasGarage: false,
+  propertyFeatures: "",
   orientation: "",
   yearBuilt: "",
   energyCertificate: "",
@@ -189,8 +192,9 @@ export const INITIAL_RENT_DATA: RentValuationData = {
   floor: "",
   condition: "",
   hasPool: false,
-  seaView: "",
+  views: "",
   hasAC: false,
+  propertyFeatures: "",
   furnished: "",
   hasWifi: false,
   beachProximity: "",

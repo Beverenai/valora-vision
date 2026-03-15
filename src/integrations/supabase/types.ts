@@ -34,9 +34,11 @@ export type Database = {
           monthly_long_term_estimate: number | null
           occupancy_estimate: number | null
           phone: string | null
+          property_features: string | null
           property_type: string | null
           rental_preference: string | null
           seasonal_breakdown: Json | null
+          views: string | null
           weekly_high_season_estimate: number | null
           weekly_low_season_estimate: number | null
           zone_id: string | null
@@ -60,9 +62,11 @@ export type Database = {
           monthly_long_term_estimate?: number | null
           occupancy_estimate?: number | null
           phone?: string | null
+          property_features?: string | null
           property_type?: string | null
           rental_preference?: string | null
           seasonal_breakdown?: Json | null
+          views?: string | null
           weekly_high_season_estimate?: number | null
           weekly_low_season_estimate?: number | null
           zone_id?: string | null
@@ -86,9 +90,11 @@ export type Database = {
           monthly_long_term_estimate?: number | null
           occupancy_estimate?: number | null
           phone?: string | null
+          property_features?: string | null
           property_type?: string | null
           rental_preference?: string | null
           seasonal_breakdown?: Json | null
+          views?: string | null
           weekly_high_season_estimate?: number | null
           weekly_low_season_estimate?: number | null
           zone_id?: string | null
