@@ -6,7 +6,7 @@ export const PROPERTY_CATEGORIES = [
   { value: "Commercial", label: "Commercial", description: "Offices, shops and commercial properties" },
   { value: "Rural Properties", label: "Rural Properties", description: "Country estates and land" },
   { value: "New Development", label: "New Development", description: "Off-plan and new construction" },
-] as const;
+];
 
 export const PROPERTY_TYPE_CATEGORIES = [
   {
