@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProgressIndicator from "@/components/shared/ProgressIndicator";
@@ -47,10 +47,24 @@ const getRentProgressMessage = (progress: number) => {
 
 const RentValuation: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [simulatedProgress, setSimulatedProgress] = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Pre-fill address from navigation state
+  const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string } })?.address;
+  const initialData = addressState
+    ? {
+        ...INITIAL_RENT_DATA,
+        streetAddress: addressState.streetAddress || "",
+        city: addressState.city || "",
+        province: addressState.province || "",
+        country: addressState.country || "",
+        urbanization: addressState.urbanization || "",
+      }
+    : INITIAL_RENT_DATA;
 
   useEffect(() => {
     document.title = "Free Rental Estimate | ValoraCasa";
@@ -66,7 +80,7 @@ const RentValuation: React.FC = () => {
     handlePrevStep,
   } = useFormWizard<RentValuationData>({
     steps: RENT_STEPS,
-    initialData: INITIAL_RENT_DATA,
+    initialData: initialData,
     validateStep: validateRentStep,
   });
 
