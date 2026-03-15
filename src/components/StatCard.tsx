@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { type LucideIcon } from "lucide-react";
 
 interface StatCardProps {
@@ -8,20 +7,14 @@ interface StatCardProps {
   delay?: number;
 }
 
-const StatCard = ({ icon: Icon, value, label, delay = 0 }: StatCardProps) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.5, delay }}
-    className="flex flex-col items-center gap-2 text-center"
-  >
-    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold/10">
-      <Icon className="h-6 w-6 text-gold" />
+const StatCard = ({ icon: Icon, value, label }: StatCardProps) => (
+  <div className="bg-card p-6 flex flex-col items-center gap-2 text-center">
+    <div className="flex items-center gap-2 mb-1">
+      <Icon className="h-4 w-4 text-gold" />
+      <span className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">{label}</span>
     </div>
-    <span className="font-heading text-3xl font-bold text-foreground">{value}</span>
-    <span className="text-sm text-muted-foreground">{label}</span>
-  </motion.div>
+    <span className="text-[2.5rem] font-light tracking-[-0.02em] leading-none text-foreground">{value}</span>
+  </div>
 );
 
 export default StatCard;

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface CTABannerProps {
   title: string;
@@ -10,30 +9,23 @@ interface CTABannerProps {
   variant?: "navy" | "teal";
 }
 
-const CTABanner = ({ title, subtitle, buttonText, href, variant = "navy" }: CTABannerProps) => (
-  <section
-    className={`rounded-2xl px-8 py-12 text-center ${
-      variant === "teal"
-        ? "bg-gradient-to-r from-teal to-teal-light"
-        : "bg-gradient-to-r from-navy to-navy-deep"
-    }`}
-  >
-    <h2 className="font-heading text-2xl font-bold text-primary-foreground md:text-3xl">
-      {title}
-    </h2>
-    {subtitle && (
-      <p className="mx-auto mt-2 max-w-lg text-primary-foreground/70">{subtitle}</p>
-    )}
-    <Button
-      asChild
-      size="lg"
-      className="mt-6 bg-gold text-navy hover:bg-gold-dark"
-    >
-      <Link to={href}>
+const CTABanner = ({ title, subtitle, buttonText, href }: CTABannerProps) => (
+  <section className="border border-border">
+    <div className="bg-primary p-12 md:p-16 text-center">
+      <h2 className="font-heading text-2xl font-bold text-primary-foreground md:text-3xl">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="mx-auto mt-2 max-w-lg text-primary-foreground/60 text-sm">{subtitle}</p>
+      )}
+      <Link
+        to={href}
+        className="mt-6 inline-flex items-center gap-2 bg-gold text-primary px-6 py-3 text-sm font-medium hover:bg-gold-dark transition-colors"
+      >
         {buttonText}
-        <ArrowRight className="ml-2 h-4 w-4" />
+        <ArrowRight className="h-4 w-4" />
       </Link>
-    </Button>
+    </div>
   </section>
 );
 
