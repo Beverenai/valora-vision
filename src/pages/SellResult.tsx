@@ -421,6 +421,10 @@ const SellResult: React.FC = () => {
         <MarketTrendsSection content={lead?.market_trends || MOCK_TRENDS} chartData={PRICE_TREND_DATA} />
         <ProfessionalSpotlight companyName="Costa Del Sol Premium Realty" tagline="Full-service luxury property experts since 2005" rating={5} reviewCount={127} services={MOCK_SERVICES} quote="We look forward to helping you achieve the best possible result for your property." onContact={() => toast({ title: "Contact Requested", description: "The agent will reach out to you shortly." })} onViewProfile={() => toast({ title: "Coming Soon", description: "Agent profiles are coming soon." })} />
         <FeedbackSection leadId={id!} leadType="sell" />
+        {/* Cross-sell: Rent */}
+        <div className="p-6 md:p-10">
+          <CrossSellBanner variant="sell-to-rent" />
+        </div>
         <ValuationDisclaimer />
       </div>
       <Footer />
