@@ -72,7 +72,7 @@ const SellValuation: React.FC = () => {
     handlePrevStep,
   } = useFormWizard<SellValuationData>({
     steps: SELL_STEPS,
-    initialData: INITIAL_SELL_DATA,
+    initialData: initialData,
     validateStep: validateSellStep,
   });
 

@@ -80,7 +80,7 @@ const RentValuation: React.FC = () => {
     handlePrevStep,
   } = useFormWizard<RentValuationData>({
     steps: RENT_STEPS,
-    initialData: INITIAL_RENT_DATA,
+    initialData: initialData,
     validateStep: validateRentStep,
   });
 
