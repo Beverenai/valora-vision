@@ -52,7 +52,7 @@ export const PROPERTY_TYPE_CATEGORIES = [
       { value: "new-development", label: "New Development", description: "Pre-construction property" },
     ],
   },
-] as const;
+];
 
 export const ALL_PROPERTY_TYPES = PROPERTY_TYPE_CATEGORIES.flatMap((cat) => cat.types);
 
