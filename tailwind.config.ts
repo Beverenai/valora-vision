@@ -125,6 +125,14 @@ export default {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        "ticket-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "ticket-dash": {
+          from: { strokeDashoffset: "1000" },
+          to: { strokeDashoffset: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
