@@ -8,12 +8,13 @@ interface TestimonialCardProps {
 }
 
 const TestimonialCard = ({ quote, name, location, rating }: TestimonialCardProps) => (
-  <div className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
+  <div className="bg-card border border-border p-6 relative">
+    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gold" />
     <div className="mb-3 flex gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
-          className={`h-4 w-4 ${i < rating ? "fill-amber text-amber" : "text-border"}`}
+          className={`h-3.5 w-3.5 ${i < rating ? "fill-gold text-gold" : "text-border"}`}
         />
       ))}
     </div>
