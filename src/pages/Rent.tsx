@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -9,9 +10,6 @@ import {
   Home,
   Wallet,
   ShieldCheck,
-  CheckCircle2,
-  MapPin,
-  Key,
 } from "lucide-react";
 import {
   Accordion,
@@ -23,7 +21,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TestimonialCard from "@/components/TestimonialCard";
 import CTABanner from "@/components/CTABanner";
-import { useEffect } from "react";
+import CompanyLogos from "@/components/CompanyLogos";
+import AboutValuator from "@/components/AboutValuator";
+import InlineCTA from "@/components/InlineCTA";
+import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
+import GoogleMapsAddressInput from "@/components/shared/GoogleMapsAddressInput";
+import { AddressData } from "@/types/valuation";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -54,20 +57,41 @@ const steps = [
 ];
 
 const Rent = () => {
-  useEffect(() => { document.title = "Free Rental Income Estimate in Spain — ValoraCasa"; }, []);
+  const navigate = useNavigate();
+  const [addressData, setAddressData] = useState<AddressData>({
+    streetAddress: "",
+    urbanization: "",
+    city: "",
+    province: "",
+    country: "",
+  });
+
+  useEffect(() => {
+    document.title = "Free Rental Income Estimate in Spain — ValoraCasa";
+  }, []);
+
+  const handleAddressChange = (field: keyof AddressData, value: string) => {
+    setAddressData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleGetEstimate = () => {
+    navigate("/rent/valuation", { state: { address: addressData } });
+  };
+
+  const hasAddress = !!(addressData.streetAddress || addressData.city);
 
   return (
     <div className="min-h-screen bg-background p-6">
       <Navbar />
 
-      {/* ── Hero ── */}
+      {/* ── Hero with Address Input ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.7 }}
         className="max-w-[1400px] mx-auto border border-border mb-12"
       >
-        <div className="bg-gradient-to-br from-primary to-navy-deep p-12 md:p-16">
+        <div className="bg-gradient-to-br from-primary to-navy-deep p-10 md:p-16">
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-4">
             Free Rental Estimate
           </p>
@@ -78,31 +102,77 @@ const Rent = () => {
           <p className="text-primary-foreground/60 max-w-xl mb-8">
             Get a free rental income estimate — both short-term (Airbnb) and long-term — based on real market data. Find the best property managers in your area.
           </p>
-          <Link
-            to="/rent/valuation"
-            className="inline-flex items-center gap-2 bg-gold text-primary px-6 py-3 text-sm font-medium hover:bg-gold-dark transition-colors"
-          >
-            Get Your Free Estimate
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
 
-        {/* Stats strip */}
-        <div className="grid grid-cols-3 gap-[1px] bg-border">
-          <div className="bg-card p-6 text-center">
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Estimates</p>
-            <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">4,200+</p>
-          </div>
-          <div className="bg-card p-6 text-center">
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Cities</p>
-            <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">45+</p>
-          </div>
-          <div className="bg-card p-6 text-center">
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Verified Managers</p>
-            <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">120+</p>
+          {/* Address Input */}
+          <div className="max-w-xl">
+            <div className="bg-card/10 backdrop-blur-sm border border-primary-foreground/20 p-4">
+              <GoogleMapsAddressInput
+                addressData={addressData}
+                onChange={handleAddressChange}
+              />
+              <button
+                onClick={handleGetEstimate}
+                disabled={!hasAddress}
+                className="mt-3 w-full inline-flex items-center justify-center gap-2 bg-gold text-primary px-6 py-3 text-sm font-medium hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Get Your Free Estimate
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
+
+      {/* ── Social Proof Strip ── */}
+      <div className="max-w-[1400px] mx-auto grid grid-cols-3 gap-[1px] bg-border border border-border mb-12">
+        <div className="bg-card p-6 text-center">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Property Owners</p>
+          <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">1,000+</p>
+          <p className="text-xs text-muted-foreground mt-1">have used this tool</p>
+        </div>
+        <div className="bg-card p-6 text-center">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Cities Covered</p>
+          <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">45+</p>
+        </div>
+        <div className="bg-card p-6 text-center">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Verified Managers</p>
+          <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">120+</p>
+        </div>
+      </div>
+
+      {/* ── Company Logos ── */}
+      <CompanyLogos />
+
+      {/* ── Inline CTA ── */}
+      <InlineCTA text="Get your free rental estimate now →" href="/rent/valuation" />
+
+      {/* ── Property Showcase ── */}
+      <section className="max-w-[1400px] mx-auto mb-12">
+        <motion.div {...fadeUp} className="mb-8">
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Showcase</p>
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">Properties we've estimated</h2>
+        </motion.div>
+        <PropertyShowcaseCarousel />
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="max-w-[1400px] mx-auto mb-12">
+        <motion.div {...fadeUp} className="mb-8">
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Trusted by Owners</p>
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">What rental owners say</h2>
+        </motion.div>
+        <div className="grid gap-[1px] bg-border border border-border md:grid-cols-3">
+          <TestimonialCard quote="The rental estimate helped us set the right price for our holiday villa in Ibiza. We're now earning 40% more than before." name="Anna S." location="Ibiza" rating={5} />
+          <TestimonialCard quote="I had no idea short-term rental could generate this much income. The property manager they recommended handles everything." name="Henrik J." location="Marbella, Costa del Sol" rating={5} />
+          <TestimonialCard quote="Very useful comparison between Airbnb and long-term rental. Helped us make a much more informed decision." name="Sophie & Mark D." location="Fuengirola" rating={4} />
+        </div>
+      </section>
+
+      {/* ── Inline CTA ── */}
+      <InlineCTA text="Find out how much you can earn — it's free →" href="/rent/valuation" />
+
+      {/* ── About the Valuator ── */}
+      <AboutValuator />
 
       {/* ── How it Works ── */}
       <section className="max-w-[1400px] mx-auto mb-12">
@@ -110,7 +180,6 @@ const Rent = () => {
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Simple Process</p>
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">How your rental estimate works</h2>
         </motion.div>
-
         <div className="grid gap-[1px] bg-border border border-border md:grid-cols-3">
           {steps.map((item) => (
             <div key={item.step} className="bg-card p-8 relative">
@@ -130,7 +199,6 @@ const Rent = () => {
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Your Report</p>
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">What you'll get</h2>
         </motion.div>
-
         <div className="grid gap-[1px] bg-border border border-border sm:grid-cols-2">
           {features.map((feat) => (
             <div key={feat.title} className="bg-card p-6 flex gap-4">
@@ -144,50 +212,16 @@ const Rent = () => {
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
-      <section className="max-w-[1400px] mx-auto mb-12">
-        <motion.div {...fadeUp} className="mb-8">
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Trusted by Owners</p>
-          <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">What rental owners say</h2>
-        </motion.div>
-
-        <div className="grid gap-[1px] bg-border border border-border md:grid-cols-3">
-          <TestimonialCard
-            quote="The rental estimate helped us set the right price for our holiday villa in Ibiza. We're now earning 40% more than before."
-            name="Anna S."
-            location="Ibiza"
-            rating={5}
-          />
-          <TestimonialCard
-            quote="I had no idea short-term rental could generate this much income. The property manager they recommended handles everything."
-            name="Henrik J."
-            location="Marbella, Costa del Sol"
-            rating={5}
-          />
-          <TestimonialCard
-            quote="Very useful comparison between Airbnb and long-term rental. Helped us make a much more informed decision."
-            name="Sophie & Mark D."
-            location="Fuengirola"
-            rating={4}
-          />
-        </div>
-      </section>
-
       {/* ── FAQ ── */}
       <section className="max-w-[1400px] mx-auto mb-12">
         <motion.div {...fadeUp} className="mb-8">
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">FAQ</p>
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">Frequently asked questions</h2>
         </motion.div>
-
         <div className="border border-border">
           <Accordion type="single" collapsible>
             {faqs.map((faq, i) => (
-              <AccordionItem
-                key={i}
-                value={`faq-${i}`}
-                className="border-b border-border last:border-b-0 bg-card px-6"
-              >
+              <AccordionItem key={i} value={`faq-${i}`} className="border-b border-border last:border-b-0 bg-card px-6">
                 <AccordionTrigger className="text-left font-heading text-sm font-semibold text-foreground hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
@@ -200,7 +234,7 @@ const Rent = () => {
         </div>
       </section>
 
-      {/* ── CTA ── */}
+      {/* ── Bottom CTA ── */}
       <div className="max-w-[1400px] mx-auto mb-12">
         <CTABanner
           title="Ready to find out how much you can earn?"

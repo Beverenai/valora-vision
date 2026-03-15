@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -8,8 +9,6 @@ import {
   TrendingUp,
   Users,
   Target,
-  MapPin,
-  Shield,
 } from "lucide-react";
 import {
   Accordion,
@@ -21,7 +20,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TestimonialCard from "@/components/TestimonialCard";
 import CTABanner from "@/components/CTABanner";
-import { useEffect } from "react";
+import CompanyLogos from "@/components/CompanyLogos";
+import AboutValuator from "@/components/AboutValuator";
+import InlineCTA from "@/components/InlineCTA";
+import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
+import GoogleMapsAddressInput from "@/components/shared/GoogleMapsAddressInput";
+import { AddressData } from "@/types/valuation";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -52,20 +56,41 @@ const steps = [
 ];
 
 const Sell = () => {
-  useEffect(() => { document.title = "Free Property Valuation in Spain — ValoraCasa"; }, []);
+  const navigate = useNavigate();
+  const [addressData, setAddressData] = useState<AddressData>({
+    streetAddress: "",
+    urbanization: "",
+    city: "",
+    province: "",
+    country: "",
+  });
+
+  useEffect(() => {
+    document.title = "Free Property Valuation in Spain — ValoraCasa";
+  }, []);
+
+  const handleAddressChange = (field: keyof AddressData, value: string) => {
+    setAddressData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleGetValuation = () => {
+    navigate("/sell/valuation", { state: { address: addressData } });
+  };
+
+  const hasAddress = !!(addressData.streetAddress || addressData.city);
 
   return (
     <div className="min-h-screen bg-background p-6">
       <Navbar />
 
-      {/* ── Hero ── */}
+      {/* ── Hero with Address Input ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.7 }}
         className="max-w-[1400px] mx-auto border border-border mb-12"
       >
-        <div className="bg-gradient-to-br from-primary to-navy-deep p-12 md:p-16">
+        <div className="bg-gradient-to-br from-primary to-navy-deep p-10 md:p-16">
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-4">
             Free Property Valuation
           </p>
@@ -76,31 +101,77 @@ const Sell = () => {
           <p className="text-primary-foreground/60 max-w-xl mb-8">
             Get a free AI-powered valuation based on real market data from thousands of listings. No obligations, no hidden fees.
           </p>
-          <Link
-            to="/sell/valuation"
-            className="inline-flex items-center gap-2 bg-gold text-primary px-6 py-3 text-sm font-medium hover:bg-gold-dark transition-colors"
-          >
-            Get Your Free Valuation
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
 
-        {/* Stats strip */}
-        <div className="grid grid-cols-3 gap-[1px] bg-border">
-          <div className="bg-card p-6 text-center">
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Valuations</p>
-            <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">12,400+</p>
-          </div>
-          <div className="bg-card p-6 text-center">
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Cities</p>
-            <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">45+</p>
-          </div>
-          <div className="bg-card p-6 text-center">
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Satisfaction</p>
-            <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">98%</p>
+          {/* Address Input */}
+          <div className="max-w-xl">
+            <div className="bg-card/10 backdrop-blur-sm border border-primary-foreground/20 p-4">
+              <GoogleMapsAddressInput
+                addressData={addressData}
+                onChange={handleAddressChange}
+              />
+              <button
+                onClick={handleGetValuation}
+                disabled={!hasAddress}
+                className="mt-3 w-full inline-flex items-center justify-center gap-2 bg-gold text-primary px-6 py-3 text-sm font-medium hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Get Your Free Valuation
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
+
+      {/* ── Social Proof Strip ── */}
+      <div className="max-w-[1400px] mx-auto grid grid-cols-3 gap-[1px] bg-border border border-border mb-12">
+        <div className="bg-card p-6 text-center">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Property Owners</p>
+          <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">1,000+</p>
+          <p className="text-xs text-muted-foreground mt-1">have used this tool</p>
+        </div>
+        <div className="bg-card p-6 text-center">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Cities Covered</p>
+          <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">45+</p>
+        </div>
+        <div className="bg-card p-6 text-center">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Satisfaction</p>
+          <p className="text-[2rem] font-light tracking-[-0.02em] leading-none text-foreground">98%</p>
+        </div>
+      </div>
+
+      {/* ── Company Logos ── */}
+      <CompanyLogos />
+
+      {/* ── Inline CTA ── */}
+      <InlineCTA text="Get your free property valuation now →" href="/sell/valuation" />
+
+      {/* ── Property Showcase ── */}
+      <section className="max-w-[1400px] mx-auto mb-12">
+        <motion.div {...fadeUp} className="mb-8">
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Showcase</p>
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">Properties we've valued</h2>
+        </motion.div>
+        <PropertyShowcaseCarousel />
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="max-w-[1400px] mx-auto mb-12">
+        <motion.div {...fadeUp} className="mb-8">
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Trusted by Owners</p>
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">What sellers say</h2>
+        </motion.div>
+        <div className="grid gap-[1px] bg-border border border-border md:grid-cols-3">
+          <TestimonialCard quote="The valuation was spot-on. We sold our apartment in Marbella within 3 weeks of listing at the suggested price." name="James H." location="Marbella, Costa del Sol" rating={5} />
+          <TestimonialCard quote="I was sceptical at first, but the comparable properties they showed gave me real confidence in the price range." name="Ingrid M." location="Nueva Andalucía" rating={5} />
+          <TestimonialCard quote="Quick, accurate, and completely free. The agent they recommended was excellent — spoke perfect English too." name="Peter W." location="Alicante, Costa Blanca" rating={4} />
+        </div>
+      </section>
+
+      {/* ── Inline CTA ── */}
+      <InlineCTA text="Find out what your property is worth — it's free →" href="/sell/valuation" />
+
+      {/* ── About the Valuator ── */}
+      <AboutValuator />
 
       {/* ── How it Works ── */}
       <section className="max-w-[1400px] mx-auto mb-12">
@@ -108,7 +179,6 @@ const Sell = () => {
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Simple Process</p>
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">How your valuation works</h2>
         </motion.div>
-
         <div className="grid gap-[1px] bg-border border border-border md:grid-cols-3">
           {steps.map((item) => (
             <div key={item.step} className="bg-card p-8 relative">
@@ -128,7 +198,6 @@ const Sell = () => {
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Your Report</p>
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">What you'll get</h2>
         </motion.div>
-
         <div className="grid gap-[1px] bg-border border border-border sm:grid-cols-2">
           {features.map((feat) => (
             <div key={feat.title} className="bg-card p-6 flex gap-4">
@@ -142,50 +211,16 @@ const Sell = () => {
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
-      <section className="max-w-[1400px] mx-auto mb-12">
-        <motion.div {...fadeUp} className="mb-8">
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">Trusted by Owners</p>
-          <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">What sellers say</h2>
-        </motion.div>
-
-        <div className="grid gap-[1px] bg-border border border-border md:grid-cols-3">
-          <TestimonialCard
-            quote="The valuation was spot-on. We sold our apartment in Marbella within 3 weeks of listing at the suggested price."
-            name="James H."
-            location="Marbella, Costa del Sol"
-            rating={5}
-          />
-          <TestimonialCard
-            quote="I was sceptical at first, but the comparable properties they showed gave me real confidence in the price range."
-            name="Ingrid M."
-            location="Nueva Andalucía"
-            rating={5}
-          />
-          <TestimonialCard
-            quote="Quick, accurate, and completely free. The agent they recommended was excellent — spoke perfect English too."
-            name="Peter W."
-            location="Alicante, Costa Blanca"
-            rating={4}
-          />
-        </div>
-      </section>
-
       {/* ── FAQ ── */}
       <section className="max-w-[1400px] mx-auto mb-12">
         <motion.div {...fadeUp} className="mb-8">
           <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2">FAQ</p>
           <h2 className="font-heading text-2xl md:text-3xl font-medium text-foreground">Frequently asked questions</h2>
         </motion.div>
-
         <div className="border border-border">
           <Accordion type="single" collapsible>
             {faqs.map((faq, i) => (
-              <AccordionItem
-                key={i}
-                value={`faq-${i}`}
-                className="border-b border-border last:border-b-0 bg-card px-6"
-              >
+              <AccordionItem key={i} value={`faq-${i}`} className="border-b border-border last:border-b-0 bg-card px-6">
                 <AccordionTrigger className="text-left font-heading text-sm font-semibold text-foreground hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
@@ -198,7 +233,7 @@ const Sell = () => {
         </div>
       </section>
 
-      {/* ── CTA ── */}
+      {/* ── Bottom CTA ── */}
       <div className="max-w-[1400px] mx-auto mb-12">
         <CTABanner
           title="Ready to find out what your property is worth?"
