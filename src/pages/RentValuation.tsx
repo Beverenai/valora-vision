@@ -120,7 +120,8 @@ const RentValuation: React.FC = () => {
           bedrooms: bedroomsNum,
           bathrooms: bathroomsNum,
           is_furnished: formData.furnished || null,
-          rental_preference: formData.beachProximity ? null : null,
+          views: formData.views || null,
+          property_features: formData.propertyFeatures || null,
         })
         .select("id")
         .single();
