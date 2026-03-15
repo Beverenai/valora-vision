@@ -144,6 +144,8 @@ export default {
         "confetti-sway": "confetti-sway ease-in-out infinite",
         "confetti-shimmer": "confetti-shimmer ease-in-out infinite",
         "fade-in": "fade-in 0.3s ease-out",
+        "ticket-float": "ticket-float 6s ease-in-out infinite",
+        "ticket-dash": "ticket-dash 20s linear infinite",
       },
     },
   },
