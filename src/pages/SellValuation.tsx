@@ -39,10 +39,24 @@ const validateSellStep = (step: number, data: SellValuationData): boolean => {
 
 const SellValuation: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [simulatedProgress, setSimulatedProgress] = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Pre-fill address from navigation state
+  const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string } })?.address;
+  const initialData = addressState
+    ? {
+        ...INITIAL_SELL_DATA,
+        streetAddress: addressState.streetAddress || "",
+        city: addressState.city || "",
+        province: addressState.province || "",
+        country: addressState.country || "",
+        urbanization: addressState.urbanization || "",
+      }
+    : INITIAL_SELL_DATA;
 
   useEffect(() => {
     document.title = "Free Property Valuation | ValoraCasa";
