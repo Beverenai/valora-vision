@@ -3,16 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ConfettiAnimation from "@/components/shared/ConfettiAnimation";
-import {
-  ValuationHero,
-  PropertySummaryCard,
-  ValuationResultCard,
-  AIAnalysisSection,
-  MarketTrendsSection,
-  ProfessionalSpotlight,
-  FeedbackSection,
-  ValuationDisclaimer,
-} from "@/components/result";
+import ValuationHero from "@/components/result/ValuationHero.tsx";
+import PropertySummaryCard from "@/components/result/PropertySummaryCard.tsx";
+import ValuationResultCard from "@/components/result/ValuationResultCard.tsx";
+import AIAnalysisSection from "@/components/result/AIAnalysisSection.tsx";
+import MarketTrendsSection from "@/components/result/MarketTrendsSection.tsx";
+import ProfessionalSpotlight from "@/components/result/ProfessionalSpotlight.tsx";
+import FeedbackSection from "@/components/result/FeedbackSection.tsx";
+import ValuationDisclaimer from "@/components/result/ValuationDisclaimer.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
