@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         heading: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
+        "ticket-cursive": ["'Italianno'", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -124,6 +125,14 @@ export default {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        "ticket-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "ticket-dash": {
+          from: { strokeDashoffset: "1000" },
+          to: { strokeDashoffset: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -135,6 +144,8 @@ export default {
         "confetti-sway": "confetti-sway ease-in-out infinite",
         "confetti-shimmer": "confetti-shimmer ease-in-out infinite",
         "fade-in": "fade-in 0.3s ease-out",
+        "ticket-float": "ticket-float 6s ease-in-out infinite",
+        "ticket-dash": "ticket-dash 20s linear infinite",
       },
     },
   },
