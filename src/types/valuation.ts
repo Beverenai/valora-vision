@@ -91,8 +91,9 @@ export interface SellValuationData {
   // Features (sell-specific)
   condition: string;
   hasPool: boolean;
-  seaView: string;
+  views: string;
   hasGarage: boolean;
+  propertyFeatures: string;
   orientation: string;
   yearBuilt: string;
   energyCertificate: string;
