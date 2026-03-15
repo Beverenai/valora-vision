@@ -115,11 +115,12 @@ const SellValuation: React.FC = () => {
           bedrooms: bedroomsNum,
           bathrooms: bathroomsNum,
           orientation: formData.orientation || null,
-          views: formData.seaView || null,
+          views: formData.views || null,
           condition: formData.condition || null,
           features: [
             formData.hasPool ? "pool" : "",
             formData.hasGarage ? "garage" : "",
+            formData.propertyFeatures || "",
           ].filter(Boolean).join(", ") || null,
           year_built: formData.yearBuilt ? parseInt(formData.yearBuilt) : null,
           energy_certificate: formData.energyCertificate || null,
