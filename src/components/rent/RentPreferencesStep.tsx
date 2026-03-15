@@ -1,6 +1,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -22,11 +23,15 @@ const CONDITIONS = [
   { value: "needs-renovation", label: "Needs Renovation", desc: "Full renovation required" },
 ];
 
-const SEA_VIEWS = [
-  { value: "front-line", label: "Front Line Sea", desc: "Direct sea view" },
-  { value: "partial", label: "Partial Sea View", desc: "Partial sea view" },
-  { value: "none", label: "No Sea View", desc: "No sea view" },
-  { value: "mountain-golf", label: "Mountain / Golf View", desc: "Mountain or golf view" },
+const VIEWS_OPTIONS = [
+  { value: "sea", label: "Sea" },
+  { value: "partial-sea", label: "Partial Sea View" },
+  { value: "mountain", label: "Mountain" },
+  { value: "golf", label: "Golf" },
+  { value: "garden", label: "Garden" },
+  { value: "pool", label: "Pool" },
+  { value: "urban", label: "Urban" },
+  { value: "multiple", label: "Multiple Views" },
 ];
 
 const BEACH_PROXIMITY = [
@@ -84,15 +89,19 @@ const RentPreferencesStep: React.FC<RentPreferencesStepProps> = ({ formData, onC
         </div>
       </div>
 
-      {/* Sea View */}
+      {/* Views dropdown */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">Views</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {SEA_VIEWS.map((v) => (
-            <SelectableCard key={v.value} selected={formData.seaView === v.value}
-              onClick={() => onChange("seaView", v.value)} label={v.label} desc={v.desc} />
-          ))}
-        </div>
+        <Label className="text-sm font-medium text-foreground">Views (select most prominent view)</Label>
+        <Select value={formData.views} onValueChange={(v) => onChange("views", v)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select view type" />
+          </SelectTrigger>
+          <SelectContent>
+            {VIEWS_OPTIONS.map((v) => (
+              <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Toggle switches */}
@@ -109,6 +118,24 @@ const RentPreferencesStep: React.FC<RentPreferencesStepProps> = ({ formData, onC
           <Label htmlFor="hasWifi" className="text-sm font-medium text-foreground cursor-pointer">WiFi / Internet</Label>
           <Switch id="hasWifi" checked={formData.hasWifi} onCheckedChange={(v) => onChange("hasWifi", v)} />
         </div>
+      </div>
+
+      {/* Property Features textarea */}
+      <div className="space-y-2">
+        <Label htmlFor="propertyFeatures" className="text-sm font-medium text-foreground">
+          Additional Property Features
+        </Label>
+        <Textarea
+          id="propertyFeatures"
+          placeholder="Describe additional features: terrace, gym, sauna, wine cellar, smart home, elevator, etc."
+          value={formData.propertyFeatures}
+          onChange={(e) => onChange("propertyFeatures", e.target.value)}
+          className="text-base min-h-[80px]"
+          style={{ fontSize: "16px" }}
+        />
+        <p className="text-xs text-muted-foreground">
+          Enter key features separated by commas (e.g., private pool, roof terrace, wine cellar)
+        </p>
       </div>
 
       {/* Dropdowns */}

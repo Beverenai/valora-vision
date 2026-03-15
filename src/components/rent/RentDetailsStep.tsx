@@ -11,7 +11,7 @@ interface RentDetailsStepProps {
 }
 
 const BEDROOM_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8+"];
-const BATHROOM_OPTIONS = ["1", "2", "3", "4", "5", "6+"];
+const BATHROOM_OPTIONS = ["1", "2", "3", "4", "5", "6", "7+"];
 
 const showPlotSize = (cat: string) => ["Houses", "Rural Properties", "New Development"].includes(cat);
 const showTerraceAndFloor = (cat: string) => cat === "Apartments";

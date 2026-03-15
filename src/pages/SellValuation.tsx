@@ -98,7 +98,7 @@ const SellValuation: React.FC = () => {
 
     try {
       const bedroomsNum = formData.bedrooms === "8+" ? 8 : parseInt(formData.bedrooms) || null;
-      const bathroomsNum = formData.bathrooms === "6+" ? 6 : parseInt(formData.bathrooms) || null;
+      const bathroomsNum = formData.bathrooms === "7+" ? 7 : parseInt(formData.bathrooms) || null;
 
       const { data, error } = await supabase
         .from("leads_sell")
