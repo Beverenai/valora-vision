@@ -411,9 +411,16 @@ const SellResult: React.FC = () => {
       <Navbar />
       {showConfetti && <ConfettiAnimation />}
       <div className="max-w-[1400px] mx-auto border-x border-border">
-        <ValuationHero
-          title="Your Property Valuation"
+        <ValuationTicketCard
           address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
+          city={lead?.city || undefined}
+          estimatedValue={fmt(estimatedLow)}
+          secondaryValue={fmt(estimatedHigh)}
+          propertyType={lead?.property_type || undefined}
+          leadId={id!}
+          headline="VALUED"
+          subtitle="Your Valuation"
+          accentType="sell"
           onShare={handleShare}
           onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
         />
