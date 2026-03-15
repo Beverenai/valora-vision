@@ -14,7 +14,6 @@ import ValuationDisclaimer from "@/components/result/ValuationDisclaimer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock chart data
 const PRICE_TREND_DATA = [
   { month: "Apr '25", price: 3800 }, { month: "May '25", price: 3850 },
   { month: "Jun '25", price: 3920 }, { month: "Jul '25", price: 4010 },
@@ -76,20 +75,16 @@ const SellResult: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(true);
 
-  useEffect(() => {
-    document.title = "Your Property Valuation | ValoraCasa";
-  }, []);
+  useEffect(() => { document.title = "Your Property Valuation | ValoraCasa"; }, []);
 
   useEffect(() => {
     if (!id) { navigate("/sell"); return; }
-
     const fetchLead = async () => {
       const { data, error } = await supabase
         .from("leads_sell")
         .select("id, address, city, property_type, built_size_sqm, plot_size_sqm, bedrooms, bathrooms, orientation, condition, views, year_built, energy_certificate, estimated_value, price_range_low, price_range_high, monthly_rental_estimate, analysis, market_trends, features")
         .eq("id", id)
         .maybeSingle();
-
       if (error || !data) {
         toast({ title: "Not Found", description: "Valuation not found.", variant: "destructive" });
         navigate("/sell");
@@ -98,11 +93,9 @@ const SellResult: React.FC = () => {
       setLead(data);
       setLoading(false);
     };
-
     fetchLead();
   }, [id, navigate, toast]);
 
-  // Generate mock valuations based on property size
   const builtSize = lead?.built_size_sqm || 200;
   const basePricePerSqm = 4100;
   const estimatedLow = lead?.price_range_low || Math.round(builtSize * basePricePerSqm * 0.9);
@@ -138,14 +131,14 @@ const SellResult: React.FC = () => {
       <Navbar />
       {showConfetti && <ConfettiAnimation />}
 
-      <ValuationHero
-        title="Your Property Valuation"
-        address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
-        onShare={handleShare}
-        onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
-      />
+      <div className="max-w-[1400px] mx-auto border-x border-border">
+        <ValuationHero
+          title="Your Property Valuation"
+          address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
+          onShare={handleShare}
+          onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
+        />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
         <PropertySummaryCard
           bedrooms={lead?.bedrooms}
           bathrooms={lead?.bathrooms}
@@ -191,7 +184,8 @@ const SellResult: React.FC = () => {
         <FeedbackSection leadId={id!} leadType="sell" />
 
         <ValuationDisclaimer />
-      </main>
+      </div>
+
       <Footer />
     </div>
   );
