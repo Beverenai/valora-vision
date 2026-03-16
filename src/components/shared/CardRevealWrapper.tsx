@@ -104,7 +104,7 @@ const SealedWrapper: React.FC<{
     repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 21px)
   `;
 
-  const rightStripX = useTransform(() => dragProgress * 20);
+  const leftStripX = useTransform(() => dragProgress * -20);
   const glowOpacity = useTransform(() => Math.min(1, dragProgress * 2.5));
 
   return (
@@ -117,14 +117,14 @@ const SealedWrapper: React.FC<{
         style={{ background: isSell ? "rgba(212,116,43,0.2)" : "rgba(82,183,136,0.2)" }}
       />
 
-      {/* Right strip (tears away) */}
+      {/* Left strip (tears away) */}
       <motion.div
-        className="absolute inset-y-0 right-0 z-20 overflow-hidden rounded-r-2xl"
+        className="absolute inset-y-0 left-0 z-20 overflow-hidden rounded-l-2xl"
         style={{
           width: "15%",
           background: foilGradient,
-          x: rightStripX,
-          borderLeft: "2px dashed rgba(255,255,255,0.25)",
+          x: leftStripX,
+          borderRight: "2px dashed rgba(255,255,255,0.25)",
         }}
       >
         <div className="absolute inset-0" style={{ backgroundImage: diamondPattern }} />
