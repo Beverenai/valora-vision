@@ -1,40 +1,56 @@
 
 
-## Plan: Redesign Landing Page with Estate Atlas Spatial System
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### What we're doing
-Redesigning `src/pages/Index.tsx` to adopt the Estate Atlas design language: generous spacing, thin dividers, full-bleed hero card, horizontal browse cards, stats bar, and a discovery/editorial section. Mobile-first but properly scaled for desktop.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
 ### Changes
 
-**1. `src/pages/Index.tsx` — Full rewrite**
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-Replace the current page with these sections in order:
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**Hero** — Full-width featured property card (rounded-3xl, aspect 16/10 mobile, wider on desktop) with gradient overlay, "ValoraCasa" + "FEATURED" badge overlaid, property features as bullet chips below image, then address input + CTA underneath.
+**2. Floating agency logos treatment**
 
-**Browse Properties** — Header row ("Browse Properties" / "See all →"). Horizontal scroll on mobile, 3-col grid on desktop. Each card: tall rounded-2xl image, title, description snippet, badge chips ("2 Bed", "Urban"). Uses existing `PROPERTIES` data from PropertyShowcaseCarousel.
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-**Discovery/Editorial** — Split layout: left = large rounded image with overlay chip badges ("Video Tour", "Free Report"), right = editorial paragraph about the service. Stacks vertically on mobile.
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-**Stats Bar** — Three metrics in a row separated by thin vertical 1px dividers: "Valuations / 12,400+", "Accuracy / 97%", "Time / 2 min". `border-y border-[#E8E5E0]` top and bottom.
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-**Testimonials** — Keep existing auto-rotating testimonial with stars and dot indicators. Tighten padding.
+**3. How It Works — typographic layout**
 
-**Final CTA** — Keep existing gradient CTA section with address input.
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
 
-**Sticky mobile bar** — Enhanced: "Free Property Valuation" context line + "Get Valuation" button.
+**4. Report Features — editorial scatter**
 
-**Spatial system applied throughout:**
-- Section padding: `py-6 md:py-16`
-- Thin `border-b border-[#E8E5E0]` dividers between every section
-- Content max-width: `max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto`
-- Cards: `rounded-2xl` / `rounded-3xl`, `shadow-sm`
-- Chips/badges: `rounded-full px-3 py-1 text-xs font-medium bg-black/5`
-
-**2. No changes to `ValuationTicketCard.tsx`** — keep as-is for result pages.
-
-**3. No changes to routing** — same `/` route, same navigation to `/sell/valuation`.
-
-**Desktop scaling:** Hero card becomes max-w-5xl with image left (60%) + content right (40%). Browse becomes 3-col grid. Stats bar gets more horizontal breathing room. Discovery section goes side-by-side at `md:`.
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
