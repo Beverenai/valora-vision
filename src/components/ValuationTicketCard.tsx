@@ -384,7 +384,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
             {/* Text Block */}
             <div className="flex-1 flex flex-col min-h-0">
-              <span className="font-ticket-cursive text-[1.8rem] md:text-[3rem] leading-[0.6] mb-2 md:mb-3 -ml-1 text-foreground block">
+              <span className={cn("font-ticket-cursive leading-[0.6] mb-2 md:mb-3 -ml-1 text-foreground block", resultCursiveSize)}>
                 {subtitle}
               </span>
               <p className="text-[0.55rem] md:text-[0.6rem] uppercase text-justify leading-[1.4] font-medium text-foreground/90 mb-2 line-clamp-4">
