@@ -1,7 +1,9 @@
-import React, { useRef, useCallback, useState } from "react";
+import React, { useRef, useCallback, useState, useEffect } from "react";
 import { Share2, Download, ArrowDown, MapPin, ArrowRight, Bed, Bath, Ruler, LandPlot, Home, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+import { formatRefCode } from "@/utils/referenceCode";
 
 interface ValuationTicketCardProps {
   address: string;
@@ -31,6 +33,10 @@ interface ValuationTicketCardProps {
   condition?: string;
   /* Compact mode for when card is an anchor above form */
   compact?: boolean;
+  /* Processing mode */
+  mode?: "input" | "compact" | "result" | "processing";
+  processingProgress?: number;
+  referenceCode?: string;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
@@ -42,6 +48,14 @@ const PROPERTY_IMAGES: Record<string, string> = {
 };
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=800";
+
+const PROCESSING_MESSAGES = [
+  "Researching property data...",
+  "Analyzing market conditions...",
+  "Comparing similar properties...",
+  "Calculating valuation estimates...",
+  "Preparing your report...",
+];
 
 const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   address,
@@ -67,21 +81,40 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   plotSize,
   condition,
   compact = false,
+  mode,
+  processingProgress = 0,
+  referenceCode,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
   const [isInteracting, setIsInteracting] = useState(false);
   const [flipped, setFlipped] = useState(false);
+  const [messageIndex, setMessageIndex] = useState(0);
 
-  const hasInput = onAddressChange !== undefined;
+  // Determine effective mode
+  const isProcessing = mode === "processing";
+  const isCompact = mode === "compact" || (!mode && compact);
+
+  const hasInput = onAddressChange !== undefined && !isProcessing;
   const handleContinue = onContinue || onSubmit;
 
   const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
   const accentClass = accentType === "sell" ? "bg-primary" : "bg-[hsl(var(--success))]";
   const heroImage = (propertyType && PROPERTY_IMAGES[propertyType]) || DEFAULT_IMAGE;
 
+  const refCode = referenceCode || (leadId ? formatRefCode(leadId) : "VC-0000-0000");
+
+  // Rotate processing messages
+  useEffect(() => {
+    if (!isProcessing) return;
+    const interval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % PROCESSING_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isProcessing]);
+
   const handlePointerMove = useCallback((clientX: number, clientY: number) => {
-    if (flipped || compact) return;
+    if (flipped || isCompact || isProcessing) return;
     const card = cardRef.current;
     if (!card) return;
     const rect = card.getBoundingClientRect();
@@ -89,7 +122,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     const y = (clientY - rect.top) / rect.height - 0.5;
     setTilt({ rotateX: -y * 10, rotateY: x * 10 });
     setIsInteracting(true);
-  }, [flipped, compact]);
+  }, [flipped, isCompact, isProcessing]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     handlePointerMove(e.clientX, e.clientY);
@@ -106,11 +139,11 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }, []);
 
   const handleCardClick = useCallback(() => {
-    if (flippable && !hasInput) {
+    if (flippable && !hasInput && !isProcessing) {
       setFlipped((f) => !f);
       setTilt({ rotateX: 0, rotateY: 0 });
     }
-  }, [flippable, hasInput]);
+  }, [flippable, hasInput, isProcessing]);
 
   const detailItems = [
     { icon: Bed, label: "Bedrooms", value: bedrooms != null ? `${bedrooms}` : null },
@@ -122,7 +155,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   ].filter((d) => d.value != null);
 
   /* ── Compact mode: small address summary card ── */
-  if (compact) {
+  if (isCompact) {
     return (
       <div className="w-full max-w-[320px] md:max-w-[520px] mx-auto">
         <div className="flex items-center gap-3 bg-[hsl(36_9%_88%)] rounded-2xl px-4 py-3 shadow-sm">
@@ -133,6 +166,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             <p className="text-sm font-medium text-foreground truncate">{addressValue || address || "Your property"}</p>
             {city && <p className="text-xs text-muted-foreground">{city}</p>}
           </div>
+          <span className="text-[0.55rem] text-muted-foreground/60 font-mono tracking-wider shrink-0">{refCode}</span>
         </div>
       </div>
     );
@@ -151,7 +185,12 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           <img
             src={heroImage}
             alt={propertyType || "Property"}
-            className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-500"
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-[filter] duration-500",
+              isProcessing
+                ? processingProgress >= 90 ? "grayscale-0" : "grayscale"
+                : "grayscale group-hover:grayscale-0"
+            )}
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 to-transparent" />
@@ -162,7 +201,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           <div className={`absolute w-[28px] h-[28px] md:w-[32px] md:h-[32px] rounded-full ${accentClass} opacity-80`} style={{ bottom: "40%", right: "-8px", zIndex: 10 }} />
 
           {/* Share/Download */}
-          {!hasInput && (
+          {!hasInput && !isProcessing && (
             <div className="absolute top-3 left-3 flex gap-1.5 z-30">
               {onShare && (
                 <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); onShare(); }} className="h-7 w-7 bg-primary/60 backdrop-blur-sm text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground">
@@ -178,8 +217,48 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           )}
         </div>
 
-        {/* ── Hero INPUT mode ── */}
-        {hasInput ? (
+        {/* ── PROCESSING MODE ── */}
+        {isProcessing ? (
+          <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]">
+            <h2
+              className="font-heading text-[2.2rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] tracking-[-2px] text-foreground animate-pulse"
+              style={{ transform: "scaleY(0.9)" }}
+            >
+              ANALYSING
+            </h2>
+
+            {/* Dots Divider */}
+            <div className="flex justify-between w-full overflow-hidden my-2">
+              {Array.from({ length: 16 }).map((_, i) => (
+                <div key={i} className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-foreground shrink-0" />
+              ))}
+            </div>
+
+            <div className="space-y-2 px-1">
+              <Progress value={processingProgress} className="h-2 w-full bg-foreground/10" />
+              <p className="text-[0.6rem] md:text-xs text-muted-foreground text-center font-medium animate-fade-in" key={messageIndex}>
+                {PROCESSING_MESSAGES[messageIndex]}
+              </p>
+              <p className="text-[0.5rem] text-center text-primary font-medium mt-1">
+                Please don't refresh the page
+              </p>
+            </div>
+
+            {/* Ref code */}
+            <div className="text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 mt-2">
+              <p>VALUATION REPORT · REF {refCode}</p>
+            </div>
+
+            {/* Barcode */}
+            <div className="mt-auto relative h-[35px] md:h-[55px] w-full">
+              <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
+              <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
+                {refCode}
+              </p>
+            </div>
+          </div>
+        ) : hasInput ? (
+          /* ── Hero INPUT mode ── */
           <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]">
             <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
               Your Valuation
@@ -241,14 +320,14 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               </p>
 
               <div className="text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 mb-2">
-                <p>VALUATION REPORT · REF #{leadId.slice(0, 8).toUpperCase()} · VALID FOR ONE</p>
+                <p>VALUATION REPORT · REF {refCode} · VALID FOR ONE</p>
               </div>
 
               {/* Barcode */}
               <div className="mt-auto relative h-[35px] md:h-[55px] w-full">
                 <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
                 <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
-                  {leadId.slice(0, 4).toUpperCase()} {leadId.slice(4, 8).toUpperCase()} {leadId.slice(8, 12).toUpperCase()}
+                  {refCode}
                 </p>
               </div>
             </div>
@@ -256,7 +335,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         )}
 
         {/* Barcode for input mode */}
-        {hasInput && (
+        {hasInput && !isProcessing && (
           <div className="mt-auto relative h-[35px] md:h-[45px] w-full">
             <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
             <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
@@ -316,7 +395,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         <div className="mt-auto relative h-[35px] w-full">
           <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
           <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
-            {leadId.slice(0, 4).toUpperCase()} {leadId.slice(4, 8).toUpperCase()} {leadId.slice(8, 12).toUpperCase()}
+            {refCode}
           </p>
         </div>
       </div>

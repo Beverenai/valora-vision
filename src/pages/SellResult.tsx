@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import CrossSellBanner from "@/components/CrossSellBanner";
+import { formatRefCode } from "@/utils/referenceCode";
+import { Copy, Check as CheckIcon } from "lucide-react";
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [

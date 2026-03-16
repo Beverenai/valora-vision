@@ -7,6 +7,8 @@ import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CrossSellBanner from "@/components/CrossSellBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { formatRefCode } from "@/utils/referenceCode";
+import { Copy, Check as CheckIcon } from "lucide-react";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
