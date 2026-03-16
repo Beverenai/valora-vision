@@ -214,12 +214,12 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }, [flippable, hasInput, isProcessing]);
 
   const detailItems = [
+    { icon: Home, label: "Type", value: propertyType || null },
+    { icon: Sparkles, label: "Condition", value: condition || null },
     { icon: Bed, label: "Bedrooms", value: bedrooms != null ? `${bedrooms}` : null },
     { icon: Bath, label: "Bathrooms", value: bathrooms != null ? `${bathrooms}` : null },
     { icon: Ruler, label: "Built Size", value: builtSize || null },
     { icon: LandPlot, label: "Plot Size", value: plotSize || null },
-    { icon: Home, label: "Type", value: propertyType || null },
-    { icon: Sparkles, label: "Condition", value: condition || null },
   ].filter((d) => d.value != null);
 
   /* ── Compact mode: small address summary card ── */
@@ -409,12 +409,12 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                 {summaryText}
               </p>
 
-              <div className="text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 mb-2">
+              <div className="text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 mb-4">
                 <p>VALUATION REPORT · REF {refCode} · VALID FOR ONE</p>
               </div>
 
               {/* Barcode */}
-              <div className={cn("mt-auto relative w-full", barcodeHeight)}>
+              <div className={cn("mt-4 md:mt-6 relative w-full", barcodeHeight)}>
                 <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
                 <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
                   {refCode}
