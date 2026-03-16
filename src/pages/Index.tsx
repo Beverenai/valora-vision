@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Star, ArrowRight, RotateCcw } from "lucide-react";
+import { Star, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
@@ -108,7 +108,7 @@ const Index = () => {
     setAddressData(prev => ({ ...prev, [field]: value }));
   }, []);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
-  const [showStickyCta, setShowStickyCta] = useState(false);
+  
   const [mapExpanded, setMapExpanded] = useState(false);
   const [mapExpandedBottom, setMapExpandedBottom] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -127,16 +127,6 @@ const Index = () => {
     return () => clearInterval(t);
   }, [testimonials.length]);
 
-  useEffect(() => {
-    const el = heroRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setShowStickyCta(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   const handleGetValuation = useCallback(() => {
     const route = valuationType === "sell" ? "/sell/valuation" : "/rent/valuation";
@@ -413,13 +403,13 @@ const Index = () => {
                       <div className={cn(
                         "w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors",
                         feat.accent
-                          ? "bg-[hsl(var(--terracotta-light))]"
+                          ? isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
                           : "bg-secondary"
                       )}>
-                        <span className="text-primary text-lg">✦</span>
+                        <span className={cn("text-lg", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>✦</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-foreground text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
+                        <h3 className={cn("font-bold text-foreground text-lg uppercase tracking-tight transition-colors", isSell ? "group-hover:text-primary" : "group-hover:text-[hsl(var(--rent-foreground))]")}>
                           {feat.title}
                         </h3>
                         <p className="text-muted-foreground mt-1 leading-relaxed">
@@ -438,7 +428,7 @@ const Index = () => {
               viewport={{ once: true }}
               className="flex justify-center mt-10"
             >
-              <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider">
+              <span className={cn("inline-block rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider", isSell ? "bg-[hsl(var(--terracotta-light))] text-primary" : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]")}>
                 All included — completely free
               </span>
             </motion.div>
@@ -493,7 +483,7 @@ const Index = () => {
                 >
                   <div className="flex gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                      <Star key={i} className={cn("h-5 w-5", isSell ? "fill-primary text-primary" : "fill-[hsl(var(--rent))] text-[hsl(var(--rent))]")} />
                     ))}
                   </div>
                   <p className="text-xl md:text-2xl font-['DM_Serif_Display'] italic text-muted-foreground max-w-2xl leading-relaxed">
@@ -512,7 +502,7 @@ const Index = () => {
                   onClick={() => setTestimonialIdx(i)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
-                    i === testimonialIdx ? "bg-primary w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
+                    i === testimonialIdx ? (isSell ? "bg-primary" : "bg-[hsl(var(--rent))]") + " w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
                   )}
                 />
               ))}
@@ -525,7 +515,7 @@ const Index = () => {
         {/* ═══════════ FINAL CTA ═══════════ */}
         <section
           className="w-full py-8 md:py-20 px-5 md:px-8 pb-32"
-          style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
+          style={{ background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--${isSell ? 'terracotta-light' : 'rent-light'})) 100%)` }}
         >
           <div className="flex flex-col items-center text-center gap-4 mb-2">
             <SectionLabel>Start Now</SectionLabel>
@@ -568,31 +558,6 @@ const Index = () => {
 
       </div>
 
-      {/* ═══════════ STICKY MOBILE CTA ═══════════ */}
-      <AnimatePresence>
-        {showStickyCta && (
-          <motion.div
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            exit={{ y: 100 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border"
-          >
-            <div className="px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-              <p className="text-[11px] text-muted-foreground mb-1.5">
-                {isSell ? "Get your free property valuation" : "Get your free rental estimate"}
-              </p>
-              <button
-                onClick={handleGetValuation}
-                className="w-full rounded-full py-4 bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-              >
-                {isSell ? "Get Your Free Valuation" : "Get Your Rental Estimate"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
