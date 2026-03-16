@@ -366,7 +366,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 5 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#FAFAF7]">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#F5F3EE] border-t border-[#E8E5E0]">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
