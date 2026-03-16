@@ -138,6 +138,19 @@ const Index = () => {
           ref={heroRef}
           className="min-h-[85vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
         >
+          <div className="flex flex-col items-center text-center gap-4 mb-2">
+            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium">
+              Free property valuation
+            </span>
+            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-7xl text-foreground leading-[1.1]">
+              What is your property
+              <br />
+              in Spain <em className="italic">really</em> worth?
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground">
+              Get a detailed market report in under 2 minutes. Completely free.
+            </p>
+          </div>
           <ValuationTicketCard
             address=""
             estimatedValue=""
