@@ -277,33 +277,41 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           </div>
         ) : hasInput ? (
           /* ── Hero INPUT mode ── */
-          <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]">
+          <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
             <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
               Your Valuation
             </span>
 
-            <div className="relative mt-2">
-              <MapPin size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                value={addressValue || ""}
-                onChange={(e) => onAddressChange?.(e.target.value)}
-                placeholder="Your address..."
-                className="w-full rounded-xl border border-border bg-card pl-8 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-              />
-            </div>
-
-            {/* Continue arrow — only visible when address has content */}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleContinue?.(); }}
-              disabled={!addressValue?.trim()}
-              className="flex items-center justify-end gap-1.5 text-sm font-medium text-primary mt-1 self-end transition-all disabled:opacity-0 disabled:pointer-events-none hover:gap-2.5"
-            >
-              Continue
-              <ArrowRight size={14} />
-            </button>
+            {hasGoogleInput ? (
+              <div className="mt-2">
+                <GoogleAddressInput
+                  addressData={addressData!}
+                  onChange={onAddressFieldChange! as any}
+                  onLocationConfirmed={onLocationConfirmed || handleContinue}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="relative mt-2">
+                  <MapPin size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={addressValue || ""}
+                    onChange={(e) => onAddressChange?.(e.target.value)}
+                    placeholder="Your address..."
+                    className="w-full rounded-xl border border-border bg-card pl-8 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
+                  />
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleContinue?.(); }}
+                  disabled={!addressValue?.trim()}
+                  className="flex items-center justify-end gap-1.5 text-sm font-medium text-primary mt-1 self-end transition-all disabled:opacity-0 disabled:pointer-events-none hover:gap-2.5"
+                >
+                  Continue
+                  <ArrowRight size={14} />
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <>
