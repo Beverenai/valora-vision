@@ -228,7 +228,7 @@ const Index = () => {
       </section>
 
       {/* ═══════════ WHAT YOU GET — Flippable Card ═══════════ */}
-      <section className="w-full py-20 md:py-32 px-6 bg-secondary/50">
+      <section className="w-full py-14 md:py-32 px-4 md:px-6 bg-secondary/50">
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
