@@ -466,7 +466,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={resetTilt}
         className={cn(
-          "relative w-full max-w-[340px] md:max-w-[680px] lg:max-w-[780px] group cursor-grab active:cursor-grabbing transition-all duration-500",
+          "relative w-full max-w-[360px] md:max-w-[780px] lg:max-w-[960px] group cursor-grab active:cursor-grabbing transition-all duration-500",
         hasInput
             ? (mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
             : (mapExpanded
