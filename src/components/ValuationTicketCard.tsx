@@ -296,6 +296,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   addressData={addressData!}
                   onChange={onAddressFieldChange! as any}
                   onLocationConfirmed={onLocationConfirmed || handleContinue}
+                  onPhaseChange={onMapPhaseChange}
                 />
               </div>
             ) : (
