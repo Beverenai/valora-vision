@@ -37,7 +37,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   return (
     <div className="flex items-center justify-center px-4 py-8 md:py-12">
       <div
-        className="relative flex w-full max-w-[480px] bg-muted rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] group"
+        className="relative flex w-full max-w-[480px] bg-[hsl(36_9%_88%)] rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] group"
         style={{ aspectRatio: "9/16", maxHeight: "850px" }}
       >
         {/* ── Main Section ── */}
