@@ -207,7 +207,7 @@ const Index = () => {
           placeholder="Enter your property address..."
           className={cn(
             "w-full rounded-2xl border border-[#E8E5E0] bg-white pl-12 pr-5 text-[#1A1A1A] shadow-sm outline-none transition-shadow focus:shadow-lg placeholder:text-[#BBB]",
-            compact ? "py-3.5 text-base" : "py-5 px-6 text-lg"
+            compact ? "py-3.5 text-base" : "py-5 pr-6 text-lg"
           )}
         />
       </div>
