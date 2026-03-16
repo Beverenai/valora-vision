@@ -58,7 +58,7 @@ const HOW_STEPS = [
 const REPORT_FEATURES = [
   {
     title: "Estimated Market Value",
-    desc: "AI-calculated price based on comparable sales data.",
+    desc: "Calculated price based on comparable sales data.",
     icon: (
       <svg viewBox="0 0 36 36" width="36" height="36" fill="none" strokeWidth="1.5" stroke="#D4713B">
         <circle cx="18" cy="18" r="14" />
