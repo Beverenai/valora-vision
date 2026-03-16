@@ -349,7 +349,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   onPhaseChange={onMapPhaseChange}
                 />
               {!mapExpanded && (
-                <p className="text-[0.65rem] md:text-xs text-muted-foreground/70 text-center leading-relaxed mt-4 px-2 max-w-[280px] mx-auto">
+                <p className="text-[0.65rem] md:text-xs text-muted-foreground/70 text-center leading-relaxed mt-4 px-2 max-w-[280px] md:max-w-md mx-auto">
                   Enter your property address above and we'll provide an instant, AI-powered market valuation based on comparable sales, location data, and current demand.
                 </p>
               )}
