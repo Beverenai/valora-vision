@@ -69,16 +69,17 @@ const SealedWrapper: React.FC<{
   const tabColor = isSell ? "bg-primary" : "bg-[hsl(var(--rent))]";
   const embossedText = isSell ? "VALUED" : "ESTIMATED";
 
-  const gapY = useTransform(() => dragProgress * 30);
+  const topHalfY = useTransform(() => -dragProgress * 20);
+  const glowOpacity = useTransform(() => dragProgress * 2);
 
   return (
-    <div className="relative w-full max-w-[340px] sm:max-w-[380px] mx-auto" style={{ aspectRatio: "2/3" }}>
+    <div className="relative w-[340px] h-[510px] sm:w-[380px] sm:h-[570px] mx-auto">
       {/* Top half */}
       <motion.div
         className="absolute inset-x-0 top-0 bottom-[80%] z-20 overflow-hidden rounded-t-3xl"
         style={{
           background: "linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 25%, #A0A0A0 50%, #D4D4D4 75%, #B0B0B0 100%)",
-          y: useTransform(() => -dragProgress * 20),
+          y: topHalfY,
         }}
       >
         <div className="absolute inset-0 opacity-[0.06]" style={{
@@ -151,7 +152,7 @@ const SealedWrapper: React.FC<{
             background: isSell
               ? "radial-gradient(ellipse at center, rgba(212,113,59,0.3) 0%, transparent 70%)"
               : "radial-gradient(ellipse at center, rgba(60,179,113,0.3) 0%, transparent 70%)",
-            opacity: useTransform(() => dragProgress * 2),
+            opacity: glowOpacity,
           }}
         />
       </motion.div>
