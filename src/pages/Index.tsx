@@ -109,24 +109,14 @@ const Index = () => {
   }, []);
 
   const handleGetValuation = useCallback(() => {
-    const path = "/sell/valuation";
-    if (address.trim()) {
-      navigate(path, {
-        state: {
-          addressData: {
-            streetAddress: address,
-            urbanization: "",
-            city: "",
-            province: "",
-            country: "Spain",
-            complex: "",
-          },
+    navigate("/sell/valuation", {
+      state: {
+        addressData: {
+          ...addressData,
         },
-      });
-    } else {
-      navigate(path);
-    }
-  }, [address, navigate]);
+      },
+    });
+  }, [addressData, navigate]);
 
   const AddressBlock = ({ compact }: { compact?: boolean }) => (
     <div className="w-full flex flex-col items-center gap-6">
