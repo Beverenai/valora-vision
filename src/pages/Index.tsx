@@ -160,6 +160,8 @@ const Index = () => {
             addressData={addressData}
             onAddressFieldChange={handleAddressChange}
             onLocationConfirmed={handleGetValuation}
+            mapExpanded={mapExpanded}
+            onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
           />
         </div>
 
