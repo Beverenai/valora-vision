@@ -444,39 +444,42 @@ const SellResult: React.FC = () => {
     );
   }
 
+  const cardElement = (
+    <ValuationTicketCard
+      address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
+      city={lead?.city || undefined}
+      estimatedValue={fmt(estimatedLow)}
+      secondaryValue={fmt(estimatedHigh)}
+      propertyType={lead?.property_type || undefined}
+      leadId={id!}
+      headline="VALUED"
+      subtitle="Your Valuation"
+      accentType="sell"
+      mode="result"
+      referenceCode={formatRefCode(id!)}
+      onShare={handleShare}
+      onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
+    />
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      {showConfetti && <ConfettiAnimation />}
-      <div className="max-w-[1400px] mx-auto border-x border-border">
-        <ValuationTicketCard
-          address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
-          city={lead?.city || undefined}
-          estimatedValue={fmt(estimatedLow)}
-          secondaryValue={fmt(estimatedHigh)}
-          propertyType={lead?.property_type || undefined}
-          leadId={id!}
-          headline="VALUED"
-          subtitle="Your Valuation"
-          accentType="sell"
-          mode="result"
-          referenceCode={formatRefCode(id!)}
-          onShare={handleShare}
-          onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
-        />
-        <RefCodeBadge refCode={formatRefCode(id!)} />
-        <PropertySummaryCard bedrooms={lead?.bedrooms} bathrooms={lead?.bathrooms} builtSize={lead?.built_size_sqm} plotSize={lead?.plot_size_sqm} orientation={lead?.orientation} condition={lead?.condition} views={lead?.views} yearBuilt={lead?.year_built} energyCertificate={lead?.energy_certificate} propertyType={lead?.property_type} />
-        <ValuationResultCard estimatedLow={estimatedLow} estimatedHigh={estimatedHigh} monthlyRentalLow={monthlyRentalLow} monthlyRentalHigh={monthlyRentalHigh} weeklyHighSeasonLow={weeklyHighLow} weeklyHighSeasonHigh={weeklyHighHigh} comparableCount={comparableCount > 0 ? comparableCount : 47} city={lead?.city || undefined} />
-        <AIAnalysisSection content={lead?.analysis || MOCK_ANALYSIS} />
-        <MarketTrendsSection content={lead?.market_trends || MOCK_TRENDS} chartData={PRICE_TREND_DATA} />
-        <ProfessionalSpotlight companyName="Costa Del Sol Premium Realty" tagline="Full-service luxury property experts since 2005" rating={5} reviewCount={127} services={MOCK_SERVICES} quote="We look forward to helping you achieve the best possible result for your property." onContact={() => toast({ title: "Contact Requested", description: "The agent will reach out to you shortly." })} onViewProfile={() => toast({ title: "Coming Soon", description: "Agent profiles are coming soon." })} />
-        <FeedbackSection leadId={id!} leadType="sell" />
-        {/* Cross-sell: Rent */}
-        <div className="p-6 md:p-10">
-          <CrossSellBanner variant="sell-to-rent" />
+      <CardRevealWrapper accentType="sell" cardElement={cardElement} loading={loading}>
+        <div className="max-w-[1400px] mx-auto border-x border-border">
+          <RefCodeBadge refCode={formatRefCode(id!)} />
+          <PropertySummaryCard bedrooms={lead?.bedrooms} bathrooms={lead?.bathrooms} builtSize={lead?.built_size_sqm} plotSize={lead?.plot_size_sqm} orientation={lead?.orientation} condition={lead?.condition} views={lead?.views} yearBuilt={lead?.year_built} energyCertificate={lead?.energy_certificate} propertyType={lead?.property_type} />
+          <ValuationResultCard estimatedLow={estimatedLow} estimatedHigh={estimatedHigh} monthlyRentalLow={monthlyRentalLow} monthlyRentalHigh={monthlyRentalHigh} weeklyHighSeasonLow={weeklyHighLow} weeklyHighSeasonHigh={weeklyHighHigh} comparableCount={comparableCount > 0 ? comparableCount : 47} city={lead?.city || undefined} />
+          <AIAnalysisSection content={lead?.analysis || MOCK_ANALYSIS} />
+          <MarketTrendsSection content={lead?.market_trends || MOCK_TRENDS} chartData={PRICE_TREND_DATA} />
+          <ProfessionalSpotlight companyName="Costa Del Sol Premium Realty" tagline="Full-service luxury property experts since 2005" rating={5} reviewCount={127} services={MOCK_SERVICES} quote="We look forward to helping you achieve the best possible result for your property." onContact={() => toast({ title: "Contact Requested", description: "The agent will reach out to you shortly." })} onViewProfile={() => toast({ title: "Coming Soon", description: "Agent profiles are coming soon." })} />
+          <FeedbackSection leadId={id!} leadType="sell" />
+          <div className="p-6 md:p-10">
+            <CrossSellBanner variant="sell-to-rent" />
+          </div>
+          <ValuationDisclaimer />
         </div>
-        <ValuationDisclaimer />
-      </div>
+      </CardRevealWrapper>
       <Footer />
     </div>
   );
