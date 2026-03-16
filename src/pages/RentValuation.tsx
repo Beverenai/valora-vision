@@ -117,14 +117,16 @@ const RentValuation: React.FC = () => {
       const bedroomsNum = formData.bedrooms === "8+" ? 8 : parseInt(formData.bedrooms) || null;
       const bathroomsNum = formData.bathrooms === "7+" ? 7 : parseInt(formData.bathrooms) || null;
 
-      const { data, error } = await supabase
-        .from("leads_rent")
-        .insert({
+      const { data, error } = await supabase.functions.invoke("calculate-valuation", {
+        body: {
+          valuation_type: "rent",
           full_name: formData.fullName.trim(),
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone || null,
           address: formData.streetAddress || formData.city || "Unknown",
           city: formData.city || null,
+          latitude: formData.latitude || null,
+          longitude: formData.longitude || null,
           property_type: formData.propertyType || null,
           built_size_sqm: formData.builtSize ? parseFloat(formData.builtSize) : null,
           bedrooms: bedroomsNum,
@@ -132,20 +134,28 @@ const RentValuation: React.FC = () => {
           is_furnished: formData.furnished || null,
           views: formData.views || null,
           property_features: formData.propertyFeatures || null,
-          latitude: formData.latitude || null,
-          longitude: formData.longitude || null,
-        })
-        .select("id")
-        .single();
+          has_pool: !!formData.hasPool,
+          has_ac: !!formData.hasAC,
+          has_sea_views: formData.views?.toLowerCase().includes("sea") || false,
+          has_garage: false,
+          has_terrace: false,
+          has_garden: false,
+          has_lift: false,
+          has_balcony: false,
+        },
+      });
 
       if (error) throw error;
 
-      setSubmittedLeadId(data.id);
+      const leadId = data?.lead_id;
+      if (!leadId) throw new Error("No lead ID returned");
+
+      setSubmittedLeadId(leadId);
       setSimulatedProgress(100);
       stopProgressSimulation();
 
       setTimeout(() => {
-        navigate(`/rent/result/${data.id}`);
+        navigate(`/rent/result/${leadId}`);
       }, 600);
     } catch (error) {
       console.error("Failed to submit lead:", error);

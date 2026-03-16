@@ -119,44 +119,56 @@ const SellValuation: React.FC = () => {
       const bedroomsNum = formData.bedrooms === "8+" ? 8 : parseInt(formData.bedrooms) || null;
       const bathroomsNum = formData.bathrooms === "7+" ? 7 : parseInt(formData.bathrooms) || null;
 
-      const { data, error } = await supabase
-        .from("leads_sell")
-        .insert({
+      const featuresText = [
+        formData.hasPool ? "pool" : "",
+        formData.hasGarage ? "garage" : "",
+        formData.propertyFeatures || "",
+      ].filter(Boolean).join(", ") || null;
+
+      const { data, error } = await supabase.functions.invoke("calculate-valuation", {
+        body: {
+          valuation_type: "sell",
           full_name: formData.fullName.trim(),
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone || null,
           address: formData.streetAddress || formData.city || "Unknown",
           city: formData.city || null,
+          latitude: formData.latitude || null,
+          longitude: formData.longitude || null,
           property_type: formData.propertyType || null,
           built_size_sqm: formData.builtSize ? parseFloat(formData.builtSize) : null,
           plot_size_sqm: formData.plotSize ? parseFloat(formData.plotSize) : null,
           terrace_size_sqm: formData.terraceSize ? parseFloat(formData.terraceSize) : null,
           bedrooms: bedroomsNum,
           bathrooms: bathroomsNum,
+          condition: formData.condition || null,
           orientation: formData.orientation || null,
           views: formData.views || null,
-          condition: formData.condition || null,
-          features: [
-            formData.hasPool ? "pool" : "",
-            formData.hasGarage ? "garage" : "",
-            formData.propertyFeatures || "",
-          ].filter(Boolean).join(", ") || null,
           year_built: formData.yearBuilt ? parseInt(formData.yearBuilt) : null,
           energy_certificate: formData.energyCertificate || null,
-          latitude: formData.latitude || null,
-          longitude: formData.longitude || null,
-        })
-        .select("id")
-        .single();
+          features_text: featuresText,
+          has_pool: !!formData.hasPool,
+          has_garage: !!formData.hasGarage,
+          has_sea_views: formData.views?.toLowerCase().includes("sea") || false,
+          has_terrace: formData.terraceSize ? parseFloat(formData.terraceSize) > 0 : false,
+          has_garden: false,
+          has_lift: false,
+          has_ac: false,
+          has_balcony: false,
+        },
+      });
 
       if (error) throw error;
 
-      setSubmittedLeadId(data.id);
+      const leadId = data?.lead_id;
+      if (!leadId) throw new Error("No lead ID returned");
+
+      setSubmittedLeadId(leadId);
       setSimulatedProgress(100);
       stopProgressSimulation();
 
       setTimeout(() => {
-        navigate(`/sell/result/${data.id}`);
+        navigate(`/sell/result/${leadId}`);
       }, 600);
     } catch (error) {
       console.error("Failed to submit lead:", error);
