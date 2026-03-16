@@ -15,6 +15,7 @@ import {
   Users,
   ArrowRight,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,13 +77,21 @@ const sectionReveal = {
   transition: { duration: 0.6, ease: "easeOut" as const },
 };
 
-/* ─── MARQUEE CSS ─── */
 const marqueeStyle = `
 @keyframes marquee-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 `;
+
+/* ─── MOCK REPORT BARS ─── */
+const MOCK_BARS = [
+  { label: "Q1", h: 45 },
+  { label: "Q2", h: 60 },
+  { label: "Q3", h: 72 },
+  { label: "Q4", h: 85 },
+  { label: "Now", h: 95 },
+];
 
 /* ─── MAIN PAGE ─── */
 
@@ -94,13 +103,11 @@ const Index = () => {
   const [showStickyCta, setShowStickyCta] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
-  // Testimonial auto-rotate
   useEffect(() => {
     const t = setInterval(() => setTestimonialIdx((i) => (i + 1) % TESTIMONIALS.length), 5000);
     return () => clearInterval(t);
   }, []);
 
-  // Sticky CTA observer
   useEffect(() => {
     const el = heroRef.current;
     if (!el) return;
@@ -136,10 +143,9 @@ const Index = () => {
 
   const doubled = [...AGENCIES, ...AGENCIES];
 
-  /* ─── ADDRESS INPUT BLOCK (reused in hero + final CTA) ─── */
+  /* ─── ADDRESS INPUT BLOCK ─── */
   const AddressBlock = ({ id }: { id: string }) => (
     <div className="w-full flex flex-col gap-3">
-      {/* Input */}
       <div className="relative w-full max-w-xl mx-auto">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
         <input
@@ -152,29 +158,45 @@ const Index = () => {
         />
       </div>
 
-      {/* Pills */}
+      {/* Pill buttons with arrow icons */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-1">
         <button
           onClick={() => handleProceed("sell")}
           className={cn(
-            "min-h-[48px] rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 w-full sm:w-auto",
+            "min-h-[48px] rounded-full px-5 py-3 text-sm font-semibold transition-all duration-200 w-full sm:w-auto flex items-center justify-center gap-2.5",
             valuationType === "sell"
               ? "bg-amber text-white shadow-lg shadow-amber/25"
               : "border border-white/30 text-white/80 hover:border-amber/60 hover:text-white"
           )}
         >
           I want to sell
+          <span className={cn(
+            "inline-flex items-center justify-center w-6 h-6 rounded-full transition-all",
+            valuationType === "sell"
+              ? "bg-white/20"
+              : "border border-white/30"
+          )}>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </span>
         </button>
         <button
           onClick={() => handleProceed("rent")}
           className={cn(
-            "min-h-[48px] rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 w-full sm:w-auto",
+            "min-h-[48px] rounded-full px-5 py-3 text-sm font-semibold transition-all duration-200 w-full sm:w-auto flex items-center justify-center gap-2.5",
             valuationType === "rent"
               ? "bg-teal text-white shadow-lg shadow-teal/25"
               : "border border-white/30 text-white/80 hover:border-teal/60 hover:text-white"
           )}
         >
           I want to rent out
+          <span className={cn(
+            "inline-flex items-center justify-center w-6 h-6 rounded-full transition-all",
+            valuationType === "rent"
+              ? "bg-white/20"
+              : "border border-white/30"
+          )}>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </span>
         </button>
       </div>
     </div>
@@ -197,7 +219,7 @@ const Index = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
 
-        <div className="relative z-10 flex flex-col items-center w-full max-w-lg md:max-w-3xl px-6 gap-6">
+        <div className="relative z-10 flex flex-col items-center w-full max-w-lg md:max-w-3xl px-6 gap-8">
           {/* Logo */}
           <motion.p
             initial={{ opacity: 0 }}
@@ -208,24 +230,24 @@ const Index = () => {
             Valora<span className="text-amber">Casa</span>
           </motion.p>
 
-          {/* Headline */}
+          {/* Headline — larger */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="font-heading text-3xl md:text-5xl font-bold text-white text-center leading-tight"
+            className="font-heading text-4xl md:text-6xl font-bold text-white text-center leading-tight"
           >
             What is your property
             <br />
             in Spain <em className="text-amber not-italic font-bold italic">really</em> worth?
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* Subtitle — more visible */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-white/50 text-center text-sm sm:text-base max-w-md"
+            className="text-white/60 text-center text-base md:text-lg max-w-md"
           >
             Free AI-powered valuation in under 2 minutes
           </motion.p>
@@ -240,21 +262,27 @@ const Index = () => {
             <AddressBlock id="hero-address" />
           </motion.div>
 
-          {/* Trust row */}
+          {/* Frosted glass trust stats bar */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.65 }}
-            className="flex items-center gap-5 mt-4 text-white/40 text-sm flex-wrap justify-center"
+            className="bg-white/[0.06] backdrop-blur-md rounded-2xl border border-white/10 px-6 py-4 mt-2"
           >
-            {TRUST_STATS.map((stat, i) => (
-              <span key={stat.label} className="flex items-center gap-1.5">
-                {i > 0 && <span className="text-white/15 mr-3">•</span>}
-                <CheckCircle2 className="h-3.5 w-3.5 text-amber" />
-                <span className="font-semibold text-white/70">{stat.value}</span>{" "}
-                {stat.label}
-              </span>
-            ))}
+            <div className="flex items-center gap-0 text-sm">
+              {TRUST_STATS.map((stat, i) => (
+                <div key={stat.label} className="flex items-center">
+                  {i > 0 && <div className="w-px h-8 bg-white/10 mx-5" />}
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber shrink-0" />
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5">
+                      <span className="font-semibold text-white/80">{stat.value}</span>
+                      <span className="text-white/40 text-xs sm:text-sm">{stat.label}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </div>
@@ -287,7 +315,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 3 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 border-t border-white/5" style={{ background: "#0F1B2D" }}>
+      <motion.section {...sectionReveal} className="w-full py-20 md:py-28 px-6 border-t border-white/5" style={{ background: "#0F1B2D" }}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-2 justify-center mb-8">
             <span className="relative flex h-2.5 w-2.5">
@@ -328,7 +356,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 4 — HOW IT WORKS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 border-t border-white/5" style={{ background: "#111827" }}>
+      <motion.section {...sectionReveal} className="w-full py-20 md:py-28 px-6 border-t border-white/5" style={{ background: "#111827" }}>
         <div className="max-w-6xl mx-auto">
           <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center leading-tight mb-4">
             How it works
@@ -363,9 +391,82 @@ const Index = () => {
         </div>
       </motion.section>
 
+      {/* ═══════════ SECTION 4.5 — REPORT PREVIEW MOCKUP ═══════════ */}
+      <motion.section {...sectionReveal} className="w-full py-20 md:py-28 px-6 border-t border-white/5" style={{ background: "#0F1B2D" }}>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center leading-tight mb-3">
+            See what you'll get
+          </h2>
+          <p className="text-white/40 text-center text-sm mb-12">
+            A preview of your personalized valuation report
+          </p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 24, rotate: 1 }}
+            whileInView={{ opacity: 1, y: 0, rotate: 1 }}
+            whileHover={{ rotate: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative bg-white/[0.06] backdrop-blur-lg border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl max-w-2xl mx-auto"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Property Valuation Report</p>
+                <p className="text-white font-heading font-semibold text-sm md:text-base">Calle Marbella 24, Nueva Andalucía</p>
+              </div>
+              <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-emerald-400 text-xs font-semibold">AI Confidence: 94%</span>
+              </div>
+            </div>
+
+            {/* Value */}
+            <div className="mb-8">
+              <p className="text-white/40 text-xs mb-1">Estimated Market Value</p>
+              <p className="text-4xl md:text-5xl font-heading font-bold text-amber">€850,000</p>
+              <p className="text-white/30 text-sm mt-1">€3,400/m² · 250m² built</p>
+            </div>
+
+            {/* Chart */}
+            <div className="mb-6">
+              <p className="text-white/40 text-xs mb-3">Price trend (last 12 months)</p>
+              <div className="flex items-end gap-2 h-24">
+                {MOCK_BARS.map((bar) => (
+                  <div key={bar.label} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className="w-full rounded-t-lg bg-gradient-to-t from-amber/60 to-amber/30"
+                      style={{ height: `${bar.h}%` }}
+                    />
+                    <span className="text-white/30 text-[10px]">{bar.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer badges */}
+            <div className="flex flex-wrap gap-2">
+              {["Market Value", "Rental Estimate", "Comparables", "Agent Match"].map((tag) => (
+                <span key={tag} className="text-white/40 text-xs bg-white/[0.04] border border-white/10 rounded-full px-3 py-1">
+                  ✓ {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* Decorative glow */}
+            <div className="absolute -inset-1 bg-amber/5 rounded-3xl blur-xl -z-10" />
+          </motion.div>
+        </div>
+      </motion.section>
+
       {/* ═══════════ SECTION 5 — WHAT YOU GET ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 border-t border-white/5" style={{ background: "#0d1520" }}>
-        <div className="max-w-6xl mx-auto">
+      <motion.section {...sectionReveal} className="relative w-full py-20 md:py-28 px-6 border-t border-white/5 overflow-hidden" style={{ background: "#0d1520" }}>
+        {/* Subtle gradient mesh overlay */}
+        <div className="absolute inset-0 opacity-30 pointer-events-none" style={{
+          background: "radial-gradient(ellipse at 20% 50%, rgba(212,168,67,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 50%, rgba(13,148,136,0.06) 0%, transparent 50%)"
+        }} />
+
+        <div className="relative max-w-6xl mx-auto">
           <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center leading-tight mb-12">
             What your free report includes
           </h2>
@@ -398,13 +499,18 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 6 — TESTIMONIALS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 border-t border-white/5" style={{ background: "#111827" }}>
+      <motion.section {...sectionReveal} className="w-full py-20 md:py-28 px-6 border-t border-white/5" style={{ background: "#111827" }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-5xl font-bold text-white leading-tight mb-12">
             What property owners say
           </h2>
 
-          <div className="min-h-[160px] flex flex-col items-center justify-center">
+          <div className="relative min-h-[180px] flex flex-col items-center justify-center">
+            {/* Decorative quotation mark */}
+            <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 text-[120px] leading-none font-serif text-amber/[0.07] pointer-events-none select-none" aria-hidden="true">
+              "
+            </span>
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={testimonialIdx}
@@ -412,7 +518,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.4 }}
-                className="flex flex-col items-center gap-4"
+                className="relative flex flex-col items-center gap-4"
               >
                 <div className="flex gap-1">
                   {Array.from({ length: TESTIMONIALS[testimonialIdx].stars }).map((_, i) => (
