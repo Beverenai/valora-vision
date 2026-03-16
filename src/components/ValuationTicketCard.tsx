@@ -133,26 +133,44 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   const refCode = referenceCode || (leadId ? formatRefCode(leadId) : "VC-0000-0000");
 
-  // Size-dependent classes
-  const outerMaxWidth = isLarge
-    ? "max-w-[360px] md:max-w-[680px] lg:max-w-[800px]"
-    : "max-w-[360px] md:max-w-[500px]";
-  const stubWidth = isLarge ? "w-[50px] md:w-[60px] lg:w-[70px]" : "w-[50px]";
-  const mainPadding = isLarge ? "p-4 md:p-6 lg:p-8" : "p-3 md:p-5";
-  const heroImageMaxH = isLarge ? "max-h-[42%] md:max-h-[45%]" : "max-h-[42%]";
-  const titleSize = isLarge
-    ? "text-[2.2rem] md:text-[3rem] lg:text-[4rem]"
-    : "text-[2.2rem] md:text-[3.5rem]";
-  const cursiveSize = isLarge
-    ? "text-[2rem] md:text-[2.5rem] lg:text-[3rem]"
-    : "text-[2rem] md:text-[2.5rem]";
-  const resultCursiveSize = isLarge
-    ? "text-[1.8rem] md:text-[2.5rem] lg:text-[3.5rem]"
-    : "text-[1.8rem] md:text-[3rem]";
-  const priceSize = isLarge
-    ? "text-[1.6rem] md:text-[2.2rem] lg:text-[3rem]"
-    : "text-[1.6rem] md:text-[2.5rem]";
-  const barcodeHeight = isLarge ? "h-[35px] md:h-[55px] lg:h-[65px]" : "h-[35px] md:h-[55px]";
+  // Size-dependent classes — per-variant configs
+  const sizeConfig = {
+    default: {
+      outerMaxWidth: "max-w-[360px] md:max-w-[500px]",
+      stubWidth: "w-[50px]",
+      mainPadding: "p-3 md:p-5",
+      heroImageMaxH: "max-h-[42%]",
+      titleSize: "text-[2.2rem] md:text-[3.5rem]",
+      cursiveSize: "text-[2rem] md:text-[2.5rem]",
+      resultCursiveSize: "text-[1.8rem] md:text-[3rem]",
+      priceSize: "text-[1.6rem] md:text-[2.5rem]",
+      barcodeHeight: "h-[35px] md:h-[55px]",
+    },
+    hero: {
+      outerMaxWidth: "max-w-[360px] md:max-w-[720px] lg:max-w-[960px]",
+      stubWidth: "w-[50px] md:w-[65px] lg:w-[80px]",
+      mainPadding: "p-3 md:p-7 lg:p-10",
+      heroImageMaxH: "max-h-[42%] md:max-h-[50%]",
+      titleSize: "text-[2.2rem] md:text-[3.5rem] lg:text-[4.5rem]",
+      cursiveSize: "text-[2rem] md:text-[2.8rem] lg:text-[3.5rem]",
+      resultCursiveSize: "text-[1.8rem] md:text-[3rem] lg:text-[4rem]",
+      priceSize: "text-[1.6rem] md:text-[2.5rem] lg:text-[3.5rem]",
+      barcodeHeight: "h-[35px] md:h-[55px] lg:h-[70px]",
+    },
+    showcase: {
+      outerMaxWidth: "max-w-[360px] md:max-w-[680px] lg:max-w-[880px]",
+      stubWidth: "w-[50px] md:w-[60px] lg:w-[75px]",
+      mainPadding: "p-3 md:p-6 lg:p-9",
+      heroImageMaxH: "max-h-[42%] md:max-h-[48%]",
+      titleSize: "text-[2.2rem] md:text-[3rem] lg:text-[4rem]",
+      cursiveSize: "text-[2rem] md:text-[2.5rem] lg:text-[3rem]",
+      resultCursiveSize: "text-[1.8rem] md:text-[2.8rem] lg:text-[3.5rem]",
+      priceSize: "text-[1.6rem] md:text-[2.2rem] lg:text-[3rem]",
+      barcodeHeight: "h-[35px] md:h-[55px] lg:h-[65px]",
+    },
+  }[size];
+
+  const { outerMaxWidth, stubWidth, mainPadding, heroImageMaxH, titleSize, cursiveSize, resultCursiveSize, priceSize, barcodeHeight } = sizeConfig;
 
   // Rotate processing messages
   useEffect(() => {
@@ -331,7 +349,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   onPhaseChange={onMapPhaseChange}
                 />
               {!mapExpanded && (
-                <p className="text-[0.65rem] md:text-xs text-muted-foreground/70 text-center leading-relaxed mt-4 px-2 max-w-[280px] mx-auto">
+                <p className="text-[0.65rem] md:text-xs text-muted-foreground/70 text-center leading-relaxed mt-4 px-2 max-w-[280px] md:max-w-md mx-auto">
                   Enter your property address above and we'll provide an instant, AI-powered market valuation based on comparable sales, location data, and current demand.
                 </p>
               )}
@@ -499,7 +517,10 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             ? (mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
             : (mapExpanded
               ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
-              : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
+              : size === "default"
+                ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+                : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
+            )
         )}
         style={{
           aspectRatio: undefined,
