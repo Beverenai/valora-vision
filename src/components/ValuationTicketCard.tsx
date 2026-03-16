@@ -308,7 +308,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             </div>
 
             {/* Barcode */}
-            <div className="mt-auto relative h-[35px] md:h-[55px] w-full">
+            <div className={cn("mt-auto relative w-full", barcodeHeight)}>
               <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
               <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
                 {refCode}
