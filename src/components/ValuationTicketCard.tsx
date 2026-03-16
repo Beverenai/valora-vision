@@ -279,7 +279,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         {isProcessing ? (
           <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]">
             <h2
-              className="font-heading text-[2.2rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] tracking-[-2px] text-foreground animate-pulse"
+              className={cn("font-heading font-extrabold text-center leading-[0.8] tracking-[-2px] text-foreground animate-pulse", titleSize)}
               style={{ transform: "scaleY(0.9)" }}
             >
               ANALYSING
