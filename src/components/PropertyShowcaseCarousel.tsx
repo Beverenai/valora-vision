@@ -168,7 +168,7 @@ const PropertyShowcaseCarousel: React.FC = () => {
       </div>
 
       {/* Right — Property Image + Price */}
-      <div className="relative bg-muted min-h-[400px] md:min-h-[500px] overflow-hidden">
+      <div className="relative bg-muted min-h-[300px] md:min-h-[500px] overflow-hidden">
         <AnimatePresence mode="popLayout">
           {PROPERTIES.map((property, index) => {
             const status = getCardStatus(index);
