@@ -103,10 +103,12 @@
     @apply border-border;
   }
 
+  html, body, #root {
+    background-color: #0F1B2D;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans;
-    background-image: radial-gradient(hsl(var(--border)) 1px, transparent 1px);
-    background-size: 24px 24px;
+    @apply text-foreground font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
