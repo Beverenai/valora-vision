@@ -127,16 +127,6 @@ const Index = () => {
     return () => clearInterval(t);
   }, [testimonials.length]);
 
-  useEffect(() => {
-    const el = heroRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setShowStickyCta(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   const handleGetValuation = useCallback(() => {
     const route = valuationType === "sell" ? "/sell/valuation" : "/rent/valuation";
