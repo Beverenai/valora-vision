@@ -371,7 +371,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               </span>
             </div>
 
-            <h2 className="font-heading text-[2.2rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground" style={{ transform: "scaleY(0.9)" }}>
+            <h2 className={cn("font-heading font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground", titleSize)} style={{ transform: "scaleY(0.9)" }}>
               {headline}
             </h2>
 
