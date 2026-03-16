@@ -158,6 +158,8 @@ export const INITIAL_SELL_DATA: SellValuationData = {
   province: "",
   country: "",
   complex: "",
+  latitude: undefined,
+  longitude: undefined,
   propertyCategory: "",
   propertyType: "",
   builtSize: "",
