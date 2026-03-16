@@ -143,6 +143,8 @@ const SellValuation: React.FC = () => {
           ].filter(Boolean).join(", ") || null,
           year_built: formData.yearBuilt ? parseInt(formData.yearBuilt) : null,
           energy_certificate: formData.energyCertificate || null,
+          latitude: formData.latitude || null,
+          longitude: formData.longitude || null,
         })
         .select("id")
         .single();

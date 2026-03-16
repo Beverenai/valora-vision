@@ -1,0 +1,2 @@
+ALTER TABLE public.leads_sell ADD COLUMN latitude double precision, ADD COLUMN longitude double precision;
+ALTER TABLE public.leads_rent ADD COLUMN latitude double precision, ADD COLUMN longitude double precision;

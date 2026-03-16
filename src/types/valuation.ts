@@ -66,6 +66,8 @@ export interface AddressData {
   province: string;
   country: string;
   complex?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Sell valuation form data
@@ -77,6 +79,8 @@ export interface SellValuationData {
   province: string;
   country: string;
   complex?: string;
+  latitude?: number;
+  longitude?: number;
 
   // Property details
   propertyCategory: string;
@@ -115,6 +119,8 @@ export interface RentValuationData {
   province: string;
   country: string;
   complex?: string;
+  latitude?: number;
+  longitude?: number;
 
   // Property details
   propertyCategory: string;
@@ -152,6 +158,8 @@ export const INITIAL_SELL_DATA: SellValuationData = {
   province: "",
   country: "",
   complex: "",
+  latitude: undefined,
+  longitude: undefined,
   propertyCategory: "",
   propertyType: "",
   builtSize: "",
@@ -182,6 +190,8 @@ export const INITIAL_RENT_DATA: RentValuationData = {
   province: "",
   country: "",
   complex: "",
+  latitude: undefined,
+  longitude: undefined,
   propertyCategory: "",
   propertyType: "",
   builtSize: "",

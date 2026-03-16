@@ -1,71 +1,56 @@
 
 
-## Plan: Streamlined Sequential Location Flow
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-The location input becomes a **two-phase sequential process** — not three options shown at once.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Flow
+### Changes
+
+**1. `src/pages/Index.tsx` — Full visual overhaul**
+
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+
+**2. Floating agency logos treatment**
 
 ```text
-PHASE 1: Address Input
-┌─────────────────────────────────┐
-│  🔍 Type your address...        │  ← autocomplete search
-│  ┌─────────────────────────────┐│
-│  │ 📍 Use my current location  ││  ← appears as first suggestion
-│  │ 📍 Calle Luna 12, Marbella  ││     when dropdown opens
-│  │ 📍 Calle Luna 5, Estepona   ││
-│  └─────────────────────────────┘│
-└─────────────────────────────────┘
-         ↓ user picks one
-PHASE 2: Verify on Map
-┌─────────────────────────────────┐
-│  ✓ Calle Luna 12, Marbella     │  ← confirmed address, editable
-│  ┌─────────────────────────────┐│
-│  │                             ││
-│  │      Map with pin 📌        ││  ← draggable pin, reverse geocodes
-│  │                             ││
-│  └─────────────────────────────┘│
-│  [Confirm Location]             │
-└─────────────────────────────────┘
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
+
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
 
-Phase 1 and Phase 2 happen in the same space — Phase 2 replaces Phase 1 after selection.
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-### Changes by File
+**3. How It Works — typographic layout**
 
-**1. `src/types/valuation.ts`**
-- Add `latitude?: number` and `longitude?: number` to `AddressData`, `SellValuationData`, `RentValuationData`
-- Add to initial data objects
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
 
-**2. `src/components/shared/MapboxAddressInput.tsx` — Two-phase component**
-- Add internal state: `phase: "search" | "verify"`
-- **Phase "search"**: Current autocomplete, but inject a **"Use my current location"** item as the first suggestion in the dropdown (always visible when the input is focused/has < 3 chars). Uses `navigator.geolocation` → reverse geocode via Mapbox → fills address + moves to verify phase.
-- **Phase "verify"**: Search input becomes a confirmed address display. Below it, render an embedded Mapbox GL JS map centered on the resolved coordinates with a **draggable marker**. On drag end → reverse geocode new position → update address fields. A "Confirm Location" button finalizes.
-- Add props: `onCoordinatesChange?: (lat: number, lng: number) => void`, `onLocationConfirmed?: () => void`
-- Remove `country=es` filter from geocoding URL (keep proximity bias for Spain)
-- Add `center` array from feature geometry for map placement
+**4. Report Features — editorial scatter**
 
-**3. Install `mapbox-gl` package**
-- Required for the interactive verification map
-
-**4. `src/components/sell/SellLocationStep.tsx` & `src/components/rent/RentLocationStep.tsx`**
-- Remove the Quick City Select buttons and standalone urbanization input
-- Pass lat/lng and confirmation callback through to `MapboxAddressInput`
-- Urbanization is auto-filled from geocoding (already happens)
-
-**5. Mapbox token — required secret**
-- `VITE_MAPBOX_ACCESS_TOKEN` must be added as a publishable key in the codebase (it's a client-side token, safe to store in code)
-- Will prompt you for this before proceeding
-
-**6. DB migration**
-- Add `latitude double precision` and `longitude double precision` columns to `leads_sell` and `leads_rent`
-
-**7. `src/pages/SellValuation.tsx` & `src/pages/RentValuation.tsx`**
-- Pass lat/lng values to the database insert
-
-### What stays unchanged
-- ValuationTicketCard (all modes)
-- Result pages
-- All other form steps
-- Index.tsx
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
