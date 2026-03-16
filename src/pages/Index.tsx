@@ -356,9 +356,9 @@ const Index = () => {
       </section>
 
       {/* ═══════════ TESTIMONIALS ═══════════ */}
-      <section className="w-full py-20 md:py-32 px-6">
+      <section className="w-full py-14 md:py-32 px-4 md:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
             What property owners say
           </h2>
           <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-12">
