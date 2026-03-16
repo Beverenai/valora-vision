@@ -334,7 +334,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 4 — WHAT YOUR REPORT INCLUDES ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white border-t border-[#E8E5E0]">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-[#1A1A1A] max-w-3xl mx-auto">
             Everything you need to know about your property
