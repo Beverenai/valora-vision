@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import Footer from "@/components/Footer";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CardRevealWrapper from "@/components/shared/CardRevealWrapper";
-import CrossSellBanner from "@/components/CrossSellBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatRefCode } from "@/utils/referenceCode";
@@ -21,10 +19,13 @@ const RefCodeBadge: React.FC<{ refCode: string }> = ({ refCode }) => {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button onClick={handleCopy} className="inline-flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-md font-mono text-sm font-semibold text-foreground hover:bg-muted/80 transition-colors">
-      {refCode}
-      {copied ? <CheckIcon size={12} className="text-accent" /> : <Copy size={12} className="text-muted-foreground" />}
-    </button>
+    <div className="flex items-center justify-center gap-3 py-6">
+      <p className="text-xs text-muted-foreground">Reference</p>
+      <button onClick={handleCopy} className="inline-flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-md font-mono text-sm font-semibold text-foreground hover:bg-muted/80 transition-colors">
+        {refCode}
+        {copied ? <CheckIcon size={12} className="text-accent" /> : <Copy size={12} className="text-muted-foreground" />}
+      </button>
+    </div>
   );
 };
 
@@ -90,7 +91,6 @@ const RentResult: React.FC = () => {
         <div className="flex items-center justify-center py-32">
           <div className="animate-pulse text-muted-foreground">Loading your estimate...</div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -105,7 +105,7 @@ const RentResult: React.FC = () => {
       leadId={id!}
       headline="ESTIMATED"
       subtitle="Your Rental Income"
-      summaryText="Your property's rental potential has been analysed using comparable listings, seasonal demand patterns, and local market data. Scroll down for the full breakdown."
+      summaryText="Your property's rental potential has been analysed using comparable listings, seasonal demand patterns, and local market data."
       accentType="rent"
       mode="result"
       referenceCode={formatRefCode(id!)}
@@ -117,20 +117,10 @@ const RentResult: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <CardRevealWrapper accentType="rent" cardElement={cardElement} loading={loading}>
-        <div className="max-w-[1400px] mx-auto border-x border-border">
-          {/* Reference code badge */}
-          <div className="flex items-center justify-center gap-3 py-4 border-b border-border">
-            <p className="text-xs text-muted-foreground">Return to this valuation anytime with reference code</p>
-            <RefCodeBadge refCode={formatRefCode(id!)} />
-          </div>
-
-          {/* Cross-sell: Sell */}
-          <div className="p-6 md:p-10">
-            <CrossSellBanner variant="rent-to-sell" />
-          </div>
+        <div className="max-w-[1000px] mx-auto">
+          <RefCodeBadge refCode={formatRefCode(id!)} />
         </div>
       </CardRevealWrapper>
-      <Footer />
     </div>
   );
 };
