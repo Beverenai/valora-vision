@@ -79,7 +79,7 @@ const REPORT_FEATURES = [
     ),
   },
   {
-    title: "AI Property Analysis",
+    title: "Property Analysis",
     desc: "Detailed analysis of your property's strengths.",
     icon: (
       <svg viewBox="0 0 36 36" width="36" height="36" fill="none" strokeWidth="1.5" stroke="#D4713B">
