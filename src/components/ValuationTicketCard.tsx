@@ -147,7 +147,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       {/* Main Section */}
       <div className="flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15 overflow-hidden">
         {/* Hero Image */}
-        <div className="relative w-full h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink-0">
+        <div className="relative w-full min-h-[120px] max-h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink">
           <img
             src={heroImage}
             alt={propertyType || "Property"}
