@@ -341,9 +341,9 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onMouseLeave={resetTilt}
         onTouchMove={handleTouchMove}
         onTouchEnd={resetTilt}
-        className="relative w-full max-w-[340px] md:max-w-[520px] min-h-[480px] md:min-h-[540px] group cursor-grab active:cursor-grabbing"
+        className="relative w-full max-w-[340px] md:max-w-[520px] min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px] group cursor-grab active:cursor-grabbing"
         style={{
-          aspectRatio: "9/16",
+          aspectRatio: "9/15",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
           transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
           transformStyle: "preserve-3d",
