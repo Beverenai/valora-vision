@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import ConfettiAnimation from "@/components/shared/ConfettiAnimation";
-import { ChevronUp, Scissors } from "lucide-react";
+import { ChevronRight, ChevronUp, Scissors } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CardRevealWrapperProps {
@@ -11,7 +11,6 @@ interface CardRevealWrapperProps {
   loading?: boolean;
 }
 
-/* ── Foil shine CSS animation (avoids framer-motion for infinite loop) ── */
 const foilShineStyle = `
 @keyframes foil-shine {
   0% { transform: translateX(-150%) rotate(25deg); }
@@ -19,7 +18,6 @@ const foilShineStyle = `
 }
 `;
 
-/* ── Sparkle Particle (max 10) ── */
 const SparkleParticle: React.FC<{ index: number; accentType: "sell" | "rent" }> = ({ index, accentType }) => {
   const angle = (index / 10) * Math.PI * 2 + (index * 0.3);
   const distance = 80 + (index * 17) % 160;
@@ -27,19 +25,16 @@ const SparkleParticle: React.FC<{ index: number; accentType: "sell" | "rent" }> 
   const ty = Math.sin(angle) * distance - 80;
   const size = 4 + (index * 3) % 8;
   const colors = accentType === "sell"
-    ? ["#D4A847", "#E8CC6E", "#FFD700", "#C9962C"]
-    : ["#78B5A8", "#9FD4C6", "#FFD700", "#5D9A8C"];
+    ? ["#D4742B", "#E8A56E", "#FF8C00", "#C96A2C"]
+    : ["#52B788", "#74C69D", "#40916C", "#95D5B2"];
   const color = colors[index % colors.length];
 
   return (
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: size,
-        height: size,
-        backgroundColor: color,
-        left: "50%",
-        top: "15%",
+        width: size, height: size, backgroundColor: color,
+        left: "85%", top: "50%",
         boxShadow: `0 0 ${size + 2}px ${color}`,
         willChange: "transform",
       }}
@@ -50,21 +45,17 @@ const SparkleParticle: React.FC<{ index: number; accentType: "sell" | "rent" }> 
   );
 };
 
-/* ── Pop Bubble (max 8) ── */
 const PopBubble: React.FC<{ index: number; accentType: "sell" | "rent" }> = ({ index, accentType }) => {
-  const x = -100 + (index * 27) % 200;
-  const y = -60 + (index * 19) % 120;
+  const x = -60 + (index * 27) % 120;
+  const y = -100 + (index * 19) % 200;
   const size = 6 + (index * 5) % 14;
-  const color = accentType === "sell" ? "212, 168, 71" : "120, 181, 168";
+  const color = accentType === "sell" ? "212, 116, 43" : "82, 183, 136";
 
   return (
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: size,
-        height: size,
-        left: "50%",
-        top: "15%",
+        width: size, height: size, left: "85%", top: "50%",
         border: `1.5px solid rgba(${color}, 0.5)`,
         background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.7), rgba(${color}, 0.15))`,
         willChange: "transform",
@@ -76,9 +67,8 @@ const PopBubble: React.FC<{ index: number; accentType: "sell" | "rent" }> = ({ i
   );
 };
 
-/* ── Light Burst ── */
 const LightBurst: React.FC<{ accentType: "sell" | "rent" }> = ({ accentType }) => {
-  const color = accentType === "sell" ? "212, 168, 71" : "120, 181, 168";
+  const color = accentType === "sell" ? "212, 116, 43" : "82, 183, 136";
   return (
     <motion.div
       className="absolute inset-0 z-10 pointer-events-none"
@@ -86,38 +76,35 @@ const LightBurst: React.FC<{ accentType: "sell" | "rent" }> = ({ accentType }) =
       animate={{ opacity: [0, 0.9, 0] }}
       transition={{ duration: 0.7, delay: 0.1 }}
       style={{
-        background: `radial-gradient(ellipse at 50% 15%, rgba(${color}, 0.5) 0%, rgba(255,255,255,0.3) 30%, transparent 60%)`,
+        background: `radial-gradient(ellipse at 85% 50%, rgba(${color}, 0.5) 0%, rgba(255,255,255,0.3) 30%, transparent 60%)`,
         willChange: "opacity",
       }}
     />
   );
 };
 
-/* ── Sealed Foil Wrapper ── */
 const SealedWrapper: React.FC<{
   accentType: "sell" | "rent";
   dragProgress: number;
-  onDragY: (y: number) => void;
+  onDragX: (x: number) => void;
   onTear: () => void;
-}> = ({ accentType, dragProgress, onDragY, onTear }) => {
-  const y = useMotionValue(0);
+}> = ({ accentType, dragProgress, onDragX, onTear }) => {
+  const x = useMotionValue(0);
   const isSell = accentType === "sell";
 
-  // Metallic foil gradients
   const foilGradient = isSell
-    ? "linear-gradient(135deg, #8B6914 0%, #D4A847 25%, #C9962C 40%, #E8CC6E 55%, #B8891E 70%, #D4A847 100%)"
-    : "linear-gradient(135deg, #4A7C72 0%, #78B5A8 25%, #5D9A8C 40%, #9FD4C6 55%, #4A7C72 70%, #78B5A8 100%)";
+    ? "linear-gradient(135deg, #8B4513 0%, #D4742B 25%, #C96A2C 40%, #E8A56E 55%, #B85E1E 70%, #D4742B 100%)"
+    : "linear-gradient(135deg, #2D6A4F 0%, #52B788 25%, #40916C 40%, #74C69D 55%, #2D6A4F 70%, #52B788 100%)";
 
   const embossedText = isSell ? "VALUED" : "ESTIMATED";
-  const tabColor = isSell ? "bg-[#D4A847]" : "bg-[#78B5A8]";
+  const tabColor = isSell ? "bg-[#D4742B]" : "bg-[#52B788]";
 
-  // Embossed diamond pattern
   const diamondPattern = `
     repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 21px),
     repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 21px)
   `;
 
-  const topStripY = useTransform(() => -dragProgress * 20);
+  const rightStripX = useTransform(() => dragProgress * 20);
   const glowOpacity = useTransform(() => Math.min(1, dragProgress * 2.5));
 
   return (
@@ -125,25 +112,24 @@ const SealedWrapper: React.FC<{
       className="relative w-[320px] h-[480px] sm:w-[360px] sm:h-[540px] mx-auto"
       style={{ perspective: "800px" }}
     >
-      {/* Ground shadow */}
       <div
         className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-[80%] h-6 rounded-full blur-xl"
-        style={{ background: isSell ? "rgba(212,168,71,0.2)" : "rgba(120,181,168,0.2)" }}
+        style={{ background: isSell ? "rgba(212,116,43,0.2)" : "rgba(82,183,136,0.2)" }}
       />
 
-      {/* Top strip (tears away) */}
+      {/* Right strip (tears away) */}
       <motion.div
-        className="absolute inset-x-0 top-0 z-20 overflow-hidden rounded-t-2xl"
+        className="absolute inset-y-0 right-0 z-20 overflow-hidden rounded-r-2xl"
         style={{
-          height: "15%",
+          width: "15%",
           background: foilGradient,
-          y: topStripY,
-          borderBottom: "2px dashed rgba(255,255,255,0.25)",
+          x: rightStripX,
+          borderLeft: "2px dashed rgba(255,255,255,0.25)",
         }}
       >
         <div className="absolute inset-0" style={{ backgroundImage: diamondPattern }} />
         <div className="h-full flex items-center justify-center">
-          <span className="text-[0.6rem] tracking-[0.3em] uppercase font-bold text-white/30">
+          <span className="text-[0.5rem] tracking-[0.2em] uppercase font-bold text-white/30 [writing-mode:vertical-lr] rotate-180">
             ValoraCasa
           </span>
         </div>
@@ -152,7 +138,7 @@ const SealedWrapper: React.FC<{
       {/* Main foil body */}
       <motion.div
         className="absolute inset-0 rounded-2xl overflow-hidden"
-        animate={{ rotateX: 3 + dragProgress * -2 }}
+        animate={{ rotateY: -3 + dragProgress * 2 }}
         transition={{ type: "spring", stiffness: 200, damping: 30 }}
         style={{
           background: foilGradient,
@@ -165,20 +151,12 @@ const SealedWrapper: React.FC<{
           transformStyle: "preserve-3d",
         }}
       >
-        {/* Diamond embossed texture */}
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: diamondPattern }} />
 
-        {/* Foil shine sweep — CSS animation */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            overflow: "hidden",
-          }}
-        >
+        <div className="absolute inset-0 pointer-events-none" style={{ overflow: "hidden" }}>
           <div
             style={{
-              position: "absolute",
-              inset: 0,
+              position: "absolute", inset: 0,
               background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 48%, rgba(255,255,255,0.4) 50%, transparent 55%)",
               animation: "foil-shine 4s ease-in-out infinite",
               animationDelay: "1s",
@@ -187,7 +165,6 @@ const SealedWrapper: React.FC<{
           />
         </div>
 
-        {/* Inner thickness edge */}
         <div
           className="absolute inset-[2px] rounded-[14px] pointer-events-none"
           style={{
@@ -196,7 +173,6 @@ const SealedWrapper: React.FC<{
           }}
         />
 
-        {/* Content */}
         <div className="relative h-full flex flex-col items-center justify-between py-10 px-8 z-10">
           <span className="text-sm tracking-[0.3em] uppercase font-bold text-white/25">
             ValoraCasa
@@ -221,53 +197,52 @@ const SealedWrapper: React.FC<{
           </p>
         </div>
 
-        {/* Tear line at 15% */}
+        {/* Tear line at 85% */}
         <div
-          className="absolute left-0 right-0 border-t-2 border-dashed border-white/20"
-          style={{ top: "15%" }}
+          className="absolute top-0 bottom-0 border-r-2 border-dashed border-white/20"
+          style={{ left: "85%" }}
         />
 
         {/* Glow through tear line */}
         <motion.div
-          className="absolute left-0 right-0 h-6 pointer-events-none"
+          className="absolute top-0 bottom-0 w-6 pointer-events-none"
           style={{
-            top: "calc(15% - 12px)",
-            background: `radial-gradient(ellipse at center, ${isSell ? "rgba(255,215,0,0.5)" : "rgba(159,212,198,0.5)"} 0%, transparent 70%)`,
+            left: "calc(85% - 12px)",
+            background: `radial-gradient(ellipse at center, ${isSell ? "rgba(255,140,0,0.5)" : "rgba(82,183,136,0.5)"} 0%, transparent 70%)`,
             opacity: glowOpacity,
           }}
         />
       </motion.div>
 
-      {/* Pull tab — TOP RIGHT, drag UPWARD */}
+      {/* Pull tab — RIGHT CENTER, drag RIGHT */}
       <motion.div
-        drag="y"
-        dragConstraints={{ top: -200, bottom: 0 }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 200 }}
         dragElastic={0.1}
         onDrag={(_, info) => {
-          const progress = Math.min(1, Math.abs(Math.min(0, info.offset.y)) / 150);
-          onDragY(progress);
+          const progress = Math.min(1, Math.max(0, info.offset.x) / 150);
+          onDragX(progress);
         }}
         onDragEnd={(_, info) => {
-          if (info.offset.y < -80) {
+          if (info.offset.x > 80) {
             onTear();
           } else {
-            onDragY(0);
+            onDragX(0);
           }
         }}
-        style={{ y, top: "15%" }}
+        style={{ x, right: "-12px", top: "50%" }}
         className={cn(
-          "absolute -right-3 z-30 flex items-center gap-1.5 px-3 py-2 rounded-t-xl cursor-grab active:cursor-grabbing shadow-lg",
+          "absolute z-30 flex items-center gap-1.5 px-3 py-2 rounded-r-xl cursor-grab active:cursor-grabbing shadow-lg -translate-y-1/2",
           tabColor,
-          "-translate-y-full"
         )}
         whileHover={{ scale: 1.08 }}
       >
-        <Scissors size={14} className="text-white/90 rotate-180" />
+        <Scissors size={14} className="text-white/90 -rotate-90" />
         <motion.div
-          animate={{ y: [-3, 3, -3] }}
+          animate={{ x: [-3, 3, -3] }}
           transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
         >
-          <ChevronUp size={14} className="text-white/90" />
+          <ChevronRight size={14} className="text-white/90" />
         </motion.div>
       </motion.div>
 
@@ -277,13 +252,12 @@ const SealedWrapper: React.FC<{
         animate={{ opacity: [0.4, 0.8, 0.4] }}
         transition={{ repeat: Infinity, duration: 2.5 }}
       >
-        ↑ Pull tab to open
+        → Slide to open
       </motion.p>
     </div>
   );
 };
 
-/* ── Holo Shine (rainbow spectrum) ── */
 const HoloShine: React.FC<{ tiltX: number; tiltY: number }> = ({ tiltX, tiltY }) => {
   const angle = 135 + tiltY * 3 + tiltX * 2;
   return (
@@ -308,7 +282,6 @@ const HoloShine: React.FC<{ tiltX: number; tiltY: number }> = ({ tiltX, tiltY })
   );
 };
 
-/* ── Main Component ── */
 const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
   children,
   accentType,
@@ -323,12 +296,11 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
   const reportRef = useRef<HTMLDivElement>(null);
 
   const isSell = accentType === "sell";
-  const accentRgb = isSell ? "212, 168, 71" : "120, 181, 168";
+  const accentRgb = isSell ? "212, 116, 43" : "82, 183, 136";
   const foilGradient = isSell
-    ? "linear-gradient(135deg, #8B6914 0%, #D4A847 25%, #C9962C 40%, #E8CC6E 55%, #B8891E 70%, #D4A847 100%)"
-    : "linear-gradient(135deg, #4A7C72 0%, #78B5A8 25%, #5D9A8C 40%, #9FD4C6 55%, #4A7C72 70%, #78B5A8 100%)";
+    ? "linear-gradient(135deg, #8B4513 0%, #D4742B 25%, #C96A2C 40%, #E8A56E 55%, #B85E1E 70%, #D4742B 100%)"
+    : "linear-gradient(135deg, #2D6A4F 0%, #52B788 25%, #40916C 40%, #74C69D 55%, #2D6A4F 70%, #52B788 100%)";
 
-  // Gyroscope for mobile
   useEffect(() => {
     if (phase !== "revealed") return;
     const handler = (e: DeviceOrientationEvent) => {
@@ -357,10 +329,8 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
 
   const triggerReveal = useCallback(() => {
     setPhase("tearing");
-    // Tearing: 600ms, then sliding
     setTimeout(() => {
       setPhase("sliding");
-      // Sliding: 800ms, then revealed
       setTimeout(() => {
         setPhase("revealed");
         setShowConfetti(true);
@@ -372,7 +342,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
 
   return (
     <div className="relative">
-      {/* Inject CSS keyframes */}
       <style>{foilShineStyle}</style>
 
       {showConfetti && <ConfettiAnimation />}
@@ -396,7 +365,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
               Your valuation is ready
             </motion.p>
 
-            {/* Floating idle animation */}
             <motion.div
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: [0, -6, 0], scale: 1 }}
@@ -409,7 +377,7 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
               <SealedWrapper
                 accentType={accentType}
                 dragProgress={dragProgress}
-                onDragY={setDragProgress}
+                onDragX={setDragProgress}
                 onTear={triggerReveal}
               />
             </motion.div>
@@ -425,44 +393,45 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
               perspective: "800px",
             }}
           >
-            {/* Top strip flies UP and curls */}
+            {/* Right strip flies RIGHT and curls */}
             <motion.div
-              className="absolute w-[320px] sm:w-[360px] rounded-t-2xl z-20 overflow-hidden"
+              className="absolute rounded-r-2xl z-20 overflow-hidden"
               style={{
-                height: "80px",
+                width: "54px",
+                height: "480px",
                 background: foilGradient,
+                right: "calc(50% - 160px)",
                 top: "calc(50% - 240px)",
                 transformStyle: "preserve-3d",
                 willChange: "transform",
               }}
-              initial={{ y: 0, opacity: 1, rotateX: 0 }}
-              animate={{ y: -300, opacity: 0, rotateX: -45, scaleX: 0.9 }}
+              initial={{ x: 0, opacity: 1, rotateY: 0 }}
+              animate={{ x: 300, opacity: 0, rotateY: 45, scaleY: 0.9 }}
               transition={{ duration: 0.5, ease: "easeIn" }}
             />
 
-            {/* Bottom wrapper stays briefly, then crumples (handled in sliding phase) */}
+            {/* Main wrapper stays briefly */}
             <motion.div
-              className="absolute w-[320px] sm:w-[360px] rounded-b-2xl z-10 overflow-hidden"
+              className="absolute rounded-l-2xl z-10 overflow-hidden"
               style={{
-                height: "380px",
+                width: "306px",
+                height: "480px",
                 background: foilGradient,
-                top: "calc(50% - 160px)",
+                left: "calc(50% - 160px)",
+                top: "calc(50% - 240px)",
                 transformStyle: "preserve-3d",
                 willChange: "transform",
               }}
-              initial={{ y: 0, opacity: 1 }}
-              animate={{ y: 0, opacity: 1 }}
+              initial={{ x: 0, opacity: 1 }}
+              animate={{ x: 0, opacity: 1 }}
             />
 
-            {/* Light burst at 100ms */}
             <LightBurst accentType={accentType} />
 
-            {/* Pop bubbles at 200ms */}
             {Array.from({ length: 8 }).map((_, i) => (
               <PopBubble key={`pop-${i}`} index={i} accentType={accentType} />
             ))}
 
-            {/* Sparkles at 200ms */}
             {Array.from({ length: 10 }).map((_, i) => (
               <SparkleParticle key={`spark-${i}`} index={i} accentType={accentType} />
             ))}
@@ -478,18 +447,20 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
               perspective: "1000px",
             }}
           >
-            {/* Bottom wrapper crumples and falls */}
+            {/* Main wrapper crumples and falls */}
             <motion.div
-              className="absolute w-[320px] sm:w-[360px] rounded-b-2xl z-5 overflow-hidden"
+              className="absolute rounded-l-2xl z-5 overflow-hidden"
               style={{
-                height: "380px",
+                width: "306px",
+                height: "480px",
                 background: foilGradient,
-                top: "calc(50% - 160px)",
+                left: "calc(50% - 160px)",
+                top: "calc(50% - 240px)",
                 transformStyle: "preserve-3d",
                 willChange: "transform",
               }}
-              initial={{ y: 0, opacity: 1, rotateX: 0 }}
-              animate={{ y: 200, opacity: 0, rotateX: 25, rotateZ: 5, scaleX: 0.85 }}
+              initial={{ x: 0, opacity: 1, rotateY: 0 }}
+              animate={{ x: -200, opacity: 0, rotateY: -25, rotateZ: -5, scaleX: 0.85 }}
               transition={{ duration: 0.5, delay: 0.2, ease: "easeIn" }}
             />
 
@@ -506,7 +477,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
                 delay: 0.05,
               }}
             >
-              {/* Entrance shine sweep */}
               <motion.div
                 className="absolute inset-0 z-30 pointer-events-none rounded-[24px] md:rounded-[32px] overflow-hidden"
                 initial={{ opacity: 1 }}
@@ -536,7 +506,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Card section */}
             <div
               className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-12"
               style={{
@@ -553,7 +522,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
                 onMouseLeave={handleMouseLeave}
                 style={{ perspective: 1000 }}
               >
-                {/* 3D tilt container */}
                 <motion.div
                   animate={{ rotateX: cardTilt.x, rotateY: cardTilt.y }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -563,7 +531,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
                   {cardElement}
                 </motion.div>
 
-                {/* Floating shadow under card */}
                 <div
                   className="absolute -bottom-4 left-[10%] right-[10%] h-8 rounded-full blur-2xl"
                   style={{
@@ -573,7 +540,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
                 />
               </motion.div>
 
-              {/* Scroll indicator */}
               <motion.div
                 className="mt-10 flex flex-col items-center gap-2"
                 initial={{ opacity: 0 }}
@@ -590,7 +556,6 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
               </motion.div>
             </div>
 
-            {/* Report content below */}
             <div ref={reportRef}>
               {children}
             </div>
