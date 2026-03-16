@@ -190,6 +190,8 @@ export const INITIAL_RENT_DATA: RentValuationData = {
   province: "",
   country: "",
   complex: "",
+  latitude: undefined,
+  longitude: undefined,
   propertyCategory: "",
   propertyType: "",
   builtSize: "",

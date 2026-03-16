@@ -31,6 +31,8 @@ export type Database = {
           full_name: string
           id: string
           is_furnished: string | null
+          latitude: number | null
+          longitude: number | null
           monthly_long_term_estimate: number | null
           occupancy_estimate: number | null
           phone: string | null
@@ -59,6 +61,8 @@ export type Database = {
           full_name: string
           id?: string
           is_furnished?: string | null
+          latitude?: number | null
+          longitude?: number | null
           monthly_long_term_estimate?: number | null
           occupancy_estimate?: number | null
           phone?: string | null
@@ -87,6 +91,8 @@ export type Database = {
           full_name?: string
           id?: string
           is_furnished?: string | null
+          latitude?: number | null
+          longitude?: number | null
           monthly_long_term_estimate?: number | null
           occupancy_estimate?: number | null
           phone?: string | null
@@ -126,6 +132,8 @@ export type Database = {
           features: string | null
           full_name: string
           id: string
+          latitude: number | null
+          longitude: number | null
           market_trends: string | null
           monthly_rental_estimate: number | null
           orientation: string | null
@@ -156,6 +164,8 @@ export type Database = {
           features?: string | null
           full_name: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           market_trends?: string | null
           monthly_rental_estimate?: number | null
           orientation?: string | null
@@ -186,6 +196,8 @@ export type Database = {
           features?: string | null
           full_name?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           market_trends?: string | null
           monthly_rental_estimate?: number | null
           orientation?: string | null
