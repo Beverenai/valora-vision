@@ -198,7 +198,9 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   /* ── Card dimensions shared by both faces ── */
   const cardClasses = cn(
     "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]",
-    hasInput ? "relative overflow-visible" : "absolute inset-0 overflow-hidden"
+    hasInput
+      ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[80vh]" : "min-h-[75vh] md:min-h-[70vh]")
+      : "absolute inset-0 overflow-hidden"
   );
 
   /* ── FRONT FACE ── */
@@ -288,7 +290,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           </div>
         ) : hasInput ? (
           /* ── Hero INPUT mode ── */
-          <div className="flex-1 flex flex-col justify-center gap-3 pb-8 md:pb-12 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+          <div className="flex-1 flex flex-col justify-start gap-3 pb-8 md:pb-12 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
             <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
               Your Valuation
             </span>
@@ -450,7 +452,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   ) : null;
 
   return (
-    <div className="flex items-center justify-center px-4 py-6 md:py-8" style={{ perspective: "800px" }}>
+    <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
       <div
         ref={cardRef}
         onClick={handleCardClick}
