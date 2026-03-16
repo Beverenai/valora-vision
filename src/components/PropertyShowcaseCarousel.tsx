@@ -92,7 +92,7 @@ const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ acc
 
         <div className="relative" style={{ height: visibleCount * itemHeight }}>
           <div className="absolute inset-0 pointer-events-none z-10" style={{
-            background: "linear-gradient(to bottom, hsl(var(--primary)) 0%, transparent 15%, transparent 85%, hsl(var(--primary)) 100%)",
+            background: `linear-gradient(to bottom, hsl(var(--${isSell ? 'primary' : 'rent-foreground'})) 0%, transparent 15%, transparent 85%, hsl(var(--${isSell ? 'primary' : 'rent-foreground'})) 100%)`,
           }} />
           <div className="relative h-full overflow-hidden">
             {PROPERTIES.map((property, index) => {
