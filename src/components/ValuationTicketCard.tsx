@@ -171,7 +171,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }, [isProcessing]);
 
   const handlePointerMove = useCallback((clientX: number, clientY: number) => {
-    if (flipped || isCompact || isProcessing) return;
+    if (isCompact || isProcessing) return;
     const card = cardRef.current;
     if (!card) return;
     const rect = card.getBoundingClientRect();
