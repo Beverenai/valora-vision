@@ -424,11 +424,12 @@ const SellResult: React.FC = () => {
   const comparableCount = (lead?.comparable_properties as any[])?.length || 0;
 
   const handleShare = () => {
+    const shareText = `My property at ${lead?.address || ""}${lead?.city ? `, ${lead.city}` : ""} is valued at ${fmt(estimatedLow)} – ${fmt(estimatedHigh)}.`;
     if (navigator.share) {
-      navigator.share({ title: "My Property Valuation", url: window.location.href });
+      navigator.share({ title: `Property Valuation – ${lead?.address || ""}`, text: shareText, url: window.location.href });
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link copied!", description: "Share this link with others." });
+      navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
+      toast({ title: "Link copied!", description: "Valuation details copied to clipboard." });
     }
   };
 
