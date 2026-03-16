@@ -12,6 +12,7 @@ interface UseFormWizardProps<T> {
 export function useFormWizard<T>({
   steps,
   initialData,
+  initialStep = 0,
   validateStep,
 }: UseFormWizardProps<T>) {
   const { toast } = useToast();
