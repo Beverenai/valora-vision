@@ -1,56 +1,39 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Editorial Redesign of Result Pages
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+### What
+Strip down the text-heavy result pages to a spacious, modern newspaper aesthetic. Remove footers, remove the rent cross-sell banner (rental income is already displayed), and dramatically reduce text density.
 
 ### Changes
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+**1. `src/pages/SellResult.tsx` — Spacious editorial overhaul**
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+- **Remove Footer** import and usage (lines 4, 443, 482)
+- **Remove CrossSellBanner** import and the entire cross-sell section (lines 17, 476-478)
+- **AIAnalysisSection** — Truncate to first paragraph only with a "Read more" toggle. Add a large drop-cap on the first letter. More whitespace (`py-12 md:py-16`)
+- **MarketTrendsSection** — Remove the wall of text. Keep only the chart with a one-line summary stat above it. Full-width chart, generous padding
+- **ProfessionalSpotlight** — Simplify: remove the long services grid and blockquote. Keep avatar, name, tagline, rating, and two buttons. Tighter, cleaner card
+- **PropertySummaryCard** — Increase spacing between cells, larger values, remove the border-heavy grid look. Use a cleaner horizontal scroll on mobile
+- **ValuationResultCard** — More breathing room: larger type for the price range, remove the icon clutter, let the numbers speak
+- **ValuationHero** — Simplify: remove the placeholder image panel. Single centered section with address and price. Minimal buttons
+- **FeedbackSection** — Keep but add more top margin for separation
+- **ValuationDisclaimer** — Keep, add generous top padding
 
-**2. Floating agency logos treatment**
+**2. `src/pages/RentResult.tsx` — Same treatment**
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+- Remove Footer import and usage
+- Remove CrossSellBanner import and usage
+- Keep reference code badge and card reveal
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
+**3. General styling principles across both files**
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
+- Replace `border-b border-border` section dividers with whitespace (`py-12 md:py-16`) and occasional thin hairlines
+- Increase font sizes for key numbers
+- Reduce paragraph text — one paragraph max per section, not three
+- More `max-w-2xl mx-auto` centering for text blocks
 
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Files Modified
+- `src/pages/SellResult.tsx`
+- `src/pages/RentResult.tsx`
 
