@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PROPERTIES = [
@@ -72,6 +73,7 @@ const wrap = (min: number, max: number, v: number) => {
 };
 
 const PropertyShowcaseCarousel: React.FC = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -181,10 +183,27 @@ const PropertyShowcaseCarousel: React.FC = () => {
             const isPrev = property.status === "prev";
             const isNext = property.status === "next";
 
+            const [cityName, province] = property.city.split(", ");
+            const handleCardClick = () => {
+              if (!isActive) return;
+              navigate("/sell/valuation", {
+                state: {
+                  addressData: {
+                    city: cityName,
+                    province: province || "",
+                    country: "Spain",
+                    streetAddress: "",
+                    urbanization: "",
+                  },
+                },
+              });
+            };
+
             return (
               <motion.div
                 key={property.id}
-                className="absolute inset-0"
+                className={cn("absolute inset-0", isActive && "cursor-pointer")}
+                onClick={handleCardClick}
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
                 animate={{
                   opacity: isActive ? 1 : isPrev || isNext ? 0.3 : 0,
@@ -217,8 +236,14 @@ const PropertyShowcaseCarousel: React.FC = () => {
                           {property.price}
                         </p>
                       </div>
-                      <div className="bg-card/10 backdrop-blur-sm border border-card/20 px-2.5 py-1 md:px-3 md:py-1.5">
-                        <p className="text-[0.65rem] md:text-xs font-medium text-card">{property.propertyType}</p>
+                      <div className="flex items-center gap-2">
+                        <div className="bg-card/10 backdrop-blur-sm border border-card/20 px-2.5 py-1 md:px-3 md:py-1.5">
+                          <p className="text-[0.65rem] md:text-xs font-medium text-card">{property.propertyType}</p>
+                        </div>
+                        <div className="bg-gold/90 backdrop-blur-sm px-2.5 py-1 md:px-3 md:py-1.5 flex items-center gap-1 hover:bg-gold transition-colors">
+                          <p className="text-[0.65rem] md:text-xs font-semibold text-primary">Get Valuation</p>
+                          <ArrowRight size={10} className="text-primary" />
+                        </div>
                       </div>
                     </div>
                   </motion.div>
