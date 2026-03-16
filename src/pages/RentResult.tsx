@@ -13,6 +13,21 @@ import { Copy, Check as CheckIcon } from "lucide-react";
 const fmt = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
+const RefCodeBadge: React.FC<{ refCode: string }> = ({ refCode }) => {
+  const [copied, setCopied] = React.useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(refCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button onClick={handleCopy} className="inline-flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-md font-mono text-sm font-semibold text-foreground hover:bg-muted/80 transition-colors">
+      {refCode}
+      {copied ? <CheckIcon size={12} className="text-accent" /> : <Copy size={12} className="text-muted-foreground" />}
+    </button>
+  );
+};
+
 const RentResult: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

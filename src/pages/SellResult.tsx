@@ -51,6 +51,24 @@ const MOCK_SERVICES = [
 
 const fmt = (n: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
+const RefCodeBadge: React.FC<{ refCode: string }> = ({ refCode }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(refCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="flex items-center justify-center gap-3 py-4 border-b border-border">
+      <p className="text-xs text-muted-foreground">Return to this valuation anytime with reference code</p>
+      <button onClick={handleCopy} className="inline-flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-md font-mono text-sm font-semibold text-foreground hover:bg-muted/80 transition-colors">
+        {refCode}
+        {copied ? <CheckIcon size={12} className="text-accent" /> : <Copy size={12} className="text-muted-foreground" />}
+      </button>
+    </div>
+  );
+};
+
 // ── Inline Sub-Components ──
 
 const DataCell: React.FC<{ icon: React.ReactNode; label: string; value: string | number }> = ({ icon, label, value }) => (
