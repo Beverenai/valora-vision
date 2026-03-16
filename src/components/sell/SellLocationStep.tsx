@@ -31,7 +31,7 @@ const SellLocationStep: React.FC<SellLocationStepProps> = ({ formData, onChange 
         <Label className="text-sm font-medium text-foreground">
           Property Address <span className="text-destructive">*</span>
         </Label>
-        <MapboxAddressInput
+        <GoogleAddressInput
           addressData={addressData}
           onChange={(field, value) => onChange(field as keyof SellValuationData, value)}
         />
