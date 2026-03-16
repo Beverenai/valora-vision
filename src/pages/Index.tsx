@@ -175,9 +175,7 @@ const Index = () => {
           ref={heroRef}
           className="min-h-[85vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
         >
-          <div className="flex flex-col items-center text-center gap-4 mb-2">
-            <SectionLabel>Your Property Valuation</SectionLabel>
-            <hr className="w-[60px] border-border my-2" />
+          <div className="flex flex-col items-center text-center gap-4 mb-2 pt-6 md:pt-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={valuationType}
@@ -187,6 +185,15 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center"
               >
+                <span
+                  className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide mb-4 transition-colors duration-300 ${
+                    isSell
+                      ? "bg-[hsl(var(--terracotta-light))] text-primary"
+                      : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]"
+                  }`}
+                >
+                  {isSell ? "Free Property Valuation" : "Free Rental Estimate"}
+                </span>
                 <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
                   {isSell ? (
                     <>What is your property<br />in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?</>
