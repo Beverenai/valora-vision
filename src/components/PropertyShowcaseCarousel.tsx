@@ -73,6 +73,7 @@ const wrap = (min: number, max: number, v: number) => {
 };
 
 const PropertyShowcaseCarousel: React.FC = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
