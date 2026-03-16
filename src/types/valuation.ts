@@ -79,6 +79,8 @@ export interface SellValuationData {
   province: string;
   country: string;
   complex?: string;
+  latitude?: number;
+  longitude?: number;
 
   // Property details
   propertyCategory: string;
