@@ -76,7 +76,7 @@ const GoogleAddressInput: React.FC<GoogleAddressInputProps> = ({
   onLocationConfirmed,
   onPhaseChange,
 }) => {
-  const token = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
+  const token = GOOGLE_MAPS_API_KEY;
   const [phase, setPhaseInternal] = useState<"search" | "verify">("search");
 
   const setPhase = useCallback((newPhase: "search" | "verify") => {
