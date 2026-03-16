@@ -393,31 +393,31 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
               perspective: "800px",
             }}
           >
-            {/* Right strip flies RIGHT and curls */}
+            {/* Left strip flies LEFT and curls */}
             <motion.div
-              className="absolute rounded-r-2xl z-20 overflow-hidden"
+              className="absolute rounded-l-2xl z-20 overflow-hidden"
               style={{
                 width: "54px",
                 height: "480px",
                 background: foilGradient,
-                right: "calc(50% - 160px)",
+                left: "calc(50% - 160px)",
                 top: "calc(50% - 240px)",
                 transformStyle: "preserve-3d",
                 willChange: "transform",
               }}
               initial={{ x: 0, opacity: 1, rotateY: 0 }}
-              animate={{ x: 300, opacity: 0, rotateY: 45, scaleY: 0.9 }}
+              animate={{ x: -300, opacity: 0, rotateY: -45, scaleY: 0.9 }}
               transition={{ duration: 0.5, ease: "easeIn" }}
             />
 
             {/* Main wrapper stays briefly */}
             <motion.div
-              className="absolute rounded-l-2xl z-10 overflow-hidden"
+              className="absolute rounded-r-2xl z-10 overflow-hidden"
               style={{
                 width: "306px",
                 height: "480px",
                 background: foilGradient,
-                left: "calc(50% - 160px)",
+                right: "calc(50% - 160px)",
                 top: "calc(50% - 240px)",
                 transformStyle: "preserve-3d",
                 willChange: "transform",
