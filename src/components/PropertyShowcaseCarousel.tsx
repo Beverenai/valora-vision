@@ -79,7 +79,7 @@ const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ acc
   return (
     <div className="flex flex-col md:grid md:grid-cols-2 gap-[1px] bg-border border border-border rounded-2xl overflow-hidden mx-2 md:mx-0">
       {/* City/Area Labels */}
-      <div className="bg-primary p-5 md:p-10 flex flex-col justify-between relative overflow-hidden">
+      <div className={cn("p-5 md:p-10 flex flex-col justify-between relative overflow-hidden", isSell ? "bg-primary" : "bg-[hsl(var(--rent-foreground))]")}>
         <div>
           <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2 md:mb-4">
             Recent Valuations
