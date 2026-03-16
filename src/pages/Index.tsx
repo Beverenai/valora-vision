@@ -336,7 +336,7 @@ const Index = () => {
       </section>
 
       {/* ═══════════ RECENT VALUATIONS ═══════════ */}
-      <section className="w-full py-20 md:py-32 bg-secondary/50">
+      <section className="w-full py-14 md:py-32 bg-secondary/50">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
