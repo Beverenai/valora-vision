@@ -293,18 +293,47 @@ const SellValuation: React.FC = () => {
                 </div>
 
                 {/* Barcode */}
-                <div className="px-3 pb-3">
-                  <div className="relative h-[30px] md:h-[40px] w-full">
-                    <div
-                      className="h-full w-full"
-                      style={{
-                        background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)`,
-                      }}
-                    />
-                    <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
-                      VALORACASA
-                    </p>
+                {/* Step indicator */}
+                <div className="px-4 pb-4 pt-2">
+                  <div className="flex items-center justify-between">
+                    {SELL_STEPS.map((step, i) => {
+                      const isCompleted = i < currentStep;
+                      const isActive = i === currentStep;
+                      const isLast = i === SELL_STEPS.length - 1;
+                      return (
+                        <React.Fragment key={step.name}>
+                          <div className="flex flex-col items-center gap-1">
+                            <div
+                              className={`flex items-center justify-center rounded-full transition-all duration-300 ${
+                                isActive
+                                  ? "w-7 h-7 bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.4)]"
+                                  : isCompleted
+                                  ? "w-6 h-6 bg-primary/80"
+                                  : "w-6 h-6 bg-foreground/10"
+                              }`}
+                            >
+                              {isCompleted ? (
+                                <Check size={12} className="text-primary-foreground" />
+                              ) : (
+                                <span className={`text-[10px] font-semibold ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`}>
+                                  {i + 1}
+                                </span>
+                              )}
+                            </div>
+                            <span className={`text-[9px] font-medium tracking-wide uppercase ${isActive ? "text-foreground" : isCompleted ? "text-foreground/60" : "text-muted-foreground/50"}`}>
+                              {step.name}
+                            </span>
+                          </div>
+                          {!isLast && (
+                            <div className={`h-px flex-1 mx-1 -mt-4 transition-colors duration-300 ${isCompleted ? "bg-primary/40" : "bg-foreground/10"}`} />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                   </div>
+                  <p className="text-center text-[0.5rem] tracking-[3px] text-foreground/40 mt-2 uppercase">
+                    ValoraCasa
+                  </p>
                 </div>
               </div>
 
