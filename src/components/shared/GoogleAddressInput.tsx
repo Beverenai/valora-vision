@@ -29,7 +29,7 @@ interface Suggestion {
 let optionsSet = false;
 function ensureOptions() {
   if (!optionsSet) {
-    setOptions({ apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "" });
+    setOptions({ key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "" });
     optionsSet = true;
   }
 }
