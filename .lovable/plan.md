@@ -1,56 +1,28 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Restore ValuationTicketCard as Hero, Embed GoogleAddressInput Inside It
 
 ### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+The last change replaced the `ValuationTicketCard` hero with a raw `GoogleAddressInput` + plain text. The card IS the signature hero element and must remain.
+
+### Solution
+Restore the `ValuationTicketCard` in "input" mode as the hero centerpiece, but replace its internal plain `<input>` with the `GoogleAddressInput` component so address autocomplete works directly inside the card.
 
 ### Changes
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+**`src/pages/Index.tsx`**:
+- Restore `ValuationTicketCard` as the hero element (mode="input")
+- Remove the raw `GoogleAddressInput` and plain text hero
+- Pass `onContinue` that navigates to `/sell/valuation` with address data
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**`src/components/ValuationTicketCard.tsx`**:
+- In the "input" mode section (lines 260-289), replace the plain `<input>` with `GoogleAddressInput`
+- Accept new props: `addressData` object and `onAddressFieldChange` callback (for the Google component's `onChange`)
+- When `onLocationConfirmed` fires inside the card, call the existing `onContinue` prop
+- Remove the old `addressValue`/`onAddressChange` plain-text props (or keep as fallback)
 
-**2. Floating agency logos treatment**
-
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
-
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
-
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Result
+- Hero shows the beautiful ticket card with 3D tilt, hero image, accent circles
+- Inside the card, users get full Google autocomplete → map verify → confirm
+- On confirm, navigates to `/sell/valuation` with pre-filled address data, starting at step 1
 
