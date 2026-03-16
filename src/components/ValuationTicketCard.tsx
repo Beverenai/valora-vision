@@ -31,8 +31,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   onShare,
   onDownload,
 }) => {
-  const accentHsl = accentType === "sell" ? "hsl(var(--gold))" : "hsl(var(--teal))";
-  const accentClass = accentType === "sell" ? "bg-gold" : "bg-teal";
+  const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
+  const accentClass = accentType === "sell" ? "bg-primary" : "bg-[hsl(var(--success))]";
 
   return (
     <div className="flex items-center justify-center px-4 py-8 md:py-12">
