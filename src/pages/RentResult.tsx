@@ -86,7 +86,6 @@ const RentResult: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="flex items-center justify-center py-32">
           <div className="animate-pulse text-muted-foreground">Loading your estimate...</div>
         </div>
