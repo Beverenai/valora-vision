@@ -1,64 +1,56 @@
 
 
-## Plan: Redesign "How It Works" — 2 Steps + Report Preview as Step 3
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### Concept
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-Replace the current text-only "How It Works" section (3 steps) with a visually rich design inspired by the provided HTML. Steps 1 and 2 show mini interactive previews (address input mockup, property details pills). Step 3 is replaced by the existing "See What You'll Receive" flippable card section, merging the two sections into one cohesive flow.
+### Changes
 
-### Changes — `src/pages/Index.tsx`
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**1. Update `HOW_STEPS` data** — reduce to 2 entries (remove step 03).
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**2. Replace the "How It Works" section (lines 260–307)** with a new design:
-- Keep the header (SectionLabel + title + subtitle) with existing La Sala styling
-- Vertical timeline connector line between steps (thin 1px border-border)
-- Each step card:
-  - Large `01`/`02` number in light weight, faded color
-  - Icon circle (terracotta/rent-aware) with SVG icons (map pin for step 1, sliders for step 2)
-  - Title + description text
-  - Mini preview widget:
-    - Step 1: Fake address input bar with placeholder text + location pin icon
-    - Step 2: Pill badges showing "3 Beds", "2 Baths", "Size" like the HTML reference
-  - Card has subtle `bg-card` with light border on desktop, full-width on mobile
-
-**3. Merge "What You'll Receive" as Step 03:**
-- Remove the standalone "What You'll Receive" section (lines 311–364)
-- Add a third step card in the same timeline with number `03`, icon (sparkle/check), title "See what you'll receive"
-- Below the step text, render the existing `ValuationTicketCard` flippable showcase (reuse exact same props)
-- Keep the "Tap the card to see property details" hint
-
-**4. Mobile adaptations (390px viewport):**
-- Steps stack vertically, full-width cards
-- Timeline connector line runs down the left side
-- Step number + icon stay compact (smaller number font)
-- Mini preview widgets scale to full card width
-- ValuationTicketCard in step 3 renders at full width as it already does
-
-**5. Remove the now-redundant `SectionDivider` between the old How It Works and What You'll Receive sections.**
-
-### Visual Structure
+**2. Floating agency logos treatment**
 
 ```text
-Desktop:                          Mobile (390px):
-┌─────────────────────────┐       ┌──────────────────┐
-│  HOW IT WORKS           │       │ HOW IT WORKS     │
-│  Three Simple Steps     │       │ Three Simple...  │
-│                         │       │                  │
-│  01 ─── [card w/input]  │       │ 01               │
-│  │                      │       │ ┌──────────────┐ │
-│  02 ─── [card w/pills]  │       │ │ address bar  │ │
-│  │                      │       │ └──────────────┘ │
-│  03 ─── [ticket card]   │       │ 02               │
-│         ↻ Tap to flip   │       │ ┌──────────────┐ │
-└─────────────────────────┘       │ │ 3Bed 2Ba Size│ │
-                                  │ └──────────────┘ │
-                                  │ 03               │
-                                  │ [ValuationCard]  │
-                                  │ ↻ Tap to flip    │
-                                  └──────────────────┘
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
+
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
 
-### Files Modified
-- `src/pages/Index.tsx` — restructure How It Works + merge What You'll Receive
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
+
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 

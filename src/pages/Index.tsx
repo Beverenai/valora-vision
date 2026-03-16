@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Star, RotateCcw } from "lucide-react";
+import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
@@ -21,7 +21,6 @@ const AGENCIES = [
 const HOW_STEPS = [
   { num: "01", title: "Enter your address", desc: "Start typing and select your property from the suggestions." },
   { num: "02", title: "Tell us about your property", desc: "Add bedrooms, bathrooms, size and key features." },
-  { num: "03", title: "Get your valuation", desc: "Receive a market estimate based on real data in seconds." },
 ];
 
 const REPORT_FEATURES_SELL = [
@@ -257,9 +256,9 @@ const Index = () => {
 
         <SectionDivider />
 
-        {/* ═══════════ HOW IT WORKS ═══════════ */}
+        {/* ═══════════ HOW IT WORKS — 3 Steps Timeline ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -276,89 +275,160 @@ const Index = () => {
               </p>
             </motion.div>
 
-            <div className="space-y-0">
-              {HOW_STEPS.map((step, i) => (
-                <motion.div
-                  key={step.num}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.15 }}
-                  className={cn(
-                    "flex items-start gap-6 md:gap-10 py-8 md:py-12",
-                    i < HOW_STEPS.length - 1 && "border-b border-border"
-                  )}
-                >
-                  <span className="text-5xl md:text-7xl font-extrabold text-border leading-none shrink-0 -mt-1">
-                    {step.num}
-                  </span>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                      {step.title}
-                    </h3>
-                    <p className="text-muted-foreground mt-2 text-base md:text-lg leading-relaxed">
-                      {step.desc}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+            {/* Timeline */}
+            <div className="relative">
+              {/* Vertical connector line */}
+              <div className="absolute left-[27px] md:left-[39px] top-0 bottom-0 w-px bg-border" />
 
-        <SectionDivider />
-
-        {/* ═══════════ WHAT YOU GET — Flippable Card ═══════════ */}
-        <section className="w-full py-8 md:py-20 px-5 md:px-8 bg-secondary/50">
-          <div className="max-w-[1200px] mx-auto flex flex-col items-center text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <SectionLabel>Your Report</SectionLabel>
-              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
-                See What You'll Receive
-              </h2>
-              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4 max-w-xl mx-auto leading-relaxed">
-                A beautifully detailed valuation card with all the key data about your property — ready to share.
-              </p>
-            </motion.div>
-
-            <AnimatePresence mode="wait">
+              {/* Step 01 */}
               <motion.div
-                key={valuationType}
-                initial={{ opacity: 0, rotateY: 20 }}
-                animate={{ opacity: 1, rotateY: 0 }}
-                exit={{ opacity: 0, rotateY: -20 }}
-                transition={{ duration: 0.4 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="relative flex gap-5 md:gap-8 pb-8 md:pb-14"
               >
-                <ValuationTicketCard
-                  address="Calle Sierra Blanca 12"
-                  city="Marbella"
-                  estimatedValue={showcaseData.estimatedValue}
-                  secondaryValue={showcaseData.secondaryValue}
-                  propertyType="Villa"
-                  leadId="a1b2c3d4e5f6"
-                  headline={showcaseData.headline}
-                  subtitle={showcaseData.subtitle}
-                  summaryText={showcaseData.summaryText}
-                  accentType={valuationType}
-                  size="hero"
-                  flippable
-                  bedrooms={4}
-                  bathrooms={3}
-                  builtSize="350 m²"
-                  plotSize="1,200 m²"
-                  condition="Excellent"
-                />
+                {/* Number + icon */}
+                <div className="flex flex-col items-center shrink-0 z-10">
+                  <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">01</span>
+                  <div className={cn(
+                    "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
+                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
+                  )}>
+                    <MapPin className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                  </div>
+                </div>
+                {/* Content */}
+                <div className="flex-1 pt-1">
+                  <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
+                    Enter your address
+                  </h3>
+                  <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
+                    Start typing and select your property from the suggestions.
+                  </p>
+                  {/* Mini preview: fake address input */}
+                  <div className="mt-4 rounded-xl border border-border bg-card p-3 md:p-4 max-w-sm">
+                    <div className="flex items-center gap-2.5 rounded-lg bg-secondary/70 px-3 py-2.5">
+                      <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm text-muted-foreground/60 truncate">Calle Sierra Blanca 12, Marbella…</span>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
-            </AnimatePresence>
 
-            <div className="flex items-center gap-2 text-muted-foreground/40 text-sm -mt-2">
-              <RotateCcw size={14} />
-              <span>Tap the card to see property details</span>
+              {/* Step 02 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="relative flex gap-5 md:gap-8 pb-8 md:pb-14"
+              >
+                <div className="flex flex-col items-center shrink-0 z-10">
+                  <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">02</span>
+                  <div className={cn(
+                    "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
+                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
+                  )}>
+                    <SlidersHorizontal className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                  </div>
+                </div>
+                <div className="flex-1 pt-1">
+                  <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
+                    Tell us about your property
+                  </h3>
+                  <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
+                    Add bedrooms, bathrooms, size and key features.
+                  </p>
+                  {/* Mini preview: property pills */}
+                  <div className="mt-4 rounded-xl border border-border bg-card p-3 md:p-4 max-w-sm">
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { icon: BedDouble, label: "3 Beds" },
+                        { icon: Bath, label: "2 Baths" },
+                        { icon: Maximize, label: "Size" },
+                      ].map((pill) => (
+                        <span
+                          key={pill.label}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium",
+                            isSell
+                              ? "bg-[hsl(var(--terracotta-light))] text-primary"
+                              : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]"
+                          )}
+                        >
+                          <pill.icon className="h-3.5 w-3.5" />
+                          {pill.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Step 03 — Valuation Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="relative flex gap-5 md:gap-8"
+              >
+                <div className="flex flex-col items-center shrink-0 z-10">
+                  <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">03</span>
+                  <div className={cn(
+                    "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
+                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
+                  )}>
+                    <Sparkles className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                  </div>
+                </div>
+                <div className="flex-1 pt-1">
+                  <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
+                    See what you'll receive
+                  </h3>
+                  <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
+                    A beautifully detailed valuation card with all the key data — ready to share.
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Flippable showcase card below step 3 */}
+            <div className="mt-6 md:mt-10 flex flex-col items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={valuationType}
+                  initial={{ opacity: 0, rotateY: 20 }}
+                  animate={{ opacity: 1, rotateY: 0 }}
+                  exit={{ opacity: 0, rotateY: -20 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <ValuationTicketCard
+                    address="Calle Sierra Blanca 12"
+                    city="Marbella"
+                    estimatedValue={showcaseData.estimatedValue}
+                    secondaryValue={showcaseData.secondaryValue}
+                    propertyType="Villa"
+                    leadId="a1b2c3d4e5f6"
+                    headline={showcaseData.headline}
+                    subtitle={showcaseData.subtitle}
+                    summaryText={showcaseData.summaryText}
+                    accentType={valuationType}
+                    size="hero"
+                    flippable
+                    bedrooms={4}
+                    bathrooms={3}
+                    builtSize="350 m²"
+                    plotSize="1,200 m²"
+                    condition="Excellent"
+                  />
+                </motion.div>
+              </AnimatePresence>
+              <div className="flex items-center gap-2 text-muted-foreground/40 text-sm -mt-2">
+                <RotateCcw size={14} />
+                <span>Tap the card to see property details</span>
+              </div>
             </div>
           </div>
         </section>
