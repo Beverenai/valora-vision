@@ -364,7 +364,9 @@ interface LeadData {
   bathrooms: number | null; orientation: string | null; condition: string | null;
   views: string | null; year_built: number | null; energy_certificate: string | null;
   estimated_value: number | null; price_range_low: number | null; price_range_high: number | null;
+  price_per_sqm: number | null;
   monthly_rental_estimate: number | null; analysis: string | null; market_trends: string | null; features: string | null;
+  comparable_properties: any[] | null; status: string | null;
 }
 
 const SellResult: React.FC = () => {
@@ -379,31 +381,47 @@ const SellResult: React.FC = () => {
 
   useEffect(() => {
     if (!id) { navigate("/sell"); return; }
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
     const fetchLead = async () => {
       const { data, error } = await supabase
         .from("leads_sell")
-        .select("id, address, city, property_type, built_size_sqm, plot_size_sqm, bedrooms, bathrooms, orientation, condition, views, year_built, energy_certificate, estimated_value, price_range_low, price_range_high, monthly_rental_estimate, analysis, market_trends, features")
+        .select("id, address, city, property_type, built_size_sqm, plot_size_sqm, bedrooms, bathrooms, orientation, condition, views, year_built, energy_certificate, estimated_value, price_range_low, price_range_high, price_per_sqm, monthly_rental_estimate, analysis, market_trends, features, comparable_properties, status")
         .eq("id", id)
         .maybeSingle();
+      if (cancelled) return;
       if (error || !data) {
         toast({ title: "Not Found", description: "Valuation not found.", variant: "destructive" });
         navigate("/sell");
         return;
       }
-      setLead(data);
-      setLoading(false);
+      setLead(data as LeadData);
+
+      if (data.status === "processing" || data.status === "pending") {
+        // Poll every 2 seconds
+        pollTimer = setTimeout(fetchLead, 2000);
+      } else {
+        setLoading(false);
+      }
     };
     fetchLead();
+
+    return () => {
+      cancelled = true;
+      if (pollTimer) clearTimeout(pollTimer);
+    };
   }, [id, navigate, toast]);
 
   const builtSize = lead?.built_size_sqm || 200;
-  const basePricePerSqm = 4100;
-  const estimatedLow = lead?.price_range_low || Math.round(builtSize * basePricePerSqm * 0.9);
-  const estimatedHigh = lead?.price_range_high || Math.round(builtSize * basePricePerSqm * 1.1);
-  const monthlyRentalLow = lead?.monthly_rental_estimate || Math.round(estimatedLow * 0.004);
+  const estimatedValue = lead?.estimated_value || Math.round(builtSize * 3500);
+  const estimatedLow = lead?.price_range_low || Math.round(estimatedValue * 0.85);
+  const estimatedHigh = lead?.price_range_high || Math.round(estimatedValue * 1.15);
+  const monthlyRentalLow = lead?.monthly_rental_estimate || Math.round(estimatedValue * 0.004);
   const monthlyRentalHigh = Math.round(monthlyRentalLow * 1.5);
   const weeklyHighLow = Math.round(monthlyRentalLow * 0.85);
   const weeklyHighHigh = Math.round(monthlyRentalHigh * 0.75);
+  const comparableCount = (lead?.comparable_properties as any[])?.length || 0;
 
   const handleShare = () => {
     if (navigator.share) {
