@@ -69,10 +69,11 @@ const SealedWrapper: React.FC<{
   const tabColor = isSell ? "bg-primary" : "bg-[hsl(var(--rent))]";
   const embossedText = isSell ? "VALUED" : "ESTIMATED";
 
-  const gapY = useTransform(() => dragProgress * 30);
+  const topHalfY = useTransform(() => -dragProgress * 20);
+  const glowOpacity = useTransform(() => dragProgress * 2);
 
   return (
-    <div className="relative w-full max-w-[340px] sm:max-w-[380px] mx-auto" style={{ aspectRatio: "2/3" }}>
+    <div className="relative w-[340px] h-[510px] sm:w-[380px] sm:h-[570px] mx-auto">
       {/* Top half */}
       <motion.div
         className="absolute inset-x-0 top-0 bottom-[80%] z-20 overflow-hidden rounded-t-3xl"
