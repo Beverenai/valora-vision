@@ -164,6 +164,25 @@ serve(async (req) => {
       }
     }
 
+    // 2b. Find STR comparables for rent valuations
+    let strComparables: any[] = [];
+    if (!isSell && latitude && longitude) {
+      try {
+        const { data: strData, error: strError } = await supabase
+          .from("short_term_rentals")
+          .select("*")
+          .gte("scraped_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+          .eq("city", city || "")
+          .limit(15);
+
+        if (!strError && strData && strData.length > 0) {
+          strComparables = strData;
+        }
+      } catch (e) {
+        console.error("STR query error:", e);
+      }
+    }
+
     // 3. Calculate valuation
     if (isSell) {
       if (comparables.length > 0) {
