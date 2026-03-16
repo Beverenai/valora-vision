@@ -148,6 +148,7 @@ const Index = () => {
             estimatedValue=""
             leadId=""
             accentType="sell"
+            size="hero"
             addressData={addressData}
             onAddressFieldChange={handleAddressChange}
             onLocationConfirmed={handleGetValuation}
