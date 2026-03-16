@@ -290,7 +290,7 @@ const Index = () => {
       </div>
 
       {/* ═══════════ SECTION 2 — TRUSTED BY ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-20 bg-white">
+      <motion.section {...sectionReveal} className="w-full py-20 bg-white border-t border-[#E8E5E0]">
         <p className="text-xs tracking-[0.2em] text-[#BBB] text-center uppercase">
           Trusted by leading agencies
         </p>
