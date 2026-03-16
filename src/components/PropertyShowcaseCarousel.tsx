@@ -168,9 +168,9 @@ const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ acc
                   <div className="bg-card/10 backdrop-blur-sm border border-card/20 px-2.5 py-1 md:px-3 md:py-1.5">
                     <p className="text-[0.65rem] md:text-xs font-medium text-card">{activeProperty.propertyType}</p>
                   </div>
-                  <div className="bg-gold/90 backdrop-blur-sm px-2.5 py-1 md:px-3 md:py-1.5 flex items-center gap-1 hover:bg-gold transition-colors">
-                    <p className="text-[0.65rem] md:text-xs font-semibold text-primary">Get Valuation</p>
-                    <ArrowRight size={10} className="text-primary" />
+                  <div className={cn("backdrop-blur-sm px-2.5 py-1 md:px-3 md:py-1.5 flex items-center gap-1 transition-colors", isSell ? "bg-gold/90 hover:bg-gold" : "bg-emerald-500/90 hover:bg-emerald-600")}>
+                    <p className={cn("text-[0.65rem] md:text-xs font-semibold", isSell ? "text-primary" : "text-white")}>{isSell ? "Get Valuation" : "Get Estimate"}</p>
+                    <ArrowRight size={10} className={isSell ? "text-primary" : "text-white"} />
                   </div>
                 </div>
               </div>
