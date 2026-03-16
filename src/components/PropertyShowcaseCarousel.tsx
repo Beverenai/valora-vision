@@ -24,7 +24,12 @@ const wrap = (min: number, max: number, v: number) => {
   return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
 };
 
-const PropertyShowcaseCarousel: React.FC = () => {
+interface PropertyShowcaseCarouselProps {
+  accentType?: "sell" | "rent";
+}
+
+const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ accentType = "sell" }) => {
+  const isSell = accentType === "sell";
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
