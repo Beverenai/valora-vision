@@ -51,6 +51,8 @@ interface ValuationTicketCardProps {
   mode?: "input" | "compact" | "result" | "processing";
   processingProgress?: number;
   referenceCode?: string;
+  /* Map expanded state - card grows taller when map is visible */
+  mapExpanded?: boolean;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
