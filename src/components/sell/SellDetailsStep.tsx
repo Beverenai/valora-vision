@@ -33,8 +33,8 @@ const PillSelector: React.FC<{
           onClick={() => onChange(opt)}
           className={`min-w-[44px] h-[44px] px-4 rounded-full text-sm font-semibold transition-all duration-200 border ${
             value === opt
-              ? "bg-[hsl(var(--gold))] text-white border-[hsl(var(--gold))] shadow-md scale-105"
-              : "bg-card text-foreground border-border hover:border-[hsl(var(--gold)/0.5)]"
+              ? "bg-primary text-primary-foreground border-primary shadow-md scale-105"
+              : "bg-card text-foreground border-border hover:border-primary/50"
           }`}
         >
           {opt}
