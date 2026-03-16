@@ -455,7 +455,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       className={cn(cardClasses, "z-10")}
       style={{ transition: "opacity 0.4s ease", opacity: flipped ? 1 : 0, pointerEvents: flipped ? "auto" : "none" }}
     >
-      <div className="flex-1 flex flex-col p-5 md:p-6">
+      <div className="flex-1 flex flex-col p-5 md:p-6 overflow-y-auto">
         {/* Header */}
         <div className="flex items-center gap-2 mb-2">
           <MapPin size={14} className="text-primary" />
