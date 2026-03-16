@@ -97,7 +97,8 @@ const GoogleAddressInput: React.FC<GoogleAddressInputProps> = ({
   // Load Google Maps SDK
   useEffect(() => {
     if (!token) return;
-    googleLoaderInstance.load().then(() => {
+    const loader = getGoogleLoader();
+    loader.importLibrary("places").then(() => {
       autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
       geocoderRef.current = new google.maps.Geocoder();
       setGoogleReady(true);
