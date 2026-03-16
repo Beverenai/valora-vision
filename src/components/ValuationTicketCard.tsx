@@ -498,9 +498,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             "relative w-full group transition-all duration-500",
             flippable ? "cursor-pointer cursor-grab active:cursor-grabbing" : "",
             outerMaxWidth,
-            flippable
-              ? "h-[520px] md:h-[620px] lg:h-[680px]"
-              : mapExpanded
+            mapExpanded
                 ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
                 : size === "default"
                   ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
