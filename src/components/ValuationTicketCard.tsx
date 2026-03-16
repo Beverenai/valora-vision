@@ -51,6 +51,9 @@ interface ValuationTicketCardProps {
   mode?: "input" | "compact" | "result" | "processing";
   processingProgress?: number;
   referenceCode?: string;
+  /* Map expanded state - card grows taller when map is visible */
+  mapExpanded?: boolean;
+  onMapPhaseChange?: (phase: "search" | "verify") => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
@@ -101,6 +104,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   mode,
   processingProgress = 0,
   referenceCode,
+  mapExpanded = false,
+  onMapPhaseChange,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
@@ -199,7 +204,10 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       {/* Main Section */}
       <div className="flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15 overflow-hidden">
         {/* Hero Image */}
-        <div className="relative w-full min-h-[120px] max-h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink">
+        <div className={cn(
+          "relative w-full min-h-[120px] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink transition-all duration-500",
+          mapExpanded ? "max-h-[25%]" : "max-h-[42%]"
+        )}>
           <img
             src={heroImage}
             alt={propertyType || "Property"}
@@ -288,6 +296,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   addressData={addressData!}
                   onChange={onAddressFieldChange! as any}
                   onLocationConfirmed={onLocationConfirmed || handleContinue}
+                  onPhaseChange={onMapPhaseChange}
                 />
               </div>
             ) : (
@@ -446,9 +455,14 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onMouseLeave={resetTilt}
         onTouchMove={handleTouchMove}
         onTouchEnd={resetTilt}
-        className="relative w-full max-w-[340px] md:max-w-[520px] min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px] group cursor-grab active:cursor-grabbing"
+        className={cn(
+          "relative w-full max-w-[340px] md:max-w-[520px] group cursor-grab active:cursor-grabbing transition-all duration-500",
+          mapExpanded
+            ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
+            : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+        )}
         style={{
-          aspectRatio: "9/15",
+          aspectRatio: mapExpanded ? undefined : "9/15",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
           transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
           transformStyle: "preserve-3d",

@@ -19,6 +19,7 @@ interface GoogleAddressInputProps {
   addressData: AddressData;
   onChange: (field: keyof AddressData, value: string | number | undefined) => void;
   onLocationConfirmed?: () => void;
+  onPhaseChange?: (phase: "search" | "verify") => void;
 }
 
 interface Suggestion {
@@ -72,9 +73,15 @@ const GoogleAddressInput: React.FC<GoogleAddressInputProps> = ({
   addressData,
   onChange,
   onLocationConfirmed,
+  onPhaseChange,
 }) => {
   const token = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
-  const [phase, setPhase] = useState<"search" | "verify">("search");
+  const [phase, setPhaseInternal] = useState<"search" | "verify">("search");
+
+  const setPhase = useCallback((newPhase: "search" | "verify") => {
+    setPhaseInternal(newPhase);
+    onPhaseChange?.(newPhase);
+  }, [onPhaseChange]);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
