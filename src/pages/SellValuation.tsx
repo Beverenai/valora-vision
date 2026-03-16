@@ -371,16 +371,6 @@ const SellValuation: React.FC = () => {
         )}
       </main>
 
-      {!isSubmitting && (
-        <footer className="py-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Are you a real estate agent?{" "}
-            <Link to="/for-professionals" className="text-primary font-medium hover:underline">
-              Sign up here →
-            </Link>
-          </p>
-        </footer>
-      )}
     </div>
   );
 };
