@@ -226,20 +226,6 @@ const RentValuation: React.FC = () => {
                       <p className="text-xs text-muted-foreground">{formData.city}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {RENT_STEPS.map((step, i) => (
-                      <div
-                        key={step.name}
-                        className={`rounded-full transition-all duration-300 ${
-                          i === currentStep
-                            ? "bg-[hsl(var(--success))] w-5 h-2"
-                            : i < currentStep
-                            ? "bg-[hsl(var(--success))]/60 w-2 h-2"
-                            : "bg-foreground/20 w-2 h-2"
-                        }`}
-                      />
-                    ))}
-                  </div>
                 </div>
 
                 <div className="px-4 pt-4 pb-2">
