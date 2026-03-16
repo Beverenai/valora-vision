@@ -34,7 +34,7 @@ const SparkleParticle: React.FC<{ index: number; accentType: "sell" | "rent" }> 
       className="absolute rounded-full"
       style={{
         width: size, height: size, backgroundColor: color,
-        left: "85%", top: "50%",
+        left: "15%", top: "50%",
         boxShadow: `0 0 ${size + 2}px ${color}`,
         willChange: "transform",
       }}
