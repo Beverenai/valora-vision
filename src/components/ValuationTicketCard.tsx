@@ -121,6 +121,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   // Determine effective mode
   const isProcessing = mode === "processing";
   const isCompact = mode === "compact" || (!mode && compact);
+  const isLarge = size === "hero" || size === "showcase";
 
   const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined) && !isProcessing;
   const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
@@ -131,6 +132,27 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const heroImage = (propertyType && PROPERTY_IMAGES[propertyType]) || DEFAULT_IMAGE;
 
   const refCode = referenceCode || (leadId ? formatRefCode(leadId) : "VC-0000-0000");
+
+  // Size-dependent classes
+  const outerMaxWidth = isLarge
+    ? "max-w-[360px] md:max-w-[680px] lg:max-w-[800px]"
+    : "max-w-[360px] md:max-w-[500px]";
+  const stubWidth = isLarge ? "w-[50px] md:w-[60px] lg:w-[70px]" : "w-[50px]";
+  const mainPadding = isLarge ? "p-4 md:p-6 lg:p-8" : "p-3 md:p-5";
+  const heroImageMaxH = isLarge ? "max-h-[42%] md:max-h-[45%]" : "max-h-[42%]";
+  const titleSize = isLarge
+    ? "text-[2.2rem] md:text-[3rem] lg:text-[4rem]"
+    : "text-[2.2rem] md:text-[3.5rem]";
+  const cursiveSize = isLarge
+    ? "text-[2rem] md:text-[2.5rem] lg:text-[3rem]"
+    : "text-[2rem] md:text-[2.5rem]";
+  const resultCursiveSize = isLarge
+    ? "text-[1.8rem] md:text-[2.5rem] lg:text-[3.5rem]"
+    : "text-[1.8rem] md:text-[3rem]";
+  const priceSize = isLarge
+    ? "text-[1.6rem] md:text-[2.2rem] lg:text-[3rem]"
+    : "text-[1.6rem] md:text-[2.5rem]";
+  const barcodeHeight = isLarge ? "h-[35px] md:h-[55px] lg:h-[65px]" : "h-[35px] md:h-[55px]";
 
   // Rotate processing messages
   useEffect(() => {
