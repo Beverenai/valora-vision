@@ -192,43 +192,132 @@ const RentValuation: React.FC = () => {
     }
   };
 
-  const cardMode = isSubmitting ? "processing" : isExpanded ? "compact" : "input";
+  const accentHsl = "hsl(var(--success))";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-12">
-        {/* ── Card ── */}
-        <div
-          className="w-full transition-all duration-500 ease-out"
-          style={{
-            transform: isExpanded && !isSubmitting ? "scale(0.92)" : "scale(1)",
-            opacity: 1,
-          }}
-        >
-          {isSubmitting ? (
-            <ValuationTicketCard
-              address={formData.streetAddress || ""}
-              city={formData.city}
-              estimatedValue=""
-              propertyType={formData.propertyType || "Villa"}
-              leadId={submittedLeadId || "00000000"}
-              accentType="rent"
-              mode="processing"
-              processingProgress={simulatedProgress}
-              referenceCode={submittedLeadId ? formatRefCode(submittedLeadId) : undefined}
-            />
-          ) : isExpanded ? (
-            <ValuationTicketCard
-              address={formData.streetAddress || ""}
-              city={formData.city}
-              estimatedValue=""
-              propertyType="Villa"
-              leadId="a1b2c3d4e5f6"
-              accentType="rent"
-              addressValue={formData.streetAddress || formData.city}
-              mode="compact"
-            />
-          ) : (
+        {isSubmitting ? (
+          <ValuationTicketCard
+            address={formData.streetAddress || ""}
+            city={formData.city}
+            estimatedValue=""
+            propertyType={formData.propertyType || "Villa"}
+            leadId={submittedLeadId || "00000000"}
+            accentType="rent"
+            mode="processing"
+            processingProgress={simulatedProgress}
+            referenceCode={submittedLeadId ? formatRefCode(submittedLeadId) : undefined}
+          />
+        ) : isExpanded ? (
+          <div className="flex items-center justify-center w-full" style={{ perspective: "800px" }}>
+            <div className="relative w-full max-w-[380px] md:max-w-[520px] flex">
+              <div className="flex-1 flex flex-col bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-r-2 border-dashed border-foreground/15">
+                {/* Header band */}
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-foreground/10">
+                  <div className="w-8 h-8 rounded-full bg-[hsl(var(--success))] flex items-center justify-center shrink-0">
+                    <MapPin size={14} className="text-primary-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {formData.streetAddress || formData.city || "Your property"}
+                    </p>
+                    {formData.city && formData.streetAddress && (
+                      <p className="text-xs text-muted-foreground">{formData.city}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {RENT_STEPS.map((step, i) => (
+                      <div
+                        key={step.name}
+                        className={`rounded-full transition-all duration-300 ${
+                          i === currentStep
+                            ? "bg-[hsl(var(--success))] w-5 h-2"
+                            : i < currentStep
+                            ? "bg-[hsl(var(--success))]/60 w-2 h-2"
+                            : "bg-foreground/20 w-2 h-2"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-4 pt-4 pb-2">
+                  <h2 className="text-base font-semibold text-foreground">
+                    {RENT_STEPS[currentStep].label}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Step {currentStep + 1} of {RENT_STEPS.length}
+                  </p>
+                </div>
+
+                <div className="flex-1 px-4 pb-2 overflow-y-auto animate-fade-in">
+                  {renderStep()}
+                </div>
+
+                <div className="flex items-center justify-between px-4 py-3 border-t border-foreground/10">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleBack}
+                    className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <ArrowLeft size={16} />
+                    Back
+                  </Button>
+
+                  {isLastStep ? (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!isCurrentStepValid || isSubmitting}
+                      size="sm"
+                      className="gap-1.5"
+                    >
+                      Get My Free Rental Estimate
+                      <Check size={16} />
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleNextStep}
+                      disabled={!isCurrentStepValid}
+                      size="sm"
+                      className="gap-1.5"
+                    >
+                      Next
+                      <ArrowRight size={16} />
+                    </Button>
+                  )}
+                </div>
+
+                <div className="px-3 pb-3">
+                  <div className="relative h-[30px] md:h-[40px] w-full">
+                    <div
+                      className="h-full w-full"
+                      style={{
+                        background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)`,
+                      }}
+                    />
+                    <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
+                      VALORACASA
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex w-[50px] flex-col items-center justify-between py-4 bg-[hsl(36_9%_88%)] rounded-r-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                <ArrowDown size={16} className="text-foreground/60" />
+                <span
+                  className="font-heading text-xs font-bold uppercase tracking-[2px] text-foreground/80"
+                  style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+                >
+                  ValoraCasa
+                </span>
+                <span className="text-base text-foreground/60">⊕</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
             <ValuationTicketCard
               address=""
               estimatedValue=""
@@ -240,84 +329,10 @@ const RentValuation: React.FC = () => {
               onContinue={handleContinueFromCard}
               mode="input"
             />
-          )}
-        </div>
-
-        {/* ── Form panel ── */}
-        {!isSubmitting && (
-          <div
-            className="w-full max-w-lg mx-auto overflow-hidden transition-all duration-500 ease-out"
-            style={{
-              maxHeight: isExpanded ? "2000px" : "0px",
-              opacity: isExpanded ? 1 : 0,
-              transform: isExpanded ? "translateY(0)" : "translateY(-20px)",
-            }}
-          >
-            <div className="flex items-center justify-center gap-2 mb-6 mt-2">
-              {RENT_STEPS.map((step, i) => (
-                <div key={step.name} className="flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      i === currentStep
-                        ? "bg-primary w-6"
-                        : i < currentStep
-                        ? "bg-primary/60"
-                        : "bg-border"
-                    }`}
-                  />
-                </div>
-              ))}
-            </div>
-
-            <h2 className="text-lg font-semibold text-foreground text-center mb-1">
-              {RENT_STEPS[currentStep].label}
-            </h2>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Step {currentStep + 1} of {RENT_STEPS.length}
+            <p className="text-sm text-muted-foreground/60 tracking-wide mt-2 animate-fade-in">
+              12,400+ valuations · 100% free · 2 minutes
             </p>
-
-            <div className="bg-card rounded-2xl border border-border p-5 md:p-8 shadow-sm animate-fade-in">
-              {renderStep()}
-            </div>
-
-            <div className="flex items-center justify-between mt-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBack}
-                className="gap-1.5 text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft size={16} />
-                Back
-              </Button>
-
-              {isLastStep ? (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!isCurrentStepValid || isSubmitting}
-                  className="gap-1.5"
-                >
-                  Get My Free Rental Estimate
-                  <Check size={16} />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNextStep}
-                  disabled={!isCurrentStepValid}
-                  className="gap-1.5"
-                >
-                  Next
-                  <ArrowRight size={16} />
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {!isExpanded && !isSubmitting && (
-          <p className="text-sm text-muted-foreground/60 tracking-wide mt-2 animate-fade-in">
-            12,400+ valuations · 100% free · 2 minutes
-          </p>
+          </>
         )}
       </main>
 
