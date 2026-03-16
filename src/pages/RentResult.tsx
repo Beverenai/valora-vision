@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+
 import Footer from "@/components/Footer";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CardRevealWrapper from "@/components/shared/CardRevealWrapper";
@@ -86,7 +86,6 @@ const RentResult: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="flex items-center justify-center py-32">
           <div className="animate-pulse text-muted-foreground">Loading your estimate...</div>
         </div>
@@ -116,7 +115,6 @@ const RentResult: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <CardRevealWrapper accentType="rent" cardElement={cardElement} loading={loading}>
         <div className="max-w-[1400px] mx-auto border-x border-border">
           {/* Reference code badge */}
