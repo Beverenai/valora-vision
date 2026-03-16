@@ -304,7 +304,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 3 — HOW IT WORKS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#FAFAF7]">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#F5F3EE] border-t border-[#E8E5E0]">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-[#1A1A1A]">
             How it works
