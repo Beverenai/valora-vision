@@ -157,17 +157,6 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       priceSize: "text-[1.6rem] md:text-[2.5rem] lg:text-[3.5rem]",
       barcodeHeight: "h-[35px] md:h-[55px] lg:h-[70px]",
     },
-    showcase: {
-      outerMaxWidth: "max-w-[360px] md:max-w-[680px] lg:max-w-[880px]",
-      stubWidth: "w-[50px] md:w-[60px] lg:w-[75px]",
-      mainPadding: "p-3 md:p-6 lg:p-9",
-      heroImageMaxH: "max-h-[42%] md:max-h-[48%]",
-      titleSize: "text-[2.2rem] md:text-[3rem] lg:text-[4rem]",
-      cursiveSize: "text-[2rem] md:text-[2.5rem] lg:text-[3rem]",
-      resultCursiveSize: "text-[1.8rem] md:text-[2.8rem] lg:text-[3.5rem]",
-      priceSize: "text-[1.6rem] md:text-[2.2rem] lg:text-[3rem]",
-      barcodeHeight: "h-[35px] md:h-[55px] lg:h-[65px]",
-    },
   }[size];
 
   const { outerMaxWidth, stubWidth, mainPadding, heroImageMaxH, titleSize, cursiveSize, resultCursiveSize, priceSize, barcodeHeight } = sizeConfig;
