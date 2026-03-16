@@ -122,7 +122,7 @@ const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ acc
                         : "bg-transparent text-primary-foreground/50 border-primary-foreground/15 hover:border-primary-foreground/30 hover:text-primary-foreground/80"
                     )}
                   >
-                    <MapPin size={12} className={cn(isActive ? "text-gold" : "text-primary-foreground/30")} />
+                    <MapPin size={12} className={cn(isActive ? (isSell ? "text-gold" : "text-emerald-400") : "text-primary-foreground/30")} />
                     <span className={cn("text-xs font-medium", isActive ? "text-foreground" : "text-primary-foreground/50")}>
                       {property.city}
                     </span>
