@@ -70,8 +70,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           </svg>
 
           {/* Hero Image Area */}
-          <div className="relative w-full h-[45%] bg-primary rounded-[20px] overflow-hidden mb-6 shrink-0">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-navy-deep grayscale group-hover:grayscale-0 transition-all duration-500" />
+          <div className="relative w-full h-[45%] bg-foreground rounded-[20px] overflow-hidden mb-6 shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground/80 to-foreground/60 grayscale group-hover:grayscale-0 transition-all duration-500" />
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-primary-foreground/20 text-6xl font-heading font-bold">
                 {propertyType?.charAt(0).toUpperCase() || "P"}
