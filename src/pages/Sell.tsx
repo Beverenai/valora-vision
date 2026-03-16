@@ -105,7 +105,7 @@ const Sell = () => {
           {/* Address Input */}
           <div className="max-w-xl">
             <div className="bg-card/10 backdrop-blur-sm border border-primary-foreground/20 p-4">
-              <GoogleMapsAddressInput
+              <MapboxAddressInput
                 addressData={addressData}
                 onChange={handleAddressChange}
               />
