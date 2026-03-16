@@ -507,7 +507,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           style={{
             display: "grid",
             transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY + (flipped ? 180 : 0)}deg)`,
-            transition: isInteracting ? "transform 0.08s linear" : "transform 0.7s ease-in-out",
+            transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)",
             transformStyle: "preserve-3d",
             willChange: isInteracting ? "transform" : "auto",
           }}
