@@ -123,12 +123,6 @@ const REPORT_FEATURES = [
   },
 ];
 
-const RECENT_VALUATIONS = [
-  { location: "Nueva Andalucía", time: "2 min ago", price: "€3,850/m²", detail: "Villa · 4 bed · 280m²" },
-  { location: "Puerto Banús", time: "5 min ago", price: "€5,200/m²", detail: "Penthouse · 3 bed · 195m²" },
-  { location: "Estepona", time: "8 min ago", price: "€2,900/m²", detail: "Apartment · 2 bed · 110m²" },
-  { location: "Benahavís", time: "12 min ago", price: "€4,100/m²", detail: "Villa · 5 bed · 420m²" },
-];
 
 const TESTIMONIALS = [
   { quote: "We sold our villa in Marbella for 12% above the initial asking price thanks to the accurate valuation.", name: "James & Sarah T.", location: "Marbella" },
