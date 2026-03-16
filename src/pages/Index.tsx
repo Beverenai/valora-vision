@@ -125,7 +125,7 @@ const Index = () => {
           <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
             Free property valuation
           </span>
-          <h1 className="font-['DM_Serif_Display'] text-4xl md:text-7xl text-foreground leading-[1.1]">
+          <h1 className="font-['DM_Serif_Display'] text-3xl md:text-7xl text-foreground leading-[1.1]">
             What is your property
             <br />
             in Spain <em className="italic">really</em> worth?
