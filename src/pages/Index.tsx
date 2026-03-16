@@ -558,31 +558,6 @@ const Index = () => {
 
       </div>
 
-      {/* ═══════════ STICKY MOBILE CTA ═══════════ */}
-      <AnimatePresence>
-        {showStickyCta && (
-          <motion.div
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            exit={{ y: 100 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border"
-          >
-            <div className="px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-              <p className="text-[11px] text-muted-foreground mb-1.5">
-                {isSell ? "Get your free property valuation" : "Get your free rental estimate"}
-              </p>
-              <button
-                onClick={handleGetValuation}
-                className="w-full rounded-full py-4 bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-              >
-                {isSell ? "Get Your Free Valuation" : "Get Your Rental Estimate"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
