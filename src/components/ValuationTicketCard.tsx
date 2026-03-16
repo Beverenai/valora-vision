@@ -455,7 +455,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       className={cn(cardClasses, "z-10")}
       style={{ transition: "opacity 0.4s ease", opacity: flipped ? 1 : 0, pointerEvents: flipped ? "auto" : "none" }}
     >
-      <div className="flex-1 flex flex-col p-5 md:p-6">
+      <div className="flex-1 flex flex-col p-5 md:p-6 overflow-y-auto">
         {/* Header */}
         <div className="flex items-center gap-2 mb-2">
           <MapPin size={14} className="text-primary" />
@@ -512,16 +512,18 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             "relative w-full group",
             flippable && "cursor-pointer",
             outerMaxWidth,
-            mapExpanded
-              ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
-              : size === "default"
-                ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
-                : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
+            flippable
+              ? "h-[520px] md:h-[620px] lg:h-[680px]"
+              : mapExpanded
+                ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
+                : size === "default"
+                  ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+                  : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
           )}
           style={{ display: "grid" }}
         >
-          <div style={{ gridArea: "1/1" }}>{frontFace}</div>
-          {backFace && <div style={{ gridArea: "1/1" }}>{backFace}</div>}
+          <div style={{ gridArea: "1/1" }} className={cn(flippable && "h-full overflow-hidden")}>{frontFace}</div>
+          {backFace && <div style={{ gridArea: "1/1" }} className="h-full overflow-hidden">{backFace}</div>}
         </div>
       </div>
     );
