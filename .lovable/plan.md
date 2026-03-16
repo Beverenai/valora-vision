@@ -1,32 +1,56 @@
 
 
-## Plan: Fix showcase card — 3D tilt, consistent sizing, shadow, remove back-face barcode
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### Problems identified
-1. **No 3D tilt on showcase card** — The result/showcase mode (lines 505-529) uses a flat grid layout with no `perspective`, no mouse/touch handlers, and no `preserve-3d`. Only the input-mode card (lines 532-555) gets the 3D tilt interaction.
-2. **Card size changes on flip** — Fixed heights are applied but both faces need `h-full` enforcement on their inner content.
-3. **Shadow quality** — The current shadow is basic. Needs a layered, elevated shadow.
-4. **Barcode on back face** — Lines 485-490 render a barcode on the back face that should be removed (it's already on the front).
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Changes in `src/components/ValuationTicketCard.tsx`
+### Changes
 
-**1. Enable 3D tilt for showcase/result cards (lines 505-529)**
-- Wrap the showcase card in the same `perspective: 800px` container
-- Attach `onMouseMove`, `onMouseLeave`, `onTouchMove`, `onTouchEnd` handlers
-- Apply the same `rotateX/rotateY` transform with `preserve-3d`
-- Add `cursor-grab` / `cursor-pointer` classes
-- Keep the grid overlay for front/back face stacking
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**2. Upgrade shadow**
-- Replace `shadow-[0_20px_50px_rgba(0,0,0,0.15)]` in `cardClasses` (line 245) with a richer layered shadow: `shadow-[0_8px_30px_rgba(0,0,0,0.12),0_30px_60px_rgba(0,0,0,0.15)]`
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**3. Remove barcode from back face (lines 484-490)**
-- Delete the barcode div and ref code text from the back face entirely
-- Let the detail grid use `flex-1` to fill the freed space naturally
+**2. Floating agency logos treatment**
 
-**4. Ensure both faces fill fixed height**
-- Both face wrappers already have `h-full overflow-hidden` — verify the inner flex containers use `h-full` so content stretches properly within the fixed card
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-### File
-- `src/components/ValuationTicketCard.tsx`
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
+
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
+
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 

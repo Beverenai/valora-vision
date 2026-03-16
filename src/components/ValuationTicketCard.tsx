@@ -242,7 +242,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   /* ── Card dimensions shared by both faces ── */
   const cardClasses = cn(
-    "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+    "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.12),0_30px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3),0_30px_60px_rgba(0,0,0,0.5)]",
     hasInput
       ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
       : "overflow-hidden"
@@ -481,13 +481,6 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           ))}
         </div>
 
-        {/* Barcode */}
-        <div className="mt-auto relative h-[35px] w-full">
-          <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
-          <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
-            {refCode}
-          </p>
-        </div>
       </div>
 
       {/* Stub */}
@@ -501,16 +494,20 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     </div>
   ) : null;
 
-  /* For input mode, keep the 3D tilt. For result/showcase, use flat layout with opacity swap */
+  /* For both input and result/showcase modes, use 3D tilt */
   if (!hasInput) {
     return (
-      <div className="flex items-center justify-center px-4 py-2 md:py-4">
+      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
         <div
           ref={cardRef}
           onClick={handleCardClick}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={resetTilt}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={resetTilt}
           className={cn(
-            "relative w-full group",
-            flippable && "cursor-pointer",
+            "relative w-full group transition-all duration-500",
+            flippable ? "cursor-pointer cursor-grab active:cursor-grabbing" : "",
             outerMaxWidth,
             flippable
               ? "h-[520px] md:h-[620px] lg:h-[680px]"
@@ -520,7 +517,13 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
                   : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
           )}
-          style={{ display: "grid" }}
+          style={{
+            display: "grid",
+            transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+            transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
+            transformStyle: "preserve-3d",
+            willChange: isInteracting ? "transform" : "auto",
+          }}
         >
           <div style={{ gridArea: "1/1" }} className={cn(flippable && "h-full overflow-hidden")}>{frontFace}</div>
           {backFace && <div style={{ gridArea: "1/1" }} className="h-full overflow-hidden">{backFace}</div>}
