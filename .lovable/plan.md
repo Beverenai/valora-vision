@@ -1,37 +1,56 @@
 
 
-## Plan: Enforce Minimum 45-60 Second Wait on Valuations
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
 ### Problem
-Currently, the valuation result navigates as soon as the backend responds. If the API is fast, users see results in seconds, undermining perceived thoroughness.
-
-### Solution
-Record `Date.now()` when submission starts. When the API responds, calculate elapsed time. If less than 45 seconds, delay navigation until the minimum is reached. The progress animation already simulates ~60 seconds, so this aligns naturally.
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
 ### Changes
 
-**Files: `src/pages/SellValuation.tsx` and `src/pages/RentValuation.tsx`**
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-Same pattern in both:
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-1. Record `const startTime = Date.now()` when submission begins
-2. After API returns successfully, calculate `const elapsed = Date.now() - startTime`
-3. If `elapsed < 45000`, wait `45000 - elapsed` ms before setting progress to 100 and navigating
-4. During the wait, the existing progress simulation continues running (it already caps at 90% until manually set to 100)
+**2. Floating agency logos treatment**
 
-```typescript
-// After successful API response:
-const MIN_WAIT_MS = 45000;
-const elapsed = Date.now() - startTime;
-const remaining = Math.max(0, MIN_WAIT_MS - elapsed);
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-setTimeout(() => {
-  setSubmittedLeadId(leadId);
-  setSimulatedProgress(100);
-  stopProgressSimulation();
-  setTimeout(() => navigate(`/sell/result/${leadId}`), 600);
-}, remaining);
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
 
-No backend changes needed. The progress bar already animates toward 90% over ~60 seconds, so the minimum wait keeps the two in sync.
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
+
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 

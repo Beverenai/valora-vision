@@ -112,6 +112,7 @@ const SellValuation: React.FC = () => {
 
     setIsSubmitting(true);
     startProgressSimulation();
+    const startTime = Date.now();
 
     try {
       const bedroomsNum = formData.bedrooms === "8+" ? 8 : parseInt(formData.bedrooms) || null;
@@ -161,13 +162,18 @@ const SellValuation: React.FC = () => {
       const leadId = data?.lead_id;
       if (!leadId) throw new Error("No lead ID returned");
 
-      setSubmittedLeadId(leadId);
-      setSimulatedProgress(100);
-      stopProgressSimulation();
+      const MIN_WAIT_MS = 45000;
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, MIN_WAIT_MS - elapsed);
 
       setTimeout(() => {
-        navigate(`/sell/result/${leadId}`);
-      }, 600);
+        setSubmittedLeadId(leadId);
+        setSimulatedProgress(100);
+        stopProgressSimulation();
+        setTimeout(() => {
+          navigate(`/sell/result/${leadId}`);
+        }, 600);
+      }, remaining);
     } catch (error) {
       console.error("Failed to submit lead:", error);
       stopProgressSimulation();
