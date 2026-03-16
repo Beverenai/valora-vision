@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -64,7 +64,7 @@ const PROPERTIES = [
 
 const AUTO_PLAY_INTERVAL = 3500;
 const ITEM_HEIGHT = 52;
-const MOBILE_ITEM_HEIGHT = 48;
+const MOBILE_ITEM_HEIGHT = 46;
 
 const wrap = (min: number, max: number, v: number) => {
   const rangeSize = max - min;
@@ -111,17 +111,23 @@ const PropertyShowcaseCarousel: React.FC = () => {
     return "hidden";
   };
 
+  // Only render active + neighbors for performance
+  const visibleCards = useMemo(() => {
+    return PROPERTIES.map((p, i) => ({ ...p, index: i, status: getCardStatus(i) }))
+      .filter((p) => p.status !== "hidden");
+  }, [currentIndex]);
+
   const visibleCount = isMobile ? 4 : PROPERTIES.length;
 
   return (
-    <div className="flex flex-col md:grid md:grid-cols-2 gap-[1px] bg-border border border-border rounded-2xl overflow-hidden">
+    <div className="flex flex-col md:grid md:grid-cols-2 gap-[1px] bg-border border border-border rounded-2xl overflow-hidden mx-2 md:mx-0">
       {/* City/Area Labels */}
-      <div className="bg-primary p-6 md:p-10 flex flex-col justify-between relative overflow-hidden">
+      <div className="bg-primary p-5 md:p-10 flex flex-col justify-between relative overflow-hidden">
         <div>
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-3 md:mb-4">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2 md:mb-4">
             Recent Valuations
           </p>
-          <h3 className="font-heading text-xl md:text-3xl font-medium text-primary-foreground mb-4 md:mb-8">
+          <h3 className="font-heading text-lg md:text-3xl font-medium text-primary-foreground mb-3 md:mb-8">
             Trusted by property owners across Spain
           </h3>
         </div>
@@ -142,21 +148,21 @@ const PropertyShowcaseCarousel: React.FC = () => {
                   animate={{ y: wrappedDistance * itemHeight, opacity: Math.abs(wrappedDistance) > 2 ? 0 : 1, scale: isActive ? 1 : 0.95 }}
                   transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
                   className="absolute w-full"
-                  style={{ top: "50%", marginTop: -itemHeight / 2 }}
+                  style={{ top: "50%", marginTop: -itemHeight / 2, willChange: "transform" }}
                 >
                   <button
                     onClick={() => handleChipClick(index)}
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
                     className={cn(
-                      "relative flex items-center gap-3 w-full px-4 md:px-5 py-2.5 md:py-3 transition-all duration-500 text-left border",
+                      "relative flex items-center gap-2 md:gap-3 w-full px-3 md:px-5 py-2 md:py-3 transition-all duration-500 text-left border",
                       isActive
                         ? "bg-card text-foreground border-border"
                         : "bg-transparent text-primary-foreground/50 border-primary-foreground/15 hover:border-primary-foreground/30 hover:text-primary-foreground/80"
                     )}
                   >
-                    <MapPin size={14} className={cn(isActive ? "text-gold" : "text-primary-foreground/30")} />
-                    <span className={cn("text-xs md:text-sm font-medium transition-colors", isActive ? "text-foreground" : "text-primary-foreground/50")}>
+                    <MapPin size={12} className={cn(isActive ? "text-gold" : "text-primary-foreground/30")} />
+                    <span className={cn("text-xs font-medium transition-colors", isActive ? "text-foreground" : "text-primary-foreground/50")}>
                       {property.city}
                     </span>
                   </button>
@@ -168,13 +174,12 @@ const PropertyShowcaseCarousel: React.FC = () => {
       </div>
 
       {/* Right — Property Image + Price */}
-      <div className="relative bg-muted min-h-[300px] md:min-h-[500px] overflow-hidden">
+      <div className="relative bg-muted min-h-[250px] md:min-h-[450px] overflow-hidden">
         <AnimatePresence mode="popLayout">
-          {PROPERTIES.map((property, index) => {
-            const status = getCardStatus(index);
-            const isActive = status === "active";
-            const isPrev = status === "prev";
-            const isNext = status === "next";
+          {visibleCards.map((property) => {
+            const isActive = property.status === "active";
+            const isPrev = property.status === "prev";
+            const isNext = property.status === "next";
 
             return (
               <motion.div
@@ -190,32 +195,30 @@ const PropertyShowcaseCarousel: React.FC = () => {
                 exit={{ opacity: 0, y: -40, scale: 0.95 }}
                 transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
               >
-                {/* Background image */}
                 <div
                   className="absolute inset-0 bg-cover bg-center"
                   style={{ backgroundImage: `url(${property.image})` }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
 
-                {/* Price overlay */}
                 {isActive && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.4 }}
-                    className="absolute bottom-0 left-0 right-0 p-6 md:p-8"
+                    className="absolute bottom-0 left-0 right-0 p-5 md:p-8"
                   >
                     <div className="flex items-end justify-between">
                       <div>
-                        <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-1">
+                        <p className="text-[0.55rem] md:text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-1">
                           Estimated Value
                         </p>
-                        <p className="font-heading text-3xl md:text-4xl font-bold text-white">
+                        <p className="font-heading text-2xl md:text-4xl font-bold text-card">
                           {property.price}
                         </p>
                       </div>
-                      <div className="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5">
-                        <p className="text-xs font-medium text-white">{property.propertyType}</p>
+                      <div className="bg-card/10 backdrop-blur-sm border border-card/20 px-2.5 py-1 md:px-3 md:py-1.5">
+                        <p className="text-[0.65rem] md:text-xs font-medium text-card">{property.propertyType}</p>
                       </div>
                     </div>
                   </motion.div>

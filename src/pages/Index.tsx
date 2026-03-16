@@ -438,7 +438,7 @@ const Index = () => {
       {/* ═══════════ SECTION 8 — FINAL CTA ═══════════ */}
       <motion.section
         {...sectionReveal}
-        className="w-full py-24 md:py-40 px-6 pb-32 border-t border-border"
+        className="w-full py-16 md:py-24 px-6 pb-32 border-t border-border"
         style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
