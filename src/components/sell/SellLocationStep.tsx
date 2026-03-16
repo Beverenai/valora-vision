@@ -6,6 +6,7 @@ import { SellValuationData } from "@/types/valuation";
 interface SellLocationStepProps {
   formData: SellValuationData;
   onChange: (field: keyof SellValuationData, value: string | number | undefined) => void;
+  onLocationConfirmed?: () => void;
 }
 
 const SellLocationStep: React.FC<SellLocationStepProps> = ({ formData, onChange }) => {

@@ -6,6 +6,7 @@ import { RentValuationData } from "@/types/valuation";
 interface RentLocationStepProps {
   formData: RentValuationData;
   onChange: (field: keyof RentValuationData, value: string | number | undefined) => void;
+  onLocationConfirmed?: () => void;
 }
 
 const RentLocationStep: React.FC<RentLocationStepProps> = ({ formData, onChange }) => {
