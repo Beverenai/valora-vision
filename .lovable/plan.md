@@ -1,56 +1,49 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Switch from RapidAPI to Apify for Idealista Scraping
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+Replace the RapidAPI-based Idealista fetching with Apify's Actor API (`REcGj6dyoIJ9Z7aE6`). The Airbnb/STR scraping via RapidAPI stays as-is (or can also be switched to Apify later).
 
 ### Changes
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+**1. Replace `RAPIDAPI_KEY` with `APIFY_API_TOKEN` secret**
+- Add new secret `APIFY_API_TOKEN` for the Apify API token
+- Keep `RAPIDAPI_KEY` for Airbnb (or remove if not needed)
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**2. Rewrite `fetchIdealistaListings` in `scrape-properties/index.ts`**
 
-**2. Floating agency logos treatment**
+Replace the RapidAPI fetch with Apify's REST API:
+- **Start Actor run**: `POST https://api.apify.com/v2/acts/REcGj6dyoIJ9Z7aE6/runs?token=...` with the input body (operation, location, maxItems, etc.)
+- **Poll for completion**: `GET https://api.apify.com/v2/actor-runs/{runId}?token=...` until status is `SUCCEEDED`
+- **Fetch dataset**: `GET https://api.apify.com/v2/datasets/{datasetId}/items?token=...`
+- Pass `location_id` from `scrape_zones` as the `location` field in Apify input
+- Support both `sale` and `rent` operations
 
+**3. Update `scrape_zones` table**
+- The existing `location_id` field already stores Idealista location codes (e.g., `0-EU-ES-29-07-001-067` for Marbella), which maps directly to Apify's `location` input parameter. No schema change needed.
+
+**4. Adjust field mapping in upsert functions**
+- The Apify actor returns Idealista data in a slightly different shape than the RapidAPI wrapper. We'll map fields like `propertyCode`, `price`, `size`, `rooms`, `bathrooms`, `latitude`, `longitude`, `url`, etc. The upsert functions already handle most of these field names, but we'll verify and adjust as needed after seeing actual Apify output.
+
+### File
+- `supabase/functions/scrape-properties/index.ts` — replace `fetchIdealistaListings` with Apify Actor API calls, update main handler to use `APIFY_API_TOKEN`
+
+### Flow
 ```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
-
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
+scrape-properties called with zone
+  → POST Apify Actor run (sale)
+  → Poll until SUCCEEDED (~1-3 min)
+  → GET dataset items
+  → upsertSaleListings (existing logic)
+  → POST Apify Actor run (rent)
+  → Poll until SUCCEEDED
+  → GET dataset items
+  → upsertRentListings (existing logic)
+  → Airbnb via RapidAPI (unchanged)
 ```
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Important Notes
+- Apify Actor runs are async — the edge function will need to poll for completion, which means longer execution time (~2-5 min per zone). Edge functions have a default timeout that may need consideration.
+- The `maxItems: 50` input parameter controls how many listings per run.
+- No database migration needed — same tables, same upsert logic.
 
