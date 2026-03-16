@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import CrossSellBanner from "@/components/CrossSellBanner";
+import { formatRefCode } from "@/utils/referenceCode";
+import { Copy, Check as CheckIcon } from "lucide-react";
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [
@@ -48,6 +50,24 @@ const MOCK_SERVICES = [
 ];
 
 const fmt = (n: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+
+const RefCodeBadge: React.FC<{ refCode: string }> = ({ refCode }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(refCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="flex items-center justify-center gap-3 py-4 border-b border-border">
+      <p className="text-xs text-muted-foreground">Return to this valuation anytime with reference code</p>
+      <button onClick={handleCopy} className="inline-flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-md font-mono text-sm font-semibold text-foreground hover:bg-muted/80 transition-colors">
+        {refCode}
+        {copied ? <CheckIcon size={12} className="text-accent" /> : <Copy size={12} className="text-muted-foreground" />}
+      </button>
+    </div>
+  );
+};
 
 // ── Inline Sub-Components ──
 
@@ -421,9 +441,12 @@ const SellResult: React.FC = () => {
           headline="VALUED"
           subtitle="Your Valuation"
           accentType="sell"
+          mode="result"
+          referenceCode={formatRefCode(id!)}
           onShare={handleShare}
           onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
         />
+        <RefCodeBadge refCode={formatRefCode(id!)} />
         <PropertySummaryCard bedrooms={lead?.bedrooms} bathrooms={lead?.bathrooms} builtSize={lead?.built_size_sqm} plotSize={lead?.plot_size_sqm} orientation={lead?.orientation} condition={lead?.condition} views={lead?.views} yearBuilt={lead?.year_built} energyCertificate={lead?.energy_certificate} propertyType={lead?.property_type} />
         <ValuationResultCard estimatedLow={estimatedLow} estimatedHigh={estimatedHigh} monthlyRentalLow={monthlyRentalLow} monthlyRentalHigh={monthlyRentalHigh} weeklyHighSeasonLow={weeklyHighLow} weeklyHighSeasonHigh={weeklyHighHigh} comparableCount={47} city={lead?.city || undefined} />
         <AIAnalysisSection content={lead?.analysis || MOCK_ANALYSIS} />
