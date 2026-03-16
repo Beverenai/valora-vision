@@ -367,8 +367,8 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 6 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 bg-secondary border-t border-border">
-        <div className="max-w-5xl mx-auto px-6">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 bg-secondary border-t border-border">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
