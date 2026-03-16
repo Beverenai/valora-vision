@@ -171,7 +171,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }, [isProcessing]);
 
   const handlePointerMove = useCallback((clientX: number, clientY: number) => {
-    if (flipped || isCompact || isProcessing) return;
+    if (isCompact || isProcessing) return;
     const card = cardRef.current;
     if (!card) return;
     const rect = card.getBoundingClientRect();
@@ -485,7 +485,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   /* For both input and result/showcase modes, use 3D tilt */
   if (!hasInput) {
     return (
-      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "1200px" }}>
+      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
         <div
           ref={cardRef}
           onClick={handleCardClick}
@@ -507,7 +507,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           style={{
             display: "grid",
             transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY + (flipped ? 180 : 0)}deg)`,
-            transition: isInteracting ? "transform 0.08s linear" : "transform 0.7s ease-in-out",
+            transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)",
             transformStyle: "preserve-3d",
             willChange: isInteracting ? "transform" : "auto",
           }}
