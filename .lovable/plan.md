@@ -1,56 +1,30 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Fit card on screen + add descriptive text before map
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+Looking at the screenshots: the second image (search phase) shows the card fits nicely with barcode visible. The first image (map phase) shows the card is too tall — the bottom is cut off. Two issues to fix:
 
-### Changes
+### 1. Reduce initial card height to fit on screen
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+The current `min-h-[55vh]` is causing the card to be taller than needed in search mode. Since the user is on a 390×796 viewport and the card needs to fit below the hero text:
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+- **Search mode**: reduce to `min-h-[440px] md:min-h-[480px]` (fixed pixels that fit on screen)
+- **Map mode**: use `min-h-[600px] md:min-h-[70vh]` — tall enough for the map but not overflowing the viewport
 
-**2. Floating agency logos treatment**
+Apply to both `cardClasses` (line 202) and outer wrapper (line 466).
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+### 2. Add descriptive text in the empty space before map appears
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
+In the input mode section (line 293), below the `GoogleAddressInput` / search bar and above the barcode, add a short editorial blurb that only shows when the map is NOT expanded. Something like:
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
+> "Enter your property address above and we'll provide an instant, AI-powered market valuation based on comparable sales, location data, and current demand."
 
-**3. How It Works — typographic layout**
+This fills the empty beige space between the search input and barcode with useful context. When the map appears, this text hides to make room.
 
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
+### Files changed
 
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+**`src/components/ValuationTicketCard.tsx`**:
+- Line 202: Update `cardClasses` min-heights
+- Line 293-329: Add descriptive paragraph in input mode, visible only when `!mapExpanded`
+- Line 466: Update outer wrapper min-heights to match
 
