@@ -485,7 +485,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   /* For both input and result/showcase modes, use 3D tilt */
   if (!hasInput) {
     return (
-      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
+      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "1200px" }}>
         <div
           ref={cardRef}
           onClick={handleCardClick}
@@ -494,25 +494,26 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           onTouchMove={handleTouchMove}
           onTouchEnd={resetTilt}
           className={cn(
-            "relative w-full group transition-all duration-500",
-            flippable ? "cursor-pointer cursor-grab active:cursor-grabbing" : "",
+            "relative w-full group transition-all duration-700",
+            flippable ? cn("cursor-pointer", shadowClasses) : "",
             outerMaxWidth,
-            mapExpanded
-                ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
-                : size === "default"
-                  ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
-                  : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
+            flippable
+              ? "h-[480px] md:h-[560px] lg:h-[620px]"
+              : size === "default"
+                ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+                : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]",
+            "rounded-[24px] md:rounded-[32px]"
           )}
           style={{
             display: "grid",
-            transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
-            transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
+            transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY + (flipped ? 180 : 0)}deg)`,
+            transition: isInteracting ? "transform 0.08s linear" : "transform 0.7s ease-in-out",
             transformStyle: "preserve-3d",
             willChange: isInteracting ? "transform" : "auto",
           }}
         >
-          <div style={{ gridArea: "1/1" }}>{frontFace}</div>
-          {backFace && <div style={{ gridArea: "1/1" }}>{backFace}</div>}
+          <div style={{ gridArea: "1/1", backfaceVisibility: "hidden" }}>{frontFace}</div>
+          {backFace && <div style={{ gridArea: "1/1", backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>{backFace}</div>}
         </div>
       </div>
     );
