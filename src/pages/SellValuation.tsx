@@ -23,7 +23,7 @@ const SELL_STEPS = [
 const validateSellStep = (step: number, data: SellValuationData): boolean => {
   switch (step) {
     case 0:
-      return !!(data.streetAddress || data.city);
+      return !!(data.streetAddress && data.latitude && data.longitude);
     case 1:
       return !!(data.propertyType && data.builtSize && data.bedrooms && data.bathrooms);
     case 2:
@@ -264,7 +264,7 @@ const SellValuation: React.FC = () => {
                     Back
                   </Button>
 
-                  {isLastStep ? (
+                  {currentStep === 0 ? null : isLastStep ? (
                     <Button
                       onClick={handleSubmit}
                       disabled={!isCurrentStepValid || isSubmitting}
