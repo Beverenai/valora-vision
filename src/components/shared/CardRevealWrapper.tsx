@@ -76,7 +76,7 @@ const LightBurst: React.FC<{ accentType: "sell" | "rent" }> = ({ accentType }) =
       animate={{ opacity: [0, 0.9, 0] }}
       transition={{ duration: 0.7, delay: 0.1 }}
       style={{
-        background: `radial-gradient(ellipse at 85% 50%, rgba(${color}, 0.5) 0%, rgba(255,255,255,0.3) 30%, transparent 60%)`,
+        background: `radial-gradient(ellipse at 15% 50%, rgba(${color}, 0.5) 0%, rgba(255,255,255,0.3) 30%, transparent 60%)`,
         willChange: "opacity",
       }}
     />
