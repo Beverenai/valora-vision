@@ -363,7 +363,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           <>
             {/* ── Result/display mode: price + data ── */}
             <div className="flex justify-between items-center mb-1.5 relative z-[2]">
-              <span className="font-sans text-[1.6rem] md:text-[2.5rem] font-light tracking-[-1.5px] leading-none text-foreground">
+              <span className={cn("font-sans font-light tracking-[-1.5px] leading-none text-foreground", priceSize)}>
                 {estimatedValue}
               </span>
               <span className="text-[0.6rem] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">
