@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { formatRefCode } from "@/utils/referenceCode";
 
+type CardSize = "default" | "hero" | "showcase";
+
 interface ValuationTicketCardProps {
   address: string;
   city?: string;
@@ -54,6 +56,8 @@ interface ValuationTicketCardProps {
   /* Map expanded state - card grows taller when map is visible */
   mapExpanded?: boolean;
   onMapPhaseChange?: (phase: "search" | "verify") => void;
+  /* Size variant for different contexts */
+  size?: CardSize;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
@@ -106,6 +110,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   referenceCode,
   mapExpanded = false,
   onMapPhaseChange,
+  size = "default",
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
@@ -116,6 +121,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   // Determine effective mode
   const isProcessing = mode === "processing";
   const isCompact = mode === "compact" || (!mode && compact);
+  const isLarge = size === "hero" || size === "showcase";
 
   const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined) && !isProcessing;
   const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
@@ -126,6 +132,27 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const heroImage = (propertyType && PROPERTY_IMAGES[propertyType]) || DEFAULT_IMAGE;
 
   const refCode = referenceCode || (leadId ? formatRefCode(leadId) : "VC-0000-0000");
+
+  // Size-dependent classes
+  const outerMaxWidth = isLarge
+    ? "max-w-[360px] md:max-w-[680px] lg:max-w-[800px]"
+    : "max-w-[360px] md:max-w-[500px]";
+  const stubWidth = isLarge ? "w-[50px] md:w-[60px] lg:w-[70px]" : "w-[50px]";
+  const mainPadding = isLarge ? "p-4 md:p-6 lg:p-8" : "p-3 md:p-5";
+  const heroImageMaxH = isLarge ? "max-h-[42%] md:max-h-[45%]" : "max-h-[42%]";
+  const titleSize = isLarge
+    ? "text-[2.2rem] md:text-[3rem] lg:text-[4rem]"
+    : "text-[2.2rem] md:text-[3.5rem]";
+  const cursiveSize = isLarge
+    ? "text-[2rem] md:text-[2.5rem] lg:text-[3rem]"
+    : "text-[2rem] md:text-[2.5rem]";
+  const resultCursiveSize = isLarge
+    ? "text-[1.8rem] md:text-[2.5rem] lg:text-[3.5rem]"
+    : "text-[1.8rem] md:text-[3rem]";
+  const priceSize = isLarge
+    ? "text-[1.6rem] md:text-[2.2rem] lg:text-[3rem]"
+    : "text-[1.6rem] md:text-[2.5rem]";
+  const barcodeHeight = isLarge ? "h-[35px] md:h-[55px] lg:h-[65px]" : "h-[35px] md:h-[55px]";
 
   // Rotate processing messages
   useEffect(() => {
@@ -207,11 +234,11 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const frontFace = (
     <div className={cardClasses}>
       {/* Main Section */}
-      <div className={cn("flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15", mapExpanded ? "overflow-visible" : "overflow-hidden")}>
+      <div className={cn("flex-1 flex flex-col relative border-r-2 border-dashed border-foreground/15", mainPadding, mapExpanded ? "overflow-visible" : "overflow-hidden")}>
         {/* Hero Image */}
         <div className={cn(
           "relative w-full min-h-[120px] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink transition-all duration-500",
-          mapExpanded ? "max-h-[60px] md:max-h-[25%]" : "max-h-[42%]"
+          mapExpanded ? "max-h-[60px] md:max-h-[25%]" : heroImageMaxH
         )}>
           <img
             src={heroImage}
@@ -252,7 +279,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         {isProcessing ? (
           <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]">
             <h2
-              className="font-heading text-[2.2rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] tracking-[-2px] text-foreground animate-pulse"
+              className={cn("font-heading font-extrabold text-center leading-[0.8] tracking-[-2px] text-foreground animate-pulse", titleSize)}
               style={{ transform: "scaleY(0.9)" }}
             >
               ANALYSING
@@ -281,7 +308,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             </div>
 
             {/* Barcode */}
-            <div className="mt-auto relative h-[35px] md:h-[55px] w-full">
+            <div className={cn("mt-auto relative w-full", barcodeHeight)}>
               <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
               <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
                 {refCode}
@@ -291,7 +318,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         ) : hasInput ? (
           /* ── Hero INPUT mode ── */
           <div className="flex-1 flex flex-col justify-start gap-3 pb-8 md:pb-12 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-            <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
+            <span className={cn("font-ticket-cursive leading-[0.7] text-foreground block -ml-1", cursiveSize)}>
               Your Valuation
             </span>
 
@@ -336,7 +363,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           <>
             {/* ── Result/display mode: price + data ── */}
             <div className="flex justify-between items-center mb-1.5 relative z-[2]">
-              <span className="font-sans text-[1.6rem] md:text-[2.5rem] font-light tracking-[-1.5px] leading-none text-foreground">
+              <span className={cn("font-sans font-light tracking-[-1.5px] leading-none text-foreground", priceSize)}>
                 {estimatedValue}
               </span>
               <span className="text-[0.6rem] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -344,7 +371,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               </span>
             </div>
 
-            <h2 className="font-heading text-[2.2rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground" style={{ transform: "scaleY(0.9)" }}>
+            <h2 className={cn("font-heading font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground", titleSize)} style={{ transform: "scaleY(0.9)" }}>
               {headline}
             </h2>
 
@@ -357,7 +384,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
             {/* Text Block */}
             <div className="flex-1 flex flex-col min-h-0">
-              <span className="font-ticket-cursive text-[1.8rem] md:text-[3rem] leading-[0.6] mb-2 md:mb-3 -ml-1 text-foreground block">
+              <span className={cn("font-ticket-cursive leading-[0.6] mb-2 md:mb-3 -ml-1 text-foreground block", resultCursiveSize)}>
                 {subtitle}
               </span>
               <p className="text-[0.55rem] md:text-[0.6rem] uppercase text-justify leading-[1.4] font-medium text-foreground/90 mb-2 line-clamp-4">
@@ -369,7 +396,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               </div>
 
               {/* Barcode */}
-              <div className="mt-auto relative h-[35px] md:h-[55px] w-full">
+              <div className={cn("mt-auto relative w-full", barcodeHeight)}>
                 <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
                 <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
                   {refCode}
@@ -391,7 +418,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       </div>
 
       {/* Stub */}
-      <div className="hidden sm:flex w-[50px] flex-col items-center justify-between py-4 bg-[hsl(36_9%_88%)]">
+      <div className={cn("hidden sm:flex flex-col items-center justify-between py-4 bg-[hsl(36_9%_88%)]", stubWidth)}>
         <ArrowDown size={16} className="text-foreground/60" />
         <span className="font-heading text-xs font-bold uppercase tracking-[2px] text-foreground/80" style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}>
           ValoraCasa
@@ -446,7 +473,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       </div>
 
       {/* Stub */}
-      <div className="hidden sm:flex w-[50px] flex-col items-center justify-between py-4 bg-[hsl(36_9%_88%)]">
+      <div className={cn("hidden sm:flex flex-col items-center justify-between py-4 bg-[hsl(36_9%_88%)]", stubWidth)}>
         <ArrowDown size={16} className="text-foreground/60" />
         <span className="font-heading text-xs font-bold uppercase tracking-[2px] text-foreground/80" style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}>
           ValoraCasa
@@ -466,7 +493,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={resetTilt}
         className={cn(
-          "relative w-full max-w-[360px] md:max-w-[900px] lg:max-w-[1100px] group cursor-grab active:cursor-grabbing transition-all duration-500",
+          "relative w-full group cursor-grab active:cursor-grabbing transition-all duration-500",
+          outerMaxWidth,
         hasInput
             ? (mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
             : (mapExpanded

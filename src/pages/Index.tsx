@@ -123,7 +123,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
-      <div className="max-w-5xl mx-auto w-full flex flex-col">
+      <div className="max-w-[1400px] mx-auto w-full flex flex-col">
 
         {/* ═══════════ HERO ═══════════ */}
         <div
@@ -148,6 +148,7 @@ const Index = () => {
             estimatedValue=""
             leadId=""
             accentType="sell"
+            size="hero"
             addressData={addressData}
             onAddressFieldChange={handleAddressChange}
             onLocationConfirmed={handleGetValuation}
@@ -249,7 +250,7 @@ const Index = () => {
 
         {/* ═══════════ WHAT YOU GET — Flippable Card ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8 bg-secondary/50">
-          <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
+          <div className="max-w-[1200px] mx-auto flex flex-col items-center text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -275,6 +276,7 @@ const Index = () => {
               subtitle="Your Valuation"
               summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators."
               accentType="sell"
+              size="showcase"
               flippable
               bedrooms={4}
               bathrooms={3}
@@ -459,6 +461,7 @@ const Index = () => {
             estimatedValue=""
             leadId=""
             accentType="sell"
+            size="hero"
             addressData={addressData}
             onAddressFieldChange={handleAddressChange}
             onLocationConfirmed={handleGetValuation}
