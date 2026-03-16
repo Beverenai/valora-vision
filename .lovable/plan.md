@@ -1,56 +1,23 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Problem
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+The showcase card in the "See What You'll Receive" section is invisible. The heading, subtitle, and "Tap the card" hint all render, but the card itself is a blank space.
 
-### Changes
+**Root cause**: In `ValuationTicketCard.tsx`, when the card is in result mode (no input), the card face uses `absolute inset-0` positioning. This works for the flip animation. However, the card's background color `bg-[hsl(36_9%_88%)]` blends with the section's `bg-secondary/50`, AND more critically — the 3D transform context (`preserve-3d` + `backface-visibility: hidden`) without an explicit `translateZ` on the front face can cause rendering issues where the card becomes invisible in certain browsers/contexts.
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+The hero input cards work fine because they use `relative` positioning (line 246-247), not `absolute inset-0`.
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+## Fix
 
-**2. Floating agency logos treatment**
+**File: `src/components/ValuationTicketCard.tsx`**
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+1. Add `translateZ(1px)` to the front face when in result/flippable mode, ensuring it renders above z=0 in the 3D context
+2. Add a visible shadow and slight border to the card so it's distinguishable from the section background even when colors are similar
+3. Ensure the front face has proper stacking in the 3D rendering context
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
-
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+Specifically:
+- On the `frontFace` div (around line 252), add an inline style `transform: "translateZ(1px)"` when not in input mode — this ensures the face renders in front within the `preserve-3d` context
+- On the `backFace` div (line 456), keep the existing `rotateY(180deg)` but also add `translateZ(1px)`
+- This is a known CSS 3D rendering fix for `backface-visibility: hidden` elements that appear invisible
 
