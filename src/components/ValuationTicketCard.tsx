@@ -214,12 +214,12 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }, [flippable, hasInput, isProcessing]);
 
   const detailItems = [
+    { icon: Home, label: "Type", value: propertyType || null },
+    { icon: Sparkles, label: "Condition", value: condition || null },
     { icon: Bed, label: "Bedrooms", value: bedrooms != null ? `${bedrooms}` : null },
     { icon: Bath, label: "Bathrooms", value: bathrooms != null ? `${bathrooms}` : null },
     { icon: Ruler, label: "Built Size", value: builtSize || null },
     { icon: LandPlot, label: "Plot Size", value: plotSize || null },
-    { icon: Home, label: "Type", value: propertyType || null },
-    { icon: Sparkles, label: "Condition", value: condition || null },
   ].filter((d) => d.value != null);
 
   /* ── Compact mode: small address summary card ── */
