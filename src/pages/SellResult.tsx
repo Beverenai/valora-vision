@@ -463,7 +463,6 @@ const SellResult: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <CardRevealWrapper accentType="sell" cardElement={cardElement} loading={loading}>
         <div className="max-w-[1400px] mx-auto border-x border-border">
           <RefCodeBadge refCode={formatRefCode(id!)} />

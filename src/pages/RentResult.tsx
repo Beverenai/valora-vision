@@ -115,7 +115,6 @@ const RentResult: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <CardRevealWrapper accentType="rent" cardElement={cardElement} loading={loading}>
         <div className="max-w-[1400px] mx-auto border-x border-border">
           {/* Reference code badge */}
