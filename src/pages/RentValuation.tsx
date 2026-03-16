@@ -132,6 +132,8 @@ const RentValuation: React.FC = () => {
           is_furnished: formData.furnished || null,
           views: formData.views || null,
           property_features: formData.propertyFeatures || null,
+          latitude: formData.latitude || null,
+          longitude: formData.longitude || null,
         })
         .select("id")
         .single();
