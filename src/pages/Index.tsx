@@ -150,11 +150,11 @@ const Index = () => {
       </div>
 
       {/* ═══════════ FLOATING AGENCIES ═══════════ */}
-      <section className="w-full py-24 md:py-32 overflow-hidden">
-        <p className="text-xs tracking-[0.2em] text-muted-foreground/40 text-center uppercase mb-16">
-          Trusted by leading agencies
+      <section className="w-full py-14 md:py-32 overflow-hidden">
+        <p className="text-xs tracking-[0.2em] text-muted-foreground/40 text-center uppercase mb-10 md:mb-16">
+          Used every day by real estate professionals
         </p>
-        <div className="relative max-w-4xl mx-auto h-[180px] md:h-[140px]">
+        <div className="relative max-w-4xl mx-auto h-[120px] md:h-[140px]">
           {AGENCIES.map((a, i) => (
             <motion.span
               key={a.name}
