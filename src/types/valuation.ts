@@ -106,7 +106,9 @@ export interface SellValuationData {
   fullName: string;
   email: string;
   phone: string;
+  wantsToSell: string;
   sellingTimeline: string;
+  interestedInRefinancing: string;
   termsAccepted: boolean;
 }
 
