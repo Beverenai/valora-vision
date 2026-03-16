@@ -1,56 +1,32 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Fix Card Back Face, Mobile Optimization, Agency Copy Update
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+### Issues from Screenshot
+1. **Card back face broken**: Front-face elements (barcode, accent circles, large text) are bleeding through onto the back face. The `backface-visibility: hidden` isn't working properly because the accent circles and barcode from the front overlap visually.
+2. **Agency section copy wrong**: Says "Trusted by leading agencies" — should say "Used every day by real estate professionals"
+3. **Mobile card too narrow**: On 390px viewport the card is cramped
 
 ### Changes
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+**1. `src/components/ValuationTicketCard.tsx` — Fix card rendering**
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+- **Back face z-index**: Add `z-10` to back face so it properly covers front face when flipped
+- **Front face accent circles**: These use absolute positioning that extends outside the card bounds (`left: -16px`, `right: -8px`). Add `overflow-hidden` to the image container so circles don't bleed outside
+- **Mobile sizing**: Change `max-w-[320px]` to `max-w-[340px]` on mobile for better use of 390px screen. Reduce internal padding on mobile from `p-4` to `p-3`
+- **Back face detail grid**: Increase spacing, make items larger on mobile — `gap-2.5` to `gap-3`, larger icon size, bigger text
+- **Remove stub on mobile**: The `hidden sm:flex` stub is fine but ensure card uses full width without it
 
-**2. Floating agency logos treatment**
+**2. `src/pages/Index.tsx` — Copy + mobile fixes**
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+- Line 154: Change `"Trusted by leading agencies"` → `"Used every day by real estate professionals"`
+- **Hero section mobile**: Reduce `px-6` to `px-4` on mobile, tighten heading size for 390px
+- **Floating agencies on mobile**: The `h-[180px]` container with absolute-positioned names is problematic on small screens — names overlap. Reduce to `h-[120px]` on mobile with fewer visible names or adjusted positions
+- **"What you get" section**: The flippable card showcase section — ensure adequate padding on mobile
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
+**3. Overall mobile polish**
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+- Reduce `py-20` sections to `py-14` on mobile for less dead space
+- Ensure text sizes scale: `text-3xl` headings on mobile (not `text-4xl`)
+- Sticky CTA: already good, keep as-is
 
