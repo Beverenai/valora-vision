@@ -157,7 +157,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
             {/* Meta Info */}
             <div className="absolute bottom-[75px] right-0 text-right text-[0.5rem] leading-[1.2] text-foreground/60 w-[100px]">
-              <p>VALUATION BY AI</p>
+              <p>VALUATION REPORT</p>
               <p>REF #{leadId.slice(0, 8).toUpperCase()}</p>
               <p>VALID FOR ONE</p>
             </div>
