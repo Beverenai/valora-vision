@@ -41,21 +41,35 @@ const RentResult: React.FC = () => {
 
   useEffect(() => {
     if (!id) { navigate("/rent"); return; }
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
     const fetchLead = async () => {
       const { data, error } = await supabase
         .from("leads_rent")
         .select("*")
         .eq("id", id)
         .maybeSingle();
+      if (cancelled) return;
       if (error || !data) {
         toast({ title: "Not Found", description: "Estimate not found.", variant: "destructive" });
         navigate("/rent");
         return;
       }
       setLead(data);
-      setLoading(false);
+
+      if (data.status === "processing" || data.status === "pending") {
+        pollTimer = setTimeout(fetchLead, 2000);
+      } else {
+        setLoading(false);
+      }
     };
     fetchLead();
+
+    return () => {
+      cancelled = true;
+      if (pollTimer) clearTimeout(pollTimer);
+    };
   }, [id, navigate, toast]);
 
   const monthlyEstimate = lead?.monthly_long_term_estimate || 2500;
