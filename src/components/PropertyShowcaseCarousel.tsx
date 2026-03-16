@@ -74,7 +74,16 @@ const wrap = (min: number, max: number, v: number) => {
 const PropertyShowcaseCarousel: React.FC = () => {
   const [step, setStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const itemHeight = isMobile ? MOBILE_ITEM_HEIGHT : ITEM_HEIGHT;
   const currentIndex = ((step % PROPERTIES.length) + PROPERTIES.length) % PROPERTIES.length;
 
   const nextStep = useCallback(() => setStep((prev) => prev + 1), []);
@@ -102,20 +111,22 @@ const PropertyShowcaseCarousel: React.FC = () => {
     return "hidden";
   };
 
+  const visibleCount = isMobile ? 4 : PROPERTIES.length;
+
   return (
-    <div className="grid gap-[1px] bg-border border border-border md:grid-cols-2">
-      {/* Left — City/Area Labels */}
-      <div className="bg-primary p-8 md:p-10 flex flex-col justify-between relative overflow-hidden">
+    <div className="flex flex-col md:grid md:grid-cols-2 gap-[1px] bg-border border border-border rounded-2xl overflow-hidden">
+      {/* City/Area Labels */}
+      <div className="bg-primary p-6 md:p-10 flex flex-col justify-between relative overflow-hidden">
         <div>
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-4">
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-3 md:mb-4">
             Recent Valuations
           </p>
-          <h3 className="font-heading text-2xl md:text-3xl font-medium text-primary-foreground mb-8">
+          <h3 className="font-heading text-xl md:text-3xl font-medium text-primary-foreground mb-4 md:mb-8">
             Trusted by property owners across Spain
           </h3>
         </div>
 
-        <div className="relative" style={{ height: PROPERTIES.length * ITEM_HEIGHT }}>
+        <div className="relative" style={{ height: visibleCount * itemHeight }}>
           <div className="absolute inset-0 pointer-events-none z-10" style={{
             background: "linear-gradient(to bottom, hsl(var(--primary)) 0%, transparent 15%, transparent 85%, hsl(var(--primary)) 100%)",
           }} />
@@ -128,24 +139,24 @@ const PropertyShowcaseCarousel: React.FC = () => {
               return (
                 <motion.div
                   key={property.id}
-                  animate={{ y: wrappedDistance * ITEM_HEIGHT, opacity: Math.abs(wrappedDistance) > 2 ? 0 : 1, scale: isActive ? 1 : 0.95 }}
+                  animate={{ y: wrappedDistance * itemHeight, opacity: Math.abs(wrappedDistance) > 2 ? 0 : 1, scale: isActive ? 1 : 0.95 }}
                   transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
                   className="absolute w-full"
-                  style={{ top: "50%", marginTop: -ITEM_HEIGHT / 2 }}
+                  style={{ top: "50%", marginTop: -itemHeight / 2 }}
                 >
                   <button
                     onClick={() => handleChipClick(index)}
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
                     className={cn(
-                      "relative flex items-center gap-3 w-full px-5 py-3 transition-all duration-500 text-left border",
+                      "relative flex items-center gap-3 w-full px-4 md:px-5 py-2.5 md:py-3 transition-all duration-500 text-left border",
                       isActive
                         ? "bg-card text-foreground border-border"
                         : "bg-transparent text-primary-foreground/50 border-primary-foreground/15 hover:border-primary-foreground/30 hover:text-primary-foreground/80"
                     )}
                   >
                     <MapPin size={14} className={cn(isActive ? "text-gold" : "text-primary-foreground/30")} />
-                    <span className={cn("text-sm font-medium transition-colors", isActive ? "text-foreground" : "text-primary-foreground/50")}>
+                    <span className={cn("text-xs md:text-sm font-medium transition-colors", isActive ? "text-foreground" : "text-primary-foreground/50")}>
                       {property.city}
                     </span>
                   </button>
