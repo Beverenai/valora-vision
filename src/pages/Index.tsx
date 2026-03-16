@@ -181,7 +181,7 @@ const Index = () => {
   );
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background text-foreground">
+    <div className="min-h-screen w-full flex flex-col text-foreground" style={{ backgroundColor: "#0F1B2D" }}>
       <style>{marqueeStyle}</style>
 
       {/* ═══════════ SECTION 1 — HERO ═══════════ */}
