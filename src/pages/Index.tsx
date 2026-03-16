@@ -45,7 +45,7 @@ const HOW_STEPS = [
   {
     num: "03",
     title: "Get your valuation",
-    desc: "Receive an AI-powered market estimate in seconds.",
+    desc: "Receive a market estimate based on real data in seconds.",
     icon: (
       <svg viewBox="0 0 40 40" width="40" height="40" fill="none" strokeWidth="1.5" stroke="#D4713B">
         <path d="M8 32 L16 20 L24 26 L32 12" />
