@@ -9,7 +9,7 @@ interface SellLocationStepProps {
   onLocationConfirmed?: () => void;
 }
 
-const SellLocationStep: React.FC<SellLocationStepProps> = ({ formData, onChange }) => {
+const SellLocationStep: React.FC<SellLocationStepProps> = ({ formData, onChange, onLocationConfirmed }) => {
   const addressData = {
     streetAddress: formData.streetAddress,
     urbanization: formData.urbanization,
@@ -35,6 +35,7 @@ const SellLocationStep: React.FC<SellLocationStepProps> = ({ formData, onChange 
         <GoogleAddressInput
           addressData={addressData}
           onChange={(field, value) => onChange(field as keyof SellValuationData, value)}
+          onLocationConfirmed={onLocationConfirmed}
         />
       </div>
     </div>
