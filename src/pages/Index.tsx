@@ -409,7 +409,7 @@ const Index = () => {
                         <span className={cn("text-lg", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>✦</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-foreground text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
+                        <h3 className={cn("font-bold text-foreground text-lg uppercase tracking-tight transition-colors", isSell ? "group-hover:text-primary" : "group-hover:text-[hsl(var(--rent-foreground))]")}>
                           {feat.title}
                         </h3>
                         <p className="text-muted-foreground mt-1 leading-relaxed">
