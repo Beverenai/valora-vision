@@ -494,16 +494,20 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     </div>
   ) : null;
 
-  /* For input mode, keep the 3D tilt. For result/showcase, use flat layout with opacity swap */
+  /* For both input and result/showcase modes, use 3D tilt */
   if (!hasInput) {
     return (
-      <div className="flex items-center justify-center px-4 py-2 md:py-4">
+      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
         <div
           ref={cardRef}
           onClick={handleCardClick}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={resetTilt}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={resetTilt}
           className={cn(
-            "relative w-full group",
-            flippable && "cursor-pointer",
+            "relative w-full group transition-all duration-500",
+            flippable ? "cursor-pointer cursor-grab active:cursor-grabbing" : "",
             outerMaxWidth,
             flippable
               ? "h-[520px] md:h-[620px] lg:h-[680px]"
@@ -513,7 +517,13 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
                   : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
           )}
-          style={{ display: "grid" }}
+          style={{
+            display: "grid",
+            transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+            transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
+            transformStyle: "preserve-3d",
+            willChange: isInteracting ? "transform" : "auto",
+          }}
         >
           <div style={{ gridArea: "1/1" }} className={cn(flippable && "h-full overflow-hidden")}>{frontFace}</div>
           {backFace && <div style={{ gridArea: "1/1" }} className="h-full overflow-hidden">{backFace}</div>}
