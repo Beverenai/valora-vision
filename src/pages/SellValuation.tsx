@@ -240,21 +240,6 @@ const SellValuation: React.FC = () => {
                       <p className="text-xs text-muted-foreground">{formData.city}</p>
                     )}
                   </div>
-                  {/* Step dots */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {SELL_STEPS.map((step, i) => (
-                      <div
-                        key={step.name}
-                        className={`rounded-full transition-all duration-300 ${
-                          i === currentStep
-                            ? "bg-primary w-5 h-2"
-                            : i < currentStep
-                            ? "bg-primary/60 w-2 h-2"
-                            : "bg-foreground/20 w-2 h-2"
-                        }`}
-                      />
-                    ))}
-                  </div>
                 </div>
 
                 {/* Step label */}
