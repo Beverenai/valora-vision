@@ -1,61 +1,231 @@
-import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star } from "lucide-react";
+import GoogleMapsAddressInput from "@/components/shared/GoogleMapsAddressInput";
+import { cn } from "@/lib/utils";
+
+const TESTIMONIALS = [
+  {
+    quote: "We sold our villa in Marbella for 12% above the initial asking price thanks to the accurate valuation.",
+    name: "James & Sarah T.",
+    location: "Marbella",
+    stars: 5,
+  },
+  {
+    quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.",
+    name: "Carlos M.",
+    location: "Estepona",
+    stars: 5,
+  },
+  {
+    quote: "Fast, free, and surprisingly accurate. Best property tool I've found for Spain.",
+    name: "Anna K.",
+    location: "Fuengirola",
+    stars: 5,
+  },
+  {
+    quote: "Used it to compare agents' prices. The AI valuation was within 3% of the final sale price.",
+    name: "Robert D.",
+    location: "Benalmádena",
+    stars: 5,
+  },
+];
+
+const TRUST_STATS = [
+  { label: "Valuations", value: "12,400+" },
+  { label: "Cities", value: "45+" },
+  { label: "Free", value: "100%" },
+];
+
+type ValuationType = "sell" | "rent";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-background p-6">
-      <Navbar />
+  const navigate = useNavigate();
+  const [valuationType, setValuationType] = useState<ValuationType>("sell");
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const [addressData, setAddressData] = useState({
+    streetAddress: "",
+    urbanization: "",
+    city: "",
+    province: "",
+    country: "",
+    complex: "",
+  });
 
-      <div className="max-w-[1400px] mx-auto grid gap-[1px] bg-border border border-border md:grid-cols-2 mb-12">
-        <motion.div
+  const handleAddressChange = useCallback(
+    (field: string, value: string) => {
+      setAddressData((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  const hasAddress = addressData.streetAddress || addressData.city;
+
+  const handleProceed = (type: ValuationType) => {
+    setValuationType(type);
+    if (hasAddress) {
+      const path = type === "sell" ? "/sell/valuation" : "/rent/valuation";
+      navigate(path, { state: { addressData } });
+    }
+  };
+
+  // Auto-cycle testimonials
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTestimonialIndex((i) => (i + 1) % TESTIMONIALS.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div
+      className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/65 backdrop-blur-[2px]" />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center w-full max-w-3xl px-6 py-12 gap-6">
+        {/* Logo */}
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="font-heading text-lg font-bold text-white/90 tracking-wide"
+        >
+          Valora<span className="text-gold">Casa</span>
+        </motion.p>
+
+        {/* Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15 }}
+          className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold text-white text-center leading-tight tracking-tight"
+        >
+          What is your property
+          <br />
+          in Spain{" "}
+          <span className="text-gold">really</span> worth?
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.7 }}
-          className="bg-gradient-to-br from-primary to-navy-deep p-12 md:p-16 flex flex-col justify-between"
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="text-white/60 text-center text-sm sm:text-base max-w-lg"
         >
-          <div>
-            <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-6">
-              ValoraCasa
-            </p>
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-[3.5rem] font-normal leading-[1.1] tracking-[-0.02em] text-primary-foreground mb-6">
-              What is your property<br />in Spain <span className="text-soft-blue">really worth?</span>
-            </h1>
-            <p className="text-primary-foreground/60 leading-relaxed max-w-md">
-              Free AI-powered valuations and rental income estimates — based on real market data from thousands of listings.
-            </p>
-          </div>
-          <div className="flex gap-8 mt-12 text-sm text-primary-foreground/40">
-            <span>Est. 2024</span>
-            <span>Coverage: 45+ Cities</span>
+          Free AI-powered valuations based on real market data from thousands of
+          listings
+        </motion.p>
+
+        {/* Address input with glow */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="w-full max-w-[600px] mt-2 rounded-xl p-[2px] animate-[glow-pulse_3s_ease-in-out_infinite]"
+        >
+          <div className="bg-card rounded-xl p-4">
+            <GoogleMapsAddressInput
+              addressData={addressData}
+              onChange={handleAddressChange}
+            />
           </div>
         </motion.div>
 
-        <div className="grid grid-rows-2 gap-[1px] bg-border">
-          <Link to="/sell" className="group bg-card p-8 md:p-12 relative transition-colors hover:bg-muted flex flex-col justify-center">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-soft-blue" />
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-2">I want to</p>
-            <h2 className="font-heading text-3xl md:text-4xl font-medium text-foreground mb-3">Sell my property</h2>
-            <p className="text-sm text-muted-foreground mb-4 max-w-sm">Get a free AI-powered property valuation in 2 minutes</p>
-            <div className="flex items-center gap-1 text-sm font-medium text-soft-blue">
-              Get Free Valuation <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
-          <Link to="/rent" className="group bg-card p-8 md:p-12 relative transition-colors hover:bg-muted flex flex-col justify-center">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-accent" />
-            <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-2">I want to</p>
-            <h2 className="font-heading text-3xl md:text-4xl font-medium text-foreground mb-3">Rent my property</h2>
-            <p className="text-sm text-muted-foreground mb-4 max-w-sm">Find out your rental income — short-term and long-term</p>
-            <div className="flex items-center gap-1 text-sm font-medium text-accent">
-              Get Rental Estimate <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
-        </div>
-      </div>
+        {/* Type pills */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.65 }}
+          className="flex gap-3 mt-1"
+        >
+          <button
+            onClick={() => handleProceed("sell")}
+            className={cn(
+              "px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200",
+              valuationType === "sell"
+                ? "bg-gold text-black shadow-lg shadow-gold/25"
+                : "border border-white/20 text-white/70 hover:border-gold/50 hover:text-white"
+            )}
+          >
+            I want to sell
+          </button>
+          <button
+            onClick={() => handleProceed("rent")}
+            className={cn(
+              "px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200",
+              valuationType === "rent"
+                ? "bg-teal text-white shadow-lg shadow-teal/25"
+                : "border border-white/20 text-white/70 hover:border-teal/50 hover:text-white"
+            )}
+          >
+            I want to rent out
+          </button>
+        </motion.div>
 
-      <Footer />
+        {/* Trust stats */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="flex items-center gap-6 mt-6 text-white/40 text-xs sm:text-sm"
+        >
+          {TRUST_STATS.map((stat, i) => (
+            <span key={stat.label} className="flex items-center gap-1.5">
+              {i > 0 && <span className="text-white/20 mr-4">•</span>}
+              <span className="font-semibold text-white/70">{stat.value}</span>{" "}
+              {stat.label}
+            </span>
+          ))}
+        </motion.div>
+
+        {/* Rotating testimonial */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.95 }}
+          className="mt-4 text-center max-w-md min-h-[80px] flex flex-col items-center justify-center"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={testimonialIndex}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center gap-2"
+            >
+              <div className="flex gap-0.5">
+                {Array.from({ length: TESTIMONIALS[testimonialIndex].stars }).map(
+                  (_, i) => (
+                    <Star
+                      key={i}
+                      className="h-3.5 w-3.5 fill-gold text-gold"
+                    />
+                  )
+                )}
+              </div>
+              <p className="text-white/50 text-xs sm:text-sm italic leading-relaxed">
+                "{TESTIMONIALS[testimonialIndex].quote}"
+              </p>
+              <p className="text-white/30 text-xs">
+                — {TESTIMONIALS[testimonialIndex].name},{" "}
+                {TESTIMONIALS[testimonialIndex].location}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+      </div>
     </div>
   );
 };
