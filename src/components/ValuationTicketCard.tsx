@@ -105,6 +105,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   processingProgress = 0,
   referenceCode,
   mapExpanded = false,
+  onMapPhaseChange,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
