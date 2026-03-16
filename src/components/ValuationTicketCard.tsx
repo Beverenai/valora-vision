@@ -31,17 +31,17 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   onShare,
   onDownload,
 }) => {
-  const accentHsl = accentType === "sell" ? "hsl(var(--gold))" : "hsl(var(--teal))";
-  const accentClass = accentType === "sell" ? "bg-gold" : "bg-teal";
+  const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
+  const accentClass = accentType === "sell" ? "bg-primary" : "bg-[hsl(var(--success))]";
 
   return (
     <div className="flex items-center justify-center px-4 py-8 md:py-12">
       <div
-        className="relative flex w-full max-w-[480px] bg-muted rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] group"
+        className="relative flex w-full max-w-[480px] bg-[hsl(36_9%_88%)] rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] group"
         style={{ aspectRatio: "9/16", maxHeight: "850px" }}
       >
         {/* ── Main Section ── */}
-        <div className="flex-1 flex flex-col p-6 relative border-r-2 border-dashed border-foreground/20">
+        <div className="flex-1 flex flex-col p-6 relative border-r-2 border-dashed border-foreground/15">
           {/* SVG Backdrop */}
           <svg
             className="absolute inset-0 w-full h-full opacity-[0.04] pointer-events-none"
@@ -70,8 +70,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           </svg>
 
           {/* Hero Image Area */}
-          <div className="relative w-full h-[45%] bg-primary rounded-[20px] overflow-hidden mb-6 shrink-0">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-navy-deep grayscale group-hover:grayscale-0 transition-all duration-500" />
+          <div className="relative w-full h-[45%] bg-foreground rounded-[20px] overflow-hidden mb-6 shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground/80 to-foreground/60 grayscale group-hover:grayscale-0 transition-all duration-500" />
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-primary-foreground/20 text-6xl font-heading font-bold">
                 {propertyType?.charAt(0).toUpperCase() || "P"}
@@ -157,7 +157,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
             {/* Meta Info */}
             <div className="absolute bottom-[75px] right-0 text-right text-[0.5rem] leading-[1.2] text-foreground/60 w-[100px]">
-              <p>VALUATION BY AI</p>
+              <p>VALUATION REPORT</p>
               <p>REF #{leadId.slice(0, 8).toUpperCase()}</p>
               <p>VALID FOR ONE</p>
             </div>
@@ -200,7 +200,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         </div>
 
         {/* ── Stub Section ── */}
-        <div className="hidden sm:flex w-[60px] flex-col items-center justify-between py-6 bg-muted">
+        <div className="hidden sm:flex w-[60px] flex-col items-center justify-between py-6 bg-[hsl(36_9%_88%)]">
           <div className="flex flex-col items-center gap-4">
             <ArrowDown size={18} className="text-foreground/60" />
           </div>
