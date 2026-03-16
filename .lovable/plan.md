@@ -1,56 +1,55 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Features Showcase, Comparables Section, and Editorial Text Refinements
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+This is a multi-stage plan. Stage 1 focuses on what we can build now with existing data. Stage 2 outlines future enhancements.
 
-### Changes
+---
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+### Stage 1 — Immediate Changes (SellResult.tsx)
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**1. Property Features Section (new)**
+Display the user's submitted features (from `lead.features` — stored as comma-separated text, plus `hasPool`/`hasGarage` booleans from the features field) with icons in a clean grid layout. Each feature gets a small icon + label pill, similar to the La Sala "Features & Amenities" collapsible but rendered as a flat visual grid of tags with icons.
 
-**2. Floating agency logos treatment**
+- Parse `lead.features` (comma-separated string like "private pool, roof terrace, wine cellar")
+- Map common keywords to Lucide icons (pool → `Waves`, garage → `Car`, terrace → `Fence`, garden → `TreePine`, gym → `Dumbbell`, elevator → `ArrowUpDown`, etc.)
+- Render as a centered grid of small icon+label items with generous spacing
+- Place this section between PropertySummaryCard and ValuationResultCard
+- Section header: small uppercase label "What Makes It Special"
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+**2. AI Analysis Section — Always Open**
+- Remove the `expanded` toggle state — show all paragraphs always
+- Keep the drop-cap on first paragraph
+- Adopt La Sala text style: larger line-height (`leading-[2]`), lighter font weight, more paragraph spacing (`mt-8` between paragraphs instead of `mt-6`)
+- Add an italic serif subtitle/pull-quote extracted from the first sentence, displayed above the body text in `font-serif italic text-lg`
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
+**3. Market Trends Section — Collapsible**
+- Wrap chart + text in a toggle (collapsed by default)
+- Show only the section header + a "View market trends" button
+- When expanded, reveal chart with smooth animation
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
+**4. Comparable Properties Section (new)**
+- Use the existing `lead.comparable_properties` JSONB data (already stored with: `id`, `price`, `price_per_sqm`, `built_size_sqm`, `bedrooms`, `bathrooms`, `property_type`, `address`, `city`, `distance_km`, `image_urls`, `listing_url`)
+- Create a horizontal scroll carousel of comparable property cards
+- **Front of card**: Property image (from `image_urls[0]`, fallback to placeholder), price, address, city
+- **Back of card** (flip on tap): Show matching attributes — bedrooms, bathrooms, built size, price/m², distance — with check marks for attributes that match the user's property
+- Cards use the ValuationTicketCard visual language (rounded, shadow, gold accents) but simplified
+- Section header: "Comparable Properties" with count
+- Place after Market Trends, before Professional Spotlight
 
-**3. How It Works — typographic layout**
+**5. Text & Spacing Refinements (La Sala style)**
+- Analysis paragraphs: `text-[15px] leading-[2] text-foreground/70 font-light` — lighter, more airy
+- More vertical space between sections (`py-16 md:py-24`)
+- Thin 1px `bg-border` hairlines between sections (already present, keep)
 
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
+### Stage 2 — Future Enhancements (not in this implementation)
+- Fetch live property images via scraping or Resales Online API for comparables
+- Add a "Feature Impact" section showing estimated value added per feature (e.g., "+€85,000 Pool")
+- Interactive comparable card that links to the original listing URL
+- RentResult page parity — add comparable rentals section using `comparable_rentals` JSONB
 
-**4. Report Features — editorial scatter**
+---
 
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Files Modified
+- `src/pages/SellResult.tsx` — all changes above
 
