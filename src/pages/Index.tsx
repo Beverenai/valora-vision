@@ -5,6 +5,7 @@ import { Star, ArrowRight, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 
 /* ─── DATA ─── */
 
