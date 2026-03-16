@@ -512,8 +512,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             willChange: isInteracting ? "transform" : "auto",
           }}
         >
-          <div style={{ gridArea: "1/1" }} className={cn(flippable && "h-full overflow-hidden")}>{frontFace}</div>
-          {backFace && <div style={{ gridArea: "1/1" }} className="h-full overflow-hidden">{backFace}</div>}
+          <div style={{ gridArea: "1/1" }}>{frontFace}</div>
+          {backFace && <div style={{ gridArea: "1/1" }}>{backFace}</div>}
         </div>
       </div>
     );
