@@ -59,6 +59,9 @@ interface ValuationTicketCardProps {
   onMapPhaseChange?: (phase: "search" | "verify") => void;
   /* Size variant for different contexts */
   size?: CardSize;
+  /* Valuation type toggle */
+  valuationType?: "sell" | "rent";
+  onValuationTypeChange?: (type: "sell" | "rent") => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
