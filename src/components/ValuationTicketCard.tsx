@@ -442,10 +442,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   /* ── BACK FACE ── */
   const backFace = flippable ? (
-    <div
-      className={cn(cardClasses, "z-10")}
-      style={{ transition: "opacity 0.4s ease", opacity: flipped ? 1 : 0, pointerEvents: flipped ? "auto" : "none" }}
-    >
+    <div className={cardClasses}>
       <div className={cn("flex-1 flex flex-col overflow-y-auto", mainPadding)}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-2">
