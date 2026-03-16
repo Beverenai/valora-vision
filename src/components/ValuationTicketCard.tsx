@@ -53,6 +53,7 @@ interface ValuationTicketCardProps {
   referenceCode?: string;
   /* Map expanded state - card grows taller when map is visible */
   mapExpanded?: boolean;
+  onMapPhaseChange?: (phase: "search" | "verify") => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
