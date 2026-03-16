@@ -25,57 +25,126 @@ function mapPropertyType(idealistaType: string): string {
   return map[idealistaType] || idealistaType || "apartment";
 }
 
-// ─── Idealista via RapidAPI (idealista7 by scraperium) ────
-async function fetchIdealistaListings(
-  rapidApiKey: string,
+// ─── Apify Actor for Idealista ───────────────────────────
+const APIFY_ACTOR_ID = "REcGj6dyoIJ9Z7aE6";
+
+async function fetchIdealistaViaApify(
+  apifyToken: string,
   locationId: string,
   operation: "sale" | "rent",
-  maxPages: number = 3
+  maxItems: number = 50
 ): Promise<any[]> {
-  const allListings: any[] = [];
-  const host = "idealista7.p.rapidapi.com";
+  // 1. Start the Actor run
+  const input = {
+    maxItems,
+    operation,
+    propertyType: "homes",
+    country: "es",
+    location: locationId,
+    propertyCodes: [],
+    sortBy: "mostRecent",
+    fetchDetails: false,
+    fetchStats: false,
+    minPrice: "0",
+    maxPrice: "0",
+    minSize: "0",
+    maxSize: "0",
+    publicationDate: "",
+    airConditioning: false,
+    fittedWardrobes: false,
+    lift: false,
+    balcony: false,
+    terrace: false,
+    exterior: false,
+    garage: false,
+    garden: false,
+    swimmingPool: false,
+    storageRoom: false,
+    accessible: false,
+    seaViews: false,
+    luxury: false,
+    plan: false,
+    virtualTour: false,
+    agency: "",
+    proxyConfiguration: {
+      useApifyProxy: true,
+      apifyProxyGroups: ["RESIDENTIAL"],
+    },
+  };
 
-  for (let page = 1; page <= maxPages; page++) {
-    const params = new URLSearchParams({
-      operation,
-      locationId,
-      maxItems: "40",
-      numPage: String(page),
-      location: "es",
-      locale: "en",
-      order: "relevance",
-    });
+  console.log(`Starting Apify Actor for ${operation} in ${locationId}`);
 
-    const url = `https://${host}/list?${params.toString()}`;
-    console.log(`Fetching Idealista ${operation} page ${page}: ${url}`);
-
-    const res = await fetch(url, {
-      headers: {
-        "x-rapidapi-key": rapidApiKey,
-        "x-rapidapi-host": host,
-      },
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error(`Idealista API error [${res.status}]: ${text}`);
-      break;
+  const startRes = await fetch(
+    `https://api.apify.com/v2/acts/${APIFY_ACTOR_ID}/runs?token=${apifyToken}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
     }
+  );
 
-    const data = await res.json();
-    const listings = data?.elementList || data?.elements || [];
-
-    if (listings.length === 0) break;
-    allListings.push(...listings);
-
-    // Rate limiting
-    if (page < maxPages) await delay(1500);
+  if (!startRes.ok) {
+    const text = await startRes.text();
+    console.error(`Apify start error [${startRes.status}]: ${text}`);
+    throw new Error(`Failed to start Apify Actor: ${startRes.status}`);
   }
 
-  return allListings;
+  const runData = await startRes.json();
+  const runId = runData.data?.id;
+  const datasetId = runData.data?.defaultDatasetId;
+
+  if (!runId || !datasetId) {
+    throw new Error("No runId or datasetId returned from Apify");
+  }
+
+  console.log(`Apify run started: ${runId}, dataset: ${datasetId}`);
+
+  // 2. Poll for completion (max ~5 minutes)
+  const maxPolls = 60;
+  const pollInterval = 5000;
+
+  for (let i = 0; i < maxPolls; i++) {
+    await delay(pollInterval);
+
+    const statusRes = await fetch(
+      `https://api.apify.com/v2/actor-runs/${runId}?token=${apifyToken}`
+    );
+
+    if (!statusRes.ok) {
+      console.error(`Apify poll error [${statusRes.status}]`);
+      continue;
+    }
+
+    const statusData = await statusRes.json();
+    const status = statusData.data?.status;
+
+    console.log(`Apify run ${runId} status: ${status} (poll ${i + 1}/${maxPolls})`);
+
+    if (status === "SUCCEEDED") {
+      break;
+    } else if (status === "FAILED" || status === "ABORTED" || status === "TIMED-OUT") {
+      throw new Error(`Apify Actor run ${status}`);
+    }
+    // RUNNING or READY — keep polling
+  }
+
+  // 3. Fetch dataset items
+  const itemsRes = await fetch(
+    `https://api.apify.com/v2/datasets/${datasetId}/items?token=${apifyToken}&format=json`
+  );
+
+  if (!itemsRes.ok) {
+    const text = await itemsRes.text();
+    console.error(`Apify dataset error [${itemsRes.status}]: ${text}`);
+    throw new Error(`Failed to fetch Apify dataset: ${itemsRes.status}`);
+  }
+
+  const items = await itemsRes.json();
+  console.log(`Apify returned ${items.length} items for ${operation}`);
+  return items;
 }
 
-// ─── Airbnb via RapidAPI (airbnb-search by ntd119) ────────
+// ─── Airbnb via RapidAPI (unchanged) ─────────────────────
 async function fetchAirbnbListings(
   rapidApiKey: string,
   city: string,
@@ -251,8 +320,8 @@ async function upsertSTRListings(supabase: any, listings: any[], city: string, z
         bedrooms: Number(item.bedrooms || item.beds || 0) || null,
         bathrooms: Number(item.bathrooms || 0) || null,
         avg_daily_rate: pricePerNight || null,
-        avg_weekly_rate: pricePerNight ? Math.round(pricePerNight * 7 * 0.9) : null,  // ~10% weekly discount
-        avg_monthly_rate: pricePerNight ? Math.round(pricePerNight * 30 * 0.75) : null,  // ~25% monthly discount
+        avg_weekly_rate: pricePerNight ? Math.round(pricePerNight * 7 * 0.9) : null,
+        avg_monthly_rate: pricePerNight ? Math.round(pricePerNight * 30 * 0.75) : null,
         occupancy_rate: Number(item.occupancyRate || 0.65) || 0.65,
         high_season_daily_rate: pricePerNight ? Math.round(pricePerNight * 1.4) : null,
         low_season_daily_rate: pricePerNight ? Math.round(pricePerNight * 0.7) : null,
@@ -288,10 +357,12 @@ serve(async (req) => {
   }
 
   try {
-    const RAPIDAPI_KEY = Deno.env.get("RAPIDAPI_KEY");
-    if (!RAPIDAPI_KEY) {
-      throw new Error("RAPIDAPI_KEY is not configured");
+    const APIFY_TOKEN = Deno.env.get("APIFY_API_TOKEN");
+    if (!APIFY_TOKEN) {
+      throw new Error("APIFY_API_TOKEN is not configured");
     }
+
+    const RAPIDAPI_KEY = Deno.env.get("RAPIDAPI_KEY"); // still used for Airbnb
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -300,18 +371,17 @@ serve(async (req) => {
     const body = await req.json();
     const { zone_id, location_id, zone_name, scrape_sale, scrape_rent, scrape_str } = body;
 
-    // Defaults: scrape everything
     const doSale = scrape_sale !== false;
     const doRent = scrape_rent !== false;
     const doSTR = scrape_str !== false;
 
-    const results: Record<string, number> = {};
+    const results: Record<string, any> = {};
 
-    // 1. Idealista Sales
+    // 1. Idealista Sales via Apify
     if (doSale && location_id) {
       try {
-        console.log(`=== Scraping Idealista SALES for ${zone_name} (${location_id}) ===`);
-        const saleListings = await fetchIdealistaListings(RAPIDAPI_KEY, location_id, "sale", 3);
+        console.log(`=== Scraping Idealista SALES for ${zone_name} (${location_id}) via Apify ===`);
+        const saleListings = await fetchIdealistaViaApify(APIFY_TOKEN, location_id, "sale", 50);
         console.log(`Found ${saleListings.length} sale listings`);
         results.sale_count = await upsertSaleListings(supabase, saleListings, zone_name, zone_id || null);
         console.log(`Upserted ${results.sale_count} sale properties`);
@@ -319,14 +389,13 @@ serve(async (req) => {
         console.error("Sale scrape failed:", e);
         results.sale_error = String(e);
       }
-      await delay(2000);
     }
 
-    // 2. Idealista Rentals
+    // 2. Idealista Rentals via Apify
     if (doRent && location_id) {
       try {
-        console.log(`=== Scraping Idealista RENTALS for ${zone_name} (${location_id}) ===`);
-        const rentListings = await fetchIdealistaListings(RAPIDAPI_KEY, location_id, "rent", 3);
+        console.log(`=== Scraping Idealista RENTALS for ${zone_name} (${location_id}) via Apify ===`);
+        const rentListings = await fetchIdealistaViaApify(APIFY_TOKEN, location_id, "rent", 50);
         console.log(`Found ${rentListings.length} rental listings`);
         results.rent_count = await upsertRentListings(supabase, rentListings, zone_name, zone_id || null);
         console.log(`Upserted ${results.rent_count} rental properties`);
@@ -334,11 +403,10 @@ serve(async (req) => {
         console.error("Rent scrape failed:", e);
         results.rent_error = String(e);
       }
-      await delay(2000);
     }
 
-    // 3. Airbnb STR
-    if (doSTR) {
+    // 3. Airbnb STR (still via RapidAPI if key available)
+    if (doSTR && RAPIDAPI_KEY) {
       try {
         console.log(`=== Scraping Airbnb STR for ${zone_name} ===`);
         const strListings = await fetchAirbnbListings(RAPIDAPI_KEY, zone_name, 2);
@@ -349,6 +417,9 @@ serve(async (req) => {
         console.error("STR scrape failed:", e);
         results.str_error = String(e);
       }
+    } else if (doSTR && !RAPIDAPI_KEY) {
+      console.log("Skipping Airbnb STR — RAPIDAPI_KEY not configured");
+      results.str_skipped = "RAPIDAPI_KEY not configured";
     }
 
     // 4. Update scrape_zones.last_scraped_at
