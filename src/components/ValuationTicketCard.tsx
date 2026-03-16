@@ -205,11 +205,11 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const frontFace = (
     <div className={cardClasses}>
       {/* Main Section */}
-      <div className="flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15 overflow-hidden">
+      <div className={cn("flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15", mapExpanded ? "overflow-visible" : "overflow-hidden")}>
         {/* Hero Image */}
         <div className={cn(
           "relative w-full min-h-[120px] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink transition-all duration-500",
-          mapExpanded ? "max-h-[80px] md:max-h-[25%]" : "max-h-[42%]"
+          mapExpanded ? "max-h-[60px] md:max-h-[25%]" : "max-h-[42%]"
         )}>
           <img
             src={heroImage}
@@ -461,7 +461,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         className={cn(
           "relative w-full max-w-[340px] md:max-w-[520px] group cursor-grab active:cursor-grabbing transition-all duration-500",
           hasInput
-            ? (mapExpanded ? "min-h-[480px]" : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
+            ? (mapExpanded ? "min-h-[620px] md:min-h-[680px]" : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
             : (mapExpanded
               ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
               : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
