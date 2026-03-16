@@ -1,56 +1,76 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Bento Grid for "Everything In Your Report"
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+### What
+Replace the current flat 2-column list of report features with an asymmetric bento grid where each feature has a mini visual preview mockup inside its card.
 
-### Changes
-
-**1. `src/pages/Index.tsx` — Full visual overhaul**
-
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
-
-**2. Floating agency logos treatment**
+### Layout (Mobile-first, 390px viewport)
 
 ```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+Mobile (single column, full-width cards):
+┌──────────────────────────────┐
+│  Estimated Market Value      │  ← tall hero card
+│  ┌────────────────────────┐  │
+│  │  €845,000              │  │
+│  │  Range: €790K – €900K  │  │
+│  └────────────────────────┘  │
+└──────────────────────────────┘
+┌─────────────┐ ┌──────────────┐
+│ Price/m²    │ │ Property     │  ← 2-col row
+│ €3,200/m²   │ │ Analysis     │
+└─────────────┘ └──────────────┘
+┌──────────────────────────────┐
+│  Market Trends               │  ← wide card
+│  ↗ chart mockup              │
+└──────────────────────────────┘
+┌─────────────┐ ┌──────────────┐
+│ Comparables │ │ Agent Recs   │  ← 2-col row
+│ 3 mini cards│ │ matched icon │
+└─────────────┘ └──────────────┘
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
+Desktop (2-col bento with spanning):
+┌──────────────────┬───────────┐
+│ Market Value     │ Price/m²  │
+│ (spans tall)     │───────────│
+│                  │ Analysis  │
+├──────────────────┴───────────┤
+│ Market Trends (full width)   │
+├───────────┬──────────────────┤
+│ Comps     │ Agent Recs       │
+└───────────┴──────────────────┘
 ```
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
+### Implementation — `src/pages/Index.tsx`
 
-**3. How It Works — typographic layout**
+**1. Update data arrays** — add a `visual` type field and `gridClass` to each feature for bento sizing:
+- `"hero"` — large card with mock price display
+- `"metric"` — small card with single stat
+- `"chart"` — wide card with mini trend line SVG
+- `"cards"` — card with mini property thumbnails
+- `"icon"` — card with centered icon treatment
 
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
+**2. Replace the grid section (lines 457–493)** with a CSS Grid bento layout:
+- `grid-cols-2` on mobile, `grid-cols-4` on desktop
+- Hero card spans 2 cols (+ 2 rows on desktop)
+- Market trends spans full width
+- Cards use `bg-card` with subtle `border border-border` and `rounded-2xl`
+- Each card renders a tiny decorative visual:
+  - Market Value: large price number + confidence bar
+  - Price/m²: single bold metric
+  - Property Analysis: strength indicator dots
+  - Market Trends: inline SVG sparkline (static, decorative)
+  - Comparables: 3 tiny placeholder cards in a row
+  - Agent Recs: avatar circles + checkmark
 
-**4. Report Features — editorial scatter**
+**3. Styling** — follows La Sala language:
+- White cards on off-white bg
+- Terracotta accent tints on `accent: true` cards (rent: green tints)
+- `whileInView` staggered fade-in per card (0.08s delay each)
+- Generous padding inside cards (`p-5 md:p-6`)
 
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+**4. Rent mode** — same layout, different visual content in hero card (monthly estimate instead of market value), green accents instead of terracotta.
+
+### Files Modified
+- `src/pages/Index.tsx` — report features section only
 
