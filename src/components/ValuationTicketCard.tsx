@@ -121,7 +121,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   // Determine effective mode
   const isProcessing = mode === "processing";
   const isCompact = mode === "compact" || (!mode && compact);
-  const isLarge = size === "hero" || size === "showcase";
+  const isLarge = size === "hero";
 
   const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined) && !isProcessing;
   const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
