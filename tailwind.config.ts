@@ -133,6 +133,10 @@ export default {
           from: { strokeDashoffset: "1000" },
           to: { strokeDashoffset: "0" },
         },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 15px 2px hsl(var(--gold) / 0.3)" },
+          "50%": { boxShadow: "0 0 25px 6px hsl(var(--gold) / 0.5)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
