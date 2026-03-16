@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { formatRefCode } from "@/utils/referenceCode";
 
-type CardSize = "default" | "hero" | "showcase";
+type CardSize = "default" | "hero";
 
 interface ValuationTicketCardProps {
   address: string;
@@ -121,7 +121,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   // Determine effective mode
   const isProcessing = mode === "processing";
   const isCompact = mode === "compact" || (!mode && compact);
-  const isLarge = size === "hero" || size === "showcase";
+  const isLarge = size === "hero";
 
   const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined) && !isProcessing;
   const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
@@ -156,17 +156,6 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       resultCursiveSize: "text-[1.8rem] md:text-[3rem] lg:text-[4rem]",
       priceSize: "text-[1.6rem] md:text-[2.5rem] lg:text-[3.5rem]",
       barcodeHeight: "h-[35px] md:h-[55px] lg:h-[70px]",
-    },
-    showcase: {
-      outerMaxWidth: "max-w-[360px] md:max-w-[680px] lg:max-w-[880px]",
-      stubWidth: "w-[50px] md:w-[60px] lg:w-[75px]",
-      mainPadding: "p-3 md:p-6 lg:p-9",
-      heroImageMaxH: "max-h-[42%] md:max-h-[48%]",
-      titleSize: "text-[2.2rem] md:text-[3rem] lg:text-[4rem]",
-      cursiveSize: "text-[2rem] md:text-[2.5rem] lg:text-[3rem]",
-      resultCursiveSize: "text-[1.8rem] md:text-[2.8rem] lg:text-[3.5rem]",
-      priceSize: "text-[1.6rem] md:text-[2.2rem] lg:text-[3rem]",
-      barcodeHeight: "h-[35px] md:h-[55px] lg:h-[65px]",
     },
   }[size];
 
@@ -455,7 +444,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       className={cn(cardClasses, "z-10")}
       style={{ transition: "opacity 0.4s ease", opacity: flipped ? 1 : 0, pointerEvents: flipped ? "auto" : "none" }}
     >
-      <div className="flex-1 flex flex-col p-5 md:p-6 overflow-y-auto">
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", mainPadding)}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-2">
           <MapPin size={14} className="text-primary" />
@@ -509,9 +498,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             "relative w-full group transition-all duration-500",
             flippable ? "cursor-pointer cursor-grab active:cursor-grabbing" : "",
             outerMaxWidth,
-            flippable
-              ? "h-[520px] md:h-[620px] lg:h-[680px]"
-              : mapExpanded
+            mapExpanded
                 ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
                 : size === "default"
                   ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
@@ -525,8 +512,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             willChange: isInteracting ? "transform" : "auto",
           }}
         >
-          <div style={{ gridArea: "1/1" }} className={cn(flippable && "h-full overflow-hidden")}>{frontFace}</div>
-          {backFace && <div style={{ gridArea: "1/1" }} className="h-full overflow-hidden">{backFace}</div>}
+          <div style={{ gridArea: "1/1" }}>{frontFace}</div>
+          {backFace && <div style={{ gridArea: "1/1" }}>{backFace}</div>}
         </div>
       </div>
     );

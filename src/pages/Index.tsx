@@ -280,7 +280,7 @@ const Index = () => {
               subtitle="Your Valuation"
               summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators."
               accentType="sell"
-              size="showcase"
+              size="hero"
               flippable
               bedrooms={4}
               bathrooms={3}

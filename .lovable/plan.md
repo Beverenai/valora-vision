@@ -1,27 +1,56 @@
 
 
-## Plan: Make showcase card an exact clone of the hero card shell
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### Root cause
-The showcase card uses `size="showcase"` which has different max-widths, padding, font sizes, and barcode heights than the hero card (`size="hero"`). The fixed height constraints (`h-[520px] md:h-[620px] lg:h-[680px]`) don't match the hero's natural proportions, causing mismatched sizes between front/back and awkward empty space on the back face.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
 ### Changes
 
-**1. `src/pages/Index.tsx` — Switch showcase card to `size="hero"`**
-- Line 283: Change `size="showcase"` to `size="hero"` so it uses the identical shell config (max-width, padding, typography, barcode) as the hero card.
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**2. `src/components/ValuationTicketCard.tsx` — Fix flippable sizing**
-- **Remove the separate fixed height for flippable cards** (line 512-513). Instead, use the same `min-h` / `max-h` constraints as non-flippable result cards so the card shell is identical regardless of flip state.
-- **Make the back face fill its container properly**: the back face content area should use `flex-1` with `justify-between` so the detail grid stretches to fill the same shell height as the front face — no extra empty space, no size change.
-- **Remove the `overflow-hidden` wrappers on the grid children** (lines 528-529) since the card faces themselves already have `overflow-hidden` via `cardClasses`. The grid children just need `gridArea: "1/1"` and identical dimensions.
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**3. Delete `showcase` from `sizeConfig`**
-- Remove the entire `showcase` entry from the sizeConfig object (lines 160-171) since it's no longer used. This eliminates the duplicate/divergent config entirely.
+**2. Floating agency logos treatment**
 
-### Result
-Both the hero input card and the showcase flippable card will render with the exact same outer shell — same max-width, same rounded corners, same shadow, same stub, same padding. The only difference is internal content (input vs result/details). Flipping will not change the card's dimensions.
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-### Files
-- `src/pages/Index.tsx`
-- `src/components/ValuationTicketCard.tsx`
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
+
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
+
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
