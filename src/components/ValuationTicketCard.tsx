@@ -25,6 +25,19 @@ interface ValuationTicketCardProps {
   onContinue?: () => void;
   /** @deprecated Use onContinue instead */
   onSubmit?: () => void;
+  /* Google address input mode (replaces plain input) */
+  addressData?: {
+    streetAddress: string;
+    urbanization: string;
+    city: string;
+    province: string;
+    country: string;
+    complex?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  onAddressFieldChange?: (field: string, value: string | number | undefined) => void;
+  onLocationConfirmed?: () => void;
   /* Flippable result mode */
   flippable?: boolean;
   bedrooms?: number;
