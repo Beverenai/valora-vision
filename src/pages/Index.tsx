@@ -246,7 +246,7 @@ const Index = () => {
             transition={{ duration: 0.5 }}
             className="inline-block bg-[#FFF3EB] text-[#D4713B] rounded-full px-4 py-2 text-sm font-medium mb-8"
           >
-            Free AI-powered valuation
+            Free property valuation
           </motion.span>
 
           <motion.h1
