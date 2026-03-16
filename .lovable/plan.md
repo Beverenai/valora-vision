@@ -1,80 +1,56 @@
 
 
-## Plan: Property Data Ingestion Pipeline via External APIs
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### Current State
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-The valuation engine queries `properties_for_sale` and `properties_for_rent` tables using PostGIS `find_sale_comparables` / `find_rent_comparables` RPCs. The `short_term_rentals` table exists but isn't used in valuations yet. All tables are currently empty or manually populated — there's no automated data ingestion.
+### Changes
 
-### What We'll Build
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-A weekly data ingestion pipeline using RapidAPI providers to populate the three property tables from Idealista (sales + long-term rentals) and Airbnb/VRBO (short-term rentals).
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-### Architecture
+**2. Floating agency logos treatment**
 
 ```text
-┌──────────────────────┐     ┌─────────────────────┐
-│  pg_cron (weekly)    │────▶│  scrape-properties   │
-│  Triggers per zone   │     │  (Edge Function)     │
-└──────────────────────┘     └─────────┬───────────┘
-                                       │
-                    ┌──────────────────┼──────────────────┐
-                    ▼                  ▼                  ▼
-           RapidAPI Idealista   RapidAPI Idealista   RapidAPI Airbnb
-           (Sale listings)      (Rent listings)      (STR data)
-                    │                  │                  │
-                    ▼                  ▼                  ▼
-           properties_for_sale  properties_for_rent  short_term_rentals
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
+
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
 
-### Implementation Steps
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-**1. Edge Function: `scrape-properties`**
+**3. How It Works — typographic layout**
 
-A single edge function that accepts a zone/location and fetches data from three sources:
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
 
-- **Idealista Sales** — RapidAPI endpoint for sale listings. Parses price, size, beds, baths, coordinates, images, features. Upserts into `properties_for_sale` by `external_id + source`.
-- **Idealista Rentals** — Same API, rental operation. Upserts into `properties_for_rent`.
-- **Airbnb/VRBO** — RapidAPI endpoint for short-term rental data (daily rates, occupancy, reviews). Upserts into `short_term_rentals`.
+**4. Report Features — editorial scatter**
 
-Each source is wrapped in try/catch so one failure doesn't block others. The function updates `scrape_zones.last_scraped_at` after completion.
-
-**2. API Keys (Secrets)**
-
-We'll need RapidAPI keys configured as secrets:
-- `RAPIDAPI_KEY` — single key for all RapidAPI endpoints
-
-**3. Weekly Schedule via pg_cron**
-
-A cron job iterates active `scrape_zones` and calls the edge function for each zone. Runs weekly.
-
-**4. Update `calculate-valuation` for Short-Term Rentals**
-
-Enhance the existing edge function to also query `short_term_rentals` when generating rent valuations, adding seasonal rate estimates and occupancy data.
-
-**5. Populate `scrape_zones` with Initial Data**
-
-Insert Costa del Sol zones (Marbella, Estepona, Fuengirola, Malaga, etc.) with their Idealista location IDs.
-
-### Technical Details
-
-- **Deduplication**: Upsert on `(external_id, source)` unique constraint (need to add this to `properties_for_sale` and `properties_for_rent`)
-- **Location point**: Compute `location_point` from lat/lng on insert using `ST_SetSRID(ST_MakePoint(lng, lat), 4326)::geography`
-- **Rate limiting**: Process zones sequentially with delays between API calls
-- **Data freshness**: `scraped_at` timestamp updated on each upsert; comparables RPC already filters `scraped_at > NOW() - 90 days`
-
-### Files
-
-- `supabase/functions/scrape-properties/index.ts` — new edge function
-- `supabase/functions/calculate-valuation/index.ts` — add STR data to rent valuations
-- DB migration: add unique constraints on `(external_id, source)` for sale/rent tables
-- DB migration: add INSERT policies for service role on `properties_for_sale`, `properties_for_rent`, `short_term_rentals`
-
-### Next Steps After Implementation
-
-Once the pipeline is built, you'll need to:
-1. Add the `RAPIDAPI_KEY` secret
-2. Choose specific RapidAPI providers (I'll research the best ones for Spanish property data)
-3. Seed the `scrape_zones` table with target locations
-4. Test with a single zone before enabling the weekly schedule
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
