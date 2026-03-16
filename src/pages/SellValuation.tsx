@@ -76,6 +76,7 @@ const SellValuation: React.FC = () => {
   } = useFormWizard<SellValuationData>({
     steps: SELL_STEPS,
     initialData: initialData,
+    initialStep: hasCoordinates ? 1 : 0,
     validateStep: validateSellStep,
   });
 
