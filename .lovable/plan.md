@@ -1,56 +1,69 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Apply La Sala Editorial Design Language to Homepage
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+### What changes
 
-### Changes
+Transform `src/pages/Index.tsx` from its current editorial-lite style to the full La Sala design language — bold uppercase sans-serif headlines, italic serif subtitles, drop caps, thin hr dividers, small tracking-widest labels, and the specific color/typography system.
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+### Section-by-section changes
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**1. Hero** (lines 128-158)
+- Replace badge with small uppercase label: `"YOUR PROPERTY VALUATION"` — `text-xs tracking-[0.2em] uppercase text-[#999]`
+- Add thin `<hr>` divider below label (`max-w-[60px] mx-auto border-[#E8E5E0] my-6`)
+- Headline becomes bold uppercase sans-serif: `font-black uppercase tracking-tight text-5xl md:text-7xl text-[#1A1A1A]` (Inter, not DM Serif)
+- Subtitle becomes italic DM Serif: `font-['DM_Serif_Display'] italic text-xl md:text-2xl text-[#777]`
+- Keep the ValuationTicketCard as-is
 
-**2. Floating agency logos treatment**
+**2. Stats Bar** (lines 50-72)
+- Restyle to match La Sala: small uppercase tracking labels `text-xs tracking-[0.2em] uppercase text-[#999]`, large bold numbers `text-3xl md:text-4xl font-extrabold text-[#1A1A1A]`
+- Use thin `border-[#E8E5E0]` dividers
+
+**3. SectionDivider** (line 46-48)
+- Change to thin 1px `<hr>` with `border-[#E8E5E0]` instead of `border-border/40`
+
+**4. Floating Agencies** (lines 169-197)
+- Label becomes: `text-xs tracking-[0.2em] uppercase text-[#999]`
+
+**5. How It Works** (lines 201-247)
+- Small label above: `"HOW IT WORKS"` — `text-xs tracking-[0.2em] uppercase text-[#999] text-center`
+- Headline: bold uppercase sans-serif `font-black uppercase tracking-tight text-4xl md:text-6xl text-[#1A1A1A] text-center`
+- Italic subtitle below: `font-['DM_Serif_Display'] italic text-xl text-[#777] text-center`
+- Step numbers stay large but use `font-extrabold text-[#E8E5E0]` for a watermark feel
+- Step dividers use `border-[#E8E5E0]`
+
+**6. What You Get / Flippable Card** (lines 251-293)
+- Small label: `"YOUR REPORT"` — tracking-widest uppercase
+- Headline: bold uppercase sans-serif
+- Italic subtitle
+
+**7. Report Features** (lines 297-362)
+- Small label: `"INCLUDED FREE"` — tracking-widest uppercase
+- Headline: bold uppercase sans-serif `font-black uppercase tracking-tight`
+- Italic subtitle below
+- Feature dividers use `border-[#E8E5E0]`
+
+**8. Recent Valuations** (lines 366-390)
+- Small label + bold uppercase headline pattern
+
+**9. Testimonials** (lines 394-437)
+- Small label: `"TESTIMONIALS"` — tracking-widest uppercase
+- Headline: bold uppercase sans-serif
+- Quote text stays italic DM Serif
+
+**10. Final CTA** (lines 441-471)
+- Same La Sala treatment: small label, bold uppercase headline, italic subtitle
+- Remove rounded-full badge, use thin hr + label pattern
+
+### Typography pattern (applied consistently everywhere)
 
 ```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
-
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
+<p class="text-xs tracking-[0.2em] uppercase text-[#999]">SMALL LABEL</p>
+<hr class="max-w-[60px] mx-auto border-[#E8E5E0] my-6" />  (optional)
+<h2 class="text-4xl md:text-6xl font-black uppercase tracking-tight text-[#1A1A1A]">HEADLINE</h2>
+<p class="font-['DM_Serif_Display'] italic text-xl text-[#777] mt-4">Italic subtitle</p>
 ```
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Files to edit
+- `src/pages/Index.tsx` — full typography/styling overhaul, no structural changes to layout or components
 
