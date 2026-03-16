@@ -1,68 +1,56 @@
 
 
-## Plan: ValoraCasa Backend Valuation System
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-This is a large system. I'll break it into phases that can be implemented incrementally.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Current State
-- Tables exist: `properties_for_sale`, `properties_for_rent`, `leads_sell`, `leads_rent`
-- No edge functions exist
-- No PostGIS, no geo-queries
-- Result pages show **mock/hardcoded data** (hardcoded €4,100/m², mock analysis text)
-- Form submits directly to `leads_sell`/`leads_rent` and navigates to result
+### Changes
 
-### Phase 1: Database — Enable Geo-Queries + Add Valuation Infrastructure
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**Migration 1**: Enable PostGIS, add geography columns to existing property tables, create the `find_comparables` RPC function, and add `scrape_zones` table.
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-- Enable `postgis` extension
-- Add `location_point GEOGRAPHY(POINT, 4326)` to `properties_for_sale` and `properties_for_rent`
-- Add trigger to auto-populate `location_point` from existing `latitude`/`longitude`
-- Backfill existing rows
-- Add `scrape_zones` table (for future Apify scheduling)
-- Create `find_sale_comparables()` RPC function that queries `properties_for_sale` using `ST_DWithin` for radius search, filtering by type/size/rooms
-- Add `status` column to `leads_sell` and `leads_rent` (`pending`/`processing`/`ready`/`failed`)
-- Add RLS policy allowing anonymous SELECT on `leads_sell`/`leads_rent` by ID (so result page works without auth)
+**2. Floating agency logos treatment**
 
-### Phase 2: Edge Function — `calculate-valuation`
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-Create `supabase/functions/calculate-valuation/index.ts`:
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-1. Receives form data (address, lat/lng, property details, features, contact info, valuation_type)
-2. Inserts lead into `leads_sell` or `leads_rent` with `status='processing'`
-3. Calls `find_sale_comparables` RPC to get 15-20 comparable properties
-4. Filters outliers (>2 std dev from median)
-5. Calculates median price/m² from remaining
-6. Applies feature adjustments (pool +10%, sea views +20%, garage +5%, etc.)
-7. Computes: `estimated_value = adjusted_price_m2 × size_m2`, low/high range (±15%)
-8. For rent: similar calculation using rental comparables
-9. Calls Lovable AI (Gemini) to generate analysis text and market trends
-10. Updates the lead record with all calculated values + `status='ready'`
-11. Returns the lead ID
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-### Phase 3: Frontend — Wire Up Edge Function
+**3. How It Works — typographic layout**
 
-**`SellValuation.tsx`** and **`RentValuation.tsx`**:
-- Change `handleSubmit` to call `supabase.functions.invoke('calculate-valuation', { body: formData })` instead of direct table insert
-- Navigate to result page with the returned ID
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
 
-**`SellResult.tsx`** and **`RentResult.tsx`**:
-- Poll for `status='ready'` if valuation is still processing
-- Display real calculated values from the lead record instead of mock data
-- Show real comparable properties from `comparable_properties` JSONB column
+**4. Report Features — editorial scatter**
 
-### Files Changed
-- **New migration SQL** — PostGIS, geo columns, RPC function, scrape_zones, status columns, RLS
-- **New** `supabase/functions/calculate-valuation/index.ts` — core valuation logic
-- **Edit** `supabase/config.toml` — add function config with `verify_jwt = false`
-- **Edit** `src/pages/SellValuation.tsx` — call edge function
-- **Edit** `src/pages/RentValuation.tsx` — call edge function  
-- **Edit** `src/pages/SellResult.tsx` — use real data, add polling
-- **Edit** `src/pages/RentResult.tsx` — use real data, add polling
-
-### What's NOT in this phase (future work)
-- Apify scraper integration (needs API key + scheduled edge function)
-- PDF report generation
-- On-demand scraping when <5 comparables found
-- Professional agent matching from real data
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
