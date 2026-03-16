@@ -149,16 +149,13 @@ const Index = () => {
             <p className="text-lg md:text-xl text-muted-foreground mt-2">
               Get a detailed market report in under 2 minutes. Completely free.
             </p>
-            <ValuationTicketCard
-              address=""
-              estimatedValue=""
-              propertyType="Villa"
-              leadId="a1b2c3d4e5f6"
-              accentType="sell"
-              addressValue={address}
-              onAddressChange={setAddress}
-              onSubmit={handleGetValuation}
-            />
+            <div className="w-full max-w-lg">
+              <GoogleAddressInput
+                addressData={addressData}
+                onChange={handleAddressChange}
+                onLocationConfirmed={handleGetValuation}
+              />
+            </div>
           </div>
         </div>
 
