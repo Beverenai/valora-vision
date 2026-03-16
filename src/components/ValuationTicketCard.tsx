@@ -180,7 +180,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   /* ── Compact mode: small address summary card ── */
   if (isCompact) {
     return (
-      <div className="w-full max-w-[320px] md:max-w-[520px] mx-auto">
+      <div className="w-full max-w-[320px] md:max-w-[680px] mx-auto">
         <div className="flex items-center gap-3 bg-[hsl(36_9%_88%)] rounded-2xl px-4 py-3 shadow-sm">
           <div className={`w-8 h-8 rounded-full ${accentClass} flex items-center justify-center shrink-0`}>
             <MapPin size={14} className="text-primary-foreground" />
