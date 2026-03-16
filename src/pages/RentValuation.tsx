@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, MapPin, ArrowDown } from "lucide-react";
 import { useFormWizard } from "@/hooks/use-form-wizard";
 import { INITIAL_RENT_DATA, RentValuationData } from "@/types/valuation";
@@ -214,7 +214,7 @@ const RentValuation: React.FC = () => {
             <div className="relative w-full max-w-[380px] md:max-w-[520px] flex">
               <div className="flex-1 flex flex-col bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-r-2 border-dashed border-foreground/15">
                 {/* Header band */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-foreground/10">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-foreground/10 overflow-hidden">
                   <div className="w-8 h-8 rounded-full bg-[hsl(var(--success))] flex items-center justify-center shrink-0">
                     <MapPin size={14} className="text-primary-foreground" />
                   </div>
@@ -225,20 +225,6 @@ const RentValuation: React.FC = () => {
                     {formData.city && formData.streetAddress && (
                       <p className="text-xs text-muted-foreground">{formData.city}</p>
                     )}
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {RENT_STEPS.map((step, i) => (
-                      <div
-                        key={step.name}
-                        className={`rounded-full transition-all duration-300 ${
-                          i === currentStep
-                            ? "bg-[hsl(var(--success))] w-5 h-2"
-                            : i < currentStep
-                            ? "bg-[hsl(var(--success))]/60 w-2 h-2"
-                            : "bg-foreground/20 w-2 h-2"
-                        }`}
-                      />
-                    ))}
                   </div>
                 </div>
 
@@ -289,18 +275,47 @@ const RentValuation: React.FC = () => {
                   )}
                 </div>
 
-                <div className="px-3 pb-3">
-                  <div className="relative h-[30px] md:h-[40px] w-full">
-                    <div
-                      className="h-full w-full"
-                      style={{
-                        background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)`,
-                      }}
-                    />
-                    <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
-                      VALORACASA
-                    </p>
+                {/* Step indicator */}
+                <div className="px-4 pb-4 pt-2">
+                  <div className="flex items-center justify-between">
+                    {RENT_STEPS.map((step, i) => {
+                      const isCompleted = i < currentStep;
+                      const isActive = i === currentStep;
+                      const isLast = i === RENT_STEPS.length - 1;
+                      return (
+                        <React.Fragment key={step.name}>
+                          <div className="flex flex-col items-center gap-1">
+                            <div
+                              className={`flex items-center justify-center rounded-full transition-all duration-300 ${
+                                isActive
+                                  ? "w-7 h-7 bg-[hsl(var(--success))] shadow-[0_0_10px_hsl(var(--success)/0.4)]"
+                                  : isCompleted
+                                  ? "w-6 h-6 bg-[hsl(var(--success))]/80"
+                                  : "w-6 h-6 bg-foreground/10"
+                              }`}
+                            >
+                              {isCompleted ? (
+                                <Check size={12} className="text-primary-foreground" />
+                              ) : (
+                                <span className={`text-[10px] font-semibold ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`}>
+                                  {i + 1}
+                                </span>
+                              )}
+                            </div>
+                            <span className={`text-[9px] font-medium tracking-wide uppercase ${isActive ? "text-foreground" : isCompleted ? "text-foreground/60" : "text-muted-foreground/50"}`}>
+                              {step.name}
+                            </span>
+                          </div>
+                          {!isLast && (
+                            <div className={`h-px flex-1 mx-1 -mt-4 transition-colors duration-300 ${isCompleted ? "bg-[hsl(var(--success))]/40" : "bg-foreground/10"}`} />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                   </div>
+                  <p className="text-center text-[0.5rem] tracking-[3px] text-foreground/40 mt-2 uppercase">
+                    ValoraCasa
+                  </p>
                 </div>
               </div>
 
@@ -336,16 +351,6 @@ const RentValuation: React.FC = () => {
         )}
       </main>
 
-      {!isSubmitting && (
-        <footer className="py-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Are you a real estate agent?{" "}
-            <Link to="/for-professionals" className="text-primary font-medium hover:underline">
-              Sign up here →
-            </Link>
-          </p>
-        </footer>
-      )}
     </div>
   );
 };
