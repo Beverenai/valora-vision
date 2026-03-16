@@ -260,6 +260,50 @@ serve(async (req) => {
       annualRent = monthlyRent * 12;
     }
 
+    // 3b. Calculate STR estimates for rent valuations
+    let weeklyHighSeason = 0;
+    let weeklyLowSeason = 0;
+    let occupancyEstimate = 0;
+    let seasonalBreakdown: any = null;
+
+    if (!isSell && strComparables.length > 0) {
+      const highRates = strComparables
+        .filter((s: any) => s.high_season_daily_rate > 0)
+        .map((s: any) => Number(s.high_season_daily_rate));
+      const lowRates = strComparables
+        .filter((s: any) => s.low_season_daily_rate > 0)
+        .map((s: any) => Number(s.low_season_daily_rate));
+      const occupancies = strComparables
+        .filter((s: any) => s.occupancy_rate > 0)
+        .map((s: any) => Number(s.occupancy_rate));
+
+      const medianHigh = highRates.length > 0 ? median(highRates) : 0;
+      const medianLow = lowRates.length > 0 ? median(lowRates) : 0;
+      const medianOcc = occupancies.length > 0 ? median(occupancies) : 0.65;
+
+      weeklyHighSeason = Math.round(medianHigh * 7);
+      weeklyLowSeason = Math.round(medianLow * 7);
+      occupancyEstimate = Math.round(medianOcc * 100) / 100;
+
+      // Seasonal breakdown: 4 months high, 4 mid, 4 low
+      const midRate = (medianHigh + medianLow) / 2;
+      seasonalBreakdown = {
+        high_season: { months: ["Jun", "Jul", "Aug", "Sep"], daily_rate: Math.round(medianHigh), weekly_rate: weeklyHighSeason },
+        mid_season: { months: ["Apr", "May", "Oct", "Nov"], daily_rate: Math.round(midRate), weekly_rate: Math.round(midRate * 7) },
+        low_season: { months: ["Dec", "Jan", "Feb", "Mar"], daily_rate: Math.round(medianLow), weekly_rate: weeklyLowSeason },
+        occupancy_rate: occupancyEstimate,
+        str_comparables_count: strComparables.length,
+      };
+
+      // Estimate annual STR income
+      const annualSTR = Math.round(
+        (medianHigh * 120 + midRate * 120 + medianLow * 120) * occupancyEstimate
+      );
+      if (annualSTR > annualRent) {
+        annualRent = annualSTR; // Use higher of LTR vs STR
+      }
+    }
+
     // 4. Generate AI analysis
     let analysisText = "";
     let marketTrendsText = "";
