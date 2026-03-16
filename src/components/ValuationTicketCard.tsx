@@ -199,7 +199,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const cardClasses = cn(
     "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]",
     hasInput
-      ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[80vh]" : "min-h-[75vh] md:min-h-[70vh]")
+      ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[80vh]" : "min-h-[55vh] md:min-h-[50vh]")
       : "absolute inset-0 overflow-hidden"
   );
 
@@ -463,7 +463,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         className={cn(
           "relative w-full max-w-[340px] md:max-w-[520px] group cursor-grab active:cursor-grabbing transition-all duration-500",
         hasInput
-            ? (mapExpanded ? "min-h-[85vh] md:min-h-[80vh]" : "min-h-[75vh] md:min-h-[70vh]")
+            ? (mapExpanded ? "min-h-[85vh] md:min-h-[80vh]" : "min-h-[55vh] md:min-h-[50vh]")
             : (mapExpanded
               ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
               : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
