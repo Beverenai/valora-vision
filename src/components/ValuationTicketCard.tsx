@@ -1,5 +1,6 @@
 import React, { useRef, useCallback, useState, useEffect } from "react";
 import { Share2, Download, ArrowDown, MapPin, ArrowRight, Bed, Bath, Ruler, LandPlot, Home, Sparkles } from "lucide-react";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -24,6 +25,19 @@ interface ValuationTicketCardProps {
   onContinue?: () => void;
   /** @deprecated Use onContinue instead */
   onSubmit?: () => void;
+  /* Google address input mode (replaces plain input) */
+  addressData?: {
+    streetAddress: string;
+    urbanization: string;
+    city: string;
+    province: string;
+    country: string;
+    complex?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  onAddressFieldChange?: (field: string, value: string | number | undefined) => void;
+  onLocationConfirmed?: () => void;
   /* Flippable result mode */
   flippable?: boolean;
   bedrooms?: number;
@@ -74,6 +88,9 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   onAddressChange,
   onContinue,
   onSubmit,
+  addressData,
+  onAddressFieldChange,
+  onLocationConfirmed,
   flippable = false,
   bedrooms,
   bathrooms,
@@ -95,7 +112,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const isProcessing = mode === "processing";
   const isCompact = mode === "compact" || (!mode && compact);
 
-  const hasInput = onAddressChange !== undefined && !isProcessing;
+  const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined) && !isProcessing;
+  const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
   const handleContinue = onContinue || onSubmit;
 
   const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
@@ -259,33 +277,41 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           </div>
         ) : hasInput ? (
           /* ── Hero INPUT mode ── */
-          <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]">
+          <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
             <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
               Your Valuation
             </span>
 
-            <div className="relative mt-2">
-              <MapPin size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                value={addressValue || ""}
-                onChange={(e) => onAddressChange?.(e.target.value)}
-                placeholder="Your address..."
-                className="w-full rounded-xl border border-border bg-card pl-8 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-              />
-            </div>
-
-            {/* Continue arrow — only visible when address has content */}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleContinue?.(); }}
-              disabled={!addressValue?.trim()}
-              className="flex items-center justify-end gap-1.5 text-sm font-medium text-primary mt-1 self-end transition-all disabled:opacity-0 disabled:pointer-events-none hover:gap-2.5"
-            >
-              Continue
-              <ArrowRight size={14} />
-            </button>
+            {hasGoogleInput ? (
+              <div className="mt-2">
+                <GoogleAddressInput
+                  addressData={addressData!}
+                  onChange={onAddressFieldChange! as any}
+                  onLocationConfirmed={onLocationConfirmed || handleContinue}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="relative mt-2">
+                  <MapPin size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={addressValue || ""}
+                    onChange={(e) => onAddressChange?.(e.target.value)}
+                    placeholder="Your address..."
+                    className="w-full rounded-xl border border-border bg-card pl-8 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
+                  />
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleContinue?.(); }}
+                  disabled={!addressValue?.trim()}
+                  className="flex items-center justify-end gap-1.5 text-sm font-medium text-primary mt-1 self-end transition-all disabled:opacity-0 disabled:pointer-events-none hover:gap-2.5"
+                >
+                  Continue
+                  <ArrowRight size={14} />
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <>

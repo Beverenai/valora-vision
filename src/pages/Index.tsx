@@ -7,6 +7,7 @@ import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
 import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 
+
 /* ─── DATA ─── */
 
 const AGENCIES = [
@@ -137,26 +138,15 @@ const Index = () => {
           ref={heroRef}
           className="min-h-[85vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
         >
-          <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
-            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-4">
-              Free property valuation
-            </span>
-            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-7xl text-foreground leading-[1.1]">
-              What is your property
-              <br />
-              in Spain <em className="italic">really</em> worth?
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mt-2">
-              Get a detailed market report in under 2 minutes. Completely free.
-            </p>
-            <div className="w-full max-w-lg">
-              <GoogleAddressInput
-                addressData={addressData}
-                onChange={handleAddressChange}
-                onLocationConfirmed={handleGetValuation}
-              />
-            </div>
-          </div>
+          <ValuationTicketCard
+            address=""
+            estimatedValue=""
+            leadId=""
+            accentType="sell"
+            addressData={addressData}
+            onAddressFieldChange={handleAddressChange}
+            onLocationConfirmed={handleGetValuation}
+          />
         </div>
 
         <SectionDivider />
