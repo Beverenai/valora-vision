@@ -1,36 +1,56 @@
 
 
-## Plan: Enhanced 3D Plastic Wrap with Bubble Wrap Effect
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### What Changes
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-Transform the sealed wrapper into a more convincing 3D "card packet" with visible bubble wrap texture, enhanced depth/perspective, and a more dramatic opening animation.
+### Changes
 
-### Visual Enhancements
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**`src/components/shared/CardRevealWrapper.tsx`**:
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-1. **Bubble wrap texture** — Add animated circular "bubbles" scattered across the plastic wrap surface using CSS radial gradients. Multiple layers of small circles at varying sizes (6-14px) with subtle highlights to simulate air pockets. Some bubbles will have a brighter specular highlight.
+**2. Floating agency logos treatment**
 
-2. **3D perspective on sealed state** — Add `perspective: 800px` and a subtle `rotateX(3deg)` tilt to the sealed wrapper to give it depth, making it look like a physical packet sitting on a surface. Add a ground shadow beneath.
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-3. **Enhanced plastic sheen** — Make the sheen more prominent with multiple moving highlight bands that slowly animate across the surface (a subtle looping CSS animation), simulating light hitting plastic.
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-4. **Thicker wrapper feel** — Add a second inner border/shadow layer to simulate the thickness of the plastic, plus a stronger `backdrop-blur(3px)` and slightly higher opacity tints.
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-5. **Better tearing animation** — When tearing, add "popping bubbles" particles (small circles that scale up and fade) alongside the existing sparkles. The wrapper halves should crumple/rotate more dramatically in 3D space (rotateZ + rotateX).
+**3. How It Works — typographic layout**
 
-6. **Floating idle animation** — Subtle floating motion on the sealed packet (translateY oscillation) to make it feel alive and 3D.
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
 
-### Implementation Details
+**4. Report Features — editorial scatter**
 
-- Add a `BubbleTexture` sub-component that renders a CSS-only bubble pattern using layered `radial-gradient`
-- Add a `PopBubble` particle component for the tear animation (circles that expand and pop)
-- Add a slow-moving sheen animation using framer-motion on the sealed wrapper
-- Apply 3D perspective transform to the sealed container
-- Add drop shadow beneath the wrapper for grounded 3D feel
-- Increase sparkle count during tear from 12 to 20
-
-### Files
-- `src/components/shared/CardRevealWrapper.tsx`
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
