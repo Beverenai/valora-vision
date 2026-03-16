@@ -375,7 +375,7 @@ const SellResult: React.FC = () => {
   const { toast } = useToast();
   const [lead, setLead] = useState<LeadData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showConfetti, setShowConfetti] = useState(true);
+  // showConfetti removed — handled by CardRevealWrapper
 
   useEffect(() => { document.title = "Your Property Valuation | ValoraCasa"; }, []);
 
