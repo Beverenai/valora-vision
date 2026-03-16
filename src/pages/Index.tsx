@@ -132,7 +132,7 @@ const TESTIMONIALS = [
   { quote: "We sold our villa in Marbella for 12% above the initial asking price thanks to the accurate valuation.", name: "James & Sarah T.", location: "Marbella" },
   { quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.", name: "Carlos M.", location: "Estepona" },
   { quote: "Fast, free, and surprisingly accurate. Best property tool I've found for Spain.", name: "Anna K.", location: "Fuengirola" },
-  { quote: "Used it to compare agents' prices. The AI valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
+  { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
 
 type ValuationType = "sell" | "rent";
