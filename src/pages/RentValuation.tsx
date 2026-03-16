@@ -180,7 +180,7 @@ const RentValuation: React.FC = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <RentLocationStep formData={formData} onChange={handleChange} />;
+        return <RentLocationStep formData={formData} onChange={handleChange} onLocationConfirmed={handleNextStep} />;
       case 1:
         return <RentDetailsStep formData={formData} onChange={handleChange} />;
       case 2:

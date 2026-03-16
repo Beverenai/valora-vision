@@ -191,7 +191,7 @@ const SellValuation: React.FC = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <SellLocationStep formData={formData} onChange={handleChange} />;
+        return <SellLocationStep formData={formData} onChange={handleChange} onLocationConfirmed={handleNextStep} />;
       case 1:
         return <SellDetailsStep formData={formData} onChange={handleChange} />;
       case 2:
