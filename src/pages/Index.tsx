@@ -373,8 +373,8 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 6 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-secondary border-t border-border">
-        <div className="max-w-5xl mx-auto">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 bg-secondary border-t border-border">
+        <div className="max-w-5xl mx-auto px-6">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
@@ -387,26 +387,10 @@ const Index = () => {
             Recent valuations
           </h2>
           <p className="text-muted-foreground text-lg text-center mt-2">238 valuations this week</p>
+        </div>
 
-          <div className="flex overflow-x-auto gap-4 mt-12 snap-x pb-4">
-            {RECENT_VALUATIONS.map((v, i) => (
-              <motion.div
-                key={v.location}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="min-w-[280px] bg-card rounded-2xl p-6 shadow-sm snap-start shrink-0"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground text-sm font-medium">{v.location}</span>
-                  <span className="text-xs text-[hsl(var(--success))] bg-[hsl(var(--success)/0.1)] rounded-full px-3 py-1">{v.time}</span>
-                </div>
-                <p className="text-2xl font-bold text-primary mt-2">{v.price}</p>
-                <p className="text-sm text-muted-foreground mt-1">{v.detail}</p>
-              </motion.div>
-            ))}
-          </div>
+        <div className="max-w-5xl mx-auto mt-12 rounded-2xl overflow-hidden">
+          <PropertyShowcaseCarousel />
         </div>
       </motion.section>
 

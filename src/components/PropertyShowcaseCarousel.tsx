@@ -63,7 +63,8 @@ const PROPERTIES = [
 ];
 
 const AUTO_PLAY_INTERVAL = 3500;
-const ITEM_HEIGHT = 56;
+const ITEM_HEIGHT = 52;
+const MOBILE_ITEM_HEIGHT = 48;
 
 const wrap = (min: number, max: number, v: number) => {
   const rangeSize = max - min;
