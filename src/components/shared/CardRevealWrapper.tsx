@@ -214,30 +214,30 @@ const SealedWrapper: React.FC<{
         />
       </motion.div>
 
-      {/* Pull tab — RIGHT CENTER, drag RIGHT */}
+      {/* Pull tab — LEFT CENTER, drag RIGHT across card */}
       <motion.div
         drag="x"
-        dragConstraints={{ left: 0, right: 200 }}
-        dragElastic={0.1}
+        dragConstraints={{ left: 0, right: 280 }}
+        dragElastic={0.05}
         onDrag={(_, info) => {
-          const progress = Math.min(1, Math.max(0, info.offset.x) / 150);
+          const progress = Math.min(1, Math.max(0, info.offset.x) / 200);
           onDragX(progress);
         }}
         onDragEnd={(_, info) => {
-          if (info.offset.x > 80) {
+          if (info.offset.x > 100) {
             onTear();
           } else {
             onDragX(0);
           }
         }}
-        style={{ x, right: "-12px", top: "50%" }}
+        style={{ x, left: "0px", top: "50%" }}
         className={cn(
           "absolute z-30 flex items-center gap-1.5 px-3 py-2 rounded-r-xl cursor-grab active:cursor-grabbing shadow-lg -translate-y-1/2",
           tabColor,
         )}
         whileHover={{ scale: 1.08 }}
       >
-        <Scissors size={14} className="text-white/90 -rotate-90" />
+        <Scissors size={14} className="text-white/90 rotate-90" />
         <motion.div
           animate={{ x: [-3, 3, -3] }}
           transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
@@ -252,7 +252,7 @@ const SealedWrapper: React.FC<{
         animate={{ opacity: [0.4, 0.8, 0.4] }}
         transition={{ repeat: Infinity, duration: 2.5 }}
       >
-        → Slide to open
+        Slide to open →
       </motion.p>
     </div>
   );
