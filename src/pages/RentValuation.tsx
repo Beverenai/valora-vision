@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, MapPin, ArrowDown } from "lucide-react";
 import { useFormWizard } from "@/hooks/use-form-wizard";
 import { INITIAL_RENT_DATA, RentValuationData } from "@/types/valuation";
 import { supabase } from "@/integrations/supabase/client";
