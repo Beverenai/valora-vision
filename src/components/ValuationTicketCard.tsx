@@ -147,7 +147,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       {/* Main Section */}
       <div className="flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15 overflow-hidden">
         {/* Hero Image */}
-        <div className="relative w-full h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink-0">
+        <div className="relative w-full min-h-[120px] max-h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink">
           <img
             src={heroImage}
             alt={propertyType || "Property"}
@@ -212,7 +212,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           <>
             {/* ── Result/display mode: price + data ── */}
             <div className="flex justify-between items-center mb-1.5 relative z-[2]">
-              <span className="font-sans text-[2rem] md:text-[2.5rem] font-light tracking-[-1.5px] leading-none text-foreground">
+              <span className="font-sans text-[1.6rem] md:text-[2.5rem] font-light tracking-[-1.5px] leading-none text-foreground">
                 {estimatedValue}
               </span>
               <span className="text-[0.6rem] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -220,7 +220,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               </span>
             </div>
 
-            <h2 className="font-heading text-[3rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground" style={{ transform: "scaleY(0.9)" }}>
+            <h2 className="font-heading text-[2.2rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground" style={{ transform: "scaleY(0.9)" }}>
               {headline}
             </h2>
 
@@ -232,22 +232,20 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             </div>
 
             {/* Text Block */}
-            <div className="relative flex-1 flex flex-col">
-              <span className="font-ticket-cursive text-[2.5rem] md:text-[3rem] leading-[0.6] mb-3 -ml-1 text-foreground block">
+            <div className="flex-1 flex flex-col min-h-0">
+              <span className="font-ticket-cursive text-[1.8rem] md:text-[3rem] leading-[0.6] mb-2 md:mb-3 -ml-1 text-foreground block">
                 {subtitle}
               </span>
-              <p className="text-[0.55rem] md:text-[0.6rem] uppercase text-justify leading-[1.4] font-medium text-foreground/90 mb-4">
+              <p className="text-[0.55rem] md:text-[0.6rem] uppercase text-justify leading-[1.4] font-medium text-foreground/90 mb-2 line-clamp-4">
                 {summaryText}
               </p>
 
-              <div className="absolute bottom-[55px] md:bottom-[65px] right-0 text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 w-[80px] md:w-[100px]">
-                <p>VALUATION REPORT</p>
-                <p>REF #{leadId.slice(0, 8).toUpperCase()}</p>
-                <p>VALID FOR ONE</p>
+              <div className="text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 mb-2">
+                <p>VALUATION REPORT · REF #{leadId.slice(0, 8).toUpperCase()} · VALID FOR ONE</p>
               </div>
 
               {/* Barcode */}
-              <div className="mt-auto relative h-[45px] md:h-[55px] w-full">
+              <div className="mt-auto relative h-[35px] md:h-[55px] w-full">
                 <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
                 <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
                   {leadId.slice(0, 4).toUpperCase()} {leadId.slice(4, 8).toUpperCase()} {leadId.slice(8, 12).toUpperCase()}
@@ -343,9 +341,9 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onMouseLeave={resetTilt}
         onTouchMove={handleTouchMove}
         onTouchEnd={resetTilt}
-        className="relative w-full max-w-[340px] md:max-w-[520px] min-h-[480px] md:min-h-[540px] group cursor-grab active:cursor-grabbing"
+        className="relative w-full max-w-[340px] md:max-w-[520px] min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px] group cursor-grab active:cursor-grabbing"
         style={{
-          aspectRatio: "9/16",
+          aspectRatio: "9/15",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
           transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
           transformStyle: "preserve-3d",

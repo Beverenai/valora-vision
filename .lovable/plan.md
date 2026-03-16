@@ -1,47 +1,56 @@
 
 
-## Plan: Fix Text Overlapping in ValuationTicketCard
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
 ### Problem
-The front face has overlapping text because:
-1. The "VALUATION REPORT / REF # / VALID FOR ONE" block is **absolutely positioned** (`absolute bottom-[55px] right-0`) and overlaps the `summaryText` paragraph above it
-2. Fixed `h-[42%]` image height + fixed font sizes + fixed barcode height leaves insufficient space for variable-length text content
-3. The 9:16 aspect ratio is too tall/narrow on mobile — text gets cramped
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Solution: Fluid layout that adapts to any content length
+### Changes
 
-**`src/components/ValuationTicketCard.tsx` — Front face restructure**
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-1. **Remove absolute positioning** on the "VALUATION REPORT / REF #" block — make it flow naturally in the document, right-aligned above the barcode
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-2. **Replace fixed `h-[42%]` image** with a responsive approach:
-   - Use `flex-shrink` so the image compresses when text needs more room
-   - Set `min-h-[120px] max-h-[42%]` so it scales down gracefully
+**2. Floating agency logos treatment**
 
-3. **Make text sizes responsive with `clamp()`** or smaller base sizes:
-   - Price: `text-[1.6rem] md:text-[2.5rem]` (down from `2rem`)
-   - "VALUED" headline: `text-[2.2rem] md:text-[3.5rem]` (down from `3rem`)
-   - Cursive subtitle: `text-[1.8rem] md:text-[3rem]` (down from `2.5rem`)
-
-4. **Summary text**: Add `line-clamp-4` so it truncates gracefully if too long, preventing overflow
-
-5. **Remove the aspect-ratio: 9/16** from the outer container — let the card height be determined by content with a `min-h` and `max-h` instead. This is the core fix: the card should grow to fit its content rather than forcing content into a fixed ratio
-
-6. **Back face**: Values already use `truncate` which is good. Increase grid item `min-w` slightly so "1,200 m²" fits without ellipsis — or use `text-xs` instead of `text-sm` for long values
-
-### Layout after fix
 ```text
-┌──────────────────────────┐
-│  [Image: flex-shrink]    │  ← Shrinks if needed
-│                          │
-├──────────────────────────┤
-│ €1,250,000      MARBELLA │  ← Smaller on mobile
-│       VALUED             │
-│ · · · · · · · · · · · ·  │
-│ Your Valuation           │
-│ YOUR PROPERTY HAS BEEN...│  ← line-clamp-4
-│              REF #A1B2.. │  ← Flows naturally, not absolute
-│ ║║║║║║║║║║║║║║║║║║║║║║║  │  ← Barcode at bottom via mt-auto
-└──────────────────────────┘
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
+
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
+
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
+
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
