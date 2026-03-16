@@ -512,11 +512,13 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             "relative w-full group",
             flippable && "cursor-pointer",
             outerMaxWidth,
-            mapExpanded
-              ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
-              : size === "default"
-                ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
-                : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
+            flippable
+              ? "h-[520px] md:h-[620px] lg:h-[680px]"
+              : mapExpanded
+                ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
+                : size === "default"
+                  ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+                  : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
           )}
           style={{ display: "grid" }}
         >
