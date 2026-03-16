@@ -138,7 +138,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }
 
   /* ── Card dimensions shared by both faces ── */
-  const cardClasses = "absolute inset-0 flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]";
+  const cardClasses = "absolute inset-0 flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]";
 
   /* ── FRONT FACE ── */
   const frontFace = (
