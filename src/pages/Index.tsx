@@ -311,60 +311,54 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 4 — HOW IT WORKS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-secondary border-t border-border">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-secondary border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-center text-foreground">
             How it works
           </h2>
-          <p className="text-muted-foreground text-xl text-center mt-4">
+          <p className="text-muted-foreground text-lg md:text-xl text-center mt-3">
             Three simple steps to your free valuation
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 md:mt-16">
             {HOW_STEPS.map((step, i) => (
-              <motion.div
+              <div
                 key={step.num}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="bg-card rounded-2xl p-10 shadow-sm"
+                className="bg-card rounded-2xl p-6 md:p-10 shadow-sm animate-fade-in"
+                style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
               >
                 {step.icon}
-                <p className="text-xs text-muted-foreground/30 font-mono tracking-wider mt-6">{step.num}</p>
-                <h3 className="text-lg font-semibold text-foreground mt-3">{step.title}</h3>
-                <p className="text-muted-foreground text-base mt-2 leading-relaxed">{step.desc}</p>
-              </motion.div>
+                <p className="text-xs text-muted-foreground/30 font-mono tracking-wider mt-4 md:mt-6">{step.num}</p>
+                <h3 className="text-lg font-semibold text-foreground mt-2 md:mt-3">{step.title}</h3>
+                <p className="text-muted-foreground text-sm md:text-base mt-2 leading-relaxed">{step.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </motion.section>
 
       {/* ═══════════ SECTION 5 — WHAT YOUR REPORT INCLUDES ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-card border-t border-border">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground max-w-3xl mx-auto">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-center text-foreground max-w-3xl mx-auto">
             Everything you need to know about your property
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-10 md:mt-16">
             {REPORT_FEATURES.map((feat, i) => (
-              <motion.div
+              <div
                 key={feat.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="bg-background rounded-2xl p-8"
+                className="bg-background rounded-2xl p-6 md:p-8 animate-fade-in"
+                style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
               >
                 {feat.icon}
-                <h3 className="font-semibold text-foreground mt-4">{feat.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2">{feat.desc}</p>
-              </motion.div>
+                <h3 className="font-semibold text-foreground mt-3 md:mt-4">{feat.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1.5 md:mt-2">{feat.desc}</p>
+              </div>
             ))}
           </div>
 
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-8 md:mt-12">
             <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium">
               All included — completely free
             </span>
@@ -373,8 +367,8 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 6 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 bg-secondary border-t border-border">
-        <div className="max-w-5xl mx-auto px-6">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 bg-secondary border-t border-border">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
@@ -395,7 +389,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 7 — TESTIMONIALS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-card border-t border-border">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground">
             What property owners say
@@ -444,7 +438,7 @@ const Index = () => {
       {/* ═══════════ SECTION 8 — FINAL CTA ═══════════ */}
       <motion.section
         {...sectionReveal}
-        className="w-full py-24 md:py-40 px-6 pb-32 border-t border-border"
+        className="w-full py-16 md:py-24 px-6 pb-32 border-t border-border"
         style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
