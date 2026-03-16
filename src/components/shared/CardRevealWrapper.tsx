@@ -329,7 +329,10 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
             <motion.div
               className="absolute w-[340px] sm:w-[380px] h-[100px] rounded-t-3xl z-20"
               style={{
-                background: "linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 25%, #A0A0A0 50%)",
+                background: accentType === "sell"
+                  ? "linear-gradient(135deg, rgba(212,113,59,0.06) 0%, rgba(212,113,59,0.1) 50%, rgba(212,113,59,0.04) 100%)"
+                  : "linear-gradient(135deg, rgba(60,179,113,0.06) 0%, rgba(60,179,113,0.1) 50%, rgba(60,179,113,0.04) 100%)",
+                backdropFilter: "blur(1.5px)",
                 top: "calc(50% - 180px)",
               }}
               initial={{ y: 0, opacity: 1, rotateX: 0 }}
@@ -341,7 +344,10 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
             <motion.div
               className="absolute w-[340px] sm:w-[380px] h-[350px] rounded-b-3xl z-20"
               style={{
-                background: "linear-gradient(135deg, #A0A0A0 50%, #D4D4D4 75%, #B0B0B0 100%)",
+                background: accentType === "sell"
+                  ? "linear-gradient(135deg, rgba(212,113,59,0.08) 0%, rgba(212,113,59,0.04) 50%, rgba(212,113,59,0.06) 100%)"
+                  : "linear-gradient(135deg, rgba(60,179,113,0.08) 0%, rgba(60,179,113,0.04) 50%, rgba(60,179,113,0.06) 100%)",
+                backdropFilter: "blur(1.5px)",
                 top: "calc(50% - 80px)",
               }}
               initial={{ y: 0, opacity: 1, rotateX: 0 }}
