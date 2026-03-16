@@ -250,7 +250,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   /* ── FRONT FACE ── */
   const frontFace = (
-    <div className={cardClasses}>
+    <div className={cardClasses} style={!hasInput ? { transform: "translateZ(1px)" } : undefined}>
       {/* Main Section */}
       <div className={cn("flex-1 flex flex-col relative border-r-2 border-dashed border-foreground/15", mainPadding, mapExpanded ? "overflow-visible" : "overflow-hidden")}>
         {/* Hero Image */}
@@ -453,7 +453,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const backFace = flippable ? (
     <div
       className={cn(cardClasses, "z-10")}
-      style={{ transform: "rotateY(180deg)" }}
+      style={{ transform: "rotateY(180deg) translateZ(1px)" }}
     >
       <div className="flex-1 flex flex-col p-5 md:p-6">
         {/* Header */}
