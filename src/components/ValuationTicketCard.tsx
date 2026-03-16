@@ -467,7 +467,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
         )}
         style={{
-          aspectRatio: mapExpanded ? undefined : "9/15",
+          aspectRatio: (hasInput || mapExpanded) ? undefined : "9/15",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
           transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
           transformStyle: "preserve-3d",
