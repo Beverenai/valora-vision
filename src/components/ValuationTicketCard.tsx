@@ -318,7 +318,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         ) : hasInput ? (
           /* ── Hero INPUT mode ── */
           <div className="flex-1 flex flex-col justify-start gap-3 pb-8 md:pb-12 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-            <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
+            <span className={cn("font-ticket-cursive leading-[0.7] text-foreground block -ml-1", cursiveSize)}>
               Your Valuation
             </span>
 
