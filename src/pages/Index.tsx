@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Star, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
@@ -123,20 +123,12 @@ const REPORT_FEATURES = [
   },
 ];
 
-
 const TESTIMONIALS = [
   { quote: "We sold our villa in Marbella for 12% above the initial asking price thanks to the accurate valuation.", name: "James & Sarah T.", location: "Marbella" },
   { quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.", name: "Carlos M.", location: "Estepona" },
   { quote: "Fast, free, and surprisingly accurate. Best property tool I've found for Spain.", name: "Anna K.", location: "Fuengirola" },
   { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
-
-const sectionReveal = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-60px" },
-  transition: { duration: 0.6, ease: "easeOut" as const },
-};
 
 /* ─── MAIN PAGE ─── */
 
@@ -183,7 +175,7 @@ const Index = () => {
     }
   }, [address, navigate]);
 
-  /* ─── ADDRESS INPUT ─── */
+  /* ─── ADDRESS INPUT (for final CTA) ─── */
   const AddressBlock = ({ compact }: { compact?: boolean }) => (
     <div className="w-full flex flex-col items-center gap-6">
       <div className={cn("relative w-full", compact ? "max-w-md" : "max-w-lg mx-auto")}>
@@ -216,69 +208,24 @@ const Index = () => {
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
 
-      {/* ═══════════ SECTION 1 — HERO ═══════════ */}
+      {/* ═══════════ SECTION 1 — HERO WITH TICKET CARD ═══════════ */}
       <div
         ref={heroRef}
-        className="min-h-screen flex flex-col items-center justify-center px-6"
+        className="min-h-screen flex flex-col items-center justify-center px-6 animate-fade-in"
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-0">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-8"
-          >
+          <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
             Free property valuation
-          </motion.span>
+          </span>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="font-['DM_Serif_Display'] text-5xl md:text-7xl text-foreground leading-[1.1]"
-          >
+          <h1 className="font-['DM_Serif_Display'] text-4xl md:text-7xl text-foreground leading-[1.1]">
             What is your property
             <br />
             in Spain <em className="italic">really</em> worth?
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-xl text-muted-foreground mt-6"
-          >
+          <p className="text-lg md:text-xl text-muted-foreground mt-4">
             Get a detailed market report in under 2 minutes. Completely free.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="w-full mt-12"
-          >
-            <AddressBlock />
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
-            className="text-sm text-muted-foreground/60 tracking-wide mt-16"
-          >
-            12,400+ valuations · 100% free · 2 minutes
-          </motion.p>
-        </div>
-      </div>
-
-      {/* ═══════════ SECTION 2 — TICKET SHOWCASE ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-background">
-        <div className="max-w-5xl mx-auto flex flex-col items-center">
-          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-4xl text-foreground text-center mb-2">
-            See what you'll get
-          </h2>
-          <p className="text-muted-foreground text-center mb-8">
-            A comprehensive valuation report, beautifully presented
           </p>
 
           <ValuationTicketCard
@@ -288,16 +235,22 @@ const Index = () => {
             secondaryValue="€4,200/m²"
             propertyType="Villa"
             leadId="a1b2c3d4e5f6"
-            headline="VALUED"
             subtitle="Your Valuation"
             summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators. Scroll down to explore the full breakdown."
             accentType="sell"
+            addressValue={address}
+            onAddressChange={setAddress}
+            onSubmit={handleGetValuation}
           />
-        </div>
-      </motion.section>
 
-      {/* ═══════════ SECTION 3 — TRUSTED BY ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-20 bg-card border-t border-border">
+          <p className="text-sm text-muted-foreground/60 tracking-wide -mt-2">
+            12,400+ valuations · 100% free · 2 minutes
+          </p>
+        </div>
+      </div>
+
+      {/* ═══════════ SECTION 2 — TRUSTED BY ═══════════ */}
+      <section className="w-full py-20 bg-card border-t border-border">
         <p className="text-xs tracking-[0.2em] text-muted-foreground/60 text-center uppercase">
           Trusted by leading agencies
         </p>
@@ -308,10 +261,10 @@ const Index = () => {
             </span>
           ))}
         </div>
-      </motion.section>
+      </section>
 
-      {/* ═══════════ SECTION 4 — HOW IT WORKS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-secondary border-t border-border">
+      {/* ═══════════ SECTION 3 — HOW IT WORKS ═══════════ */}
+      <section className="w-full py-16 md:py-24 px-6 bg-secondary border-t border-border">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-center text-foreground">
             How it works
@@ -335,10 +288,10 @@ const Index = () => {
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
 
-      {/* ═══════════ SECTION 5 — WHAT YOUR REPORT INCLUDES ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
+      {/* ═══════════ SECTION 4 — WHAT YOUR REPORT INCLUDES ═══════════ */}
+      <section className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-center text-foreground max-w-3xl mx-auto">
             Everything you need to know about your property
@@ -364,10 +317,10 @@ const Index = () => {
             </span>
           </div>
         </div>
-      </motion.section>
+      </section>
 
-      {/* ═══════════ SECTION 6 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 bg-secondary border-t border-border">
+      {/* ═══════════ SECTION 5 — RECENT VALUATIONS ═══════════ */}
+      <section className="w-full py-16 md:py-24 bg-secondary border-t border-border">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
@@ -386,10 +339,10 @@ const Index = () => {
         <div className="max-w-5xl mx-auto mt-12 rounded-2xl overflow-hidden">
           <PropertyShowcaseCarousel />
         </div>
-      </motion.section>
+      </section>
 
-      {/* ═══════════ SECTION 7 — TESTIMONIALS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
+      {/* ═══════════ SECTION 6 — TESTIMONIALS ═══════════ */}
+      <section className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground">
             What property owners say
@@ -433,11 +386,10 @@ const Index = () => {
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
 
-      {/* ═══════════ SECTION 8 — FINAL CTA ═══════════ */}
-      <motion.section
-        {...sectionReveal}
+      {/* ═══════════ SECTION 7 — FINAL CTA ═══════════ */}
+      <section
         className="w-full py-16 md:py-24 px-6 pb-32 border-t border-border"
         style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
       >
@@ -457,7 +409,7 @@ const Index = () => {
             Join 12,400+ property owners who already know their home's worth
           </p>
         </div>
-      </motion.section>
+      </section>
 
       {/* ═══════════ STICKY MOBILE CTA ═══════════ */}
       <AnimatePresence>

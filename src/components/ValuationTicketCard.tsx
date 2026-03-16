@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useState } from "react";
-import { Share2, Download, ArrowDown } from "lucide-react";
+import { Share2, Download, ArrowDown, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ValuationTicketCardProps {
@@ -15,6 +15,10 @@ interface ValuationTicketCardProps {
   accentType?: "sell" | "rent";
   onShare?: () => void;
   onDownload?: () => void;
+  /* Embedded input mode */
+  addressValue?: string;
+  onAddressChange?: (value: string) => void;
+  onSubmit?: () => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
@@ -40,9 +44,15 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   accentType = "sell",
   onShare,
   onDownload,
+  addressValue,
+  onAddressChange,
+  onSubmit,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+  const [isInteracting, setIsInteracting] = useState(false);
+
+  const hasInput = onAddressChange !== undefined;
 
   const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
   const accentClass = accentType === "sell" ? "bg-primary" : "bg-[hsl(var(--success))]";
@@ -54,7 +64,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     const rect = card.getBoundingClientRect();
     const x = (clientX - rect.left) / rect.width - 0.5;
     const y = (clientY - rect.top) / rect.height - 0.5;
-    setTilt({ rotateX: -y * 12, rotateY: x * 12 });
+    setTilt({ rotateX: -y * 10, rotateY: x * 10 });
+    setIsInteracting(true);
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -68,6 +79,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   const resetTilt = useCallback(() => {
     setTilt({ rotateX: 0, rotateY: 0 });
+    setIsInteracting(false);
   }, []);
 
   return (
@@ -83,9 +95,9 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           aspectRatio: "9/16",
           maxHeight: "520px",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
-          transition: tilt.rotateX === 0 && tilt.rotateY === 0 ? "transform 0.5s ease-out" : "transform 0.08s linear",
+          transition: isInteracting ? "transform 0.08s linear" : "transform 0.5s ease-out",
           transformStyle: "preserve-3d",
-          willChange: "transform",
+          willChange: isInteracting ? "transform" : "auto",
         }}
       >
         {/* ── Main Section ── */}
@@ -95,7 +107,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             <img
               src={heroImage}
               alt={propertyType || "Property"}
-              className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+              className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-500"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 to-transparent" />
@@ -149,13 +161,40 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             </span>
           </div>
 
-          {/* Big Headline */}
-          <h2
-            className="font-heading text-[3rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground"
-            style={{ transform: "scaleY(0.9)" }}
-          >
-            {headline}
-          </h2>
+          {/* Headline or Address Input */}
+          {hasInput ? (
+            <div className="my-2 flex flex-col gap-2 relative z-[2]">
+              <div className="relative">
+                <MapPin size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={addressValue || ""}
+                  onChange={(e) => onAddressChange?.(e.target.value)}
+                  placeholder="Your address..."
+                  className="w-full rounded-xl border border-border bg-card pl-8 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSubmit?.();
+                }}
+                className="w-full rounded-xl bg-primary text-primary-foreground py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/90 active:scale-[0.98] transition-all"
+              >
+                Get Valuation
+                <ArrowRight size={12} />
+              </button>
+            </div>
+          ) : (
+            <h2
+              className="font-heading text-[3rem] md:text-[3.5rem] font-extrabold text-center leading-[0.8] my-2 tracking-[-2px] text-foreground"
+              style={{ transform: "scaleY(0.9)" }}
+            >
+              {headline}
+            </h2>
+          )}
 
           {/* Dots Divider */}
           <div className="flex justify-between w-full overflow-hidden my-3">
