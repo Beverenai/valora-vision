@@ -454,42 +454,135 @@ const Index = () => {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-              <AnimatePresence mode="wait">
-                {reportFeatures.map((feat, i) => (
-                  <motion.div
-                    key={`${valuationType}-${feat.title}`}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.4, delay: i * 0.05 }}
-                    className={cn(
-                      "py-6 group",
-                      i < reportFeatures.length - 2 && "border-b border-border",
-                      "max-md:border-b max-md:border-border max-md:last:border-b-0"
-                    )}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors",
-                        feat.accent
-                          ? isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
-                          : "bg-secondary"
-                      )}>
-                        <span className={cn("text-lg", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>✦</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              {reportFeatures.map((feat, i) => (
+                <motion.div
+                  key={`${valuationType}-${feat.title}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                  className={cn(
+                    "rounded-2xl border border-border bg-card p-5 md:p-6 flex flex-col justify-between gap-4 transition-shadow hover:shadow-md",
+                    feat.gridClass
+                  )}
+                >
+                  <div>
+                    <h3 className="font-bold text-foreground text-sm uppercase tracking-tight">
+                      {feat.title}
+                    </h3>
+                    <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
+                      {feat.desc}
+                    </p>
+                  </div>
+
+                  {/* ── Visual previews ── */}
+                  {feat.visual === "hero" && (
+                    <div className={cn("rounded-xl p-4 mt-auto", isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]")}>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                        {isSell ? "Estimated value" : "Monthly estimate"}
+                      </p>
+                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
+                        {isSell ? "€845,000" : "€3,200"}
+                      </p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="flex-1 h-2 rounded-full bg-background overflow-hidden">
+                          <div className={cn("h-full rounded-full", isSell ? "bg-primary" : "bg-[hsl(var(--rent))]")} style={{ width: "78%" }} />
+                        </div>
+                        <span className="text-[0.65rem] text-muted-foreground whitespace-nowrap">High confidence</span>
                       </div>
-                      <div>
-                        <h3 className={cn("font-bold text-foreground text-lg uppercase tracking-tight transition-colors", isSell ? "group-hover:text-primary" : "group-hover:text-[hsl(var(--rent-foreground))]")}>
-                          {feat.title}
-                        </h3>
-                        <p className="text-muted-foreground mt-1 leading-relaxed">
-                          {feat.desc}
-                        </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {isSell ? "Range: €790K – €900K" : "Range: €2,800 – €3,600/mo"}
+                      </p>
+                    </div>
+                  )}
+
+                  {feat.visual === "metric" && (
+                    <div className="mt-auto">
+                      <p className={cn("text-2xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
+                        {isSell ? "€3,200" : "€1,850"}
+                        <span className="text-sm text-muted-foreground font-normal">/m²</span>
+                      </p>
+                      <div className="flex gap-1 mt-2">
+                        {[65, 78, 85, 72, 90, 88, 95].map((h, j) => (
+                          <div key={j} className="flex-1 rounded-sm bg-border" style={{ height: `${h * 0.3}px` }}>
+                            <div className={cn("w-full rounded-sm", isSell ? "bg-primary/30" : "bg-[hsl(var(--rent)/0.3)]")} style={{ height: `${h * 0.3}px` }} />
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  )}
+
+                  {feat.visual === "chart" && (
+                    <div className="mt-auto flex items-end gap-3">
+                      <div className="flex-1">
+                        <svg viewBox="0 0 200 50" className="w-full h-10 md:h-12" fill="none">
+                          <path
+                            d={isSell
+                              ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10"
+                              : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12"
+                            }
+                            stroke={isSell ? "hsl(var(--primary))" : "hsl(var(--rent))"}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                          <path
+                            d={isSell
+                              ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10 V50 H0Z"
+                              : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12 V50 H0Z"
+                            }
+                            fill={isSell ? "hsl(var(--primary) / 0.08)" : "hsl(var(--rent) / 0.08)"}
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <TrendingUp className={cn("h-4 w-4", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                        <span className={cn("text-sm font-semibold", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
+                          {isSell ? "+4.2%" : "+6.1%"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {feat.visual === "cards" && (
+                    <div className="mt-auto flex gap-2">
+                      {[1, 2, 3].map(n => (
+                        <div key={n} className="flex-1 rounded-lg bg-secondary border border-border p-2">
+                          <div className="w-full aspect-[4/3] rounded bg-border mb-1.5" />
+                          <div className="h-1.5 w-3/4 rounded-full bg-border" />
+                          <div className="h-1.5 w-1/2 rounded-full bg-border mt-1" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {feat.visual === "icon" && (
+                    <div className="mt-auto flex items-center gap-3">
+                      {feat.title.includes("Agent") ? (
+                        <>
+                          <div className="flex -space-x-2">
+                            {[0, 1, 2].map(n => (
+                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", isSell ? "bg-primary" : "bg-[hsl(var(--rent))]")} style={{ opacity: 1 - n * 0.2 }}>
+                                {["A", "B", "C"][n]}
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">3 matched agents</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex gap-1.5">
+                            {[1, 2, 3, 4, 5].map(n => (
+                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? (isSell ? "bg-primary" : "bg-[hsl(var(--rent))]") : "bg-border")} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">Strong property score</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
             </div>
 
             <motion.div
