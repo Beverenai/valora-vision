@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X, Loader, AlertCircle, MapPin, Navigation, ChevronLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 
 interface AddressData {
   streetAddress: string;
@@ -14,71 +15,92 @@ interface AddressData {
   longitude?: number;
 }
 
-interface MapboxAddressInputProps {
+interface GoogleAddressInputProps {
   addressData: AddressData;
   onChange: (field: keyof AddressData, value: string | number | undefined) => void;
   onLocationConfirmed?: () => void;
 }
 
-interface MapboxFeature {
-  id: string;
-  place_name: string;
-  text: string;
-  center: [number, number]; // [lng, lat]
-  context?: { id: string; text: string }[];
+interface Suggestion {
+  placeId: string;
+  description: string;
 }
 
-const MAPBOX_GEOCODING_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places";
-const PROXIMITY = "-4.88,36.51"; // Marbella bias
+let optionsSet = false;
+function ensureOptions() {
+  if (!optionsSet) {
+    setOptions({ key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "" });
+    optionsSet = true;
+  }
+}
 
-function parseMapboxFeature(
-  feature: MapboxFeature,
+function parseAddressComponents(
+  components: google.maps.GeocoderAddressComponent[],
   onChange: (field: keyof AddressData, value: string | number | undefined) => void
 ) {
+  let streetNumber = "";
+  let route = "";
   let city = "";
   let province = "";
   let country = "";
   let urbanization = "";
 
-  if (feature.context) {
-    for (const ctx of feature.context) {
-      if (ctx.id.startsWith("place.")) city = ctx.text;
-      else if (ctx.id.startsWith("region.")) province = ctx.text;
-      else if (ctx.id.startsWith("country.")) country = ctx.text;
-      else if (ctx.id.startsWith("neighborhood.") || ctx.id.startsWith("locality."))
-        urbanization = ctx.text;
+  for (const comp of components) {
+    const types = comp.types;
+    if (types.includes("street_number")) streetNumber = comp.long_name;
+    else if (types.includes("route")) route = comp.long_name;
+    else if (types.includes("locality")) city = comp.long_name;
+    else if (types.includes("administrative_area_level_2")) {
+      if (!city) city = comp.long_name;
     }
+    else if (types.includes("administrative_area_level_1")) province = comp.long_name;
+    else if (types.includes("country")) country = comp.long_name;
+    else if (types.includes("neighborhood") || types.includes("sublocality") || types.includes("sublocality_level_1"))
+      urbanization = comp.long_name;
   }
 
-  onChange("streetAddress", feature.text || "");
+  const streetAddress = [route, streetNumber].filter(Boolean).join(" ");
+  onChange("streetAddress", streetAddress);
   onChange("city", city);
   onChange("province", province);
   onChange("country", country || "Spain");
   onChange("urbanization", urbanization);
   onChange("complex", "");
-  onChange("latitude", feature.center[1]);
-  onChange("longitude", feature.center[0]);
 }
 
-const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
+const GoogleAddressInput: React.FC<GoogleAddressInputProps> = ({
   addressData,
   onChange,
   onLocationConfirmed,
 }) => {
-  const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || "";
+  const token = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
   const [phase, setPhase] = useState<"search" | "verify">("search");
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<MapboxFeature[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [isLocating, setIsLocating] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
   const suppressFetchRef = useRef(false);
+
+  // Load Google Maps SDK
+  useEffect(() => {
+    if (!token) return;
+    ensureOptions();
+    Promise.all([importLibrary("places"), importLibrary("maps")]).then(() => {
+      autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+      geocoderRef.current = new google.maps.Geocoder();
+      setGoogleReady(true);
+    }).catch(err => console.error("Google Maps load error:", err));
+  }, [token]);
 
   // Reconstruct display value on mount
   useEffect(() => {
@@ -92,8 +114,6 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
       ].filter(Boolean);
       setQuery(parts.join(", "));
       suppressFetchRef.current = true;
-
-      // If we already have coordinates, go to verify phase
       if (addressData.latitude && addressData.longitude) {
         setPhase("verify");
       }
@@ -114,104 +134,111 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
 
   // Initialize map when entering verify phase
   useEffect(() => {
-    if (phase !== "verify" || !mapContainerRef.current || !token) return;
-    if (mapRef.current) return; // already initialized
+    if (phase !== "verify" || !mapContainerRef.current || !googleReady) return;
+    if (mapRef.current) return;
 
     const lat = addressData.latitude || 36.51;
     const lng = addressData.longitude || -4.88;
 
-    import("mapbox-gl").then((mapboxgl) => {
-      import("mapbox-gl/dist/mapbox-gl.css");
-
-      (mapboxgl as any).accessToken = token;
-
-      const map = new mapboxgl.Map({
-        container: mapContainerRef.current!,
-        style: "mapbox://styles/mapbox/streets-v12",
-        center: [lng, lat],
-        zoom: 15,
-      });
-
-      const marker = new mapboxgl.Marker({
-        draggable: true,
-        color: "hsl(21, 62%, 53%)",
-      })
-        .setLngLat([lng, lat])
-        .addTo(map);
-
-      marker.on("dragend", () => {
-        const lngLat = marker.getLngLat();
-        reverseGeocode(lngLat.lng, lngLat.lat);
-      });
-
-      mapRef.current = map;
-      markerRef.current = marker;
-
-      // Resize after render
-      setTimeout(() => map.resize(), 100);
+    const map = new google.maps.Map(mapContainerRef.current, {
+      center: { lat, lng },
+      zoom: 15,
+      disableDefaultUI: true,
+      zoomControl: true,
+      gestureHandling: "greedy",
+      styles: [
+        { featureType: "poi", stylers: [{ visibility: "off" }] },
+      ],
     });
 
+    const marker = new google.maps.Marker({
+      position: { lat, lng },
+      map,
+      draggable: true,
+    });
+
+    marker.addListener("dragend", () => {
+      const pos = marker.getPosition();
+      if (pos) {
+        reverseGeocode(pos.lat(), pos.lng());
+      }
+    });
+
+    mapRef.current = map;
+    markerRef.current = marker;
+
+    setTimeout(() => google.maps.event.trigger(map, "resize"), 100);
+
     return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
+      if (markerRef.current) {
+        google.maps.event.clearInstanceListeners(markerRef.current);
+        markerRef.current.setMap(null);
         markerRef.current = null;
+      }
+      if (mapRef.current) {
+        mapRef.current = null;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, token]);
+  }, [phase, googleReady]);
 
   const reverseGeocode = useCallback(
-    async (lng: number, lat: number) => {
-      if (!token) return;
+    async (lat: number, lng: number) => {
+      if (!geocoderRef.current) return;
       try {
-        const res = await fetch(
-          `${MAPBOX_GEOCODING_URL}/${lng},${lat}.json?access_token=${token}&types=address&limit=1&language=en,es`
-        );
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.features?.length > 0) {
-          const feature = data.features[0] as MapboxFeature;
-          feature.center = [lng, lat]; // use exact pin position
-          parseMapboxFeature(feature, onChange);
-          const parts = [feature.text, ...(feature.context?.filter(c => c.id.startsWith("place.")).map(c => c.text) || [])].filter(Boolean);
-          setQuery(feature.place_name || parts.join(", "));
+        const result = await geocoderRef.current.geocode({
+          location: { lat, lng },
+        });
+        if (result.results?.[0]) {
+          const place = result.results[0];
+          parseAddressComponents(place.address_components, onChange);
+          onChange("latitude", lat);
+          onChange("longitude", lng);
+          setQuery(place.formatted_address);
         } else {
           onChange("latitude", lat);
           onChange("longitude", lng);
         }
       } catch (err) {
         console.error("Reverse geocoding error:", err);
+        onChange("latitude", lat);
+        onChange("longitude", lng);
       }
     },
-    [token, onChange]
+    [onChange]
   );
 
   const fetchSuggestions = useCallback(
     async (text: string) => {
-      if (!token || text.length < 3) {
+      if (!autocompleteServiceRef.current || text.length < 3) {
         setSuggestions([]);
         return;
       }
       setIsLoading(true);
       try {
-        const encoded = encodeURIComponent(text);
-        const res = await fetch(
-          `${MAPBOX_GEOCODING_URL}/${encoded}.json?access_token=${token}&proximity=${PROXIMITY}&types=address,poi&limit=5&language=en,es`
-        );
-        if (!res.ok) throw new Error("Mapbox API error");
-        const data = await res.json();
-        setSuggestions(data.features || []);
+        const response = await autocompleteServiceRef.current.getPlacePredictions({
+          input: text,
+          locationBias: new google.maps.Circle({
+            center: { lat: 36.51, lng: -4.88 },
+            radius: 50000,
+          }),
+          types: ["address"],
+        });
+        const results = (response?.predictions || []).map((p) => ({
+          placeId: p.place_id,
+          description: p.description,
+        }));
+        setSuggestions(results);
         setShowSuggestions(true);
         setHighlightIndex(-1);
       } catch (err) {
-        console.error("Mapbox geocoding error:", err);
+        console.error("Autocomplete error:", err);
         setSuggestions([]);
       } finally {
         setIsLoading(false);
       }
     },
-    [token]
+    []
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -230,14 +257,28 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
     }, 300);
   };
 
-  const handleSelect = (feature: MapboxFeature) => {
+  const handleSelect = async (suggestion: Suggestion) => {
     suppressFetchRef.current = true;
-    setQuery(feature.place_name);
+    setQuery(suggestion.description);
     setSuggestions([]);
     setShowSuggestions(false);
-    parseMapboxFeature(feature, onChange);
-    // Move to verify phase
-    setPhase("verify");
+
+    if (!geocoderRef.current) return;
+    try {
+      const result = await geocoderRef.current.geocode({ placeId: suggestion.placeId });
+      if (result.results?.[0]) {
+        const place = result.results[0];
+        parseAddressComponents(place.address_components, onChange);
+        const loc = place.geometry?.location;
+        if (loc) {
+          onChange("latitude", loc.lat());
+          onChange("longitude", loc.lng());
+        }
+        setPhase("verify");
+      }
+    } catch (err) {
+      console.error("Geocode error:", err);
+    }
   };
 
   const handleUseCurrentLocation = () => {
@@ -250,7 +291,7 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        await reverseGeocode(longitude, latitude);
+        await reverseGeocode(latitude, longitude);
         setIsLocating(false);
         setPhase("verify");
       },
@@ -276,21 +317,21 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
     onChange("complex", "");
     onChange("latitude", undefined);
     onChange("longitude", undefined);
-    // Clean up map
-    if (mapRef.current) {
-      mapRef.current.remove();
-      mapRef.current = null;
+    cleanupMap();
+  };
+
+  const cleanupMap = () => {
+    if (markerRef.current) {
+      google.maps.event.clearInstanceListeners(markerRef.current);
+      markerRef.current.setMap(null);
       markerRef.current = null;
     }
+    mapRef.current = null;
   };
 
   const handleBackToSearch = () => {
     setPhase("search");
-    if (mapRef.current) {
-      mapRef.current.remove();
-      mapRef.current = null;
-      markerRef.current = null;
-    }
+    cleanupMap();
   };
 
   const handleConfirmLocation = () => {
@@ -299,7 +340,6 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showSuggestions) return;
-    // Account for "Use current location" as index 0
     const totalItems = suggestions.length + 1;
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -325,7 +365,7 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
         <div className="text-center px-4">
           <AlertCircle className="mx-auto mb-2 text-destructive" size={24} />
           <p className="text-sm text-muted-foreground">
-            Mapbox access token not configured. Set VITE_MAPBOX_ACCESS_TOKEN in your environment.
+            Google Maps API key not configured. Set VITE_GOOGLE_MAPS_API_KEY in your environment.
           </p>
         </div>
       </div>
@@ -342,7 +382,6 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
 
     return (
       <div ref={containerRef} className="space-y-3">
-        {/* Confirmed address header */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -364,7 +403,6 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
           </div>
         </div>
 
-        {/* Map */}
         <div className="relative rounded-xl overflow-hidden border border-border">
           <div
             ref={mapContainerRef}
@@ -378,7 +416,6 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
           </div>
         </div>
 
-        {/* Confirm button */}
         <Button
           type="button"
           onClick={handleConfirmLocation}
@@ -401,10 +438,7 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            // Always show dropdown on focus (with current location option)
-            setShowSuggestions(true);
-          }}
+          onFocus={() => setShowSuggestions(true)}
           placeholder="Type your property address…"
           className="pl-9 pr-9 text-base"
           style={{ fontSize: "16px" }}
@@ -426,7 +460,6 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
 
       {showSuggestions && (
         <ul className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg max-h-60 overflow-auto">
-          {/* Current location option — always first */}
           <li
             onClick={handleUseCurrentLocation}
             onMouseEnter={() => setHighlightIndex(0)}
@@ -438,17 +471,17 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
             <span className="font-medium">Use my current location</span>
           </li>
 
-          {suggestions.map((feature, idx) => (
+          {suggestions.map((suggestion, idx) => (
             <li
-              key={feature.id}
-              onClick={() => handleSelect(feature)}
+              key={suggestion.placeId}
+              onClick={() => handleSelect(suggestion)}
               onMouseEnter={() => setHighlightIndex(idx + 1)}
               className={`flex items-start gap-2 px-3 py-2.5 cursor-pointer text-sm transition-colors ${
                 idx + 1 === highlightIndex ? "bg-accent text-accent-foreground" : "text-foreground hover:bg-accent/50"
               }`}
             >
               <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
-              <span className="line-clamp-2">{feature.place_name}</span>
+              <span className="line-clamp-2">{suggestion.description}</span>
             </li>
           ))}
         </ul>
@@ -457,4 +490,4 @@ const MapboxAddressInput: React.FC<MapboxAddressInputProps> = ({
   );
 };
 
-export default MapboxAddressInput;
+export default GoogleAddressInput;

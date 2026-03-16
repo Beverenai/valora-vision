@@ -1,6 +1,6 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
-import MapboxAddressInput from "@/components/shared/MapboxAddressInput";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 import { SellValuationData } from "@/types/valuation";
 
 interface SellLocationStepProps {
@@ -31,7 +31,7 @@ const SellLocationStep: React.FC<SellLocationStepProps> = ({ formData, onChange 
         <Label className="text-sm font-medium text-foreground">
           Property Address <span className="text-destructive">*</span>
         </Label>
-        <MapboxAddressInput
+        <GoogleAddressInput
           addressData={addressData}
           onChange={(field, value) => onChange(field as keyof SellValuationData, value)}
         />

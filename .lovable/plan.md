@@ -1,38 +1,56 @@
 
 
-## Plan: Switch from Mapbox to Google Maps
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-Replace Mapbox geocoding + map with Google Places Autocomplete + Google Maps JS API. Same two-phase flow (Search → Verify), just different provider.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
 ### Changes
 
-**1. Rename & rewrite `src/components/shared/MapboxAddressInput.tsx` → `GoogleAddressInput.tsx`**
-- **Phase 1 (Search)**: Use Google Places Autocomplete API (`/maps/api/place/autocomplete/json` via the JS library `google.maps.places.AutocompleteService`) for suggestions. Keep the "Use my current location" as first dropdown item (browser Geolocation → Google Geocoder reverse lookup).
-- **Phase 2 (Verify)**: Embed a `google.maps.Map` with a draggable `google.maps.Marker`. On drag end → `google.maps.Geocoder.geocode({location})` to update address fields.
-- Load the Google Maps JS SDK via a `<script>` tag or dynamic import with `@googlemaps/js-api-loader`
-- Parse `place.address_components` to extract street, city, province, country, urbanization
-- Token read from `VITE_GOOGLE_MAPS_API_KEY`
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**2. Install `@googlemaps/js-api-loader`**
-- Lightweight loader for Google Maps JS API — avoids raw script tag management
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**3. Update imports in `SellLocationStep.tsx` and `RentLocationStep.tsx`**
-- Change `MapboxAddressInput` → `GoogleAddressInput`
+**2. Floating agency logos treatment**
 
-**4. Remove `mapbox-gl` dependency**
-- No longer needed
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-**5. Store the API key**
-- `VITE_GOOGLE_MAPS_API_KEY` — this is a publishable client-side key, stored directly in the codebase
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-### Interface stays identical
-- Same `AddressData` type, same `onChange` callback, same `onLocationConfirmed` prop
-- Same two-phase UX: search dropdown → map verification → confirm button
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-### Files changed
-- `src/components/shared/GoogleAddressInput.tsx` (new, replaces MapboxAddressInput)
-- `src/components/shared/MapboxAddressInput.tsx` (delete)
-- `src/components/sell/SellLocationStep.tsx` (update import)
-- `src/components/rent/RentLocationStep.tsx` (update import)
-- `package.json` (add `@googlemaps/js-api-loader`, remove `mapbox-gl`)
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 

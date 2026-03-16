@@ -24,7 +24,7 @@ import CompanyLogos from "@/components/CompanyLogos";
 import AboutValuator from "@/components/AboutValuator";
 import InlineCTA from "@/components/InlineCTA";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
-import MapboxAddressInput from "@/components/shared/MapboxAddressInput";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 import { AddressData } from "@/types/valuation";
 
 const fadeUp = {
@@ -105,7 +105,7 @@ const Sell = () => {
           {/* Address Input */}
           <div className="max-w-xl">
             <div className="bg-card/10 backdrop-blur-sm border border-primary-foreground/20 p-4">
-              <MapboxAddressInput
+              <GoogleAddressInput
                 addressData={addressData}
                 onChange={handleAddressChange}
               />
