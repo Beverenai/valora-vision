@@ -1,53 +1,56 @@
 
 
-## Plan: Mirror hero structure in Final CTA section
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-The Final CTA section currently uses a standalone `GoogleAddressInput` (`AddressBlock`). It should instead replicate the hero's exact structure: heading text + `ValuationTicketCard` in input mode.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Changes — `src/pages/Index.tsx` (lines 448–467)
+### Changes
 
-Replace the Final CTA section content with the same structure as the hero (lines 138–166):
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-- **Keep** the gradient background and section wrapper
-- **Replace** the inner content with:
-  - Same badge ("Free property valuation")
-  - Same heading (or the current CTA heading — "Ready to discover your property's true value?")
-  - Same subtitle
-  - `ValuationTicketCard` with the same input-mode props as the hero (sharing `addressData`, `handleAddressChange`, `handleGetValuation`, `mapExpanded`, `onMapPhaseChange`)
-- **Remove** the `AddressBlock` usage and the "Join 12,400+" text
-- Add a second `mapExpanded` state (e.g. `mapExpandedBottom`) so the two cards expand independently
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-### State addition
+**2. Floating agency logos treatment**
 
-Add `const [mapExpandedBottom, setMapExpandedBottom] = useState(false);` alongside the existing `mapExpanded` state, so the bottom card's map phase doesn't affect the hero card.
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-### Resulting Final CTA structure
-
-```tsx
-<section className="w-full py-8 md:py-20 px-5 md:px-8 pb-32" style={{...gradient}}>
-  <div className="flex flex-col items-center text-center gap-4 mb-2">
-    <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium">
-      Free property valuation
-    </span>
-    <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl ...">
-      Ready to discover your property's true value?
-    </h2>
-    <p className="text-lg text-muted-foreground">
-      Free, confidential, and takes less than 2 minutes
-    </p>
-  </div>
-  <ValuationTicketCard
-    address="" estimatedValue="" leadId="" accentType="sell"
-    addressData={addressData}
-    onAddressFieldChange={handleAddressChange}
-    onLocationConfirmed={handleGetValuation}
-    mapExpanded={mapExpandedBottom}
-    onMapPhaseChange={(phase) => setMapExpandedBottom(phase === "verify")}
-  />
-</section>
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
 
-### Cleanup
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-Remove the `AddressBlock` component definition (lines 123–131) since it will no longer be used anywhere.
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
