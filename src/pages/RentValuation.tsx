@@ -246,7 +246,7 @@ const RentValuation: React.FC = () => {
                     Back
                   </Button>
 
-                  {isLastStep ? (
+                  {currentStep === 0 ? null : isLastStep ? (
                     <Button
                       onClick={handleSubmit}
                       disabled={!isCurrentStepValid || isSubmitting}
