@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ValuationTicketCard from "@/components/ValuationTicketCard";
 
 /* ─── DATA ─── */
 
@@ -135,8 +136,6 @@ const TESTIMONIALS = [
   { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
 
-type ValuationType = "sell" | "rent";
-
 const sectionReveal = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
@@ -148,7 +147,6 @@ const sectionReveal = {
 
 const Index = () => {
   const navigate = useNavigate();
-  const [valuationType, setValuationType] = useState<ValuationType>("sell");
   const [address, setAddress] = useState("");
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [showStickyCta, setShowStickyCta] = useState(false);
@@ -170,27 +168,25 @@ const Index = () => {
     return () => obs.disconnect();
   }, []);
 
-  const handleProceed = useCallback(
-    (type: ValuationType) => {
-      setValuationType(type);
-      if (address.trim()) {
-        const path = type === "sell" ? "/sell/valuation" : "/rent/valuation";
-        navigate(path, {
-          state: {
-            addressData: {
-              streetAddress: address,
-              urbanization: "",
-              city: "",
-              province: "",
-              country: "Spain",
-              complex: "",
-            },
+  const handleGetValuation = useCallback(() => {
+    const path = "/sell/valuation";
+    if (address.trim()) {
+      navigate(path, {
+        state: {
+          addressData: {
+            streetAddress: address,
+            urbanization: "",
+            city: "",
+            province: "",
+            country: "Spain",
+            complex: "",
           },
-        });
-      }
-    },
-    [address, navigate]
-  );
+        },
+      });
+    } else {
+      navigate(path);
+    }
+  }, [address, navigate]);
 
   /* ─── ADDRESS INPUT ─── */
   const AddressBlock = ({ compact }: { compact?: boolean }) => (
@@ -206,33 +202,24 @@ const Index = () => {
           onChange={(e) => setAddress(e.target.value)}
           placeholder="Enter your property address..."
           className={cn(
-            "w-full rounded-2xl border border-[#E8E5E0] bg-white pl-12 pr-5 text-[#1A1A1A] shadow-sm outline-none transition-shadow focus:shadow-lg placeholder:text-[#BBB]",
+            "w-full rounded-2xl border border-[hsl(var(--border))] bg-card pl-12 pr-5 text-foreground shadow-sm outline-none transition-shadow focus:shadow-lg placeholder:text-muted-foreground",
             compact ? "py-3.5 text-base" : "py-5 pr-6 text-lg"
           )}
         />
       </div>
 
-      {!compact && (
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button
-            onClick={() => handleProceed("sell")}
-            className="rounded-full px-8 py-4 text-lg font-medium transition-colors bg-[#D4713B] text-white hover:bg-[#C06030]"
-          >
-            I want to sell
-          </button>
-          <button
-            onClick={() => handleProceed("rent")}
-            className="rounded-full px-8 py-4 text-lg font-medium transition-colors bg-white border-2 border-[#E8E5E0] text-[#1A1A1A] hover:border-[#D4713B]"
-          >
-            I want to rent out
-          </button>
-        </div>
-      )}
+      <button
+        onClick={handleGetValuation}
+        className="rounded-full px-8 py-4 text-lg font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+      >
+        Get Your Free Valuation
+        <ArrowRight className="h-5 w-5" />
+      </button>
     </div>
   );
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-[#FAFAF7]">
+    <div className="min-h-screen w-full flex flex-col bg-background">
 
       {/* ═══════════ SECTION 1 — HERO ═══════════ */}
       <div
@@ -244,7 +231,7 @@ const Index = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-block bg-[#FFF3EB] text-[#D4713B] rounded-full px-4 py-2 text-sm font-medium mb-8"
+            className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-8"
           >
             Free property valuation
           </motion.span>
@@ -253,7 +240,7 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="font-['DM_Serif_Display'] text-5xl md:text-7xl text-[#1A1A1A] leading-[1.1]"
+            className="font-['DM_Serif_Display'] text-5xl md:text-7xl text-foreground leading-[1.1]"
           >
             What is your property
             <br />
@@ -264,7 +251,7 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-xl text-[#777] mt-6"
+            className="text-xl text-muted-foreground mt-6"
           >
             Get a detailed market report in under 2 minutes. Completely free.
           </motion.p>
@@ -282,34 +269,59 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.7 }}
-            className="text-sm text-[#BBB] tracking-wide mt-16"
+            className="text-sm text-muted-foreground/60 tracking-wide mt-16"
           >
             12,400+ valuations · 100% free · 2 minutes
           </motion.p>
         </div>
       </div>
 
-      {/* ═══════════ SECTION 2 — TRUSTED BY ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-20 bg-white border-t border-[#E8E5E0]">
-        <p className="text-xs tracking-[0.2em] text-[#BBB] text-center uppercase">
+      {/* ═══════════ SECTION 2 — TICKET SHOWCASE ═══════════ */}
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-background">
+        <div className="max-w-5xl mx-auto flex flex-col items-center">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-4xl text-foreground text-center mb-2">
+            See what you'll get
+          </h2>
+          <p className="text-muted-foreground text-center mb-8">
+            A comprehensive valuation report, beautifully presented
+          </p>
+
+          <ValuationTicketCard
+            address="Calle Sierra Blanca 12"
+            city="Marbella"
+            estimatedValue="€1,250,000"
+            secondaryValue="€4,200/m²"
+            propertyType="Villa"
+            leadId="a1b2c3d4e5f6"
+            headline="VALUED"
+            subtitle="Your Valuation"
+            summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators. Scroll down to explore the full breakdown."
+            accentType="sell"
+          />
+        </div>
+      </motion.section>
+
+      {/* ═══════════ SECTION 3 — TRUSTED BY ═══════════ */}
+      <motion.section {...sectionReveal} className="w-full py-20 bg-card border-t border-border">
+        <p className="text-xs tracking-[0.2em] text-muted-foreground/60 text-center uppercase">
           Trusted by leading agencies
         </p>
         <div className="flex flex-wrap items-center justify-center gap-10 mt-6 px-6 overflow-x-auto">
           {AGENCIES.map((name) => (
-            <span key={name} className="text-[#CCC] text-base font-medium whitespace-nowrap">
+            <span key={name} className="text-muted-foreground/40 text-base font-medium whitespace-nowrap">
               {name}
             </span>
           ))}
         </div>
       </motion.section>
 
-      {/* ═══════════ SECTION 3 — HOW IT WORKS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#F5F3EE] border-t border-[#E8E5E0]">
+      {/* ═══════════ SECTION 4 — HOW IT WORKS ═══════════ */}
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-secondary border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-[#1A1A1A]">
+          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground">
             How it works
           </h2>
-          <p className="text-[#777] text-xl text-center mt-4">
+          <p className="text-muted-foreground text-xl text-center mt-4">
             Three simple steps to your free valuation
           </p>
 
@@ -321,22 +333,22 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="bg-white rounded-2xl p-10 shadow-sm"
+                className="bg-card rounded-2xl p-10 shadow-sm"
               >
                 {step.icon}
-                <p className="text-xs text-[#DDD] font-mono tracking-wider mt-6">{step.num}</p>
-                <h3 className="text-lg font-semibold text-[#1A1A1A] mt-3">{step.title}</h3>
-                <p className="text-[#777] text-base mt-2 leading-relaxed">{step.desc}</p>
+                <p className="text-xs text-muted-foreground/30 font-mono tracking-wider mt-6">{step.num}</p>
+                <h3 className="text-lg font-semibold text-foreground mt-3">{step.title}</h3>
+                <p className="text-muted-foreground text-base mt-2 leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </motion.section>
 
-      {/* ═══════════ SECTION 4 — WHAT YOUR REPORT INCLUDES ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white border-t border-[#E8E5E0]">
+      {/* ═══════════ SECTION 5 — WHAT YOUR REPORT INCLUDES ═══════════ */}
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-card border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-[#1A1A1A] max-w-3xl mx-auto">
+          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground max-w-3xl mx-auto">
             Everything you need to know about your property
           </h2>
 
@@ -348,38 +360,38 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="bg-[#FAFAF7] rounded-2xl p-8"
+                className="bg-background rounded-2xl p-8"
               >
                 {feat.icon}
-                <h3 className="font-semibold text-[#1A1A1A] mt-4">{feat.title}</h3>
-                <p className="text-sm text-[#777] mt-2">{feat.desc}</p>
+                <h3 className="font-semibold text-foreground mt-4">{feat.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2">{feat.desc}</p>
               </motion.div>
             ))}
           </div>
 
           <div className="flex justify-center mt-12">
-            <span className="inline-block bg-[#FFF3EB] text-[#D4713B] rounded-full px-5 py-2.5 text-sm font-medium">
+            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium">
               All included — completely free
             </span>
           </div>
         </div>
       </motion.section>
 
-      {/* ═══════════ SECTION 5 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#F5F3EE] border-t border-[#E8E5E0]">
+      {/* ═══════════ SECTION 6 — RECENT VALUATIONS ═══════════ */}
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-secondary border-t border-border">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4CAF50] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4CAF50]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--success))]" />
             </span>
-            <span className="text-sm text-[#4CAF50] font-medium">Live</span>
+            <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
           </div>
 
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-[#1A1A1A] mt-4">
+          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground mt-4">
             Recent valuations
           </h2>
-          <p className="text-[#999] text-lg text-center mt-2">238 valuations this week</p>
+          <p className="text-muted-foreground text-lg text-center mt-2">238 valuations this week</p>
 
           <div className="flex overflow-x-auto gap-4 mt-12 snap-x pb-4">
             {RECENT_VALUATIONS.map((v, i) => (
@@ -389,24 +401,24 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="min-w-[280px] bg-white rounded-2xl p-6 shadow-sm snap-start shrink-0"
+                className="min-w-[280px] bg-card rounded-2xl p-6 shadow-sm snap-start shrink-0"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[#1A1A1A] text-sm font-medium">{v.location}</span>
-                  <span className="text-xs text-[#4CAF50] bg-[#F0FFF0] rounded-full px-3 py-1">{v.time}</span>
+                  <span className="text-foreground text-sm font-medium">{v.location}</span>
+                  <span className="text-xs text-[hsl(var(--success))] bg-[hsl(var(--success)/0.1)] rounded-full px-3 py-1">{v.time}</span>
                 </div>
-                <p className="text-2xl font-bold text-[#D4713B] mt-2">{v.price}</p>
-                <p className="text-sm text-[#999] mt-1">{v.detail}</p>
+                <p className="text-2xl font-bold text-primary mt-2">{v.price}</p>
+                <p className="text-sm text-muted-foreground mt-1">{v.detail}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </motion.section>
 
-      {/* ═══════════ SECTION 6 — TESTIMONIALS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white border-t border-[#E8E5E0]">
+      {/* ═══════════ SECTION 7 — TESTIMONIALS ═══════════ */}
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-card border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-[#1A1A1A]">
+          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground">
             What property owners say
           </h2>
 
@@ -422,13 +434,13 @@ const Index = () => {
               >
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-[#D4713B] text-[#D4713B]" />
+                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                   ))}
                 </div>
-                <p className="text-xl md:text-2xl text-[#555] italic max-w-2xl leading-relaxed">
+                <p className="text-xl md:text-2xl text-muted-foreground italic max-w-2xl leading-relaxed">
                   "{TESTIMONIALS[testimonialIdx].quote}"
                 </p>
-                <p className="text-sm text-[#999] mt-6">
+                <p className="text-sm text-muted-foreground/60 mt-6">
                   — {TESTIMONIALS[testimonialIdx].name}, {TESTIMONIALS[testimonialIdx].location}
                 </p>
               </motion.div>
@@ -442,7 +454,7 @@ const Index = () => {
                 onClick={() => setTestimonialIdx(i)}
                 className={cn(
                   "h-2 rounded-full transition-all duration-300",
-                  i === testimonialIdx ? "bg-[#D4713B] w-6" : "bg-[#E0E0E0] w-2 hover:bg-[#CCC]"
+                  i === testimonialIdx ? "bg-primary w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
                 )}
               />
             ))}
@@ -450,17 +462,17 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* ═══════════ SECTION 7 — FINAL CTA ═══════════ */}
+      {/* ═══════════ SECTION 8 — FINAL CTA ═══════════ */}
       <motion.section
         {...sectionReveal}
-        className="w-full py-24 md:py-40 px-6 pb-32 border-t border-[#E8E5E0]"
-        style={{ background: "linear-gradient(180deg, #FAFAF7 0%, #FFF3EB 100%)" }}
+        className="w-full py-24 md:py-40 px-6 pb-32 border-t border-border"
+        style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-[#1A1A1A] leading-[1.1]">
+          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground leading-[1.1]">
             Ready to discover your property's true value?
           </h2>
-          <p className="text-lg text-[#777]">
+          <p className="text-lg text-muted-foreground">
             Free, confidential, and takes less than 2 minutes
           </p>
 
@@ -468,7 +480,7 @@ const Index = () => {
             <AddressBlock />
           </div>
 
-          <p className="text-sm text-[#999] mt-8">
+          <p className="text-sm text-muted-foreground/60 mt-8">
             Join 12,400+ property owners who already know their home's worth
           </p>
         </div>
@@ -482,12 +494,12 @@ const Index = () => {
             animate={{ y: 0 }}
             exit={{ y: 100 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t border-[#E8E5E0]"
+            className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border"
           >
             <div className="px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <button
-                onClick={() => handleProceed(valuationType)}
-                className="w-full rounded-full py-4 bg-[#D4713B] text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                onClick={handleGetValuation}
+                className="w-full rounded-full py-4 bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
               >
                 Get Your Free Valuation
                 <ArrowRight className="h-4 w-4" />

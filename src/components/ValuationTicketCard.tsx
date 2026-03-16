@@ -200,7 +200,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         </div>
 
         {/* ── Stub Section ── */}
-        <div className="hidden sm:flex w-[60px] flex-col items-center justify-between py-6 bg-muted">
+        <div className="hidden sm:flex w-[60px] flex-col items-center justify-between py-6 bg-[hsl(36_9%_88%)]">
           <div className="flex flex-col items-center gap-4">
             <ArrowDown size={18} className="text-foreground/60" />
           </div>
