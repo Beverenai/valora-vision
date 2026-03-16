@@ -265,7 +265,7 @@ const SellValuation: React.FC = () => {
                 </div>
 
                 {/* Form content */}
-                <div className="flex-1 px-4 pb-2 overflow-y-auto animate-fade-in">
+                <div className="px-4 pb-2 animate-fade-in">
                   {renderStep()}
                 </div>
 
