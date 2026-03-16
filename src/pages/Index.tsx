@@ -389,7 +389,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 7 — TESTIMONIALS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-card border-t border-border">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground">
             What property owners say
