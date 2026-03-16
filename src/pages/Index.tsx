@@ -21,7 +21,6 @@ const AGENCIES = [
 const HOW_STEPS = [
   { num: "01", title: "Enter your address", desc: "Start typing and select your property from the suggestions." },
   { num: "02", title: "Tell us about your property", desc: "Add bedrooms, bathrooms, size and key features." },
-  { num: "03", title: "Get your valuation", desc: "Receive a market estimate based on real data in seconds." },
 ];
 
 const REPORT_FEATURES_SELL = [
