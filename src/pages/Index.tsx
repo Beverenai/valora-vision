@@ -24,21 +24,21 @@ const HOW_STEPS = [
 ];
 
 const REPORT_FEATURES_SELL = [
-  { title: "Estimated Market Value", desc: "Calculated price based on comparable sales data.", accent: true },
-  { title: "Price Per Square Metre", desc: "See how your property compares per m² in your area.", accent: false },
-  { title: "Property Analysis", desc: "Detailed analysis of your property's strengths.", accent: false },
-  { title: "Market Trends", desc: "Current price trends and market dynamics in your area.", accent: true },
-  { title: "Comparable Properties", desc: "Similar properties recently sold or listed near you.", accent: false },
-  { title: "Agent Recommendations", desc: "Matched local agents ready to help you sell.", accent: true },
+  { title: "Estimated Market Value", desc: "Calculated price based on comparable sales data.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
+  { title: "Price Per Square Metre", desc: "See how your property compares per m² in your area.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Property Analysis", desc: "Detailed analysis of your property's strengths.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Market Trends", desc: "Current price trends and market dynamics in your area.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
+  { title: "Comparable Properties", desc: "Similar properties recently sold or listed near you.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Agent Recommendations", desc: "Matched local agents ready to help you sell.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
 ];
 
 const REPORT_FEATURES_RENT = [
-  { title: "Monthly Rental Estimate", desc: "Long-term rental income projection for your property.", accent: true },
-  { title: "Seasonal Income Forecast", desc: "High and low season weekly rate estimates.", accent: false },
-  { title: "Occupancy Projections", desc: "Expected occupancy rates based on local demand.", accent: false },
-  { title: "Annual Revenue Estimate", desc: "Total projected annual rental income.", accent: true },
-  { title: "Comparable Rentals", desc: "Similar properties currently rented near you.", accent: false },
-  { title: "Agent Recommendations", desc: "Matched local agents ready to help you rent.", accent: true },
+  { title: "Monthly Rental Estimate", desc: "Long-term rental income projection for your property.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
+  { title: "Seasonal Income Forecast", desc: "High and low season weekly rate estimates.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Occupancy Projections", desc: "Expected occupancy rates based on local demand.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Annual Revenue Estimate", desc: "Total projected annual rental income.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
+  { title: "Comparable Rentals", desc: "Similar properties currently rented near you.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Agent Recommendations", desc: "Matched local agents ready to help you rent.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
 ];
 
 const TESTIMONIALS_SELL = [
