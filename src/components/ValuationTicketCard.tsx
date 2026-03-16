@@ -485,7 +485,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   /* For both input and result/showcase modes, use 3D tilt */
   if (!hasInput) {
     return (
-      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "1200px" }}>
+      <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
         <div
           ref={cardRef}
           onClick={handleCardClick}
