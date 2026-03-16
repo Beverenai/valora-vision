@@ -338,30 +338,27 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 5 — WHAT YOUR REPORT INCLUDES ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-card border-t border-border">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground max-w-3xl mx-auto">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-center text-foreground max-w-3xl mx-auto">
             Everything you need to know about your property
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-10 md:mt-16">
             {REPORT_FEATURES.map((feat, i) => (
-              <motion.div
+              <div
                 key={feat.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="bg-background rounded-2xl p-8"
+                className="bg-background rounded-2xl p-6 md:p-8 animate-fade-in"
+                style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
               >
                 {feat.icon}
-                <h3 className="font-semibold text-foreground mt-4">{feat.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2">{feat.desc}</p>
-              </motion.div>
+                <h3 className="font-semibold text-foreground mt-3 md:mt-4">{feat.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1.5 md:mt-2">{feat.desc}</p>
+              </div>
             ))}
           </div>
 
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-8 md:mt-12">
             <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium">
               All included — completely free
             </span>
