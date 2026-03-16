@@ -79,7 +79,7 @@ const SealedWrapper: React.FC<{
         className="absolute inset-x-0 top-0 bottom-[80%] z-20 overflow-hidden rounded-t-3xl"
         style={{
           background: "linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 25%, #A0A0A0 50%, #D4D4D4 75%, #B0B0B0 100%)",
-          y: useTransform(() => -dragProgress * 20),
+          y: topHalfY,
         }}
       >
         <div className="absolute inset-0 opacity-[0.06]" style={{
