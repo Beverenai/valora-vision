@@ -517,7 +517,10 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             ? (mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
             : (mapExpanded
               ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
-              : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
+              : size === "default"
+                ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+                : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
+            )
         )}
         style={{
           aspectRatio: undefined,
