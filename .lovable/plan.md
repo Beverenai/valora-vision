@@ -1,48 +1,56 @@
 
 
-## Plan: Sky Toggle for Sell/Rent mode + Unified Routes
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### Overview
-Add the sky-toggle (day/night switch) inside the hero card below the address input to switch between "Property Value" (sell = sun/day) and "Rent Income" (rent = moon/night). The toggle controls page-wide content theming. Consolidate routes to: `/` (home), `/result/:id` (unified result), `/admin`.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
 ### Changes
 
-**1. Install `styled-components` dependency**
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**2. Create `src/components/ui/sky-toggle.tsx`**
-- Port the provided styled-components toggle as-is
-- Add props: `checked: boolean`, `onChange: (checked: boolean) => void`
-- Add labels on each side: "Property Value" (left/sun) and "Rent Income" (right/moon)
-- Wire the checkbox state to the parent via props instead of internal-only state
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**3. Update `src/components/ValuationTicketCard.tsx`**
-- Add new props: `valuationType?: "sell" | "rent"`, `onValuationTypeChange?: (type: "sell" | "rent") => void`
-- In the hero input mode section (line ~329-370), render the SkyToggle below the GoogleAddressInput (replacing the descriptive paragraph text at line 343-345)
-- Toggle maps: unchecked (sun/day) = "sell", checked (moon/night) = "rent"
+**2. Floating agency logos treatment**
 
-**4. Update `src/pages/Index.tsx`**
-- Add `valuationType` state (`"sell" | "rent"`, default `"sell"`)
-- Pass `valuationType` and `onValuationTypeChange` to both hero and bottom CTA `ValuationTicketCard` instances
-- Update `handleGetValuation` to navigate to `/sell/valuation` or `/rent/valuation` based on `valuationType`
-- Update `accentType` on cards to match `valuationType`
-- Adapt content sections based on mode:
-  - Hero heading: "really worth?" (sell) vs "rental income?" (rent)
-  - Hero subtitle: market report (sell) vs rental estimate (rent)
-  - Showcase flippable card: show sell values (sell) vs rent values (rent)
-  - Stats, testimonials, report features: swap relevant entries based on mode
-  - Bottom CTA heading adapts similarly
-- Use `AnimatePresence` with a key on `valuationType` to animate content transitions when toggling
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-**5. Simplify routes in `src/App.tsx`**
-- Keep existing routes as-is for now (sell/rent wizards and results still need separate flows due to different form steps)
-- The toggle only affects which wizard the user is routed to from the homepage
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-### Result
-The sky toggle sits inside the card below the address input. Sliding it switches the entire homepage between sell/rent messaging and routes the user to the correct valuation wizard. The page content animates between modes.
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-### Files
-- `package.json` (add styled-components)
-- `src/components/ui/sky-toggle.tsx` (new)
-- `src/components/ValuationTicketCard.tsx`
-- `src/pages/Index.tsx`
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 

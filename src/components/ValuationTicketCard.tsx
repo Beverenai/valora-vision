@@ -2,6 +2,7 @@ import React, { useRef, useCallback, useState, useEffect } from "react";
 import { Share2, Download, ArrowDown, MapPin, ArrowRight, Bed, Bath, Ruler, LandPlot, Home, Sparkles } from "lucide-react";
 import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 import { Button } from "@/components/ui/button";
+import SkyToggle from "@/components/ui/sky-toggle";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { formatRefCode } from "@/utils/referenceCode";
@@ -58,6 +59,9 @@ interface ValuationTicketCardProps {
   onMapPhaseChange?: (phase: "search" | "verify") => void;
   /* Size variant for different contexts */
   size?: CardSize;
+  /* Valuation type toggle */
+  valuationType?: "sell" | "rent";
+  onValuationTypeChange?: (type: "sell" | "rent") => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
@@ -111,6 +115,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   mapExpanded = false,
   onMapPhaseChange,
   size = "default",
+  valuationType,
+  onValuationTypeChange,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
@@ -339,10 +345,13 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   onLocationConfirmed={onLocationConfirmed || handleContinue}
                   onPhaseChange={onMapPhaseChange}
                 />
-              {!mapExpanded && (
-                <p className="text-[0.65rem] md:text-xs text-muted-foreground/70 text-center leading-relaxed mt-4 px-2 max-w-[280px] md:max-w-md mx-auto">
-                  Enter your property address above and we'll provide an instant, AI-powered market valuation based on comparable sales, location data, and current demand.
-                </p>
+              {!mapExpanded && onValuationTypeChange && (
+                <div className="mt-4 flex justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                  <SkyToggle
+                    checked={valuationType === "rent"}
+                    onChange={(checked) => onValuationTypeChange(checked ? "rent" : "sell")}
+                  />
+                </div>
               )}
               </div>
             ) : (

@@ -24,20 +24,34 @@ const HOW_STEPS = [
   { num: "03", title: "Get your valuation", desc: "Receive a market estimate based on real data in seconds." },
 ];
 
-const REPORT_FEATURES = [
+const REPORT_FEATURES_SELL = [
   { title: "Estimated Market Value", desc: "Calculated price based on comparable sales data.", accent: true },
-  { title: "Rental Income Potential", desc: "Long-term and seasonal rental income projections.", accent: false },
+  { title: "Price Per Square Metre", desc: "See how your property compares per m² in your area.", accent: false },
   { title: "Property Analysis", desc: "Detailed analysis of your property's strengths.", accent: false },
   { title: "Market Trends", desc: "Current price trends and market dynamics in your area.", accent: true },
   { title: "Comparable Properties", desc: "Similar properties recently sold or listed near you.", accent: false },
-  { title: "Agent Recommendations", desc: "Matched local agents ready to help you sell or rent.", accent: true },
+  { title: "Agent Recommendations", desc: "Matched local agents ready to help you sell.", accent: true },
 ];
 
-const TESTIMONIALS = [
+const REPORT_FEATURES_RENT = [
+  { title: "Monthly Rental Estimate", desc: "Long-term rental income projection for your property.", accent: true },
+  { title: "Seasonal Income Forecast", desc: "High and low season weekly rate estimates.", accent: false },
+  { title: "Occupancy Projections", desc: "Expected occupancy rates based on local demand.", accent: false },
+  { title: "Annual Revenue Estimate", desc: "Total projected annual rental income.", accent: true },
+  { title: "Comparable Rentals", desc: "Similar properties currently rented near you.", accent: false },
+  { title: "Agent Recommendations", desc: "Matched local agents ready to help you rent.", accent: true },
+];
+
+const TESTIMONIALS_SELL = [
   { quote: "We sold our villa in Marbella for 12% above the initial asking price thanks to the accurate valuation.", name: "James & Sarah T.", location: "Marbella" },
-  { quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.", name: "Carlos M.", location: "Estepona" },
   { quote: "Fast, free, and surprisingly accurate. Best property tool I've found for Spain.", name: "Anna K.", location: "Fuengirola" },
   { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
+];
+
+const TESTIMONIALS_RENT = [
+  { quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.", name: "Carlos M.", location: "Estepona" },
+  { quote: "Helped us decide between long-term and seasonal rental. The seasonal forecast was incredibly accurate.", name: "Maria L.", location: "Marbella" },
+  { quote: "We increased our rental income by 30% after following the recommendations in the report.", name: "Peter & Julia W.", location: "Mijas" },
 ];
 
 /* ─── SECTION LABEL ─── */
@@ -78,6 +92,7 @@ const StatsBar = () => (
 
 const Index = () => {
   const navigate = useNavigate();
+  const [valuationType, setValuationType] = useState<"sell" | "rent">("sell");
   const [addressData, setAddressData] = useState({
     streetAddress: "",
     urbanization: "",
@@ -98,10 +113,19 @@ const Index = () => {
   const [mapExpandedBottom, setMapExpandedBottom] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
+  const isSell = valuationType === "sell";
+  const testimonials = isSell ? TESTIMONIALS_SELL : TESTIMONIALS_RENT;
+  const reportFeatures = isSell ? REPORT_FEATURES_SELL : REPORT_FEATURES_RENT;
+
+  // Reset testimonial index when switching type
   useEffect(() => {
-    const t = setInterval(() => setTestimonialIdx((i) => (i + 1) % TESTIMONIALS.length), 5000);
+    setTestimonialIdx(0);
+  }, [valuationType]);
+
+  useEffect(() => {
+    const t = setInterval(() => setTestimonialIdx((i) => (i + 1) % testimonials.length), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [testimonials.length]);
 
   useEffect(() => {
     const el = heroRef.current;
@@ -115,14 +139,32 @@ const Index = () => {
   }, []);
 
   const handleGetValuation = useCallback(() => {
-    navigate("/sell/valuation", {
+    const route = valuationType === "sell" ? "/sell/valuation" : "/rent/valuation";
+    navigate(route, {
       state: {
         addressData: {
           ...addressData,
         },
       },
     });
-  }, [addressData, navigate]);
+  }, [addressData, navigate, valuationType]);
+
+  // Showcase card data based on mode
+  const showcaseData = isSell
+    ? {
+        estimatedValue: "€1,250,000",
+        secondaryValue: "€4,200/m²",
+        headline: "VALUED",
+        subtitle: "Your Valuation",
+        summaryText: "Your property has been analysed using comparable market data, location scoring, and current demand indicators.",
+      }
+    : {
+        estimatedValue: "€3,200/mo",
+        secondaryValue: "€38,400/yr",
+        headline: "VALUED",
+        subtitle: "Rental Income",
+        summaryText: "Your rental potential has been analysed using comparable rentals, seasonal demand, and occupancy projections.",
+      };
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
@@ -136,26 +178,44 @@ const Index = () => {
           <div className="flex flex-col items-center text-center gap-4 mb-2">
             <SectionLabel>Your Property Valuation</SectionLabel>
             <hr className="w-[60px] border-border my-2" />
-            <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
-              What is your property
-              <br />
-              in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?
-            </h1>
-            <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed">
-              Get a detailed market report in under 2 minutes. Completely free.
-            </p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={valuationType}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center"
+              >
+                <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
+                  {isSell ? (
+                    <>What is your property<br />in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?</>
+                  ) : (
+                    <>How much could your<br />property <span className="font-['DM_Serif_Display'] italic normal-case">earn</span> in rent?</>
+                  )}
+                </h1>
+                <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed mt-4">
+                  {isSell
+                    ? "Get a detailed market report in under 2 minutes. Completely free."
+                    : "Get a rental income estimate in under 2 minutes. Completely free."
+                  }
+                </p>
+              </motion.div>
+            </AnimatePresence>
           </div>
           <ValuationTicketCard
             address=""
             estimatedValue=""
             leadId=""
-            accentType="sell"
+            accentType={valuationType}
             size="hero"
             addressData={addressData}
             onAddressFieldChange={handleAddressChange}
             onLocationConfirmed={handleGetValuation}
             mapExpanded={mapExpanded}
             onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
+            valuationType={valuationType}
+            onValuationTypeChange={setValuationType}
           />
         </div>
 
@@ -269,25 +329,35 @@ const Index = () => {
               </p>
             </motion.div>
 
-            <ValuationTicketCard
-              address="Calle Sierra Blanca 12"
-              city="Marbella"
-              estimatedValue="€1,250,000"
-              secondaryValue="€4,200/m²"
-              propertyType="Villa"
-              leadId="a1b2c3d4e5f6"
-              headline="VALUED"
-              subtitle="Your Valuation"
-              summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators."
-              accentType="sell"
-              size="hero"
-              flippable
-              bedrooms={4}
-              bathrooms={3}
-              builtSize="350 m²"
-              plotSize="1,200 m²"
-              condition="Excellent"
-            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={valuationType}
+                initial={{ opacity: 0, rotateY: 20 }}
+                animate={{ opacity: 1, rotateY: 0 }}
+                exit={{ opacity: 0, rotateY: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                <ValuationTicketCard
+                  address="Calle Sierra Blanca 12"
+                  city="Marbella"
+                  estimatedValue={showcaseData.estimatedValue}
+                  secondaryValue={showcaseData.secondaryValue}
+                  propertyType="Villa"
+                  leadId="a1b2c3d4e5f6"
+                  headline={showcaseData.headline}
+                  subtitle={showcaseData.subtitle}
+                  summaryText={showcaseData.summaryText}
+                  accentType={valuationType}
+                  size="hero"
+                  flippable
+                  bedrooms={4}
+                  bathrooms={3}
+                  builtSize="350 m²"
+                  plotSize="1,200 m²"
+                  condition="Excellent"
+                />
+              </motion.div>
+            </AnimatePresence>
 
             <div className="flex items-center gap-2 text-muted-foreground/40 text-sm -mt-2">
               <RotateCcw size={14} />
@@ -318,39 +388,41 @@ const Index = () => {
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-              {REPORT_FEATURES.map((feat, i) => (
-                <motion.div
-                  key={feat.title}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.08 }}
-                  className={cn(
-                    "py-6 group",
-                    i < REPORT_FEATURES.length - 2 && "border-b border-border",
-                    "max-md:border-b max-md:border-border max-md:last:border-b-0"
-                  )}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors",
-                      feat.accent
-                        ? "bg-[hsl(var(--terracotta-light))]"
-                        : "bg-secondary"
-                    )}>
-                      <span className="text-primary text-lg">✦</span>
+              <AnimatePresence mode="wait">
+                {reportFeatures.map((feat, i) => (
+                  <motion.div
+                    key={`${valuationType}-${feat.title}`}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.4, delay: i * 0.05 }}
+                    className={cn(
+                      "py-6 group",
+                      i < reportFeatures.length - 2 && "border-b border-border",
+                      "max-md:border-b max-md:border-border max-md:last:border-b-0"
+                    )}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors",
+                        feat.accent
+                          ? "bg-[hsl(var(--terracotta-light))]"
+                          : "bg-secondary"
+                      )}>
+                        <span className="text-primary text-lg">✦</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-foreground text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
+                          {feat.title}
+                        </h3>
+                        <p className="text-muted-foreground mt-1 leading-relaxed">
+                          {feat.desc}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-foreground text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
-                        {feat.title}
-                      </h3>
-                      <p className="text-muted-foreground mt-1 leading-relaxed">
-                        {feat.desc}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
 
             <motion.div
@@ -405,7 +477,7 @@ const Index = () => {
             <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-10">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={testimonialIdx}
+                  key={`${valuationType}-${testimonialIdx}`}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
@@ -418,16 +490,16 @@ const Index = () => {
                     ))}
                   </div>
                   <p className="text-xl md:text-2xl font-['DM_Serif_Display'] italic text-muted-foreground max-w-2xl leading-relaxed">
-                    "{TESTIMONIALS[testimonialIdx].quote}"
+                    "{testimonials[testimonialIdx]?.quote}"
                   </p>
                   <p className="text-sm text-muted-foreground/60 mt-4">
-                    — {TESTIMONIALS[testimonialIdx].name}, {TESTIMONIALS[testimonialIdx].location}
+                    — {testimonials[testimonialIdx]?.name}, {testimonials[testimonialIdx]?.location}
                   </p>
                 </motion.div>
               </AnimatePresence>
             </div>
             <div className="flex justify-center gap-2 mt-6">
-              {TESTIMONIALS.map((_, i) => (
+              {testimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setTestimonialIdx(i)}
@@ -451,11 +523,22 @@ const Index = () => {
           <div className="flex flex-col items-center text-center gap-4 mb-2">
             <SectionLabel>Start Now</SectionLabel>
             <hr className="w-[60px] border-border my-2" />
-            <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
-              Ready to discover your
-              <br />
-              property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?
-            </h2>
+            <AnimatePresence mode="wait">
+              <motion.h2
+                key={valuationType}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}
+                className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground leading-[1.05]"
+              >
+                {isSell ? (
+                  <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?</>
+                ) : (
+                  <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">rental income</span>?</>
+                )}
+              </motion.h2>
+            </AnimatePresence>
             <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground">
               Free, confidential, and takes less than 2 minutes
             </p>
@@ -464,13 +547,15 @@ const Index = () => {
             address=""
             estimatedValue=""
             leadId=""
-            accentType="sell"
+            accentType={valuationType}
             size="hero"
             addressData={addressData}
             onAddressFieldChange={handleAddressChange}
             onLocationConfirmed={handleGetValuation}
             mapExpanded={mapExpandedBottom}
             onMapPhaseChange={(phase) => setMapExpandedBottom(phase === "verify")}
+            valuationType={valuationType}
+            onValuationTypeChange={setValuationType}
           />
         </section>
 
@@ -488,13 +573,13 @@ const Index = () => {
           >
             <div className="px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <p className="text-[11px] text-muted-foreground mb-1.5">
-                Get your free property valuation
+                {isSell ? "Get your free property valuation" : "Get your free rental estimate"}
               </p>
               <button
                 onClick={handleGetValuation}
                 className="w-full rounded-full py-4 bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
               >
-                Get Your Free Valuation
+                {isSell ? "Get Your Free Valuation" : "Get Your Rental Estimate"}
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
