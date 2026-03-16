@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
 
-
-
 /* ─── DATA ─── */
 
 const AGENCIES = [
@@ -42,30 +40,35 @@ const TESTIMONIALS = [
   { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
 
+/* ─── SECTION LABEL ─── */
+const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <p className={cn("text-xs tracking-[0.2em] uppercase text-muted-foreground", className)}>
+    {children}
+  </p>
+);
+
 /* ─── DIVIDER ─── */
 const SectionDivider = () => (
-  <div className="border-b border-border/40 mx-5 md:mx-8" />
+  <hr className="border-border mx-5 md:mx-8" />
 );
 
 /* ─── STATS BAR ─── */
 const StatsBar = () => (
-  <div className="flex justify-between border-y border-border/40 py-5 mx-5 md:mx-8">
+  <div className="flex justify-between border-y border-border py-6 mx-5 md:mx-8">
     {[
       { label: "Valuations", value: "12,400+" },
       { label: "Average time", value: "2 min" },
-      { label: "Cost", value: "100% Free" },
+      { label: "Cost", value: "Free" },
     ].map((stat, i, arr) => (
       <div
         key={stat.label}
         className={cn(
           "flex-1 text-center",
-          i < arr.length - 1 && "border-r border-border/40"
+          i < arr.length - 1 && "border-r border-border"
         )}
       >
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
-          {stat.label}
-        </p>
-        <p className="font-semibold text-sm text-foreground">{stat.value}</p>
+        <SectionLabel className="mb-2">{stat.label}</SectionLabel>
+        <p className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">{stat.value}</p>
       </div>
     ))}
   </div>
@@ -131,15 +134,14 @@ const Index = () => {
           className="min-h-[85vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
         >
           <div className="flex flex-col items-center text-center gap-4 mb-2">
-            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium">
-              Free property valuation
-            </span>
-            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-7xl text-foreground leading-[1.1]">
+            <SectionLabel>Your Property Valuation</SectionLabel>
+            <hr className="w-[60px] border-border my-2" />
+            <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
               What is your property
               <br />
-              in Spain <em className="italic">really</em> worth?
+              in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground">
+            <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed">
               Get a detailed market report in under 2 minutes. Completely free.
             </p>
           </div>
@@ -168,9 +170,9 @@ const Index = () => {
 
         {/* ═══════════ FLOATING AGENCIES ═══════════ */}
         <section className="w-full py-8 md:py-20 overflow-hidden px-5 md:px-8">
-          <p className="text-xs tracking-[0.2em] text-muted-foreground/40 text-center uppercase mb-8 md:mb-14">
+          <SectionLabel className="text-center mb-8 md:mb-14">
             Used every day by real estate professionals
-          </p>
+          </SectionLabel>
           <div className="relative max-w-4xl mx-auto h-[120px] md:h-[140px]">
             {AGENCIES.map((a, i) => (
               <motion.span
@@ -206,13 +208,14 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="flex items-baseline justify-between mb-8 md:mb-16"
+              className="text-center mb-8 md:mb-16"
             >
-              <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
-                How it works
+              <SectionLabel>How It Works</SectionLabel>
+              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
+                Three Simple Steps
               </h2>
-              <p className="text-sm text-muted-foreground hidden md:block">
-                Three simple steps
+              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
+                From address to valuation in under two minutes
               </p>
             </motion.div>
 
@@ -226,14 +229,14 @@ const Index = () => {
                   transition={{ duration: 0.5, delay: i * 0.15 }}
                   className={cn(
                     "flex items-start gap-6 md:gap-10 py-8 md:py-12",
-                    i < HOW_STEPS.length - 1 && "border-b border-border/30"
+                    i < HOW_STEPS.length - 1 && "border-b border-border"
                   )}
                 >
-                  <span className="text-5xl md:text-7xl font-['DM_Serif_Display'] text-primary/20 leading-none shrink-0 -mt-1">
+                  <span className="text-5xl md:text-7xl font-extrabold text-border leading-none shrink-0 -mt-1">
                     {step.num}
                   </span>
                   <div>
-                    <h3 className="text-xl md:text-2xl font-semibold text-foreground">
+                    <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
                       {step.title}
                     </h3>
                     <p className="text-muted-foreground mt-2 text-base md:text-lg leading-relaxed">
@@ -257,10 +260,11 @@ const Index = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
-                See what you'll receive
+              <SectionLabel>Your Report</SectionLabel>
+              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
+                See What You'll Receive
               </h2>
-              <p className="text-muted-foreground text-lg mt-3 max-w-xl mx-auto">
+              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4 max-w-xl mx-auto leading-relaxed">
                 A beautifully detailed valuation card with all the key data about your property — ready to share.
               </p>
             </motion.div>
@@ -302,14 +306,15 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="flex items-baseline justify-between mb-12"
+              className="text-center mb-12"
             >
-              <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground max-w-xl">
-                Everything you need to know about your property
+              <SectionLabel>Included Free</SectionLabel>
+              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3 max-w-2xl mx-auto">
+                Everything In Your Report
               </h2>
-              <span className="hidden md:inline-block text-sm text-muted-foreground">
-                All included free
-              </span>
+              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
+                All the data you need to make informed decisions
+              </p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
@@ -322,8 +327,8 @@ const Index = () => {
                   transition={{ duration: 0.5, delay: i * 0.08 }}
                   className={cn(
                     "py-6 group",
-                    i < REPORT_FEATURES.length - 2 && "border-b border-border/20",
-                    "max-md:border-b max-md:border-border/20 max-md:last:border-b-0"
+                    i < REPORT_FEATURES.length - 2 && "border-b border-border",
+                    "max-md:border-b max-md:border-border max-md:last:border-b-0"
                   )}
                 >
                   <div className="flex items-start gap-4">
@@ -336,7 +341,7 @@ const Index = () => {
                       <span className="text-primary text-lg">✦</span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-foreground text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
                         {feat.title}
                       </h3>
                       <p className="text-muted-foreground mt-1 leading-relaxed">
@@ -354,7 +359,7 @@ const Index = () => {
               viewport={{ once: true }}
               className="flex justify-center mt-10"
             >
-              <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium">
+              <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider">
                 All included — completely free
               </span>
             </motion.div>
@@ -366,21 +371,20 @@ const Index = () => {
         {/* ═══════════ RECENT VALUATIONS ═══════════ */}
         <section className="w-full py-8 md:py-20 bg-secondary/50">
           <div className="max-w-5xl mx-auto px-5 md:px-8">
-            <div className="flex items-baseline justify-between mb-8">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--success))]" />
-                  </span>
-                  <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
-                </div>
-                <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground mt-2">
-                  Recent valuations
-                </h2>
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--success))]" />
+                </span>
+                <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
               </div>
-              <p className="text-sm text-muted-foreground hidden md:block">
-                238 this week
+              <SectionLabel>Market Data</SectionLabel>
+              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
+                Recent Valuations
+              </h2>
+              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
+                238 property valuations completed this week
               </p>
             </div>
           </div>
@@ -394,8 +398,9 @@ const Index = () => {
         {/* ═══════════ TESTIMONIALS ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
-              What property owners say
+            <SectionLabel>Testimonials</SectionLabel>
+            <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
+              What Owners Say
             </h2>
             <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-10">
               <AnimatePresence mode="wait">
@@ -412,7 +417,7 @@ const Index = () => {
                       <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                     ))}
                   </div>
-                  <p className="text-xl md:text-2xl text-muted-foreground italic max-w-2xl leading-relaxed">
+                  <p className="text-xl md:text-2xl font-['DM_Serif_Display'] italic text-muted-foreground max-w-2xl leading-relaxed">
                     "{TESTIMONIALS[testimonialIdx].quote}"
                   </p>
                   <p className="text-sm text-muted-foreground/60 mt-4">
@@ -444,15 +449,14 @@ const Index = () => {
           style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
         >
           <div className="flex flex-col items-center text-center gap-4 mb-2">
-            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium">
-              Free property valuation
-            </span>
-            <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground leading-[1.1]">
-              Ready to discover your property's
+            <SectionLabel>Start Now</SectionLabel>
+            <hr className="w-[60px] border-border my-2" />
+            <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
+              Ready to discover your
               <br />
-              true <em className="italic">value</em>?
+              property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground">
+            <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground">
               Free, confidential, and takes less than 2 minutes
             </p>
           </div>
