@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
@@ -208,7 +208,7 @@ const Index = () => {
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
 
-      {/* ═══════════ SECTION 1 — HERO WITH TICKET CARD ═══════════ */}
+      {/* ═══════════ SECTION 1 — HERO WITH TICKET CARD (INPUT MODE) ═══════════ */}
       <div
         ref={heroRef}
         className="min-h-screen flex flex-col items-center justify-center px-6 animate-fade-in"
@@ -228,15 +228,12 @@ const Index = () => {
             Get a detailed market report in under 2 minutes. Completely free.
           </p>
 
+          {/* Ticket card in INPUT mode — no price, no city */}
           <ValuationTicketCard
-            address="Calle Sierra Blanca 12"
-            city="Marbella"
-            estimatedValue="€1,250,000"
-            secondaryValue="€4,200/m²"
+            address=""
+            estimatedValue=""
             propertyType="Villa"
             leadId="a1b2c3d4e5f6"
-            subtitle="Your Valuation"
-            summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators. Scroll down to explore the full breakdown."
             accentType="sell"
             addressValue={address}
             onAddressChange={setAddress}
@@ -290,7 +287,44 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ═══════════ SECTION 4 — WHAT YOUR REPORT INCLUDES ═══════════ */}
+      {/* ═══════════ SECTION 4 — WHAT YOU GET (FLIPPABLE CARD) ═══════════ */}
+      <section className="w-full py-16 md:py-24 px-6 bg-background border-t border-border">
+        <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
+            See what you'll receive
+          </h2>
+          <p className="text-muted-foreground text-lg mt-3 max-w-xl">
+            A beautifully detailed valuation card with all the key data about your property — ready to share.
+          </p>
+
+          {/* Flippable showcase card */}
+          <ValuationTicketCard
+            address="Calle Sierra Blanca 12"
+            city="Marbella"
+            estimatedValue="€1,250,000"
+            secondaryValue="€4,200/m²"
+            propertyType="Villa"
+            leadId="a1b2c3d4e5f6"
+            headline="VALUED"
+            subtitle="Your Valuation"
+            summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators."
+            accentType="sell"
+            flippable
+            bedrooms={4}
+            bathrooms={3}
+            builtSize="350 m²"
+            plotSize="1,200 m²"
+            condition="Excellent"
+          />
+
+          <div className="flex items-center gap-2 text-muted-foreground/60 text-sm -mt-2">
+            <RotateCcw size={14} />
+            <span>Tap the card to see property details</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ SECTION 5 — WHAT YOUR REPORT INCLUDES ═══════════ */}
       <section className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-center text-foreground max-w-3xl mx-auto">
@@ -319,7 +353,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ═══════════ SECTION 5 — RECENT VALUATIONS ═══════════ */}
+      {/* ═══════════ SECTION 6 — RECENT VALUATIONS ═══════════ */}
       <section className="w-full py-16 md:py-24 bg-secondary border-t border-border">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-2 justify-center">
@@ -341,7 +375,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ═══════════ SECTION 6 — TESTIMONIALS ═══════════ */}
+      {/* ═══════════ SECTION 7 — TESTIMONIALS ═══════════ */}
       <section className="w-full py-16 md:py-24 px-6 bg-card border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground">
@@ -388,7 +422,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ═══════════ SECTION 7 — FINAL CTA ═══════════ */}
+      {/* ═══════════ SECTION 8 — FINAL CTA ═══════════ */}
       <section
         className="w-full py-16 md:py-24 px-6 pb-32 border-t border-border"
         style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
