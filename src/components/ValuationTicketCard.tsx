@@ -288,7 +288,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           </div>
         ) : hasInput ? (
           /* ── Hero INPUT mode ── */
-          <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+          <div className="flex-1 flex flex-col justify-center gap-3 pb-8 md:pb-12 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
             <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
               Your Valuation
             </span>
@@ -461,7 +461,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         className={cn(
           "relative w-full max-w-[340px] md:max-w-[520px] group cursor-grab active:cursor-grabbing transition-all duration-500",
           hasInput
-            ? (mapExpanded ? "min-h-[620px] md:min-h-[680px]" : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
+            ? (mapExpanded ? "min-h-[620px] md:min-h-[680px]" : "min-h-[560px] md:min-h-[620px]")
             : (mapExpanded
               ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
               : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
