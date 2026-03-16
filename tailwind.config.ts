@@ -155,6 +155,7 @@ export default {
         "ticket-float": "ticket-float 6s ease-in-out infinite",
         "ticket-dash": "ticket-dash 20s linear infinite",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
+        marquee: "marquee 20s linear infinite",
       },
     },
   },
