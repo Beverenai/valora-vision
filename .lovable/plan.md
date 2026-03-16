@@ -1,56 +1,47 @@
 
+Issue rephrased: the “See What You’ll Receive” card is still rendering as an empty block for you, even though the component exists and reserves height. This is not a missing JSX/render path problem; it is a rendering problem in the flippable result-card implementation.
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+What I found:
+- The broken area is the `ValuationTicketCard` result/showcase mode in `src/components/ValuationTicketCard.tsx`.
+- The homepage section in `src/pages/Index.tsx` is passing the right props and still renders the card component correctly.
+- In code, the showcase/result card still relies on a fragile 3D stack:
+  - parent uses `transformStyle: "preserve-3d"`
+  - both faces use `backface-visibility: hidden`
+  - front/back faces are overlaid with `absolute inset-0`
+  - the recent `translateZ(1px)` fix is already present
+- My browser session can see the card, but your screenshot still shows a blank area. That strongly points to a browser-specific paint bug rather than missing content. WebKit/Safari is known to be unreliable with `preserve-3d` + `backface-visibility` + absolutely stacked faces.
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+Do I know what the issue is? Yes.
 
-### Changes
+Exact problem:
+- The showcase card is still depending on a Safari-fragile 3D flip implementation. The current `translateZ(1px)` patch was too small/partial: it does not remove the actual source of the bug, which is the face-overlay/3D rendering strategy itself.
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+Plan to fix:
+1. Rebuild the flippable result-card rendering in `src/components/ValuationTicketCard.tsx`
+- replace the current `absolute inset-0` face overlay with a safer shared layout (single-cell grid or explicit layered wrapper)
+- stop relying solely on `backface-visibility` to decide which face is visible
+- use explicit `opacity`, `visibility`, and `pointer-events` state for front/back faces so one face is always painted
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+2. Add a robust mobile/browser fallback
+- disable the 3D tilt effect for touch/mobile result cards
+- on mobile/showcase, either:
+  - keep tap-to-flip with a simpler non-3D face swap, or
+  - gracefully show only the front face if 3D is unsafe
+- keep the richer 3D interaction only where it is stable
 
-**2. Floating agency logos treatment**
+3. Add Safari-safe transform handling
+- add WebKit-prefixed backface/transform-style where needed
+- simplify transform composition so the wrapper is not permanently forcing a 3D scene when the card is idle
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+4. Preserve the current homepage design
+- keep `src/pages/Index.tsx` structure and editorial styling as-is
+- only adjust the card internals so the “See What You’ll Receive” block becomes visible again without changing the surrounding section
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
+Files involved:
+- `src/components/ValuationTicketCard.tsx` — main fix
+- `src/pages/Index.tsx` — likely no structural changes, only verify usage if needed
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
-
+Expected result:
+- the showcase card will render reliably instead of appearing blank
+- mobile/touch browsers will get a stable card first, with flip behavior only where safe
+- the hero cards remain unchanged
