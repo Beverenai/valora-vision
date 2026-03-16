@@ -119,7 +119,7 @@ const Index = () => {
       {/* ═══════════ HERO ═══════════ */}
       <div
         ref={heroRef}
-        className="min-h-screen flex flex-col items-center justify-center px-6 animate-fade-in"
+        className="min-h-screen flex flex-col items-center justify-center px-4 md:px-6 animate-fade-in"
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
           <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
