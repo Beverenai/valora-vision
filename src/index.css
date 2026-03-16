@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Italianno&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,47 +6,44 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 213 37% 24%;
+    --background: 40 9% 97%;
+    --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 213 37% 24%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 213 37% 24%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 213 52% 24%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 21 62% 53%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 97%;
-    --secondary-foreground: 213 52% 24%;
+    --secondary: 30 20% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 17% 47%;
+    --muted: 36 9% 94%;
+    --muted-foreground: 0 0% 47%;
 
-    --accent: 174 85% 32%;
+    --accent: 21 62% 53%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 347 82% 50%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 213 52% 24%;
+    --border: 34 16% 89%;
+    --input: 34 16% 89%;
+    --ring: 21 62% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* ValoraCasa custom tokens */
-    --navy: 213 52% 24%;
-    --navy-deep: 222 60% 8%;
-    --gold: 40 55% 55%;
-    --gold-dark: 40 60% 38%;
-    --teal: 174 85% 32%;
-    --teal-light: 174 60% 45%;
-    --slate: 215 17% 47%;
-    --soft-blue: 217 91% 60%;
-    --amber: 38 92% 50%;
-    --rose: 347 82% 50%;
+    --terracotta: 21 62% 53%;
+    --terracotta-light: 24 100% 95%;
+    --success: 122 39% 49%;
+    --text-primary: 0 0% 10%;
+    --text-secondary: 0 0% 47%;
+    --text-muted: 0 0% 73%;
+    --surface: 40 9% 97%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -57,45 +54,6 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-
-  .dark {
-    --background: 222 60% 8%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
-
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 174 85% 32%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 213 27% 84%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
 }
 
 @layer base {
@@ -104,14 +62,15 @@
   }
 
   html, body, #root {
-    background-color: #0F1B2D;
+    background-color: #FAFAF7;
   }
 
   body {
-    @apply text-foreground font-sans;
+    @apply text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'DM Serif Display', serif;
   }
 }
