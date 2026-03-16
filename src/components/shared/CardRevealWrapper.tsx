@@ -55,7 +55,7 @@ const PopBubble: React.FC<{ index: number; accentType: "sell" | "rent" }> = ({ i
     <motion.div
       className="absolute rounded-full"
       style={{
-        width: size, height: size, left: "85%", top: "50%",
+        width: size, height: size, left: "15%", top: "50%",
         border: `1.5px solid rgba(${color}, 0.5)`,
         background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.7), rgba(${color}, 0.15))`,
         willChange: "transform",
