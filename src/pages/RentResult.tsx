@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ConfettiAnimation from "@/components/shared/ConfettiAnimation";
-import ValuationTicketCard from "@/components/result/ValuationTicketCard.tsx";
+import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CrossSellBanner from "@/components/CrossSellBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
