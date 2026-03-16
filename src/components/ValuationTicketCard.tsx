@@ -1,6 +1,7 @@
 import React, { useRef, useCallback, useState } from "react";
 import { Share2, Download, ArrowDown, MapPin, ArrowRight, Bed, Bath, Ruler, LandPlot, Home, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ValuationTicketCardProps {
   address: string;

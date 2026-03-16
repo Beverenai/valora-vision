@@ -402,7 +402,7 @@ const Index = () => {
 
       {/* ═══════════ FINAL CTA ═══════════ */}
       <section
-        className="w-full py-20 md:py-32 px-6 pb-32"
+        className="w-full py-14 md:py-32 px-4 md:px-6 pb-32"
         style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
