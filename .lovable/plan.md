@@ -1,56 +1,40 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Horizontal Scissors Cut — Right to Left
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+### What
+Change the sealed card's tear mechanic from a vertical left-side strip to a **horizontal cut line** running between "VALORACASA" (top) and "VALUED" (center). The scissors tab sits on the right edge at ~35% height and drags **left** across the card. The tear line is horizontal dashed. On tear, the top strip flies upward and the bottom section drops away.
 
-### Changes
+### Changes — `src/components/shared/CardRevealWrapper.tsx`
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+**1. SealedWrapper — Replace vertical strip with horizontal top strip:**
+- Remove the left 15% vertical strip entirely
+- Add a horizontal top strip at ~35% of card height (between "VALORACASA" and "VALUED")
+- The top strip contains "VALORACASA" centered
+- The main body below contains "VALUED", dots, and "Property Valuation Report"
+- Horizontal dashed line at the 35% boundary (border-bottom dashed on top strip)
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**2. Pull tab — Move to right edge, horizontal center of card (~35% from top):**
+- Position: `right: 0, top: 35%`
+- Drag direction: `drag="x"` with constraints `{ left: -280, right: 0 }` (drag LEFT)
+- Rounded-left pill shape (`rounded-l-xl`)
+- Scissors icon oriented horizontally (no rotation), chevron pointing left
+- Animate chevron left `x: [3, -3, 3]`
+- Update instruction text: `← Slide to open`
 
-**2. Floating agency logos treatment**
+**3. Drag progress effects:**
+- `topStripY = dragProgress * -15` (top strip shifts up slightly as user drags)
+- Glow line runs horizontally at the 35% mark
+- `rotateX` tilt instead of `rotateY` on main body
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+**4. Tearing phase — Update tear animation:**
+- Top strip flies **upward** (`y: -300, opacity: 0, rotateX: 25`)
+- Bottom section stays briefly then drops **downward** in the sliding phase
+- Sparkle/bubble particles originate from the horizontal cut line (center-X, 35% Y)
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
+**5. Update SparkleParticle and PopBubble origins:**
+- Change `left: "15%", top: "50%"` → `left: "50%", top: "35%"` to match new cut position
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Files Modified
+- `src/components/shared/CardRevealWrapper.tsx`
 
