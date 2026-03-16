@@ -1,56 +1,54 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Fix flippable card — true 3D flip animation with identical sizing
 
 ### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+1. **No 3D flip**: Clicking the card just cross-fades opacity between front/back. There's no actual Y-axis rotation animation.
+2. **Size mismatch**: Front and back are separate divs stacked in a grid with `min-h`/`max-h` ranges, so each face can resolve to a different height.
 
-### Changes
+### Root cause
+- `handleCardClick` toggles `flipped` state, but the container only uses opacity transitions (`opacity: flipped ? 0 : 1`) — no `rotateY(180deg)` transform.
+- Both faces are separate full card renders (`cardClasses` applied independently), each computing their own height.
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+### Solution in `src/components/ValuationTicketCard.tsx`
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**1. True 3D Y-axis flip on click**
+- On the outer wrapper (the grid container at line 490), add `rotateY(180deg)` when `flipped` is true, combined with the existing tilt transform.
+- Remove the opacity-based show/hide from the individual faces entirely.
+- Instead, use `backface-visibility: hidden` on both face wrappers so the CSS 3D engine handles which face is visible.
+- The back face wrapper gets an additional `rotateY(180deg)` so it starts flipped and becomes visible when the container rotates.
 
-**2. Floating agency logos treatment**
+**2. Fixed identical dimensions**
+- Replace the `min-h`/`max-h` range approach with a single explicit height for the flippable showcase card: `h-[480px] md:h-[560px] lg:h-[620px]`.
+- Both face divs use `h-full` so they fill the exact same container — no independent sizing.
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+**3. Remove shadow from individual faces, put on container**
+- Move the `shadow-[...]` from `cardClasses` to the outer grid container for flippable cards, so the shadow stays consistent during rotation and doesn't double up.
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
+### Key changes
+
+```tsx
+// Outer container — add flip rotation + shadow
+style={{
+  transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY + (flipped ? 180 : 0)}deg)`,
+  transformStyle: "preserve-3d",
+}}
+className="... h-[480px] md:h-[560px] lg:h-[620px] shadow-[0_8px_30px_...]"
+
+// Front face wrapper
+<div style={{ gridArea: "1/1", backfaceVisibility: "hidden" }}>
+  <div className={cn(cardClasses, "h-full")}>{/* front content */}</div>
+</div>
+
+// Back face wrapper  
+<div style={{ gridArea: "1/1", backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+  <div className={cn(cardClasses, "h-full")}>{/* back content */}</div>
+</div>
 ```
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
+- Remove `opacity`/`pointerEvents` style logic from front and back face divs.
+- For flippable cards, strip shadow from `cardClasses` (move to container).
 
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Files
+- `src/components/ValuationTicketCard.tsx`
 
