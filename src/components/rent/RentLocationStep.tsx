@@ -6,9 +6,10 @@ import { RentValuationData } from "@/types/valuation";
 interface RentLocationStepProps {
   formData: RentValuationData;
   onChange: (field: keyof RentValuationData, value: string | number | undefined) => void;
+  onLocationConfirmed?: () => void;
 }
 
-const RentLocationStep: React.FC<RentLocationStepProps> = ({ formData, onChange }) => {
+const RentLocationStep: React.FC<RentLocationStepProps> = ({ formData, onChange, onLocationConfirmed }) => {
   const addressData = {
     streetAddress: formData.streetAddress,
     urbanization: formData.urbanization,
@@ -34,6 +35,7 @@ const RentLocationStep: React.FC<RentLocationStepProps> = ({ formData, onChange 
         <GoogleAddressInput
           addressData={addressData}
           onChange={(field, value) => onChange(field as keyof RentValuationData, value)}
+          onLocationConfirmed={onLocationConfirmed}
         />
       </div>
     </div>
