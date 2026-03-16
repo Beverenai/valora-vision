@@ -452,7 +452,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   ) : null;
 
   return (
-    <div className="flex items-center justify-center px-4 py-6 md:py-8" style={{ perspective: "800px" }}>
+    <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
       <div
         ref={cardRef}
         onClick={handleCardClick}
