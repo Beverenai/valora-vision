@@ -3,14 +3,17 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CardRevealWrapper from "@/components/shared/CardRevealWrapper";
+import PropertyFeaturesSection from "@/components/result/PropertyFeaturesSection";
+import ComparablePropertiesSection from "@/components/result/ComparablePropertiesSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
-  Share2, Download, Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
-  Calendar, Leaf, Euro, CalendarDays, Sun, TrendingUp,
-  ShieldCheck, Star, Check, Users, ThumbsUp, Meh, ThumbsDown, Send, Home,
+  Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
+  Calendar, Leaf, ShieldCheck, Star, Users, ThumbsUp, Meh, ThumbsDown, Send, Home,
+  ChevronDown,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import { formatRefCode } from "@/utils/referenceCode";
@@ -36,6 +39,8 @@ const MOCK_TRENDS = `The Costa del Sol property market continues its upward traj
 
 const fmt = (n: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
+// ── Inline Sub-Components ──
+
 const RefCodeBadge: React.FC<{ refCode: string }> = ({ refCode }) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
@@ -54,12 +59,10 @@ const RefCodeBadge: React.FC<{ refCode: string }> = ({ refCode }) => {
   );
 };
 
-// ── Inline Sub-Components ──
-
 const DataCell: React.FC<{ icon: React.ReactNode; label: string; value: string | number }> = ({ icon, label, value }) => (
-  <div className="flex flex-col items-center text-center py-6 px-4">
-    <span className="text-gold mb-2">{icon}</span>
-    <p className="text-[0.55rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">{label}</p>
+  <div className="flex flex-col items-center text-center py-8 px-5">
+    <span className="text-gold mb-3">{icon}</span>
+    <p className="text-[0.55rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1.5">{label}</p>
     <p className="text-xl font-light tracking-tight text-foreground">{value}</p>
   </div>
 );
@@ -77,13 +80,13 @@ const PropertySummaryCard: React.FC<{
     { icon: <Compass size={16} />, label: "Facing", value: orientation ?? "—" },
     { icon: <Wrench size={16} />, label: "Condition", value: condition ?? "—" },
     { icon: <Mountain size={16} />, label: "Views", value: views ?? "—" },
-    { icon: <Calendar size={16} />, label: "Built", value: yearBuilt ?? "—" },
+    { icon: <Calendar size={16} />, label: "Year", value: yearBuilt ?? "—" },
     { icon: <Leaf size={16} />, label: "Energy", value: energyCertificate ?? "—" },
   ];
   return (
-    <section className="py-8 md:py-12">
+    <section className="py-10 md:py-16">
       {propertyType && (
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <p className="text-[0.6rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">{propertyType.replace(/-/g, " ")}</p>
         </div>
       )}
@@ -98,16 +101,15 @@ const ValuationResultCard: React.FC<{
   estimatedLow: number; estimatedHigh: number; monthlyRentalLow: number; monthlyRentalHigh: number;
   weeklyHighSeasonLow: number; weeklyHighSeasonHigh: number; comparableCount: number; city?: string;
 }> = ({ estimatedLow, estimatedHigh, monthlyRentalLow, monthlyRentalHigh, weeklyHighSeasonLow, weeklyHighSeasonHigh, comparableCount, city }) => (
-  <section className="py-12 md:py-20">
+  <section className="py-16 md:py-24">
     <div className="text-center max-w-2xl mx-auto px-6">
-      <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Estimated Market Value</p>
+      <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">Estimated Market Value</p>
       <p className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-foreground">{fmt(estimatedLow)}</p>
-      <p className="text-3xl md:text-4xl font-light tracking-tight text-gold mt-2">— {fmt(estimatedHigh)}</p>
-      <p className="text-sm text-muted-foreground mt-6">Based on {comparableCount} comparable properties{city ? ` in ${city}` : ""}</p>
+      <p className="text-3xl md:text-4xl font-light tracking-tight text-gold mt-3">— {fmt(estimatedHigh)}</p>
+      <p className="text-sm text-muted-foreground mt-8">Based on {comparableCount} comparable properties{city ? ` in ${city}` : ""}</p>
     </div>
 
-    {/* Secondary figures */}
-    <div className="flex justify-center gap-12 md:gap-20 mt-12 md:mt-16">
+    <div className="flex justify-center gap-12 md:gap-20 mt-16 md:mt-20">
       <div className="text-center">
         <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-2">Monthly Rental</p>
         <p className="text-2xl md:text-3xl font-light tracking-tight text-foreground">{fmt(monthlyRentalLow)}<span className="text-muted-foreground"> – </span>{fmt(monthlyRentalHigh)}</p>
@@ -121,84 +123,90 @@ const ValuationResultCard: React.FC<{
 );
 
 const AIAnalysisSection: React.FC<{ content: string }> = ({ content }) => {
-  const [expanded, setExpanded] = useState(false);
   const paragraphs = content.split("\n\n").filter(Boolean);
   const firstParagraph = paragraphs[0] || "";
-  const hasMore = paragraphs.length > 1;
+  // Extract first sentence for pull-quote
+  const firstSentence = firstParagraph.split(/\.\s/)[0] + ".";
 
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-16 md:py-24">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">Property Analysis</p>
-        
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-10">
+          Property Analysis
+        </p>
+
+        {/* Pull-quote */}
+        <p className="font-heading italic text-lg md:text-xl text-foreground/60 leading-relaxed mb-10 border-l-2 border-gold pl-6">
+          {firstSentence}
+        </p>
+
         {/* Drop-cap first paragraph */}
-        <p className="text-foreground/80 leading-[1.8] text-base first-letter:text-5xl first-letter:font-heading first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:leading-none first-letter:text-foreground">
+        <p className="text-[15px] leading-[2] text-foreground/70 font-light first-letter:text-5xl first-letter:font-heading first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:leading-none first-letter:text-foreground">
           {firstParagraph}
         </p>
 
-        {expanded && paragraphs.slice(1).map((p, i) => (
-          <p key={i} className="text-foreground/80 leading-[1.8] text-base mt-6">{p}</p>
+        {paragraphs.slice(1).map((p, i) => (
+          <p key={i} className="text-[15px] leading-[2] text-foreground/70 font-light mt-8">{p}</p>
         ))}
-
-        {hasMore && (
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="mt-6 text-sm text-accent hover:text-accent/80 font-medium transition-colors"
-          >
-            {expanded ? "Show less" : "Read more"}
-          </button>
-        )}
       </div>
     </section>
   );
 };
 
 const MarketTrendsSection: React.FC<{ content: string; chartData: { month: string; price: number }[] }> = ({ content, chartData }) => (
-  <section className="py-12 md:py-16">
-    <div className="max-w-3xl mx-auto px-6">
-      <div className="w-10 h-px bg-gold mb-8" />
-      <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-3">Market Trends</p>
-      <p className="text-foreground/70 text-sm mb-10 max-w-xl">{content}</p>
-      
-      <div className="h-[280px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-            <defs>
-              <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-            <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: "12px" }} formatter={(value: number) => [`€${value}/m²`, "Price"]} />
-            <Area type="monotone" dataKey="price" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#trendGradient)" />
-          </AreaChart>
-        </ResponsiveContainer>
+  <Collapsible>
+    <section className="py-16 md:py-24">
+      <div className="max-w-3xl mx-auto px-6">
+        <div className="w-10 h-px bg-gold mb-8" />
+        <div className="flex items-center justify-between">
+          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Market Trends</p>
+          <CollapsibleTrigger asChild>
+            <button className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 font-medium transition-colors">
+              View trends <ChevronDown size={14} className="transition-transform data-[state=open]:rotate-180" />
+            </button>
+          </CollapsibleTrigger>
+        </div>
+
+        <CollapsibleContent className="mt-8">
+          <p className="text-[15px] leading-[2] text-foreground/70 font-light mb-10 max-w-xl">{content}</p>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: "12px" }} formatter={(value: number) => [`€${value}/m²`, "Price"]} />
+                <Area type="monotone" dataKey="price" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#trendGradient)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-4">€/m² — 12 Month Trend</p>
+        </CollapsibleContent>
       </div>
-      <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-4">€/m² — 12 Month Trend</p>
-    </div>
-  </section>
+    </section>
+  </Collapsible>
 );
 
 const ProfessionalSpotlight: React.FC<{
   companyName: string; tagline: string; rating: number; reviewCount: number;
   onContact: () => void; onViewProfile: () => void;
 }> = ({ companyName, tagline, rating, reviewCount, onContact, onViewProfile }) => (
-  <section className="py-12 md:py-16">
+  <section className="py-16 md:py-24">
     <div className="max-w-xl mx-auto px-6 text-center">
       <div className="w-10 h-px bg-gold mx-auto mb-8" />
       <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Recommended Local Expert</p>
-      
       <div className="w-20 h-20 mx-auto bg-muted border border-border rounded-full flex items-center justify-center mb-5">
         <Users className="text-muted-foreground/40" size={28} />
       </div>
-      
       <h3 className="font-heading text-xl font-bold text-foreground">{companyName}</h3>
       <p className="text-sm text-muted-foreground mt-1">{tagline}</p>
-      
       <div className="flex items-center justify-center gap-2 mt-3">
         <div className="flex gap-0.5">
           {Array.from({ length: rating }).map((_, i) => <Star key={i} size={14} className="fill-gold text-gold" />)}
@@ -208,7 +216,6 @@ const ProfessionalSpotlight: React.FC<{
           <ShieldCheck size={10} /> Verified
         </span>
       </div>
-
       <div className="flex justify-center gap-3 mt-8">
         <Button onClick={onContact} className="bg-gold text-primary hover:bg-gold-dark">Contact {companyName.split(" ")[0]}</Button>
         <Button variant="outline" onClick={onViewProfile}>View Profile</Button>
@@ -241,13 +248,13 @@ const FeedbackSection: React.FC<{ leadId: string; leadType: "sell" | "rent" }> =
   ];
 
   if (submitted) return (
-    <section className="py-12 md:py-16 text-center">
+    <section className="py-16 md:py-24 text-center">
       <p className="text-muted-foreground text-sm">Thank you for your feedback.</p>
     </section>
   );
 
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-16 md:py-24">
       <div className="max-w-md mx-auto px-6 text-center">
         <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Was this valuation helpful?</p>
         <div className="flex justify-center gap-3 mb-6">
@@ -273,7 +280,7 @@ const FeedbackSection: React.FC<{ leadId: string; leadType: "sell" | "rent" }> =
 const ValuationDisclaimer: React.FC = () => {
   const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-16 md:py-24">
       <div className="max-w-2xl mx-auto px-6 text-center">
         <p className="text-xs text-muted-foreground/60 leading-relaxed">
           This valuation is an automated estimate based on the information provided and market analysis as of {today}. It may not reflect actual market value. For an accurate appraisal, consult a qualified professional.
@@ -392,7 +399,12 @@ const SellResult: React.FC = () => {
       <CardRevealWrapper accentType="sell" cardElement={cardElement} loading={loading}>
         <div className="max-w-[1000px] mx-auto">
           <RefCodeBadge refCode={formatRefCode(id!)} />
+
           <PropertySummaryCard bedrooms={lead?.bedrooms} bathrooms={lead?.bathrooms} builtSize={lead?.built_size_sqm} plotSize={lead?.plot_size_sqm} orientation={lead?.orientation} condition={lead?.condition} views={lead?.views} yearBuilt={lead?.year_built} energyCertificate={lead?.energy_certificate} propertyType={lead?.property_type} />
+          
+          <div className="w-full h-px bg-border" />
+
+          <PropertyFeaturesSection features={lead?.features || null} />
           
           <div className="w-full h-px bg-border" />
           
@@ -405,6 +417,15 @@ const SellResult: React.FC = () => {
           <div className="w-full h-px bg-border" />
           
           <MarketTrendsSection content={lead?.market_trends || MOCK_TRENDS} chartData={PRICE_TREND_DATA} />
+          
+          <div className="w-full h-px bg-border" />
+
+          <ComparablePropertiesSection
+            comparables={lead?.comparable_properties as any[] || null}
+            leadBedrooms={lead?.bedrooms}
+            leadBathrooms={lead?.bathrooms}
+            leadBuiltSize={lead?.built_size_sqm}
+          />
           
           <div className="w-full h-px bg-border" />
           
