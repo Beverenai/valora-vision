@@ -311,30 +311,27 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 4 — HOW IT WORKS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-secondary border-t border-border">
+      <motion.section {...sectionReveal} className="w-full py-16 md:py-24 px-6 bg-secondary border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-center text-foreground">
             How it works
           </h2>
-          <p className="text-muted-foreground text-xl text-center mt-4">
+          <p className="text-muted-foreground text-lg md:text-xl text-center mt-3">
             Three simple steps to your free valuation
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 md:mt-16">
             {HOW_STEPS.map((step, i) => (
-              <motion.div
+              <div
                 key={step.num}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="bg-card rounded-2xl p-10 shadow-sm"
+                className="bg-card rounded-2xl p-6 md:p-10 shadow-sm animate-fade-in"
+                style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
               >
                 {step.icon}
-                <p className="text-xs text-muted-foreground/30 font-mono tracking-wider mt-6">{step.num}</p>
-                <h3 className="text-lg font-semibold text-foreground mt-3">{step.title}</h3>
-                <p className="text-muted-foreground text-base mt-2 leading-relaxed">{step.desc}</p>
-              </motion.div>
+                <p className="text-xs text-muted-foreground/30 font-mono tracking-wider mt-4 md:mt-6">{step.num}</p>
+                <h3 className="text-lg font-semibold text-foreground mt-2 md:mt-3">{step.title}</h3>
+                <p className="text-muted-foreground text-sm md:text-base mt-2 leading-relaxed">{step.desc}</p>
+              </div>
             ))}
           </div>
         </div>
