@@ -1,34 +1,56 @@
 
 
-## Plan: Fix Card Overflow and Blank Screen on Map Phase
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-### Problems
-1. **Input/suggestions go off-screen**: The card uses `absolute inset-0` for the front face with `overflow-hidden`, clipping the GoogleAddressInput dropdown and map content that exceeds the card's constrained height.
-2. **Blank screen on "Use current location"**: When switching to verify phase, the map (220px) + address bar + confirm button (~320px total) plus the hero image don't fit within the card's `max-h-[680px]` on mobile (390px viewport). The content is clipped away entirely.
-
-### Root Cause
-- The front face is `absolute inset-0` with `overflow-hidden` — content that exceeds the card dimensions is invisible.
-- On mobile, `max-h-[820px]` with `aspectRatio: undefined` still can't contain hero image + map + button when the hero image takes too much space.
-- The autocomplete suggestions dropdown (positioned `absolute z-50`) gets clipped by the card's `overflow-hidden`.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
 ### Changes
 
-**`src/components/ValuationTicketCard.tsx`**:
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-1. **Allow overflow for suggestions**: When in input mode, change the front face container from `overflow-hidden` to `overflow-visible` so the autocomplete dropdown can render outside the card boundaries.
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-2. **Shrink hero image more aggressively on mobile in map phase**: Change `mapExpanded` hero image max-height from `max-h-[25%]` to `max-h-[80px] md:max-h-[25%]` so there's room for the map.
+**2. Floating agency logos treatment**
 
-3. **Remove max-h constraint when map is expanded**: Instead of `max-h-[820px]`, use `max-h-none` when `mapExpanded` is true so the card grows to fit its content naturally. Keep `min-h` for visual stability.
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-4. **Make the card container use relative positioning instead of absolute when in input/map mode**: Change the front face from `absolute inset-0` to `relative` when `hasInput` is true, so card height is driven by content. This means the wrapper div should not use aspect-ratio in input mode at all — let content dictate height.
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-### Simpler Approach
-Actually, the cleanest fix is:
-- When `mapExpanded` is true, remove both `max-h` and `aspectRatio` constraints, and set the front face to `overflow-visible`
-- Shrink the hero image to `max-h-[80px]` on mobile when map is expanded
-- Set `overflow-visible` on the card wrapper when `hasGoogleInput` is true (so dropdown suggestions aren't clipped)
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-**Files to edit**:
-- `src/components/ValuationTicketCard.tsx` — adjust card constraints and overflow behavior
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 

@@ -196,7 +196,10 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }
 
   /* ── Card dimensions shared by both faces ── */
-  const cardClasses = "absolute inset-0 flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]";
+  const cardClasses = cn(
+    "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]",
+    hasInput ? "relative overflow-visible" : "absolute inset-0 overflow-hidden"
+  );
 
   /* ── FRONT FACE ── */
   const frontFace = (
@@ -206,7 +209,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         {/* Hero Image */}
         <div className={cn(
           "relative w-full min-h-[120px] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink transition-all duration-500",
-          mapExpanded ? "max-h-[25%]" : "max-h-[42%]"
+          mapExpanded ? "max-h-[80px] md:max-h-[25%]" : "max-h-[42%]"
         )}>
           <img
             src={heroImage}
@@ -457,12 +460,14 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onTouchEnd={resetTilt}
         className={cn(
           "relative w-full max-w-[340px] md:max-w-[520px] group cursor-grab active:cursor-grabbing transition-all duration-500",
-          mapExpanded
-            ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
-            : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+          hasInput
+            ? (mapExpanded ? "min-h-[480px]" : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
+            : (mapExpanded
+              ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
+              : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
         )}
         style={{
-          aspectRatio: mapExpanded ? undefined : "9/15",
+          aspectRatio: (hasInput || mapExpanded) ? undefined : "9/15",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
           transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
           transformStyle: "preserve-3d",
