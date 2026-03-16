@@ -1,46 +1,56 @@
 
 
-## Plan: Complete Card Pack Opening Rewrite
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-Rewrite `src/components/shared/CardRevealWrapper.tsx` with all 8 changes from the request. Same file path (not `valuation/`), same props interface, same exports.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Key Changes
+### Changes
 
-**1. Opaque foil wrapper** — Replace transparent `rgba(accent, 0.05)` backgrounds with solid metallic gradients. Sell = gold/bronze (`#8B6914` → `#E8CC6E`), Rent = silver/teal (`#4A7C72` → `#9FD4C6`). Add embossed diamond pattern via `repeating-linear-gradient(45deg/−45deg)`. Card is invisible in sealed state.
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**2. Tear from top, drag upward** — Move tear line to 15% from top. Pull tab at top-right, sticking up. Change `drag="x"` to `drag="y"` with `dragConstraints={{ top: -200, bottom: 0 }}`. Progress based on upward offset.
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**3. Card slides out of wrapper** — Add 4th phase `"sliding"` between `"tearing"` and `"revealed"`. During sliding: card rises upward out of remaining wrapper bottom, wrapper bottom crumples and falls. Spring bounce on card arrival.
-
-**4. Reduce particles** — Remove `BubbleTexture` entirely. Reduce `SparkleParticle` count from 20 → 10, `PopBubble` from 15 → 8. Add `will-change: transform` on animated elements. Use CSS `@keyframes` for the foil shine sweep infinite loop instead of framer-motion.
-
-**5. Stronger holographic effect** — Rewrite `HoloShine` with full rainbow spectrum (`rgba(255,100,100)` → gold → green → blue → purple) that moves with tilt. Higher base opacity (0.7).
-
-**6. Foil texture** — Add repeating diagonal line pattern at 3% white opacity on the foil wrapper body.
-
-**7. Staggered tearing animation** — Implement the exact timing sequence: 0ms top strip flies up with curl → 100ms light burst → 200ms sparkles → 400ms card rises (sliding phase) → 600ms bottom wrapper falls → 800ms card spring bounce → 1000ms shine sweep → 1500ms scroll text.
-
-**8. Floating shadow under revealed card** — Add a blurred shadow div beneath the card that shifts with `cardTilt.y`.
-
-### Phase State Machine
+**2. Floating agency logos treatment**
 
 ```text
-sealed → tearing (600ms) → sliding (800ms) → revealed
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
+
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
 
-- `sealed`: Opaque foil pack, floating idle, pull tab at top
-- `tearing`: Top strip curls up, light burst, sparkles (staggered)
-- `sliding`: Card slides up out of wrapper, bottom falls away
-- `revealed`: Card with 3D tilt, holo shine, confetti, shadow, report below
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-### Structure
+**3. How It Works — typographic layout**
 
-All in one file. Sub-components: `SparkleParticle` (10 max), `PopBubble` (8 max), `LightBurst`, `SealedWrapper` (rewritten with foil), `HoloShine` (rainbow), main `CardRevealWrapper`.
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
 
-### CSS animation for shine sweep
+**4. Report Features — editorial scatter**
 
-Add a `@keyframes foil-shine` in a `<style>` tag or inline via the component to avoid framer-motion overhead on the infinite loop.
-
-### File
-- `src/components/shared/CardRevealWrapper.tsx` — full rewrite
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
