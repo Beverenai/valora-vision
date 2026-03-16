@@ -119,13 +119,13 @@ const Index = () => {
       {/* ═══════════ HERO ═══════════ */}
       <div
         ref={heroRef}
-        className="min-h-screen flex flex-col items-center justify-center px-6 animate-fade-in"
+        className="min-h-screen flex flex-col items-center justify-center px-4 md:px-6 animate-fade-in"
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
           <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
             Free property valuation
           </span>
-          <h1 className="font-['DM_Serif_Display'] text-4xl md:text-7xl text-foreground leading-[1.1]">
+          <h1 className="font-['DM_Serif_Display'] text-3xl md:text-7xl text-foreground leading-[1.1]">
             What is your property
             <br />
             in Spain <em className="italic">really</em> worth?
@@ -150,11 +150,11 @@ const Index = () => {
       </div>
 
       {/* ═══════════ FLOATING AGENCIES ═══════════ */}
-      <section className="w-full py-24 md:py-32 overflow-hidden">
-        <p className="text-xs tracking-[0.2em] text-muted-foreground/40 text-center uppercase mb-16">
-          Trusted by leading agencies
+      <section className="w-full py-14 md:py-32 overflow-hidden">
+        <p className="text-xs tracking-[0.2em] text-muted-foreground/40 text-center uppercase mb-10 md:mb-16">
+          Used every day by real estate professionals
         </p>
-        <div className="relative max-w-4xl mx-auto h-[180px] md:h-[140px]">
+        <div className="relative max-w-4xl mx-auto h-[120px] md:h-[140px]">
           {AGENCIES.map((a, i) => (
             <motion.span
               key={a.name}
@@ -180,14 +180,14 @@ const Index = () => {
       </section>
 
       {/* ═══════════ HOW IT WORKS — Typographic ═══════════ */}
-      <section className="w-full py-20 md:py-32 px-6">
+      <section className="w-full py-14 md:py-32 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16 md:mb-20"
+            className="text-center mb-10 md:mb-20"
           >
             <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
               How it works
@@ -228,7 +228,7 @@ const Index = () => {
       </section>
 
       {/* ═══════════ WHAT YOU GET — Flippable Card ═══════════ */}
-      <section className="w-full py-20 md:py-32 px-6 bg-secondary/50">
+      <section className="w-full py-14 md:py-32 px-4 md:px-6 bg-secondary/50">
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -271,7 +271,7 @@ const Index = () => {
       </section>
 
       {/* ═══════════ REPORT FEATURES — Editorial Scatter ═══════════ */}
-      <section className="w-full py-20 md:py-32 px-6">
+      <section className="w-full py-14 md:py-32 px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -336,7 +336,7 @@ const Index = () => {
       </section>
 
       {/* ═══════════ RECENT VALUATIONS ═══════════ */}
-      <section className="w-full py-20 md:py-32 bg-secondary/50">
+      <section className="w-full py-14 md:py-32 bg-secondary/50">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
@@ -356,9 +356,9 @@ const Index = () => {
       </section>
 
       {/* ═══════════ TESTIMONIALS ═══════════ */}
-      <section className="w-full py-20 md:py-32 px-6">
+      <section className="w-full py-14 md:py-32 px-4 md:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground">
+          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
             What property owners say
           </h2>
           <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-12">
@@ -402,7 +402,7 @@ const Index = () => {
 
       {/* ═══════════ FINAL CTA ═══════════ */}
       <section
-        className="w-full py-20 md:py-32 px-6 pb-32"
+        className="w-full py-14 md:py-32 px-4 md:px-6 pb-32"
         style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">

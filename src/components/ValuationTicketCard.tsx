@@ -1,6 +1,7 @@
 import React, { useRef, useCallback, useState } from "react";
 import { Share2, Download, ArrowDown, MapPin, ArrowRight, Bed, Bath, Ruler, LandPlot, Home, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ValuationTicketCardProps {
   address: string;
@@ -138,15 +139,15 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }
 
   /* ── Card dimensions shared by both faces ── */
-  const cardClasses = "absolute inset-0 flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]";
+  const cardClasses = "absolute inset-0 flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]";
 
   /* ── FRONT FACE ── */
   const frontFace = (
-    <div className={cardClasses} style={{ backfaceVisibility: "hidden" }}>
+    <div className={cardClasses}>
       {/* Main Section */}
-      <div className="flex-1 flex flex-col p-4 md:p-5 relative border-r-2 border-dashed border-foreground/15">
+      <div className="flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15 overflow-hidden">
         {/* Hero Image */}
-        <div className="relative w-full h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-4 shrink-0">
+        <div className="relative w-full h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink-0">
           <img
             src={heroImage}
             alt={propertyType || "Property"}
@@ -284,8 +285,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   /* ── BACK FACE ── */
   const backFace = flippable ? (
     <div
-      className={cardClasses}
-      style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+      className={cn(cardClasses, "z-10")}
+      style={{ transform: "rotateY(180deg)" }}
     >
       <div className="flex-1 flex flex-col p-5 md:p-6">
         {/* Header */}
@@ -342,7 +343,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onMouseLeave={resetTilt}
         onTouchMove={handleTouchMove}
         onTouchEnd={resetTilt}
-        className="relative w-full max-w-[320px] md:max-w-[520px] min-h-[500px] md:min-h-[540px] group cursor-grab active:cursor-grabbing"
+        className="relative w-full max-w-[340px] md:max-w-[520px] min-h-[480px] md:min-h-[540px] group cursor-grab active:cursor-grabbing"
         style={{
           aspectRatio: "9/16",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
