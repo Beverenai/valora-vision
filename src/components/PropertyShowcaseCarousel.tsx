@@ -24,7 +24,12 @@ const wrap = (min: number, max: number, v: number) => {
   return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
 };
 
-const PropertyShowcaseCarousel: React.FC = () => {
+interface PropertyShowcaseCarouselProps {
+  accentType?: "sell" | "rent";
+}
+
+const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ accentType = "sell" }) => {
+  const isSell = accentType === "sell";
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -74,10 +79,10 @@ const PropertyShowcaseCarousel: React.FC = () => {
   return (
     <div className="flex flex-col md:grid md:grid-cols-2 gap-[1px] bg-border border border-border rounded-2xl overflow-hidden mx-2 md:mx-0">
       {/* City/Area Labels */}
-      <div className="bg-primary p-5 md:p-10 flex flex-col justify-between relative overflow-hidden">
+      <div className={cn("p-5 md:p-10 flex flex-col justify-between relative overflow-hidden", isSell ? "bg-primary" : "bg-[hsl(var(--rent-foreground))]")}>
         <div>
-          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2 md:mb-4">
-            Recent Valuations
+          <p className={cn("text-[0.6rem] uppercase tracking-[0.15em] font-semibold mb-2 md:mb-4", isSell ? "text-gold" : "text-emerald-400")}>
+            Recent {isSell ? "Valuations" : "Estimates"}
           </p>
           <h3 className="font-heading text-lg md:text-3xl font-medium text-primary-foreground mb-3 md:mb-8">
             Trusted by property owners across Spain
@@ -86,7 +91,7 @@ const PropertyShowcaseCarousel: React.FC = () => {
 
         <div className="relative" style={{ height: visibleCount * itemHeight }}>
           <div className="absolute inset-0 pointer-events-none z-10" style={{
-            background: "linear-gradient(to bottom, hsl(var(--primary)) 0%, transparent 15%, transparent 85%, hsl(var(--primary)) 100%)",
+            background: `linear-gradient(to bottom, hsl(var(--${isSell ? 'primary' : 'rent-foreground'})) 0%, transparent 15%, transparent 85%, hsl(var(--${isSell ? 'primary' : 'rent-foreground'})) 100%)`,
           }} />
           <div className="relative h-full overflow-hidden">
             {PROPERTIES.map((property, index) => {
@@ -116,7 +121,7 @@ const PropertyShowcaseCarousel: React.FC = () => {
                         : "bg-transparent text-primary-foreground/50 border-primary-foreground/15 hover:border-primary-foreground/30 hover:text-primary-foreground/80"
                     )}
                   >
-                    <MapPin size={12} className={cn(isActive ? "text-gold" : "text-primary-foreground/30")} />
+                    <MapPin size={12} className={cn(isActive ? (isSell ? "text-gold" : "text-emerald-400") : "text-primary-foreground/30")} />
                     <span className={cn("text-xs font-medium", isActive ? "text-foreground" : "text-primary-foreground/50")}>
                       {property.city}
                     </span>
@@ -151,8 +156,8 @@ const PropertyShowcaseCarousel: React.FC = () => {
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-[0.55rem] md:text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-1">
-                    Estimated Value
+                  <p className={cn("text-[0.55rem] md:text-[0.6rem] uppercase tracking-[0.15em] font-semibold mb-1", isSell ? "text-gold" : "text-emerald-400")}>
+                    {isSell ? "Estimated Value" : "Estimated Rent"}
                   </p>
                   <p className="font-heading text-2xl md:text-4xl font-bold text-card">
                     {activeProperty.price}
@@ -162,9 +167,9 @@ const PropertyShowcaseCarousel: React.FC = () => {
                   <div className="bg-card/10 backdrop-blur-sm border border-card/20 px-2.5 py-1 md:px-3 md:py-1.5">
                     <p className="text-[0.65rem] md:text-xs font-medium text-card">{activeProperty.propertyType}</p>
                   </div>
-                  <div className="bg-gold/90 backdrop-blur-sm px-2.5 py-1 md:px-3 md:py-1.5 flex items-center gap-1 hover:bg-gold transition-colors">
-                    <p className="text-[0.65rem] md:text-xs font-semibold text-primary">Get Valuation</p>
-                    <ArrowRight size={10} className="text-primary" />
+                  <div className={cn("backdrop-blur-sm px-2.5 py-1 md:px-3 md:py-1.5 flex items-center gap-1 transition-colors", isSell ? "bg-gold/90 hover:bg-gold" : "bg-emerald-500/90 hover:bg-emerald-600")}>
+                    <p className={cn("text-[0.65rem] md:text-xs font-semibold", isSell ? "text-primary" : "text-white")}>{isSell ? "Get Valuation" : "Get Estimate"}</p>
+                    <ArrowRight size={10} className={isSell ? "text-primary" : "text-white"} />
                   </div>
                 </div>
               </div>

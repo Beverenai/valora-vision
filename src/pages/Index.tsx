@@ -458,7 +458,7 @@ const Index = () => {
             </div>
           </div>
           <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden px-5 md:px-8">
-            <PropertyShowcaseCarousel />
+            <PropertyShowcaseCarousel accentType={valuationType} />
           </div>
         </section>
 
