@@ -1,56 +1,23 @@
 
+Yes — the last changes were mostly on the outer 3D wrapper, not the visible beige ticket itself. That’s why the card still looks too small.
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+Implementation plan:
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+1. In `src/components/ValuationTicketCard.tsx`, move the height logic into a shared input-state size config and apply it to the actual ticket face, not just the outer `cardRef` wrapper.
+   - Search state: make the ticket much taller.
+   - Map/verify state: make it even taller so it visibly lengthens the whole page.
 
-### Changes
+2. Make the visible card body inherit/stretch to that height.
+   - Update `cardClasses` / front face so the beige ticket fills the configured height.
+   - Keep result/processing modes unchanged.
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+3. Rework the input-mode vertical layout so the extra height appears below the form.
+   - Replace the centered input layout with a top-aligned layout.
+   - Add a flexible spacer before the barcode so the gap between the form and barcode becomes much larger.
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+4. Reduce any artificial wrapper padding around the ticket if it still stops short visually.
+   - The outer `py-6 md:py-8` around the card can be trimmed so the ticket reaches closer to the section divider.
 
-**2. Floating agency logos treatment**
-
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
-
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
-
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
-
+Technical note:
+- The key bug is structural: `min-h` was increased on the outer interactive wrapper, but the actual card face (`frontFace` / `cardClasses`) still sizes to content.
+- The fix is to size the face itself and redistribute internal flex spacing so the card looks longer, not just its invisible container.
