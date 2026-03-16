@@ -121,16 +121,6 @@ const Index = () => {
     });
   }, [addressData, navigate]);
 
-  const AddressBlock = () => (
-    <div className="w-full max-w-lg mx-auto">
-      <GoogleAddressInput
-        addressData={addressData}
-        onChange={handleAddressChange}
-        onLocationConfirmed={handleGetValuation}
-      />
-    </div>
-  );
-
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
       <div className="max-w-5xl mx-auto w-full flex flex-col">
