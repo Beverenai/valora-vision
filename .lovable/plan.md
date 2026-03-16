@@ -1,56 +1,54 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Fix Card Opener + Share Details
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+### 1. Card Opener — Keep Within Card Bounds (CardRevealWrapper.tsx)
 
-### Changes
+The current pull tab sits at `right: "-12px"` and drags rightward up to 200px — going off-screen on mobile (320px card on 390px viewport). Fix: move the tab to the **left edge** of the card, drag it rightward but only across the card width (~320px). The tear line moves from 85% to 15%.
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+**SealedWrapper changes:**
+- Pull tab: `left: "0px"` instead of `right: "-12px"`, rounded-l-xl, positioned inside the card
+- Drag constraints: `{ left: 0, right: 280 }` — stays within card width
+- Threshold lowered: trigger tear at `offset.x > 100` (about 1/3 card width)
+- Progress calc: normalize over card width (`/ 280`)
+- Tear strip: move from right side to left side (`left: 0` instead of `right: 0`)
+- Tear dashed line: `left: "15%"` instead of `left: "85%"`
+- Glow: reposition to 15%
+- Scissors/chevron: flip direction (ChevronRight stays, scissors rotate adjusted)
+- Instruction: "Slide to open →"
+- Sparkle/pop particles: change `left: "85%"` to `left: "15%"` in SparkleParticle and PopBubble
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**Tearing phase changes:**
+- The strip that flies away starts on the **left** and flies left (`x: -300`)
+- Main wrapper remains on the right
+- Adjust positions to match 15% strip width on left
 
-**2. Floating agency logos treatment**
+**Sliding phase:**
+- Main wrapper crumples rightward instead of leftward (or just fades — simpler)
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+### 2. Share with Valuation Details (SellResult.tsx + RentResult.tsx)
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
+**SellResult `handleShare`:**
+```typescript
+navigator.share({
+  title: `Property Valuation – ${lead?.address}`,
+  text: `My property at ${lead?.address} is valued at ${fmt(estimatedLow)} – ${fmt(estimatedHigh)}.`,
+  url: window.location.href
+});
+// Clipboard fallback includes same text + URL
 ```
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
+**RentResult `handleShare`:**
+```typescript
+navigator.share({
+  title: `Rental Estimate – ${lead?.address}`,
+  text: `My property at ${lead?.address} could earn ${fmt(monthlyEstimate)}/mo.`,
+  url: window.location.href
+});
+```
 
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Files Modified
+- `src/components/shared/CardRevealWrapper.tsx` — tab position, drag bounds, tear line, particles
+- `src/pages/SellResult.tsx` — share text with address + price range
+- `src/pages/RentResult.tsx` — share text with address + monthly estimate
 
