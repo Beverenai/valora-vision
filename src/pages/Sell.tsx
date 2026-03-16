@@ -24,7 +24,7 @@ import CompanyLogos from "@/components/CompanyLogos";
 import AboutValuator from "@/components/AboutValuator";
 import InlineCTA from "@/components/InlineCTA";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
-import MapboxAddressInput from "@/components/shared/MapboxAddressInput";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 import { AddressData } from "@/types/valuation";
 
 const fadeUp = {
