@@ -418,7 +418,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       </div>
 
       {/* Stub */}
-      <div className="hidden sm:flex w-[50px] flex-col items-center justify-between py-4 bg-[hsl(36_9%_88%)]">
+      <div className={cn("hidden sm:flex flex-col items-center justify-between py-4 bg-[hsl(36_9%_88%)]", stubWidth)}>
         <ArrowDown size={16} className="text-foreground/60" />
         <span className="font-heading text-xs font-bold uppercase tracking-[2px] text-foreground/80" style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}>
           ValoraCasa
