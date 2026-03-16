@@ -241,7 +241,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   /* ── FRONT FACE ── */
   const frontFace = (
-    <div className={cardClasses} style={!hasInput ? { transition: "opacity 0.4s ease", opacity: flipped ? 0 : 1, pointerEvents: flipped ? "none" : "auto" } : undefined}>
+    <div className={cardClasses}>
       {/* Main Section */}
       <div className={cn("flex-1 flex flex-col relative border-r-2 border-dashed border-foreground/15", mainPadding, mapExpanded ? "overflow-visible" : "overflow-hidden")}>
         {/* Hero Image */}
