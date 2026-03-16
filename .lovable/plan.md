@@ -1,122 +1,56 @@
 
 
-## Plan: 3D Card Reveal Animation (Pokemon Pack Opening)
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-This is a large feature that creates a dramatic "unboxing" experience on the valuation result pages. When the user arrives at a result page, instead of immediately seeing their valuation, they see a sealed metallic wrapper that they tear open to reveal their ValuationTicketCard.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Architecture
+### Changes
 
-Create a single reusable component `CardRevealWrapper` that wraps the existing result pages. Both `SellResult.tsx` and `RentResult.tsx` will use it. The existing page content (report sections) remains untouched — it just becomes Phase 3 (scrollable content below the card).
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-### New Files
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**1. `src/components/shared/CardRevealWrapper.tsx`** — The core component (~400 lines)
-
-Contains all three phases:
-
-- **Phase 1: Sealed Wrapper** — Full-viewport metallic wrapper with "VC" texture pattern, embossed "VALUED"/"ESTIMATED" text, dotted tear line, and a pulsing terracotta/green pull tab. Uses `framer-motion` `drag="x"` on the pull tab. As the user drags, the wrapper splits along the tear line with a light-leak glow effect.
-
-- **Phase 2: Reveal Animation** — When drag exceeds 50% threshold: wrapper halves fly apart (top up, bottom down with rotateX), golden/green light burst from center using a radial gradient, 8-12 sparkle particles scatter with random trajectories (framer-motion `animate`), then the ValuationTicketCard springs in from below with `type: "spring"` physics and a diagonal shine sweep.
-
-- **Phase 3: Card + Report** — Card is displayed with the existing 3D tilt effect (already built into `ValuationTicketCard`). A holographic shine overlay is added on top that shifts angle based on tilt. Below: "Scroll down for your full report ↓" indicator. On scroll, card scales down slightly and the full report sections fade in.
-
-**Props:**
-```tsx
-interface CardRevealWrapperProps {
-  children: React.ReactNode; // The full report content
-  accentType: "sell" | "rent";
-  // All ValuationTicketCard props for the revealed card
-  cardProps: ValuationTicketCardProps;
-  // Whether data is still loading
-  loading?: boolean;
-}
-```
-
-**Key implementation details:**
-
-- Wrapper background: CSS `linear-gradient(135deg, #C0C0C0, #E8E8E8, #A0A0A0, #D4D4D4, #B0B0B0)` with repeating "VC" pattern via pseudo-elements at 10% opacity
-- Tear line: `border-dashed` horizontal line at ~20% from top
-- Pull tab: terracotta (#D4713B) for sell, green (hsl(var(--rent))) for rent, with CSS wiggle animation
-- Drag: `framer-motion` `drag="x"` with `dragConstraints={{ left: -300, right: 0 }}`, tracks `dragProgress` as 0-1
-- As drag progresses: tear gap opens (top half translates up proportionally), white glow intensifies in gap
-- Reveal trigger at `dragProgress > 0.5`: `AnimatePresence` exits wrapper halves, enters card with spring
-- Holographic overlay: CSS custom property `--shine-angle` updated from tilt values, `mix-blend-mode: overlay`
-- Mobile: touch drag works natively with framer-motion; gyroscope tilt via `DeviceOrientationEvent` as enhancement
-- Celebration sound reused from existing `ConfettiAnimation` (extract or duplicate the `playCelebrationSound` function)
-- Confetti fires on reveal (reuse `ConfettiAnimation` component)
-- `will-change: transform` on animated elements for 60fps
-
-**Inline sub-components:**
-- `SealedWrapper` — the metallic wrapper with texture, tear line, pull tab
-- `Barcode` — decorative CSS barcode from ref code
-- `HoloShine` — the holographic overlay div
-- `SparkleParticle` — individual scatter particle with random trajectory
-
-**2. Font addition in `index.html` or `index.css`**
-
-Add `Italianno` is already loaded. Add `Playfair Display` for the "VALUED" embossed text on the wrapper:
-```css
-@import url('...&family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
-```
-
-### Modified Files
-
-**3. `src/pages/SellResult.tsx`**
-- Wrap the existing content in `<CardRevealWrapper>`
-- Pass card props and `accentType="sell"`
-- Remove the standalone `<ValuationTicketCard>` and `<ConfettiAnimation>` (now handled inside the wrapper)
-- The rest of the report sections become `children`
-
-**4. `src/pages/RentResult.tsx`**
-- Same pattern: wrap in `<CardRevealWrapper>` with `accentType="rent"`
-- Remove standalone card and confetti
-
-### Visual Flow
+**2. Floating agency logos treatment**
 
 ```text
-┌─────────────────────────────┐
-│   "Your valuation is ready" │  ← italic serif, muted
-│                             │
-│  ┌───────────────────────┐  │
-│  │  ══ METALLIC WRAPPER ══│  │
-│  │  ·······[VC]···········│  │  ← repeating VC pattern
-│  │                        │  │
-│  │     V A L O R A C A S A│  │  ← embossed silver
-│  │                        │  │
-│  │- - - - - - - - - -[TAB]│  │  ← dotted tear + pull tab
-│  │                        │  │
-│  │       VALUED           │  │  ← embossed semi-transparent
-│  │                        │  │
-│  │  PROPERTY VALUATION    │  │
-│  │       REPORT           │  │
-│  └───────────────────────┘  │
-│                             │
-│    ← Slide to open →       │
-└─────────────────────────────┘
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-         ↓ drag tab ↓
-
-┌─────────────────────────────┐
-│    ✨ sparkles ✨            │
-│                             │
-│  ┌───────────────────────┐  │
-│  │  [ValuationTicketCard] │  │  ← springs in with 3D tilt
-│  │   with holo overlay    │  │
-│  └───────────────────────┘  │
-│                             │
-│   Scroll down for report ↓  │
-│                             │
-│  ─────────────────────────  │
-│  [ Full report sections ]   │
-│  [ (existing content)    ]  │
-└─────────────────────────────┘
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
 ```
 
-### Scope
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-- One new component file (~400 lines)
-- Two modified result pages (minor wrapping changes)
-- One CSS font addition
-- No database changes
-- No new dependencies (framer-motion already installed)
+**3. How It Works — typographic layout**
+
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 

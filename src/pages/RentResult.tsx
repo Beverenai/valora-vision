@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ConfettiAnimation from "@/components/shared/ConfettiAnimation";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
+import CardRevealWrapper from "@/components/shared/CardRevealWrapper";
 import CrossSellBanner from "@/components/CrossSellBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -95,39 +95,42 @@ const RentResult: React.FC = () => {
     );
   }
 
+  const cardElement = (
+    <ValuationTicketCard
+      address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
+      city={lead?.city || undefined}
+      estimatedValue={`${fmt(monthlyEstimate)}/mo`}
+      secondaryValue={lead?.annual_income_estimate ? fmt(lead.annual_income_estimate) + "/yr" : undefined}
+      propertyType={lead?.property_type || undefined}
+      leadId={id!}
+      headline="ESTIMATED"
+      subtitle="Your Rental Income"
+      summaryText="Your property's rental potential has been analysed using comparable listings, seasonal demand patterns, and local market data. Scroll down for the full breakdown."
+      accentType="rent"
+      mode="result"
+      referenceCode={formatRefCode(id!)}
+      onShare={handleShare}
+      onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
+    />
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <ConfettiAnimation />
-      <div className="max-w-[1400px] mx-auto border-x border-border">
-        <ValuationTicketCard
-          address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
-          city={lead?.city || undefined}
-          estimatedValue={`${fmt(monthlyEstimate)}/mo`}
-          secondaryValue={lead?.annual_income_estimate ? fmt(lead.annual_income_estimate) + "/yr" : undefined}
-          propertyType={lead?.property_type || undefined}
-          leadId={id!}
-          headline="ESTIMATED"
-          subtitle="Your Rental Income"
-          summaryText="Your property's rental potential has been analysed using comparable listings, seasonal demand patterns, and local market data. Scroll down for the full breakdown."
-          accentType="rent"
-          mode="result"
-          referenceCode={formatRefCode(id!)}
-          onShare={handleShare}
-          onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
-        />
+      <CardRevealWrapper accentType="rent" cardElement={cardElement} loading={loading}>
+        <div className="max-w-[1400px] mx-auto border-x border-border">
+          {/* Reference code badge */}
+          <div className="flex items-center justify-center gap-3 py-4 border-b border-border">
+            <p className="text-xs text-muted-foreground">Return to this valuation anytime with reference code</p>
+            <RefCodeBadge refCode={formatRefCode(id!)} />
+          </div>
 
-        {/* Reference code badge */}
-        <div className="flex items-center justify-center gap-3 py-4 border-b border-border">
-          <p className="text-xs text-muted-foreground">Return to this valuation anytime with reference code</p>
-          <RefCodeBadge refCode={formatRefCode(id!)} />
+          {/* Cross-sell: Sell */}
+          <div className="p-6 md:p-10">
+            <CrossSellBanner variant="rent-to-sell" />
+          </div>
         </div>
-
-        {/* Cross-sell: Sell */}
-        <div className="p-6 md:p-10">
-          <CrossSellBanner variant="rent-to-sell" />
-        </div>
-      </div>
+      </CardRevealWrapper>
       <Footer />
     </div>
   );
