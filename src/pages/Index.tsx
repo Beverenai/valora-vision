@@ -40,6 +40,35 @@ const TESTIMONIALS = [
   { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
 
+/* ─── DIVIDER ─── */
+const SectionDivider = () => (
+  <div className="border-b border-border/40 mx-5 md:mx-8" />
+);
+
+/* ─── STATS BAR ─── */
+const StatsBar = () => (
+  <div className="flex justify-between border-y border-border/40 py-5 mx-5 md:mx-8">
+    {[
+      { label: "Valuations", value: "12,400+" },
+      { label: "Average time", value: "2 min" },
+      { label: "Cost", value: "100% Free" },
+    ].map((stat, i, arr) => (
+      <div
+        key={stat.label}
+        className={cn(
+          "flex-1 text-center",
+          i < arr.length - 1 && "border-r border-border/40"
+        )}
+      >
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+          {stat.label}
+        </p>
+        <p className="font-semibold text-sm text-foreground">{stat.value}</p>
+      </div>
+    ))}
+  </div>
+);
+
 /* ─── MAIN PAGE ─── */
 
 const Index = () => {
@@ -98,7 +127,7 @@ const Index = () => {
           onChange={(e) => setAddress(e.target.value)}
           placeholder="Enter your property address..."
           className={cn(
-            "w-full rounded-2xl border border-[hsl(var(--border))] bg-card pl-12 pr-5 text-foreground shadow-sm outline-none transition-shadow focus:shadow-lg placeholder:text-muted-foreground",
+            "w-full rounded-2xl border border-border bg-card pl-12 pr-5 text-foreground shadow-sm outline-none transition-shadow focus:shadow-lg placeholder:text-muted-foreground",
             compact ? "py-3.5 text-base" : "py-5 pr-6 text-lg"
           )}
         />
@@ -115,311 +144,340 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
+      <div className="max-w-5xl mx-auto w-full flex flex-col">
 
-      {/* ═══════════ HERO ═══════════ */}
-      <div
-        ref={heroRef}
-        className="min-h-screen flex flex-col items-center justify-center px-4 md:px-6 animate-fade-in"
-      >
-        <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
-          <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
-            Free property valuation
-          </span>
-          <h1 className="font-['DM_Serif_Display'] text-3xl md:text-7xl text-foreground leading-[1.1]">
-            What is your property
-            <br />
-            in Spain <em className="italic">really</em> worth?
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mt-4">
-            Get a detailed market report in under 2 minutes. Completely free.
-          </p>
-          <ValuationTicketCard
-            address=""
-            estimatedValue=""
-            propertyType="Villa"
-            leadId="a1b2c3d4e5f6"
-            accentType="sell"
-            addressValue={address}
-            onAddressChange={setAddress}
-            onSubmit={handleGetValuation}
-          />
-          <p className="text-sm text-muted-foreground/60 tracking-wide -mt-2">
-            12,400+ valuations · 100% free · 2 minutes
-          </p>
-        </div>
-      </div>
-
-      {/* ═══════════ FLOATING AGENCIES ═══════════ */}
-      <section className="w-full py-14 md:py-32 overflow-hidden">
-        <p className="text-xs tracking-[0.2em] text-muted-foreground/40 text-center uppercase mb-10 md:mb-16">
-          Used every day by real estate professionals
-        </p>
-        <div className="relative max-w-4xl mx-auto h-[120px] md:h-[140px]">
-          {AGENCIES.map((a, i) => (
-            <motion.span
-              key={a.name}
-              className={cn(
-                "absolute font-['DM_Serif_Display'] italic text-muted-foreground cursor-default select-none",
-                a.size
-              )}
-              style={{ left: a.x, top: `${30 + (i % 3) * 28}%` }}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: a.opacity }}
-              viewport={{ once: true }}
-              animate={{ y: [a.y, a.y - 6, a.y] }}
-              transition={{
-                y: { duration: a.dur, repeat: Infinity, ease: "easeInOut" },
-                opacity: { duration: 0.8, delay: i * 0.1 },
-              }}
-              whileHover={{ opacity: 0.6, scale: 1.05 }}
-            >
-              {a.name}
-            </motion.span>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══════════ HOW IT WORKS — Typographic ═══════════ */}
-      <section className="w-full py-14 md:py-32 px-4 md:px-6">
-        <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-10 md:mb-20"
-          >
-            <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
-              How it works
-            </h2>
-            <p className="text-muted-foreground text-lg mt-3">
-              Three simple steps to your free valuation
+        {/* ═══════════ HERO ═══════════ */}
+        <div
+          ref={heroRef}
+          className="min-h-[85vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
+        >
+          <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
+            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium mb-4">
+              Free property valuation
+            </span>
+            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-7xl text-foreground leading-[1.1]">
+              What is your property
+              <br />
+              in Spain <em className="italic">really</em> worth?
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mt-2">
+              Get a detailed market report in under 2 minutes. Completely free.
             </p>
-          </motion.div>
+            <ValuationTicketCard
+              address=""
+              estimatedValue=""
+              propertyType="Villa"
+              leadId="a1b2c3d4e5f6"
+              accentType="sell"
+              addressValue={address}
+              onAddressChange={setAddress}
+              onSubmit={handleGetValuation}
+            />
+          </div>
+        </div>
 
-          <div className="space-y-0">
-            {HOW_STEPS.map((step, i) => (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
+        <SectionDivider />
+
+        {/* ═══════════ STATS BAR ═══════════ */}
+        <div className="py-2">
+          <StatsBar />
+        </div>
+
+        <SectionDivider />
+
+        {/* ═══════════ FLOATING AGENCIES ═══════════ */}
+        <section className="w-full py-8 md:py-20 overflow-hidden px-5 md:px-8">
+          <p className="text-xs tracking-[0.2em] text-muted-foreground/40 text-center uppercase mb-8 md:mb-14">
+            Used every day by real estate professionals
+          </p>
+          <div className="relative max-w-4xl mx-auto h-[120px] md:h-[140px]">
+            {AGENCIES.map((a, i) => (
+              <motion.span
+                key={a.name}
                 className={cn(
-                  "flex items-start gap-6 md:gap-10 py-10 md:py-14",
-                  i < HOW_STEPS.length - 1 && "border-b border-[hsl(var(--border)/0.3)]"
+                  "absolute font-['DM_Serif_Display'] italic text-muted-foreground cursor-default select-none",
+                  a.size
                 )}
+                style={{ left: a.x, top: `${30 + (i % 3) * 28}%` }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: a.opacity }}
+                viewport={{ once: true }}
+                animate={{ y: [a.y, a.y - 6, a.y] }}
+                transition={{
+                  y: { duration: a.dur, repeat: Infinity, ease: "easeInOut" },
+                  opacity: { duration: 0.8, delay: i * 0.1 },
+                }}
+                whileHover={{ opacity: 0.6, scale: 1.05 }}
               >
-                <span className="text-5xl md:text-7xl font-['DM_Serif_Display'] text-primary/20 leading-none shrink-0 -mt-1">
-                  {step.num}
-                </span>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-semibold text-foreground">
-                    {step.title}
-                  </h3>
-                  <p className="text-muted-foreground mt-2 text-base md:text-lg leading-relaxed">
-                    {step.desc}
-                  </p>
-                </div>
-              </motion.div>
+                {a.name}
+              </motion.span>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ═══════════ WHAT YOU GET — Flippable Card ═══════════ */}
-      <section className="w-full py-14 md:py-32 px-4 md:px-6 bg-secondary/50">
-        <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
-              See what you'll receive
-            </h2>
-            <p className="text-muted-foreground text-lg mt-3 max-w-xl mx-auto">
-              A beautifully detailed valuation card with all the key data about your property — ready to share.
-            </p>
-          </motion.div>
+        <SectionDivider />
 
-          <ValuationTicketCard
-            address="Calle Sierra Blanca 12"
-            city="Marbella"
-            estimatedValue="€1,250,000"
-            secondaryValue="€4,200/m²"
-            propertyType="Villa"
-            leadId="a1b2c3d4e5f6"
-            headline="VALUED"
-            subtitle="Your Valuation"
-            summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators."
-            accentType="sell"
-            flippable
-            bedrooms={4}
-            bathrooms={3}
-            builtSize="350 m²"
-            plotSize="1,200 m²"
-            condition="Excellent"
-          />
+        {/* ═══════════ HOW IT WORKS ═══════════ */}
+        <section className="w-full py-8 md:py-20 px-5 md:px-8">
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="flex items-baseline justify-between mb-8 md:mb-16"
+            >
+              <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
+                How it works
+              </h2>
+              <p className="text-sm text-muted-foreground hidden md:block">
+                Three simple steps
+              </p>
+            </motion.div>
 
-          <div className="flex items-center gap-2 text-muted-foreground/40 text-sm -mt-2">
-            <RotateCcw size={14} />
-            <span>Tap the card to see property details</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ REPORT FEATURES — Editorial Scatter ═══════════ */}
-      <section className="w-full py-14 md:py-32 px-4 md:px-6">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground max-w-3xl mx-auto">
-              Everything you need to know about your property
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-            {REPORT_FEATURES.map((feat, i) => (
-              <motion.div
-                key={feat.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className={cn(
-                  "py-8 group",
-                  i < REPORT_FEATURES.length - 2 && "border-b border-[hsl(var(--border)/0.2)]",
-                  // On mobile all get bottom border except last
-                  "max-md:border-b max-md:border-[hsl(var(--border)/0.2)] max-md:last:border-b-0"
-                )}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors",
-                    feat.accent
-                      ? "bg-[hsl(var(--terracotta-light))]"
-                      : "bg-secondary"
-                  )}>
-                    <span className="text-primary text-lg">✦</span>
-                  </div>
+            <div className="space-y-0">
+              {HOW_STEPS.map((step, i) => (
+                <motion.div
+                  key={step.num}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.15 }}
+                  className={cn(
+                    "flex items-start gap-6 md:gap-10 py-8 md:py-12",
+                    i < HOW_STEPS.length - 1 && "border-b border-border/30"
+                  )}
+                >
+                  <span className="text-5xl md:text-7xl font-['DM_Serif_Display'] text-primary/20 leading-none shrink-0 -mt-1">
+                    {step.num}
+                  </span>
                   <div>
-                    <h3 className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
-                      {feat.title}
+                    <h3 className="text-xl md:text-2xl font-semibold text-foreground">
+                      {step.title}
                     </h3>
-                    <p className="text-muted-foreground mt-1 leading-relaxed">
-                      {feat.desc}
+                    <p className="text-muted-foreground mt-2 text-base md:text-lg leading-relaxed">
+                      {step.desc}
                     </p>
                   </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <SectionDivider />
+
+        {/* ═══════════ WHAT YOU GET — Flippable Card ═══════════ */}
+        <section className="w-full py-8 md:py-20 px-5 md:px-8 bg-secondary/50">
+          <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
+                See what you'll receive
+              </h2>
+              <p className="text-muted-foreground text-lg mt-3 max-w-xl mx-auto">
+                A beautifully detailed valuation card with all the key data about your property — ready to share.
+              </p>
+            </motion.div>
+
+            <ValuationTicketCard
+              address="Calle Sierra Blanca 12"
+              city="Marbella"
+              estimatedValue="€1,250,000"
+              secondaryValue="€4,200/m²"
+              propertyType="Villa"
+              leadId="a1b2c3d4e5f6"
+              headline="VALUED"
+              subtitle="Your Valuation"
+              summaryText="Your property has been analysed using comparable market data, location scoring, and current demand indicators."
+              accentType="sell"
+              flippable
+              bedrooms={4}
+              bathrooms={3}
+              builtSize="350 m²"
+              plotSize="1,200 m²"
+              condition="Excellent"
+            />
+
+            <div className="flex items-center gap-2 text-muted-foreground/40 text-sm -mt-2">
+              <RotateCcw size={14} />
+              <span>Tap the card to see property details</span>
+            </div>
+          </div>
+        </section>
+
+        <SectionDivider />
+
+        {/* ═══════════ REPORT FEATURES ═══════════ */}
+        <section className="w-full py-8 md:py-20 px-5 md:px-8">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="flex items-baseline justify-between mb-12"
+            >
+              <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground max-w-xl">
+                Everything you need to know about your property
+              </h2>
+              <span className="hidden md:inline-block text-sm text-muted-foreground">
+                All included free
+              </span>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+              {REPORT_FEATURES.map((feat, i) => (
+                <motion.div
+                  key={feat.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                  className={cn(
+                    "py-6 group",
+                    i < REPORT_FEATURES.length - 2 && "border-b border-border/20",
+                    "max-md:border-b max-md:border-border/20 max-md:last:border-b-0"
+                  )}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors",
+                      feat.accent
+                        ? "bg-[hsl(var(--terracotta-light))]"
+                        : "bg-secondary"
+                    )}>
+                      <span className="text-primary text-lg">✦</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
+                        {feat.title}
+                      </h3>
+                      <p className="text-muted-foreground mt-1 leading-relaxed">
+                        {feat.desc}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="flex justify-center mt-10"
+            >
+              <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium">
+                All included — completely free
+              </span>
+            </motion.div>
+          </div>
+        </section>
+
+        <SectionDivider />
+
+        {/* ═══════════ RECENT VALUATIONS ═══════════ */}
+        <section className="w-full py-8 md:py-20 bg-secondary/50">
+          <div className="max-w-5xl mx-auto px-5 md:px-8">
+            <div className="flex items-baseline justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--success))]" />
+                  </span>
+                  <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
                 </div>
-              </motion.div>
-            ))}
+                <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground mt-2">
+                  Recent valuations
+                </h2>
+              </div>
+              <p className="text-sm text-muted-foreground hidden md:block">
+                238 this week
+              </p>
+            </div>
           </div>
+          <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden px-5 md:px-8">
+            <PropertyShowcaseCarousel />
+          </div>
+        </section>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="flex justify-center mt-12"
-          >
-            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-5 py-2.5 text-sm font-medium">
-              All included — completely free
-            </span>
-          </motion.div>
-        </div>
-      </section>
+        <SectionDivider />
 
-      {/* ═══════════ RECENT VALUATIONS ═══════════ */}
-      <section className="w-full py-14 md:py-32 bg-secondary/50">
-        <div className="max-w-5xl mx-auto px-4 md:px-6">
-          <div className="flex items-center gap-2 justify-center">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--success))] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--success))]" />
-            </span>
-            <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
+        {/* ═══════════ TESTIMONIALS ═══════════ */}
+        <section className="w-full py-8 md:py-20 px-5 md:px-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
+              What property owners say
+            </h2>
+            <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-10">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={testimonialIdx}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex flex-col items-center gap-4"
+                >
+                  <div className="flex gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                    ))}
+                  </div>
+                  <p className="text-xl md:text-2xl text-muted-foreground italic max-w-2xl leading-relaxed">
+                    "{TESTIMONIALS[testimonialIdx].quote}"
+                  </p>
+                  <p className="text-sm text-muted-foreground/60 mt-4">
+                    — {TESTIMONIALS[testimonialIdx].name}, {TESTIMONIALS[testimonialIdx].location}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            <div className="flex justify-center gap-2 mt-6">
+              {TESTIMONIALS.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setTestimonialIdx(i)}
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-300",
+                    i === testimonialIdx ? "bg-primary w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
+                  )}
+                />
+              ))}
+            </div>
           </div>
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-foreground mt-4">
-            Recent valuations
-          </h2>
-          <p className="text-muted-foreground text-lg text-center mt-2">238 valuations this week</p>
-        </div>
-        <div className="max-w-5xl mx-auto mt-12 rounded-2xl overflow-hidden">
-          <PropertyShowcaseCarousel />
-        </div>
-      </section>
+        </section>
 
-      {/* ═══════════ TESTIMONIALS ═══════════ */}
-      <section className="w-full py-14 md:py-32 px-4 md:px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
-            What property owners say
-          </h2>
-          <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-12">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={testimonialIdx}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center gap-4"
-              >
-                <div className="flex gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                  ))}
-                </div>
-                <p className="text-xl md:text-2xl text-muted-foreground italic max-w-2xl leading-relaxed">
-                  "{TESTIMONIALS[testimonialIdx].quote}"
-                </p>
-                <p className="text-sm text-muted-foreground/60 mt-6">
-                  — {TESTIMONIALS[testimonialIdx].name}, {TESTIMONIALS[testimonialIdx].location}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <div className="flex justify-center gap-2 mt-8">
-            {TESTIMONIALS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setTestimonialIdx(i)}
-                className={cn(
-                  "h-2 rounded-full transition-all duration-300",
-                  i === testimonialIdx ? "bg-primary w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
-                )}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+        <SectionDivider />
 
-      {/* ═══════════ FINAL CTA ═══════════ */}
-      <section
-        className="w-full py-14 md:py-32 px-4 md:px-6 pb-32"
-        style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
-      >
-        <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground leading-[1.1]">
-            Ready to discover your property's true value?
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Free, confidential, and takes less than 2 minutes
-          </p>
-          <div className="w-full mt-6">
-            <AddressBlock />
+        {/* ═══════════ FINAL CTA ═══════════ */}
+        <section
+          className="w-full py-8 md:py-20 px-5 md:px-8 pb-32"
+          style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
+        >
+          <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
+            <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground leading-[1.1]">
+              Ready to discover your property's true value?
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Free, confidential, and takes less than 2 minutes
+            </p>
+            <div className="w-full mt-4">
+              <AddressBlock />
+            </div>
+            <p className="text-sm text-muted-foreground/60 mt-6">
+              Join 12,400+ property owners who already know their home's worth
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground/60 mt-8">
-            Join 12,400+ property owners who already know their home's worth
-          </p>
-        </div>
-      </section>
+        </section>
+
+      </div>
 
       {/* ═══════════ STICKY MOBILE CTA ═══════════ */}
       <AnimatePresence>
@@ -431,7 +489,10 @@ const Index = () => {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border"
           >
-            <div className="px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <div className="px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <p className="text-[11px] text-muted-foreground mb-1.5">
+                Get your free property valuation
+              </p>
               <button
                 onClick={handleGetValuation}
                 className="w-full rounded-full py-4 bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
