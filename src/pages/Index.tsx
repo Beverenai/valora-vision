@@ -108,7 +108,7 @@ const Index = () => {
     setAddressData(prev => ({ ...prev, [field]: value }));
   }, []);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
-  const [showStickyCta, setShowStickyCta] = useState(false);
+  
   const [mapExpanded, setMapExpanded] = useState(false);
   const [mapExpandedBottom, setMapExpandedBottom] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
