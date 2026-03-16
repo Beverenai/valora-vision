@@ -112,7 +112,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const isProcessing = mode === "processing";
   const isCompact = mode === "compact" || (!mode && compact);
 
-  const hasInput = onAddressChange !== undefined && !isProcessing;
+  const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined) && !isProcessing;
+  const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
   const handleContinue = onContinue || onSubmit;
 
   const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
