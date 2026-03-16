@@ -45,7 +45,7 @@ const HOW_STEPS = [
   {
     num: "03",
     title: "Get your valuation",
-    desc: "Receive an AI-powered market estimate in seconds.",
+    desc: "Receive a market estimate based on real data in seconds.",
     icon: (
       <svg viewBox="0 0 40 40" width="40" height="40" fill="none" strokeWidth="1.5" stroke="#D4713B">
         <path d="M8 32 L16 20 L24 26 L32 12" />
@@ -58,7 +58,7 @@ const HOW_STEPS = [
 const REPORT_FEATURES = [
   {
     title: "Estimated Market Value",
-    desc: "AI-calculated price based on comparable sales data.",
+    desc: "Calculated price based on comparable sales data.",
     icon: (
       <svg viewBox="0 0 36 36" width="36" height="36" fill="none" strokeWidth="1.5" stroke="#D4713B">
         <circle cx="18" cy="18" r="14" />
@@ -79,7 +79,7 @@ const REPORT_FEATURES = [
     ),
   },
   {
-    title: "AI Property Analysis",
+    title: "Property Analysis",
     desc: "Detailed analysis of your property's strengths.",
     icon: (
       <svg viewBox="0 0 36 36" width="36" height="36" fill="none" strokeWidth="1.5" stroke="#D4713B">
@@ -132,7 +132,7 @@ const TESTIMONIALS = [
   { quote: "We sold our villa in Marbella for 12% above the initial asking price thanks to the accurate valuation.", name: "James & Sarah T.", location: "Marbella" },
   { quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.", name: "Carlos M.", location: "Estepona" },
   { quote: "Fast, free, and surprisingly accurate. Best property tool I've found for Spain.", name: "Anna K.", location: "Fuengirola" },
-  { quote: "Used it to compare agents' prices. The AI valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
+  { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
 
 type ValuationType = "sell" | "rent";
@@ -246,7 +246,7 @@ const Index = () => {
             transition={{ duration: 0.5 }}
             className="inline-block bg-[#FFF3EB] text-[#D4713B] rounded-full px-4 py-2 text-sm font-medium mb-8"
           >
-            Free AI-powered valuation
+            Free property valuation
           </motion.span>
 
           <motion.h1
@@ -290,7 +290,7 @@ const Index = () => {
       </div>
 
       {/* ═══════════ SECTION 2 — TRUSTED BY ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-20 bg-white">
+      <motion.section {...sectionReveal} className="w-full py-20 bg-white border-t border-[#E8E5E0]">
         <p className="text-xs tracking-[0.2em] text-[#BBB] text-center uppercase">
           Trusted by leading agencies
         </p>
@@ -304,7 +304,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 3 — HOW IT WORKS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#FAFAF7]">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#F5F3EE] border-t border-[#E8E5E0]">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-[#1A1A1A]">
             How it works
@@ -334,7 +334,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 4 — WHAT YOUR REPORT INCLUDES ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white border-t border-[#E8E5E0]">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-center text-[#1A1A1A] max-w-3xl mx-auto">
             Everything you need to know about your property
@@ -366,7 +366,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 5 — RECENT VALUATIONS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#FAFAF7]">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-[#F5F3EE] border-t border-[#E8E5E0]">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-2 justify-center">
             <span className="relative flex h-2 w-2">
@@ -404,7 +404,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 6 — TESTIMONIALS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white border-t border-[#E8E5E0]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-[#1A1A1A]">
             What property owners say
@@ -453,7 +453,7 @@ const Index = () => {
       {/* ═══════════ SECTION 7 — FINAL CTA ═══════════ */}
       <motion.section
         {...sectionReveal}
-        className="w-full py-24 md:py-40 px-6 pb-32"
+        className="w-full py-24 md:py-40 px-6 pb-32 border-t border-[#E8E5E0]"
         style={{ background: "linear-gradient(180deg, #FAFAF7 0%, #FFF3EB 100%)" }}
       >
         <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
