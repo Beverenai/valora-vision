@@ -441,20 +441,30 @@ const Index = () => {
           className="w-full py-8 md:py-20 px-5 md:px-8 pb-32"
           style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--terracotta-light)) 100%)" }}
         >
-          <div className="max-w-2xl mx-auto flex flex-col items-center text-center gap-6">
-            <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-foreground leading-[1.1]">
-              Ready to discover your property's true value?
+          <div className="flex flex-col items-center text-center gap-4 mb-2">
+            <span className="inline-block bg-[hsl(var(--terracotta-light))] text-primary rounded-full px-4 py-2 text-sm font-medium">
+              Free property valuation
+            </span>
+            <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground leading-[1.1]">
+              Ready to discover your property's
+              <br />
+              true <em className="italic">value</em>?
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Free, confidential, and takes less than 2 minutes
             </p>
-            <div className="w-full mt-4">
-              <AddressBlock />
-            </div>
-            <p className="text-sm text-muted-foreground/60 mt-6">
-              Join 12,400+ property owners who already know their home's worth
-            </p>
           </div>
+          <ValuationTicketCard
+            address=""
+            estimatedValue=""
+            leadId=""
+            accentType="sell"
+            addressData={addressData}
+            onAddressFieldChange={handleAddressChange}
+            onLocationConfirmed={handleGetValuation}
+            mapExpanded={mapExpandedBottom}
+            onMapPhaseChange={(phase) => setMapExpandedBottom(phase === "verify")}
+          />
         </section>
 
       </div>
