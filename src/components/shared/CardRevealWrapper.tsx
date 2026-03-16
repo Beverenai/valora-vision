@@ -197,17 +197,17 @@ const SealedWrapper: React.FC<{
           </p>
         </div>
 
-        {/* Tear line at 85% */}
+        {/* Tear line at 15% */}
         <div
-          className="absolute top-0 bottom-0 border-r-2 border-dashed border-white/20"
-          style={{ left: "85%" }}
+          className="absolute top-0 bottom-0 border-l-2 border-dashed border-white/20"
+          style={{ left: "15%" }}
         />
 
         {/* Glow through tear line */}
         <motion.div
           className="absolute top-0 bottom-0 w-6 pointer-events-none"
           style={{
-            left: "calc(85% - 12px)",
+            left: "calc(15% - 12px)",
             background: `radial-gradient(ellipse at center, ${isSell ? "rgba(255,140,0,0.5)" : "rgba(82,183,136,0.5)"} 0%, transparent 70%)`,
             opacity: glowOpacity,
           }}
