@@ -284,8 +284,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   /* ── BACK FACE ── */
   const backFace = flippable ? (
     <div
-      className={cardClasses}
-      style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+      className={cn(cardClasses, "z-10")}
+      style={{ transform: "rotateY(180deg)" }}
     >
       <div className="flex-1 flex flex-col p-5 md:p-6">
         {/* Header */}
