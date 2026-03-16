@@ -135,7 +135,7 @@ const Index = () => {
           className="w-full max-w-[600px] mt-2 rounded-xl p-[2px] animate-[glow-pulse_3s_ease-in-out_infinite]"
         >
           <div className="bg-card rounded-xl p-4">
-            <GoogleMapsAddressInput
+            <MapboxAddressInput
               addressData={addressData}
               onChange={handleAddressChange}
             />

@@ -1,7 +1,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import GoogleMapsAddressInput from "@/components/shared/GoogleMapsAddressInput";
+import MapboxAddressInput from "@/components/shared/MapboxAddressInput";
 import { RentValuationData } from "@/types/valuation";
 
 const POPULAR_CITIES = [
