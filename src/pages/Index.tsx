@@ -250,7 +250,7 @@ const Index = () => {
 
         {/* ═══════════ WHAT YOU GET — Flippable Card ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8 bg-secondary/50">
-          <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
+          <div className="max-w-[1200px] mx-auto flex flex-col items-center text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
