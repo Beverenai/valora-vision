@@ -137,6 +137,10 @@ export default {
           "0%, 100%": { boxShadow: "0 0 15px 2px hsl(var(--gold) / 0.3)" },
           "50%": { boxShadow: "0 0 25px 6px hsl(var(--gold) / 0.5)" },
         },
+        marquee: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -151,6 +155,7 @@ export default {
         "ticket-float": "ticket-float 6s ease-in-out infinite",
         "ticket-dash": "ticket-dash 20s linear infinite",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
+        marquee: "marquee 20s linear infinite",
       },
     },
   },
