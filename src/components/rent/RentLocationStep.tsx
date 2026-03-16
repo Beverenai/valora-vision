@@ -1,7 +1,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import GoogleMapsAddressInput from "@/components/shared/GoogleMapsAddressInput";
+import MapboxAddressInput from "@/components/shared/MapboxAddressInput";
 import { RentValuationData } from "@/types/valuation";
 
 const POPULAR_CITIES = [
@@ -35,7 +35,7 @@ const RentLocationStep: React.FC<RentLocationStepProps> = ({ formData, onChange 
         <Label className="text-sm font-medium text-foreground">
           Property Address <span className="text-destructive">*</span>
         </Label>
-        <GoogleMapsAddressInput
+        <MapboxAddressInput
           addressData={addressData}
           onChange={(field, value) => onChange(field as keyof RentValuationData, value)}
         />

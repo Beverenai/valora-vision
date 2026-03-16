@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star } from "lucide-react";
-import GoogleMapsAddressInput from "@/components/shared/GoogleMapsAddressInput";
+import MapboxAddressInput from "@/components/shared/MapboxAddressInput";
 import { cn } from "@/lib/utils";
 
 const TESTIMONIALS = [
@@ -135,7 +135,7 @@ const Index = () => {
           className="w-full max-w-[600px] mt-2 rounded-xl p-[2px] animate-[glow-pulse_3s_ease-in-out_infinite]"
         >
           <div className="bg-card rounded-xl p-4">
-            <GoogleMapsAddressInput
+            <MapboxAddressInput
               addressData={addressData}
               onChange={handleAddressChange}
             />
