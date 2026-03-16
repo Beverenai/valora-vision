@@ -199,7 +199,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const cardClasses = cn(
     "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]",
     hasInput
-      ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[80vh]" : "min-h-[55vh] md:min-h-[50vh]")
+      ? cn("relative overflow-visible", mapExpanded ? "min-h-[600px] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
       : "absolute inset-0 overflow-hidden"
   );
 
@@ -303,6 +303,11 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   onLocationConfirmed={onLocationConfirmed || handleContinue}
                   onPhaseChange={onMapPhaseChange}
                 />
+              {!mapExpanded && (
+                <p className="text-[0.65rem] md:text-xs text-muted-foreground/70 text-center leading-relaxed mt-4 px-2 max-w-[280px] mx-auto">
+                  Enter your property address above and we'll provide an instant, AI-powered market valuation based on comparable sales, location data, and current demand.
+                </p>
+              )}
               </div>
             ) : (
               <>
@@ -463,7 +468,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         className={cn(
           "relative w-full max-w-[340px] md:max-w-[520px] group cursor-grab active:cursor-grabbing transition-all duration-500",
         hasInput
-            ? (mapExpanded ? "min-h-[85vh] md:min-h-[80vh]" : "min-h-[55vh] md:min-h-[50vh]")
+            ? (mapExpanded ? "min-h-[600px] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
             : (mapExpanded
               ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
               : "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]")
