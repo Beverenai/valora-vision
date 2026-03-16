@@ -150,6 +150,7 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "ticket-float": "ticket-float 6s ease-in-out infinite",
         "ticket-dash": "ticket-dash 20s linear infinite",
+        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
       },
     },
   },
