@@ -205,7 +205,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const frontFace = (
     <div className={cardClasses}>
       {/* Main Section */}
-      <div className="flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15 overflow-hidden">
+      <div className={cn("flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15", mapExpanded ? "overflow-visible" : "overflow-hidden")}>
         {/* Hero Image */}
         <div className={cn(
           "relative w-full min-h-[120px] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink transition-all duration-500",
