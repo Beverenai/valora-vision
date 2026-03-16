@@ -19,6 +19,7 @@ interface GoogleAddressInputProps {
   addressData: AddressData;
   onChange: (field: keyof AddressData, value: string | number | undefined) => void;
   onLocationConfirmed?: () => void;
+  onPhaseChange?: (phase: "search" | "verify") => void;
 }
 
 interface Suggestion {
