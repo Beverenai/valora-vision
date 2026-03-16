@@ -142,11 +142,11 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   /* ── FRONT FACE ── */
   const frontFace = (
-    <div className={cardClasses} style={{ backfaceVisibility: "hidden" }}>
+    <div className={cardClasses}>
       {/* Main Section */}
-      <div className="flex-1 flex flex-col p-4 md:p-5 relative border-r-2 border-dashed border-foreground/15">
+      <div className="flex-1 flex flex-col p-3 md:p-5 relative border-r-2 border-dashed border-foreground/15 overflow-hidden">
         {/* Hero Image */}
-        <div className="relative w-full h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-4 shrink-0">
+        <div className="relative w-full h-[42%] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink-0">
           <img
             src={heroImage}
             alt={propertyType || "Property"}
