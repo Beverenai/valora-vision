@@ -230,11 +230,13 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   }
 
   /* ── Card dimensions shared by both faces ── */
+  const shadowClasses = "shadow-[0_8px_30px_rgba(0,0,0,0.12),0_30px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3),0_30px_60px_rgba(0,0,0,0.5)]";
   const cardClasses = cn(
-    "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.12),0_30px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3),0_30px_60px_rgba(0,0,0,0.5)]",
+    "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px]",
+    flippable ? "" : shadowClasses,
     hasInput
       ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
-      : "overflow-hidden"
+      : "overflow-hidden h-full"
   );
 
   /* ── FRONT FACE ── */
