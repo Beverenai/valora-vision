@@ -345,10 +345,13 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   onLocationConfirmed={onLocationConfirmed || handleContinue}
                   onPhaseChange={onMapPhaseChange}
                 />
-              {!mapExpanded && (
-                <p className="text-[0.65rem] md:text-xs text-muted-foreground/70 text-center leading-relaxed mt-4 px-2 max-w-[280px] md:max-w-md mx-auto">
-                  Enter your property address above and we'll provide an instant, AI-powered market valuation based on comparable sales, location data, and current demand.
-                </p>
+              {!mapExpanded && onValuationTypeChange && (
+                <div className="mt-4 flex justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                  <SkyToggle
+                    checked={valuationType === "rent"}
+                    onChange={(checked) => onValuationTypeChange(checked ? "rent" : "sell")}
+                  />
+                </div>
               )}
               </div>
             ) : (
