@@ -413,6 +413,10 @@ serve(async (req) => {
       updateData.annual_income_estimate = annualRent;
       updateData.comparable_rentals = comparableData;
       updateData.analysis = analysisText || null;
+      updateData.weekly_high_season_estimate = weeklyHighSeason || null;
+      updateData.weekly_low_season_estimate = weeklyLowSeason || null;
+      updateData.occupancy_estimate = occupancyEstimate || null;
+      updateData.seasonal_breakdown = seasonalBreakdown || null;
     }
 
     const { error: updateError } = await supabase
