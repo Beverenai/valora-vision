@@ -5,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface UseFormWizardProps<T> {
   steps: { name: string; label: string }[];
   initialData: T;
+  initialStep?: number;
   validateStep: (step: number, data: T) => boolean;
 }
 
