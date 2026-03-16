@@ -31,7 +31,7 @@ interface Suggestion {
 let optionsSet = false;
 function ensureOptions() {
   if (!optionsSet) {
-    setOptions({ key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "" });
+    setOptions({ key: GOOGLE_MAPS_API_KEY });
     optionsSet = true;
   }
 }
