@@ -81,8 +81,9 @@ const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ acc
       {/* City/Area Labels */}
       <div className={cn("p-5 md:p-10 flex flex-col justify-between relative overflow-hidden", isSell ? "bg-primary" : "bg-[hsl(var(--rent-foreground))]")}>
         <div>
-          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-2 md:mb-4">
-            Recent Valuations
+          <p className={cn("text-[0.6rem] uppercase tracking-[0.15em] font-semibold mb-2 md:mb-4", isSell ? "text-gold" : "text-emerald-400")}>
+            Recent {isSell ? "Valuations" : "Estimates"}
+          </p>
           </p>
           <h3 className="font-heading text-lg md:text-3xl font-medium text-primary-foreground mb-3 md:mb-8">
             Trusted by property owners across Spain
