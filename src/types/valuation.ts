@@ -66,6 +66,8 @@ export interface AddressData {
   province: string;
   country: string;
   complex?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Sell valuation form data
