@@ -112,7 +112,7 @@ const SellContactStep: React.FC<SellContactStepProps> = ({ formData, onChange })
               onChange("sellingTimeline", "");
             }}
           >
-            No, I just want the value
+            No
           </PillButton>
         </div>
       </div>
