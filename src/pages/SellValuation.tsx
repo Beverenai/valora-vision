@@ -1,19 +1,17 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ProgressIndicator from "@/components/shared/ProgressIndicator";
-import FormStepWrapper from "@/components/shared/FormStepWrapper";
-import StepNavigation from "@/components/shared/StepNavigation";
-import LoadingOverlay from "@/components/shared/LoadingOverlay";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useFormWizard } from "@/hooks/use-form-wizard";
 import { INITIAL_SELL_DATA, SellValuationData } from "@/types/valuation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import ValuationTicketCard from "@/components/ValuationTicketCard";
+import LoadingOverlay from "@/components/shared/LoadingOverlay";
 import SellLocationStep from "@/components/sell/SellLocationStep";
 import SellDetailsStep from "@/components/sell/SellDetailsStep";
 import SellFeaturesStep from "@/components/sell/SellFeaturesStep";
 import SellContactStep from "@/components/sell/SellContactStep";
+import { Button } from "@/components/ui/button";
 
 const SELL_STEPS = [
   { name: "Location", label: "Property Location" },
@@ -44,9 +42,12 @@ const SellValuation: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [simulatedProgress, setSimulatedProgress] = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Pre-fill address from navigation state
-  const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string } })?.address;
+  const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string }; addressData?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string } })?.address
+    || (location.state as any)?.addressData;
+
   const initialData = addressState
     ? {
         ...INITIAL_SELL_DATA,
@@ -58,6 +59,13 @@ const SellValuation: React.FC = () => {
       }
     : INITIAL_SELL_DATA;
 
+  // If we arrive with an address pre-filled, auto-expand
+  useEffect(() => {
+    if (addressState?.streetAddress) {
+      setIsExpanded(true);
+    }
+  }, []);
+
   useEffect(() => {
     document.title = "Free Property Valuation | ValoraCasa";
   }, []);
@@ -65,7 +73,6 @@ const SellValuation: React.FC = () => {
   const {
     currentStep,
     formData,
-    progressPercentage,
     direction,
     handleChange,
     handleNextStep,
@@ -100,7 +107,6 @@ const SellValuation: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
@@ -163,6 +169,24 @@ const SellValuation: React.FC = () => {
     }
   };
 
+  const handleContinueFromCard = () => {
+    if (formData.streetAddress || formData.city) {
+      setIsExpanded(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep === 0) {
+      // Go back to card view
+      setIsExpanded(false);
+    } else {
+      handlePrevStep();
+    }
+  };
+
+  const isLastStep = currentStep === SELL_STEPS.length - 1;
+  const isCurrentStepValid = validateSellStep(currentStep, formData);
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -179,41 +203,133 @@ const SellValuation: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-background flex flex-col">
       {isSubmitting && <LoadingOverlay simulatedProgress={simulatedProgress} />}
-      <main className="container mx-auto px-4 py-8 max-w-2xl" id="valuation-form">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
-            Free Property Valuation
-          </h1>
-          <p className="text-muted-foreground">Get an accurate estimate in just 2 minutes</p>
+
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-12">
+        {/* ── Card: full input mode OR compact anchor ── */}
+        <div
+          className="w-full transition-all duration-500 ease-out"
+          style={{
+            transform: isExpanded ? "scale(0.92)" : "scale(1)",
+            opacity: 1,
+          }}
+        >
+          {isExpanded ? (
+            <ValuationTicketCard
+              address={formData.streetAddress || ""}
+              city={formData.city}
+              estimatedValue=""
+              propertyType="Villa"
+              leadId="a1b2c3d4e5f6"
+              accentType="sell"
+              addressValue={formData.streetAddress || formData.city}
+              compact
+            />
+          ) : (
+            <ValuationTicketCard
+              address=""
+              estimatedValue=""
+              propertyType="Villa"
+              leadId="a1b2c3d4e5f6"
+              accentType="sell"
+              addressValue={formData.streetAddress}
+              onAddressChange={(val) => handleChange("streetAddress", val)}
+              onContinue={handleContinueFromCard}
+            />
+          )}
         </div>
 
-        <ProgressIndicator
-          steps={SELL_STEPS}
-          currentStep={currentStep}
-          progressPercentage={progressPercentage}
-        />
+        {/* ── Form panel: expands below the card ── */}
+        <div
+          className="w-full max-w-lg mx-auto overflow-hidden transition-all duration-500 ease-out"
+          style={{
+            maxHeight: isExpanded ? "2000px" : "0px",
+            opacity: isExpanded ? 1 : 0,
+            transform: isExpanded ? "translateY(0)" : "translateY(-20px)",
+          }}
+        >
+          {/* Step indicator */}
+          <div className="flex items-center justify-center gap-2 mb-6 mt-2">
+            {SELL_STEPS.map((step, i) => (
+              <div key={step.name} className="flex items-center gap-2">
+                <div
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    i === currentStep
+                      ? "bg-primary w-6"
+                      : i < currentStep
+                      ? "bg-primary/60"
+                      : "bg-border"
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
 
-        <div className="bg-card rounded-xl border border-border p-6 md:p-8 shadow-sm">
-          <FormStepWrapper direction={direction} currentStep={currentStep}>
+          {/* Step label */}
+          <h2 className="text-lg font-semibold text-foreground text-center mb-1">
+            {SELL_STEPS[currentStep].label}
+          </h2>
+          <p className="text-sm text-muted-foreground text-center mb-6">
+            Step {currentStep + 1} of {SELL_STEPS.length}
+          </p>
+
+          {/* Form content */}
+          <div className="bg-card rounded-2xl border border-border p-5 md:p-8 shadow-sm animate-fade-in">
             {renderStep()}
-          </FormStepWrapper>
+          </div>
 
-          <StepNavigation
-            currentStep={currentStep}
-            totalSteps={SELL_STEPS.length}
-            isSubmitting={isSubmitting}
-            isCurrentStepValid={validateSellStep(currentStep, formData)}
-            onPrevStep={handlePrevStep}
-            onNextStep={handleNextStep}
-            onSubmit={handleSubmit}
-            submitLabel="Get My Free Valuation"
-          />
+          {/* Navigation */}
+          <div className="flex items-center justify-between mt-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </Button>
+
+            {isLastStep ? (
+              <Button
+                onClick={handleSubmit}
+                disabled={!isCurrentStepValid || isSubmitting}
+                className="gap-1.5"
+              >
+                Get My Free Valuation
+                <Check size={16} />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleNextStep}
+                disabled={!isCurrentStepValid}
+                className="gap-1.5"
+              >
+                Next
+                <ArrowRight size={16} />
+              </Button>
+            )}
+          </div>
         </div>
+
+        {/* Sub-card text when not expanded */}
+        {!isExpanded && (
+          <p className="text-sm text-muted-foreground/60 tracking-wide mt-2 animate-fade-in">
+            12,400+ valuations · 100% free · 2 minutes
+          </p>
+        )}
       </main>
-      <Footer />
+
+      {/* ── Agent prompt at bottom ── */}
+      <footer className="py-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          Are you a real estate agent?{" "}
+          <Link to="/for-professionals" className="text-primary font-medium hover:underline">
+            Sign up here →
+          </Link>
+        </p>
+      </footer>
     </div>
   );
 };

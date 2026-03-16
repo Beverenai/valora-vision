@@ -18,6 +18,8 @@ interface ValuationTicketCardProps {
   /* Embedded input mode */
   addressValue?: string;
   onAddressChange?: (value: string) => void;
+  onContinue?: () => void;
+  /** @deprecated Use onContinue instead */
   onSubmit?: () => void;
   /* Flippable result mode */
   flippable?: boolean;
@@ -26,6 +28,8 @@ interface ValuationTicketCardProps {
   builtSize?: string;
   plotSize?: string;
   condition?: string;
+  /* Compact mode for when card is an anchor above form */
+  compact?: boolean;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
@@ -53,6 +57,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   onDownload,
   addressValue,
   onAddressChange,
+  onContinue,
   onSubmit,
   flippable = false,
   bedrooms,
@@ -60,6 +65,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   builtSize,
   plotSize,
   condition,
+  compact = false,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
@@ -67,13 +73,14 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const [flipped, setFlipped] = useState(false);
 
   const hasInput = onAddressChange !== undefined;
+  const handleContinue = onContinue || onSubmit;
 
   const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
   const accentClass = accentType === "sell" ? "bg-primary" : "bg-[hsl(var(--success))]";
   const heroImage = (propertyType && PROPERTY_IMAGES[propertyType]) || DEFAULT_IMAGE;
 
   const handlePointerMove = useCallback((clientX: number, clientY: number) => {
-    if (flipped) return;
+    if (flipped || compact) return;
     const card = cardRef.current;
     if (!card) return;
     const rect = card.getBoundingClientRect();
@@ -81,7 +88,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     const y = (clientY - rect.top) / rect.height - 0.5;
     setTilt({ rotateX: -y * 10, rotateY: x * 10 });
     setIsInteracting(true);
-  }, [flipped]);
+  }, [flipped, compact]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     handlePointerMove(e.clientX, e.clientY);
@@ -112,6 +119,23 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     { icon: Home, label: "Type", value: propertyType || null },
     { icon: Sparkles, label: "Condition", value: condition || null },
   ].filter((d) => d.value != null);
+
+  /* ── Compact mode: small address summary card ── */
+  if (compact) {
+    return (
+      <div className="w-full max-w-[320px] md:max-w-[520px] mx-auto">
+        <div className="flex items-center gap-3 bg-[hsl(36_9%_88%)] rounded-2xl px-4 py-3 shadow-sm">
+          <div className={`w-8 h-8 rounded-full ${accentClass} flex items-center justify-center shrink-0`}>
+            <MapPin size={14} className="text-primary-foreground" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-foreground truncate">{addressValue || address || "Your property"}</p>
+            {city && <p className="text-xs text-muted-foreground">{city}</p>}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Card dimensions shared by both faces ── */
   const cardClasses = "absolute inset-0 flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]";
@@ -153,7 +177,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           )}
         </div>
 
-        {/* ── Hero INPUT mode: no price/city, just input ── */}
+        {/* ── Hero INPUT mode ── */}
         {hasInput ? (
           <div className="flex-1 flex flex-col justify-center gap-3 relative z-[2]">
             <span className="font-ticket-cursive text-[2rem] md:text-[2.5rem] leading-[0.7] text-foreground block -ml-1">
@@ -172,12 +196,15 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                 onMouseDown={(e) => e.stopPropagation()}
               />
             </div>
+
+            {/* Continue arrow — only visible when address has content */}
             <button
-              onClick={(e) => { e.stopPropagation(); onSubmit?.(); }}
-              className="w-full rounded-xl bg-primary text-primary-foreground py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/90 active:scale-[0.98] transition-all"
+              onClick={(e) => { e.stopPropagation(); handleContinue?.(); }}
+              disabled={!addressValue?.trim()}
+              className="flex items-center justify-end gap-1.5 text-sm font-medium text-primary mt-1 self-end transition-all disabled:opacity-0 disabled:pointer-events-none hover:gap-2.5"
             >
-              Get Valuation
-              <ArrowRight size={12} />
+              Continue
+              <ArrowRight size={14} />
             </button>
           </div>
         ) : (
@@ -315,7 +342,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         onMouseLeave={resetTilt}
         onTouchMove={handleTouchMove}
         onTouchEnd={resetTilt}
-        className="relative w-full max-w-[280px] md:max-w-[340px] min-h-[480px] md:min-h-[520px] group cursor-grab active:cursor-grabbing"
+        className="relative w-full max-w-[320px] md:max-w-[520px] min-h-[500px] md:min-h-[540px] group cursor-grab active:cursor-grabbing"
         style={{
           aspectRatio: "9/16",
           transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
