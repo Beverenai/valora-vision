@@ -1,56 +1,60 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Consolidate Pages, Add Admin + Lookup, Fix Address Step
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+### Current State
+- **Duplicate pages**: `Sell.tsx` and `Rent.tsx` are landing pages with their own hero/FAQ/testimonials. `Index.tsx` is the main landing. `SellValuation.tsx` and `RentValuation.tsx` are the ticket-card wizards. `SellResult.tsx` and `RentResult.tsx` show results.
+- **Address bug**: In `SellValuation.tsx`, the location step (step 0) renders `SellLocationStep` which embeds `GoogleAddressInput`. But `GoogleAddressInput` has a two-phase flow (search → verify with map → "Confirm Location" button). The "Confirm Location" calls `onLocationConfirmed` which triggers `handleNextStep`. This works, but the user says "it should work immediately" — the issue is the card starts collapsed (`isExpanded=false`) showing only the `ValuationTicketCard` in "input" mode, which has its own separate address input. So the user types an address in one input, clicks continue, then sees the Location step with another `GoogleAddressInput`. This is redundant. The fix: when the user enters an address and clicks continue from the initial card, skip step 0 (location) and go directly to step 1 (details), OR remove the initial collapsed card and start directly with the expanded form where step 0's `GoogleAddressInput` works immediately.
 
-### Changes
+### Plan
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+#### 1. Delete redundant pages
+- Delete `src/pages/Sell.tsx` (landing page duplicate)
+- Delete `src/pages/Rent.tsx` (landing page duplicate)  
+- Remove their routes from `App.tsx`
+- Update `Index.tsx` links that point to `/sell` or `/rent` to point to `/sell/valuation` and `/rent/valuation`
+- Update any `Navbar`, `Footer`, `CTABanner`, `InlineCTA` references
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+#### 2. Fix address step — start expanded immediately
+- In `SellValuation.tsx` and `RentValuation.tsx`: remove the `isExpanded` toggle and the initial `ValuationTicketCard` "input" mode
+- Always show the expanded card form, starting at step 0 (Location)
+- The `GoogleAddressInput` search → verify → confirm flow works as the first interaction
+- If address was passed via `location.state`, pre-populate and auto-enter verify phase
 
-**2. Floating agency logos treatment**
+#### 3. Add valuation lookup page (`/lookup`)
+- New page: `src/pages/ValuationLookup.tsx`
+- Simple input: "Enter your reference code (e.g. VC-A1B2-C3D4)"
+- Parse the ref code back to partial UUID, query `leads_sell` and `leads_rent` by ID prefix match
+- Navigate to `/sell/result/:id` or `/rent/result/:id`
 
+#### 4. Add admin dashboard (`/admin`)
+- New page: `src/pages/Admin.tsx`
+- Protected by a simple password check (stored as env secret)
+- Table view of all valuations from `leads_sell` and `leads_rent`
+- Columns: date, name, email, address, type (sell/rent), status, estimated value, ref code
+- Click to view full result
+- Basic filters: by status, by type, date range
+
+#### 5. Update routing
 ```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
-
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
+Routes:
+  /                    → Index (landing)
+  /sell/valuation      → SellValuation (wizard)
+  /rent/valuation      → RentValuation (wizard)  
+  /sell/result/:id     → SellResult
+  /rent/result/:id     → RentResult
+  /lookup              → ValuationLookup (new)
+  /admin               → Admin (new)
 ```
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
-
-**3. How It Works — typographic layout**
-
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
-
-**4. Report Features — editorial scatter**
-
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+### Files Changed
+- **Delete** `src/pages/Sell.tsx`, `src/pages/Rent.tsx`
+- **Edit** `src/App.tsx` — remove Sell/Rent routes, add `/lookup` and `/admin`
+- **Edit** `src/pages/SellValuation.tsx` — remove `isExpanded` state, always show expanded card starting at step 0
+- **Edit** `src/pages/RentValuation.tsx` — same
+- **Edit** `src/components/Navbar.tsx` — update nav links
+- **Edit** `src/pages/Index.tsx` — update any `/sell` or `/rent` links
+- **New** `src/pages/ValuationLookup.tsx` — ref code search
+- **New** `src/pages/Admin.tsx` — admin dashboard with leads table
+- **New secret** — `ADMIN_PASSWORD` for admin access
 
