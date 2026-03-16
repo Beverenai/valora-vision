@@ -41,7 +41,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         style={{ aspectRatio: "9/16", maxHeight: "850px" }}
       >
         {/* ── Main Section ── */}
-        <div className="flex-1 flex flex-col p-6 relative border-r-2 border-dashed border-foreground/20">
+        <div className="flex-1 flex flex-col p-6 relative border-r-2 border-dashed border-foreground/15">
           {/* SVG Backdrop */}
           <svg
             className="absolute inset-0 w-full h-full opacity-[0.04] pointer-events-none"
