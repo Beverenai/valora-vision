@@ -157,8 +157,8 @@ const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ acc
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-[0.55rem] md:text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-gold mb-1">
-                    Estimated Value
+                  <p className={cn("text-[0.55rem] md:text-[0.6rem] uppercase tracking-[0.15em] font-semibold mb-1", isSell ? "text-gold" : "text-emerald-400")}>
+                    {isSell ? "Estimated Value" : "Estimated Rent"}
                   </p>
                   <p className="font-heading text-2xl md:text-4xl font-bold text-card">
                     {activeProperty.price}
