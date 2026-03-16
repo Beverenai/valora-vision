@@ -1,28 +1,15 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, ArrowRight } from "lucide-react";
+import React, { useRef, useEffect, useState } from "react";
+import ValuationTicketCard from "@/components/ValuationTicketCard";
 import { cn } from "@/lib/utils";
 
 const PROPERTIES = [
-  { id: "marbella-villa", city: "Marbella, Costa del Sol", image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200", price: "€1,250,000", propertyType: "4 Bed Villa" },
-  { id: "ibiza-finca", city: "Ibiza, Balearics", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200", price: "€890,000", propertyType: "3 Bed Finca" },
-  { id: "barcelona-penthouse", city: "Barcelona, Catalonia", image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200", price: "€675,000", propertyType: "2 Bed Penthouse" },
-  { id: "malaga-apartment", city: "Málaga, Costa del Sol", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200", price: "€320,000", propertyType: "2 Bed Apartment" },
-  { id: "valencia-townhouse", city: "Valencia, Community", image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?q=80&w=1200", price: "€425,000", propertyType: "3 Bed Townhouse" },
-  { id: "alicante-villa", city: "Alicante, Costa Blanca", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200", price: "€545,000", propertyType: "4 Bed Villa" },
-  { id: "tenerife-apartment", city: "Tenerife, Canary Islands", image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=1200", price: "€275,000", propertyType: "1 Bed Apartment" },
-  { id: "madrid-flat", city: "Madrid, Central Spain", image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1200", price: "€510,000", propertyType: "3 Bed Flat" },
+  { id: "marbella-villa", city: "Marbella", address: "Golden Mile, Marbella", propertyType: "Villa", price: "€1,250,000", rentPrice: "€4,200/mo", leadId: "DEMO-001", bedrooms: 4, bathrooms: 3, builtSize: "320 m²" },
+  { id: "ibiza-finca", city: "Ibiza", address: "San José, Ibiza", propertyType: "Finca", price: "€890,000", rentPrice: "€3,800/mo", leadId: "DEMO-002", bedrooms: 3, bathrooms: 2, builtSize: "240 m²" },
+  { id: "barcelona-penthouse", city: "Barcelona", address: "Eixample, Barcelona", propertyType: "Penthouse", price: "€675,000", rentPrice: "€2,900/mo", leadId: "DEMO-003", bedrooms: 2, bathrooms: 2, builtSize: "145 m²" },
+  { id: "malaga-apartment", city: "Málaga", address: "Centro Histórico, Málaga", propertyType: "Apartment", price: "€320,000", rentPrice: "€1,450/mo", leadId: "DEMO-004", bedrooms: 2, bathrooms: 1, builtSize: "95 m²" },
+  { id: "valencia-townhouse", city: "Valencia", address: "El Carmen, Valencia", propertyType: "Townhouse", price: "€425,000", rentPrice: "€1,800/mo", leadId: "DEMO-005", bedrooms: 3, bathrooms: 2, builtSize: "180 m²" },
+  { id: "alicante-villa", city: "Alicante", address: "San Juan, Alicante", propertyType: "Villa", price: "€545,000", rentPrice: "€2,200/mo", leadId: "DEMO-006", bedrooms: 4, bathrooms: 3, builtSize: "280 m²" },
 ];
-
-const AUTO_PLAY_INTERVAL = 3500;
-const ITEM_HEIGHT = 52;
-const MOBILE_ITEM_HEIGHT = 46;
-
-const wrap = (min: number, max: number, v: number) => {
-  const rangeSize = max - min;
-  return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
-};
 
 interface PropertyShowcaseCarouselProps {
   accentType?: "sell" | "rent";
@@ -30,153 +17,60 @@ interface PropertyShowcaseCarouselProps {
 
 const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ accentType = "sell" }) => {
   const isSell = accentType === "sell";
-  const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
-  const itemHeight = isMobile ? MOBILE_ITEM_HEIGHT : ITEM_HEIGHT;
-  const currentIndex = ((step % PROPERTIES.length) + PROPERTIES.length) % PROPERTIES.length;
-
-  const nextStep = useCallback(() => setStep((prev) => prev + 1), []);
-
-  const handleChipClick = (index: number) => {
-    const diff = (index - currentIndex + PROPERTIES.length) % PROPERTIES.length;
-    if (diff > 0) setStep((s) => s + diff);
-  };
-
+  // Auto-scroll effect
   useEffect(() => {
     if (isPaused) return;
-    const interval = setInterval(nextStep, AUTO_PLAY_INTERVAL);
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const interval = setInterval(() => {
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      if (container.scrollLeft >= maxScroll - 2) {
+        container.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        container.scrollBy({ left: 300, behavior: "smooth" });
+      }
+    }, 4000);
+
     return () => clearInterval(interval);
-  }, [nextStep, isPaused]);
-
-  const visibleCount = isMobile ? 4 : PROPERTIES.length;
-  const activeProperty = PROPERTIES[currentIndex];
-
-  const handleCardClick = useCallback(() => {
-    const [cityName, province] = activeProperty.city.split(", ");
-    navigate("/sell/valuation", {
-      state: {
-        addressData: {
-          city: cityName,
-          province: province || "",
-          country: "Spain",
-          streetAddress: "",
-          urbanization: "",
-        },
-      },
-    });
-  }, [activeProperty, navigate]);
+  }, [isPaused]);
 
   return (
-    <div className="flex flex-col md:grid md:grid-cols-2 gap-[1px] bg-border border border-border rounded-2xl overflow-hidden mx-2 md:mx-0">
-      {/* City/Area Labels */}
-      <div className={cn("p-5 md:p-10 flex flex-col justify-between relative overflow-hidden", isSell ? "bg-primary" : "bg-[hsl(var(--rent-foreground))]")}>
-        <div>
-          <p className={cn("text-[0.6rem] uppercase tracking-[0.15em] font-semibold mb-2 md:mb-4", isSell ? "text-gold" : "text-emerald-400")}>
-            Recent {isSell ? "Valuations" : "Estimates"}
-          </p>
-          <h3 className="font-heading text-lg md:text-3xl font-medium text-primary-foreground mb-3 md:mb-8">
-            Trusted by property owners across Spain
-          </h3>
+    <div
+      ref={scrollRef}
+      className="flex gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
+      {PROPERTIES.map((property) => (
+        <div
+          key={property.id}
+          className="snap-start shrink-0 w-[280px] md:w-[320px]"
+        >
+          <ValuationTicketCard
+            address={property.address}
+            city={property.city}
+            estimatedValue={isSell ? property.price : property.rentPrice}
+            propertyType={property.propertyType}
+            leadId={property.leadId}
+            headline={isSell ? "VALUED" : "ESTIMATED"}
+            subtitle={isSell ? "Sale Valuation" : "Rental Estimate"}
+            summaryText=""
+            accentType={accentType}
+            size="default"
+            flippable={false}
+            bedrooms={property.bedrooms}
+            bathrooms={property.bathrooms}
+            builtSize={property.builtSize}
+          />
         </div>
-
-        <div className="relative" style={{ height: visibleCount * itemHeight }}>
-          <div className="absolute inset-0 pointer-events-none z-10" style={{
-            background: `linear-gradient(to bottom, hsl(var(--${isSell ? 'primary' : 'rent-foreground'})) 0%, transparent 15%, transparent 85%, hsl(var(--${isSell ? 'primary' : 'rent-foreground'})) 100%)`,
-          }} />
-          <div className="relative h-full overflow-hidden">
-            {PROPERTIES.map((property, index) => {
-              const isActive = index === currentIndex;
-              const distance = index - currentIndex;
-              const wrappedDistance = wrap(-(PROPERTIES.length / 2), PROPERTIES.length / 2, distance);
-
-              return (
-                <div
-                  key={property.id}
-                  className="absolute w-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                  style={{
-                    top: "50%",
-                    marginTop: -itemHeight / 2,
-                    transform: `translateY(${wrappedDistance * itemHeight}px) scale(${isActive ? 1 : 0.95})`,
-                    opacity: Math.abs(wrappedDistance) > 2 ? 0 : 1,
-                  }}
-                >
-                  <button
-                    onClick={() => handleChipClick(index)}
-                    onMouseEnter={() => setIsPaused(true)}
-                    onMouseLeave={() => setIsPaused(false)}
-                    className={cn(
-                      "relative flex items-center gap-2 md:gap-3 w-full px-3 md:px-5 py-2 md:py-3 transition-colors duration-300 text-left border",
-                      isActive
-                        ? "bg-card text-foreground border-border"
-                        : "bg-transparent text-primary-foreground/50 border-primary-foreground/15 hover:border-primary-foreground/30 hover:text-primary-foreground/80"
-                    )}
-                  >
-                    <MapPin size={12} className={cn(isActive ? (isSell ? "text-gold" : "text-emerald-400") : "text-primary-foreground/30")} />
-                    <span className={cn("text-xs font-medium", isActive ? "text-foreground" : "text-primary-foreground/50")}>
-                      {property.city}
-                    </span>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Right — Property Image + Price */}
-      <div
-        className="relative bg-muted min-h-[250px] md:min-h-[450px] overflow-hidden cursor-pointer"
-        onClick={handleCardClick}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeProperty.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="absolute inset-0"
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${activeProperty.image})` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
-
-            <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className={cn("text-[0.55rem] md:text-[0.6rem] uppercase tracking-[0.15em] font-semibold mb-1", isSell ? "text-gold" : "text-emerald-400")}>
-                    {isSell ? "Estimated Value" : "Estimated Rent"}
-                  </p>
-                  <p className="font-heading text-2xl md:text-4xl font-bold text-card">
-                    {activeProperty.price}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-card/10 backdrop-blur-sm border border-card/20 px-2.5 py-1 md:px-3 md:py-1.5">
-                    <p className="text-[0.65rem] md:text-xs font-medium text-card">{activeProperty.propertyType}</p>
-                  </div>
-                  <div className={cn("backdrop-blur-sm px-2.5 py-1 md:px-3 md:py-1.5 flex items-center gap-1 transition-colors", isSell ? "bg-gold/90 hover:bg-gold" : "bg-emerald-500/90 hover:bg-emerald-600")}>
-                    <p className={cn("text-[0.65rem] md:text-xs font-semibold", isSell ? "text-primary" : "text-white")}>{isSell ? "Get Valuation" : "Get Estimate"}</p>
-                    <ArrowRight size={10} className={isSell ? "text-primary" : "text-white"} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      ))}
     </div>
   );
 };

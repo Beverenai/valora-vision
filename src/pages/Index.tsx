@@ -450,10 +450,10 @@ const Index = () => {
               </div>
               <SectionLabel>Market Data</SectionLabel>
               <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
-                Recent Valuations
+                {valuationType === "sell" ? "Recent Valuations" : "Recent Rental Estimates"}
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
-                238 property valuations completed this week
+                {valuationType === "sell" ? "238 property valuations completed this week" : "185 rental estimates completed this week"}
               </p>
             </div>
           </div>
