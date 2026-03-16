@@ -214,7 +214,7 @@ const RentValuation: React.FC = () => {
             <div className="relative w-full max-w-[380px] md:max-w-[520px] flex">
               <div className="flex-1 flex flex-col bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-r-2 border-dashed border-foreground/15">
                 {/* Header band */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-foreground/10">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-foreground/10 overflow-hidden">
                   <div className="w-8 h-8 rounded-full bg-[hsl(var(--success))] flex items-center justify-center shrink-0">
                     <MapPin size={14} className="text-primary-foreground" />
                   </div>
