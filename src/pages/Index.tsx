@@ -74,7 +74,20 @@ const StatsBar = () => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const [address, setAddress] = useState("");
+  const [addressData, setAddressData] = useState({
+    streetAddress: "",
+    urbanization: "",
+    city: "",
+    province: "",
+    country: "Spain",
+    complex: "",
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined,
+  });
+
+  const handleAddressChange = useCallback((field: string, value: string | number | undefined) => {
+    setAddressData(prev => ({ ...prev, [field]: value }));
+  }, []);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [showStickyCta, setShowStickyCta] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
