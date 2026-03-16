@@ -5,17 +5,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface UseFormWizardProps<T> {
   steps: { name: string; label: string }[];
   initialData: T;
+  initialStep?: number;
   validateStep: (step: number, data: T) => boolean;
 }
 
 export function useFormWizard<T>({
   steps,
   initialData,
+  initialStep = 0,
   validateStep,
 }: UseFormWizardProps<T>) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [formData, setFormData] = useState<T>(initialData);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
 

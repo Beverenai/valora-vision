@@ -5,6 +5,7 @@ import { Star, ArrowRight, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 
 /* ─── DATA ─── */
 
@@ -73,7 +74,20 @@ const StatsBar = () => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const [address, setAddress] = useState("");
+  const [addressData, setAddressData] = useState({
+    streetAddress: "",
+    urbanization: "",
+    city: "",
+    province: "",
+    country: "Spain",
+    complex: "",
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined,
+  });
+
+  const handleAddressChange = useCallback((field: string, value: string | number | undefined) => {
+    setAddressData(prev => ({ ...prev, [field]: value }));
+  }, []);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [showStickyCta, setShowStickyCta] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -95,50 +109,22 @@ const Index = () => {
   }, []);
 
   const handleGetValuation = useCallback(() => {
-    const path = "/sell/valuation";
-    if (address.trim()) {
-      navigate(path, {
-        state: {
-          addressData: {
-            streetAddress: address,
-            urbanization: "",
-            city: "",
-            province: "",
-            country: "Spain",
-            complex: "",
-          },
+    navigate("/sell/valuation", {
+      state: {
+        addressData: {
+          ...addressData,
         },
-      });
-    } else {
-      navigate(path);
-    }
-  }, [address, navigate]);
+      },
+    });
+  }, [addressData, navigate]);
 
-  const AddressBlock = ({ compact }: { compact?: boolean }) => (
-    <div className="w-full flex flex-col items-center gap-6">
-      <div className={cn("relative w-full", compact ? "max-w-md" : "max-w-lg mx-auto")}>
-        <svg className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.4">
-          <circle cx="10" cy="8" r="4" />
-          <path d="M10 12v6" />
-        </svg>
-        <input
-          type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Enter your property address..."
-          className={cn(
-            "w-full rounded-2xl border border-border bg-card pl-12 pr-5 text-foreground shadow-sm outline-none transition-shadow focus:shadow-lg placeholder:text-muted-foreground",
-            compact ? "py-3.5 text-base" : "py-5 pr-6 text-lg"
-          )}
-        />
-      </div>
-      <button
-        onClick={handleGetValuation}
-        className="rounded-full px-8 py-4 text-lg font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
-      >
-        Get Your Free Valuation
-        <ArrowRight className="h-5 w-5" />
-      </button>
+  const AddressBlock = () => (
+    <div className="w-full max-w-lg mx-auto">
+      <GoogleAddressInput
+        addressData={addressData}
+        onChange={handleAddressChange}
+        onLocationConfirmed={handleGetValuation}
+      />
     </div>
   );
 
@@ -163,16 +149,13 @@ const Index = () => {
             <p className="text-lg md:text-xl text-muted-foreground mt-2">
               Get a detailed market report in under 2 minutes. Completely free.
             </p>
-            <ValuationTicketCard
-              address=""
-              estimatedValue=""
-              propertyType="Villa"
-              leadId="a1b2c3d4e5f6"
-              accentType="sell"
-              addressValue={address}
-              onAddressChange={setAddress}
-              onSubmit={handleGetValuation}
-            />
+            <div className="w-full max-w-lg">
+              <GoogleAddressInput
+                addressData={addressData}
+                onChange={handleAddressChange}
+                onLocationConfirmed={handleGetValuation}
+              />
+            </div>
           </div>
         </div>
 

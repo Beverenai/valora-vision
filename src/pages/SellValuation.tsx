@@ -44,8 +44,10 @@ const SellValuation: React.FC = () => {
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [submittedLeadId, setSubmittedLeadId] = useState<string | null>(null);
 
-  const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string }; addressData?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string } })?.address
+  const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string; latitude?: number; longitude?: number }; addressData?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string; latitude?: number; longitude?: number } })?.address
     || (location.state as any)?.addressData;
+
+  const hasCoordinates = !!(addressState?.latitude && addressState?.longitude);
 
   const initialData = addressState
     ? {
@@ -55,6 +57,8 @@ const SellValuation: React.FC = () => {
         province: addressState.province || "",
         country: addressState.country || "",
         urbanization: addressState.urbanization || "",
+        latitude: addressState.latitude,
+        longitude: addressState.longitude,
       }
     : INITIAL_SELL_DATA;
 
@@ -72,6 +76,7 @@ const SellValuation: React.FC = () => {
   } = useFormWizard<SellValuationData>({
     steps: SELL_STEPS,
     initialData: initialData,
+    initialStep: hasCoordinates ? 1 : 0,
     validateStep: validateSellStep,
   });
 
