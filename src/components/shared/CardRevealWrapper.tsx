@@ -449,18 +449,18 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
           >
             {/* Main wrapper crumples and falls */}
             <motion.div
-              className="absolute rounded-l-2xl z-5 overflow-hidden"
+              className="absolute rounded-r-2xl z-5 overflow-hidden"
               style={{
                 width: "306px",
                 height: "480px",
                 background: foilGradient,
-                left: "calc(50% - 160px)",
+                right: "calc(50% - 160px)",
                 top: "calc(50% - 240px)",
                 transformStyle: "preserve-3d",
                 willChange: "transform",
               }}
               initial={{ x: 0, opacity: 1, rotateY: 0 }}
-              animate={{ x: -200, opacity: 0, rotateY: -25, rotateZ: -5, scaleX: 0.85 }}
+              animate={{ x: 200, opacity: 0, rotateY: 25, rotateZ: 5, scaleX: 0.85 }}
               transition={{ duration: 0.5, delay: 0.2, ease: "easeIn" }}
             />
 

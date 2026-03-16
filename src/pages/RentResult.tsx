@@ -75,11 +75,12 @@ const RentResult: React.FC = () => {
   const monthlyEstimate = lead?.monthly_long_term_estimate || 2500;
 
   const handleShare = () => {
+    const shareText = `My property at ${lead?.address || ""}${lead?.city ? `, ${lead.city}` : ""} could earn ${fmt(monthlyEstimate)}/mo in rental income.`;
     if (navigator.share) {
-      navigator.share({ title: "My Rental Estimate", url: window.location.href });
+      navigator.share({ title: `Rental Estimate – ${lead?.address || ""}`, text: shareText, url: window.location.href });
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link copied!", description: "Share this link with others." });
+      navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
+      toast({ title: "Link copied!", description: "Estimate details copied to clipboard." });
     }
   };
 
