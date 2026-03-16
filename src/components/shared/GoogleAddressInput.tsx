@@ -26,10 +26,16 @@ interface Suggestion {
   description: string;
 }
 
-const googleLoaderInstance = new GoogleLoader({
-  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
-  libraries: ["places"],
-});
+let googleLoaderInstance: GoogleLoader | null = null;
+function getGoogleLoader() {
+  if (!googleLoaderInstance) {
+    googleLoaderInstance = new GoogleLoader({
+      apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
+      libraries: ["places"],
+    });
+  }
+  return googleLoaderInstance;
+}
 
 function parseAddressComponents(
   components: google.maps.GeocoderAddressComponent[],
