@@ -23,7 +23,7 @@ const RENT_STEPS = [
 const validateRentStep = (step: number, data: RentValuationData): boolean => {
   switch (step) {
     case 0:
-      return !!(data.streetAddress || data.city);
+      return !!(data.streetAddress && data.latitude && data.longitude);
     case 1:
       return !!(data.propertyType && data.builtSize && data.bedrooms && data.bathrooms && data.furnished);
     case 2:
