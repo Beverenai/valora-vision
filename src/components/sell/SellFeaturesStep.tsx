@@ -50,8 +50,8 @@ const SelectableCard: React.FC<{
     onClick={onClick}
     className={`p-3 rounded-lg border-2 text-left transition-all duration-200 ${
       selected
-        ? "border-[hsl(var(--gold))] bg-[hsl(var(--gold)/0.08)] shadow-sm"
-        : "border-border bg-card hover:border-[hsl(var(--gold)/0.4)]"
+        ? "border-primary bg-primary/10 shadow-sm"
+        : "border-border bg-card hover:border-primary/40"
     }`}
   >
     <div className="font-medium text-sm text-foreground">{label}</div>
@@ -111,8 +111,8 @@ const SellFeaturesStep: React.FC<SellFeaturesStepProps> = ({ formData, onChange 
               onClick={() => onChange("orientation", o)}
               className={`px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${
                 formData.orientation === o
-                  ? "bg-[hsl(var(--gold))] text-white border-[hsl(var(--gold))] shadow-sm"
-                  : "bg-card text-foreground border-border hover:border-[hsl(var(--gold)/0.4)]"
+                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                  : "bg-card text-foreground border-border hover:border-primary/40"
               }`}
             >
               {o}

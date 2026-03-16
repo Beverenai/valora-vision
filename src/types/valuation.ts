@@ -106,7 +106,9 @@ export interface SellValuationData {
   fullName: string;
   email: string;
   phone: string;
+  wantsToSell: string;
   sellingTimeline: string;
+  interestedInRefinancing: string;
   termsAccepted: boolean;
 }
 
@@ -179,7 +181,9 @@ export const INITIAL_SELL_DATA: SellValuationData = {
   fullName: "",
   email: "",
   phone: "",
+  wantsToSell: "",
   sellingTimeline: "",
+  interestedInRefinancing: "",
   termsAccepted: false,
 };
 

@@ -25,6 +25,24 @@ const TIMELINES = [
   { value: "exploring", label: "Just exploring" },
 ];
 
+const PillButton: React.FC<{
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}> = ({ selected, onClick, children }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`flex-1 h-[44px] px-6 rounded-full text-sm font-semibold transition-all duration-200 border ${
+      selected
+        ? "bg-primary text-primary-foreground border-primary shadow-md scale-105"
+        : "bg-card text-foreground border-border hover:border-primary/50"
+    }`}
+  >
+    {children}
+  </button>
+);
+
 const SellContactStep: React.FC<SellContactStepProps> = ({ formData, onChange }) => {
   return (
     <div className="space-y-6">
@@ -72,24 +90,77 @@ const SellContactStep: React.FC<SellContactStepProps> = ({ formData, onChange })
         />
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">Selling Timeline</Label>
-        <Select
-          value={formData.sellingTimeline}
-          onValueChange={(v) => onChange("sellingTimeline", v)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="When are you looking to sell?" />
-          </SelectTrigger>
-          <SelectContent>
-            {TIMELINES.map((t) => (
-              <SelectItem key={t.value} value={t.value}>
-                {t.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Intent question: Do you want to sell? */}
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-foreground">
+          Do you want to sell the property?
+        </Label>
+        <div className="flex gap-3">
+          <PillButton
+            selected={formData.wantsToSell === "yes"}
+            onClick={() => {
+              onChange("wantsToSell", "yes");
+              onChange("interestedInRefinancing", "");
+            }}
+          >
+            Yes
+          </PillButton>
+          <PillButton
+            selected={formData.wantsToSell === "no"}
+            onClick={() => {
+              onChange("wantsToSell", "no");
+              onChange("sellingTimeline", "");
+            }}
+          >
+            No, I just want the value
+          </PillButton>
+        </div>
       </div>
+
+      {/* If Yes → show timeline */}
+      {formData.wantsToSell === "yes" && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">Selling Timeline</Label>
+          <Select
+            value={formData.sellingTimeline}
+            onValueChange={(v) => onChange("sellingTimeline", v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="When are you looking to sell?" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIMELINES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* If No → ask about refinancing */}
+      {formData.wantsToSell === "no" && (
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-foreground">
+            Are you looking for refinancing?
+          </Label>
+          <div className="flex gap-3">
+            <PillButton
+              selected={formData.interestedInRefinancing === "yes"}
+              onClick={() => onChange("interestedInRefinancing", "yes")}
+            >
+              Yes
+            </PillButton>
+            <PillButton
+              selected={formData.interestedInRefinancing === "no"}
+              onClick={() => onChange("interestedInRefinancing", "no")}
+            >
+              No
+            </PillButton>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-start gap-3">
         <Checkbox
