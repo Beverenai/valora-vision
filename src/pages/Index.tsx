@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Star, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
+import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
 
 /* ─── DATA ─── */
 
