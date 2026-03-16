@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { formatRefCode } from "@/utils/referenceCode";
 
-type CardSize = "default" | "hero" | "showcase";
+type CardSize = "default" | "hero";
 
 interface ValuationTicketCardProps {
   address: string;
