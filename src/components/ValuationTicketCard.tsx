@@ -242,15 +242,15 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
 
   /* ── Card dimensions shared by both faces ── */
   const cardClasses = cn(
-    "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] [backface-visibility:hidden]",
+    "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
     hasInput
       ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
-      : "absolute inset-0 overflow-hidden"
+      : "overflow-hidden"
   );
 
   /* ── FRONT FACE ── */
   const frontFace = (
-    <div className={cardClasses} style={!hasInput ? { transform: "translateZ(1px)" } : undefined}>
+    <div className={cardClasses} style={!hasInput ? { transition: "opacity 0.4s ease", opacity: flipped ? 0 : 1, pointerEvents: flipped ? "none" : "auto" } : undefined}>
       {/* Main Section */}
       <div className={cn("flex-1 flex flex-col relative border-r-2 border-dashed border-foreground/15", mainPadding, mapExpanded ? "overflow-visible" : "overflow-hidden")}>
         {/* Hero Image */}
@@ -453,7 +453,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const backFace = flippable ? (
     <div
       className={cn(cardClasses, "z-10")}
-      style={{ transform: "rotateY(180deg) translateZ(1px)" }}
+      style={{ transition: "opacity 0.4s ease", opacity: flipped ? 1 : 0, pointerEvents: flipped ? "auto" : "none" }}
     >
       <div className="flex-1 flex flex-col p-5 md:p-6">
         {/* Header */}
@@ -501,6 +501,32 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     </div>
   ) : null;
 
+  /* For input mode, keep the 3D tilt. For result/showcase, use flat layout with opacity swap */
+  if (!hasInput) {
+    return (
+      <div className="flex items-center justify-center px-4 py-2 md:py-4">
+        <div
+          ref={cardRef}
+          onClick={handleCardClick}
+          className={cn(
+            "relative w-full group",
+            flippable && "cursor-pointer",
+            outerMaxWidth,
+            mapExpanded
+              ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
+              : size === "default"
+                ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
+                : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
+          )}
+          style={{ display: "grid" }}
+        >
+          <div style={{ gridArea: "1/1" }}>{frontFace}</div>
+          {backFace && <div style={{ gridArea: "1/1" }}>{backFace}</div>}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-center px-4 py-2 md:py-4" style={{ perspective: "800px" }}>
       <div
@@ -513,25 +539,16 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         className={cn(
           "relative w-full group cursor-grab active:cursor-grabbing transition-all duration-500",
           outerMaxWidth,
-        hasInput
-            ? (mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
-            : (mapExpanded
-              ? "min-h-[580px] max-h-[820px] md:min-h-[640px] md:max-h-[900px]"
-              : size === "default"
-                ? "min-h-[480px] max-h-[680px] md:min-h-[540px] md:max-h-[780px]"
-                : "min-h-[480px] max-h-[680px] md:min-h-[560px] md:max-h-[820px] lg:min-h-[620px] lg:max-h-[900px]"
-            )
+          mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]"
         )}
         style={{
-          aspectRatio: undefined,
-          transform: `rotateX(${tilt.rotateX}deg) rotateY(${flipped ? 180 + tilt.rotateY : tilt.rotateY}deg)`,
+          transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
           transition: isInteracting ? "transform 0.08s linear" : "transform 0.6s ease-out",
           transformStyle: "preserve-3d",
           willChange: isInteracting ? "transform" : "auto",
         }}
       >
         {frontFace}
-        {backFace}
       </div>
     </div>
   );
