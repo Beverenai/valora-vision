@@ -82,9 +82,17 @@ const RentResult: React.FC = () => {
           subtitle="Your Rental Income"
           summaryText="Your property's rental potential has been analysed using comparable listings, seasonal demand patterns, and local market data. Scroll down for the full breakdown."
           accentType="rent"
+          mode="result"
+          referenceCode={formatRefCode(id!)}
           onShare={handleShare}
           onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
         />
+
+        {/* Reference code badge */}
+        <div className="flex items-center justify-center gap-3 py-4 border-b border-border">
+          <p className="text-xs text-muted-foreground">Return to this valuation anytime with reference code</p>
+          <RefCodeBadge refCode={formatRefCode(id!)} />
+        </div>
 
         {/* Cross-sell: Sell */}
         <div className="p-6 md:p-10">

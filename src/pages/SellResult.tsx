@@ -423,9 +423,12 @@ const SellResult: React.FC = () => {
           headline="VALUED"
           subtitle="Your Valuation"
           accentType="sell"
+          mode="result"
+          referenceCode={formatRefCode(id!)}
           onShare={handleShare}
           onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
         />
+        <RefCodeBadge refCode={formatRefCode(id!)} />
         <PropertySummaryCard bedrooms={lead?.bedrooms} bathrooms={lead?.bathrooms} builtSize={lead?.built_size_sqm} plotSize={lead?.plot_size_sqm} orientation={lead?.orientation} condition={lead?.condition} views={lead?.views} yearBuilt={lead?.year_built} energyCertificate={lead?.energy_certificate} propertyType={lead?.property_type} />
         <ValuationResultCard estimatedLow={estimatedLow} estimatedHigh={estimatedHigh} monthlyRentalLow={monthlyRentalLow} monthlyRentalHigh={monthlyRentalHigh} weeklyHighSeasonLow={weeklyHighLow} weeklyHighSeasonHigh={weeklyHighHigh} comparableCount={47} city={lead?.city || undefined} />
         <AIAnalysisSection content={lead?.analysis || MOCK_ANALYSIS} />
