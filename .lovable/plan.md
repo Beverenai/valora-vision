@@ -1,29 +1,56 @@
 
 
-## Why Google Maps Shows "Not Configured"
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
-The `VITE_GOOGLE_MAPS_API_KEY` is stored as a backend secret, but Vite frontend environment variables need to be available at build time — they get baked into the JavaScript bundle. Backend secrets are only accessible from edge functions, not from `import.meta.env` in the browser.
+### Problem
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
-### Fix
+### Changes
 
-Since Google Maps API keys are **public/publishable** keys (they're exposed in every browser request anyway, and should be restricted via Google Cloud Console domain restrictions instead), the key should be stored directly in the codebase rather than as a secret.
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-**Option A — Hardcode in the component** (simplest):
-- Add the Google Maps API key directly in `GoogleAddressInput.tsx` or a config file
-- This is safe because Maps API keys are always visible in browser network requests regardless
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-**Option B — Add to `.env` as a build-time variable**:
-- However, Lovable auto-manages `.env` so we can't edit it directly
+**2. Floating agency logos treatment**
 
-### Recommended approach
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-1. Create a config file `src/config/google-maps.ts` exporting the API key
-2. Update `GoogleAddressInput.tsx` to import from that config instead of `import.meta.env`
-3. You'll need to provide me the actual API key value so I can embed it
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-### Alternative
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-If you'd prefer not to expose the key in code, we could proxy Google Maps requests through a backend function — but this adds complexity and latency for no real security gain (Maps keys are inherently public).
+**3. How It Works — typographic layout**
 
-**I'll need you to share the Google Maps API key value** so I can add it to the config file, since I can't read the encrypted secret value.
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
