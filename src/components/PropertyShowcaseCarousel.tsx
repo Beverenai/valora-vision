@@ -84,7 +84,6 @@ const PropertyShowcaseCarousel: React.FC<PropertyShowcaseCarouselProps> = ({ acc
           <p className={cn("text-[0.6rem] uppercase tracking-[0.15em] font-semibold mb-2 md:mb-4", isSell ? "text-gold" : "text-emerald-400")}>
             Recent {isSell ? "Valuations" : "Estimates"}
           </p>
-          </p>
           <h3 className="font-heading text-lg md:text-3xl font-medium text-primary-foreground mb-3 md:mb-8">
             Trusted by property owners across Spain
           </h3>
