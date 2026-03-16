@@ -404,7 +404,7 @@ const Index = () => {
       </motion.section>
 
       {/* ═══════════ SECTION 6 — TESTIMONIALS ═══════════ */}
-      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white">
+      <motion.section {...sectionReveal} className="w-full py-24 md:py-40 px-6 bg-white border-t border-[#E8E5E0]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-[#1A1A1A]">
             What property owners say
