@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { formatRefCode } from "@/utils/referenceCode";
 
+type CardSize = "default" | "hero" | "showcase";
+
 interface ValuationTicketCardProps {
   address: string;
   city?: string;
@@ -54,6 +56,8 @@ interface ValuationTicketCardProps {
   /* Map expanded state - card grows taller when map is visible */
   mapExpanded?: boolean;
   onMapPhaseChange?: (phase: "search" | "verify") => void;
+  /* Size variant for different contexts */
+  size?: CardSize;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
