@@ -152,7 +152,7 @@ const SealedWrapper: React.FC<{
             background: isSell
               ? "radial-gradient(ellipse at center, rgba(212,113,59,0.3) 0%, transparent 70%)"
               : "radial-gradient(ellipse at center, rgba(60,179,113,0.3) 0%, transparent 70%)",
-            opacity: useTransform(() => dragProgress * 2),
+            opacity: glowOpacity,
           }}
         />
       </motion.div>
