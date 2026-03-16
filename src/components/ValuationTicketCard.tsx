@@ -232,22 +232,20 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
             </div>
 
             {/* Text Block */}
-            <div className="relative flex-1 flex flex-col">
-              <span className="font-ticket-cursive text-[2.5rem] md:text-[3rem] leading-[0.6] mb-3 -ml-1 text-foreground block">
+            <div className="flex-1 flex flex-col min-h-0">
+              <span className="font-ticket-cursive text-[1.8rem] md:text-[3rem] leading-[0.6] mb-2 md:mb-3 -ml-1 text-foreground block">
                 {subtitle}
               </span>
-              <p className="text-[0.55rem] md:text-[0.6rem] uppercase text-justify leading-[1.4] font-medium text-foreground/90 mb-4">
+              <p className="text-[0.55rem] md:text-[0.6rem] uppercase text-justify leading-[1.4] font-medium text-foreground/90 mb-2 line-clamp-4">
                 {summaryText}
               </p>
 
-              <div className="absolute bottom-[55px] md:bottom-[65px] right-0 text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 w-[80px] md:w-[100px]">
-                <p>VALUATION REPORT</p>
-                <p>REF #{leadId.slice(0, 8).toUpperCase()}</p>
-                <p>VALID FOR ONE</p>
+              <div className="text-right text-[0.45rem] md:text-[0.5rem] leading-[1.2] text-foreground/60 mb-2">
+                <p>VALUATION REPORT · REF #{leadId.slice(0, 8).toUpperCase()} · VALID FOR ONE</p>
               </div>
 
               {/* Barcode */}
-              <div className="mt-auto relative h-[45px] md:h-[55px] w-full">
+              <div className="mt-auto relative h-[35px] md:h-[55px] w-full">
                 <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
                 <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
                   {leadId.slice(0, 4).toUpperCase()} {leadId.slice(4, 8).toUpperCase()} {leadId.slice(8, 12).toUpperCase()}
