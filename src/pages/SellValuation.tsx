@@ -42,7 +42,6 @@ const SellValuation: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [simulatedProgress, setSimulatedProgress] = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [submittedLeadId, setSubmittedLeadId] = useState<string | null>(null);
 
   const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string }; addressData?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string } })?.address
@@ -58,12 +57,6 @@ const SellValuation: React.FC = () => {
         urbanization: addressState.urbanization || "",
       }
     : INITIAL_SELL_DATA;
-
-  useEffect(() => {
-    if (addressState?.streetAddress) {
-      setIsExpanded(true);
-    }
-  }, []);
 
   useEffect(() => {
     document.title = "Free Property Valuation | ValoraCasa";
@@ -183,15 +176,9 @@ const SellValuation: React.FC = () => {
     }
   };
 
-  const handleContinueFromCard = () => {
-    if (formData.streetAddress || formData.city) {
-      setIsExpanded(true);
-    }
-  };
-
   const handleBack = () => {
     if (currentStep === 0) {
-      setIsExpanded(false);
+      navigate("/");
     } else {
       handlePrevStep();
     }
@@ -215,13 +202,10 @@ const SellValuation: React.FC = () => {
     }
   };
 
-  const accentHsl = "hsl(var(--primary))";
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-12">
         {isSubmitting ? (
-          /* ── Processing card ── */
           <ValuationTicketCard
             address={formData.streetAddress || ""}
             city={formData.city}
@@ -233,8 +217,7 @@ const SellValuation: React.FC = () => {
             processingProgress={simulatedProgress}
             referenceCode={submittedLeadId ? formatRefCode(submittedLeadId) : undefined}
           />
-        ) : isExpanded ? (
-          /* ── Card-wrapped form ── */
+        ) : (
           <div className="flex items-center justify-center w-full" style={{ perspective: "800px" }}>
             <div className="relative w-full max-w-[380px] md:max-w-[520px] flex">
               {/* Main card body */}
@@ -304,7 +287,6 @@ const SellValuation: React.FC = () => {
                   )}
                 </div>
 
-                {/* Barcode */}
                 {/* Step indicator */}
                 <div className="px-4 pb-4 pt-2">
                   <div className="flex items-center justify-between">
@@ -362,27 +344,8 @@ const SellValuation: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
-          /* ── Initial input card ── */
-          <>
-            <ValuationTicketCard
-              address=""
-              estimatedValue=""
-              propertyType="Villa"
-              leadId="a1b2c3d4e5f6"
-              accentType="sell"
-              addressValue={formData.streetAddress}
-              onAddressChange={(val) => handleChange("streetAddress", val)}
-              onContinue={handleContinueFromCard}
-              mode="input"
-            />
-            <p className="text-sm text-muted-foreground/60 tracking-wide mt-2 animate-fade-in">
-              12,400+ valuations · 100% free · 2 minutes
-            </p>
-          </>
         )}
       </main>
-
     </div>
   );
 };

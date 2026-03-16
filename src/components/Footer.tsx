@@ -16,9 +16,9 @@ const Footer = () => (
           Services
         </p>
         <div className="flex flex-col gap-2">
-          <Link to="/sell" className="text-sm text-foreground/70 hover:text-foreground">Sell Valuation</Link>
-          <Link to="/rent" className="text-sm text-foreground/70 hover:text-foreground">Rental Estimate</Link>
-          <Link to="/for-professionals" className="text-sm text-foreground/70 hover:text-foreground">For Professionals</Link>
+          <Link to="/sell/valuation" className="text-sm text-foreground/70 hover:text-foreground">Sell Valuation</Link>
+          <Link to="/rent/valuation" className="text-sm text-foreground/70 hover:text-foreground">Rental Estimate</Link>
+          <Link to="/lookup" className="text-sm text-foreground/70 hover:text-foreground">Lookup Valuation</Link>
         </div>
       </div>
       <div className="bg-card p-8">
