@@ -123,7 +123,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
-      <div className="max-w-5xl mx-auto w-full flex flex-col">
+      <div className="max-w-[1400px] mx-auto w-full flex flex-col">
 
         {/* ═══════════ HERO ═══════════ */}
         <div
