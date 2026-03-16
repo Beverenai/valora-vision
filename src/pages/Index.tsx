@@ -180,14 +180,14 @@ const Index = () => {
       </section>
 
       {/* ═══════════ HOW IT WORKS — Typographic ═══════════ */}
-      <section className="w-full py-20 md:py-32 px-6">
+      <section className="w-full py-14 md:py-32 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16 md:mb-20"
+            className="text-center mb-10 md:mb-20"
           >
             <h2 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground">
               How it works
