@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Search, X, Loader, AlertCircle, MapPin, Navigation, ChevronLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
+import { GOOGLE_MAPS_API_KEY } from "@/config/google-maps";
 
 interface AddressData {
   streetAddress: string;
