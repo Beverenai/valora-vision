@@ -72,22 +72,34 @@ const SealedWrapper: React.FC<{
   const topHalfY = useTransform(() => -dragProgress * 20);
   const glowOpacity = useTransform(() => dragProgress * 2);
 
+  // Accent colors
+  const accentRgb = isSell ? "212, 113, 59" : "60, 179, 113";
+  const accentRgba = (a: number) => `rgba(${accentRgb}, ${a})`;
+
+  // Plastic wrap styles
+  const plasticBg = `linear-gradient(135deg, ${accentRgba(0.04)} 0%, ${accentRgba(0.08)} 50%, ${accentRgba(0.04)} 100%)`;
+  const plasticSheen = `linear-gradient(135deg, transparent 20%, rgba(255,255,255,0.25) 42%, rgba(255,255,255,0.4) 48%, transparent 55%, rgba(255,255,255,0.12) 72%, transparent 85%)`;
+  const crinkleTexture = `repeating-linear-gradient(62deg, transparent, transparent 8px, rgba(255,255,255,0.04) 8.5px, transparent 9px), repeating-linear-gradient(-25deg, transparent, transparent 12px, ${accentRgba(0.03)} 12.5px, transparent 13px)`;
+
   return (
     <div className="relative w-[340px] h-[510px] sm:w-[380px] sm:h-[570px] mx-auto">
       {/* Top half */}
       <motion.div
         className="absolute inset-x-0 top-0 bottom-[80%] z-20 overflow-hidden rounded-t-3xl"
         style={{
-          background: "linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 25%, #A0A0A0 50%, #D4D4D4 75%, #B0B0B0 100%)",
+          background: plasticBg,
+          backdropFilter: "blur(2px)",
+          borderTop: `1px solid ${accentRgba(0.15)}`,
+          borderLeft: `1px solid ${accentRgba(0.1)}`,
+          borderRight: `1px solid ${accentRgba(0.1)}`,
           y: topHalfY,
         }}
       >
-        <div className="absolute inset-0 opacity-[0.06]" style={{
-          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 20px, currentColor 20px, currentColor 21px)`,
-          color: "#666",
-        }} />
+        {/* Sheen overlay */}
+        <div className="absolute inset-0" style={{ backgroundImage: plasticSheen }} />
+        <div className="absolute inset-0" style={{ backgroundImage: crinkleTexture }} />
         <div className="h-full flex items-center justify-center">
-          <span className="font-heading text-sm tracking-[0.3em] uppercase text-[#888] font-bold">
+          <span className="font-heading text-sm tracking-[0.3em] uppercase font-bold" style={{ color: accentRgba(0.4) }}>
             ValoraCasa
           </span>
         </div>
@@ -95,45 +107,47 @@ const SealedWrapper: React.FC<{
 
       {/* Main wrapper body */}
       <motion.div
-        className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl"
+        className="absolute inset-0 rounded-3xl overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 25%, #A0A0A0 50%, #D4D4D4 75%, #B0B0B0 100%)",
+          background: plasticBg,
+          backdropFilter: "blur(1.5px)",
+          border: `1px solid ${accentRgba(0.12)}`,
+          boxShadow: `0 8px 32px ${accentRgba(0.08)}, inset 0 0 60px ${accentRgba(0.03)}`,
         }}
       >
-        {/* VC pattern texture */}
-        <div className="absolute inset-0 opacity-[0.05]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext x='10' y='35' font-size='14' font-family='serif' fill='%23666' opacity='0.6'%3EVC%3C/text%3E%3C/svg%3E")`,
-          backgroundRepeat: "repeat",
-        }} />
+        {/* Plastic sheen overlay */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: plasticSheen }} />
+
+        {/* Crinkle texture */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: crinkleTexture }} />
 
         {/* Content */}
         <div className="relative h-full flex flex-col items-center justify-between py-10 px-8">
           {/* Top brand */}
-          <span className="font-heading text-base tracking-[0.3em] uppercase font-bold" style={{ color: "rgba(180,180,180,0.8)" }}>
+          <span className="font-heading text-base tracking-[0.3em] uppercase font-bold" style={{ color: accentRgba(0.35) }}>
             ValoraCasa
           </span>
 
-          {/* Center: Embossed VALUED */}
+          {/* Center: VALUED / ESTIMATED */}
           <div className="text-center">
             <h2
               className="font-heading text-5xl sm:text-6xl font-black tracking-[-2px] uppercase"
               style={{
-                color: "transparent",
-                WebkitTextStroke: "1.5px rgba(160,160,160,0.5)",
-                textShadow: "2px 2px 4px rgba(255,255,255,0.3), -1px -1px 2px rgba(0,0,0,0.1)",
+                color: accentRgba(0.2),
+                textShadow: `0 1px 2px ${accentRgba(0.08)}`,
               }}
             >
               {embossedText}
             </h2>
             <div className="flex justify-center gap-1 mt-4">
               {Array.from({ length: 20 }).map((_, i) => (
-                <div key={i} className="w-1 h-1 rounded-full" style={{ backgroundColor: "rgba(160,160,160,0.4)" }} />
+                <div key={i} className="w-1 h-1 rounded-full" style={{ backgroundColor: accentRgba(0.2) }} />
               ))}
             </div>
           </div>
 
           {/* Bottom text */}
-          <p className="text-[0.6rem] tracking-[0.25em] uppercase font-semibold" style={{ color: "rgba(140,140,140,0.7)" }}>
+          <p className="text-[0.6rem] tracking-[0.25em] uppercase font-semibold" style={{ color: accentRgba(0.35) }}>
             Property Valuation Report
           </p>
         </div>
@@ -141,7 +155,7 @@ const SealedWrapper: React.FC<{
         {/* Tear line */}
         <div
           className="absolute left-0 right-0 border-t-2 border-dashed"
-          style={{ top: "20%", borderColor: "rgba(120,120,120,0.4)" }}
+          style={{ top: "20%", borderColor: accentRgba(0.25) }}
         />
 
         {/* Glow through tear */}
@@ -149,9 +163,7 @@ const SealedWrapper: React.FC<{
           className="absolute left-0 right-0 h-4 pointer-events-none"
           style={{
             top: "calc(20% - 8px)",
-            background: isSell
-              ? "radial-gradient(ellipse at center, rgba(212,113,59,0.3) 0%, transparent 70%)"
-              : "radial-gradient(ellipse at center, rgba(60,179,113,0.3) 0%, transparent 70%)",
+            background: `radial-gradient(ellipse at center, ${accentRgba(0.3)} 0%, transparent 70%)`,
             opacity: glowOpacity,
           }}
         />
