@@ -403,10 +403,10 @@ const Index = () => {
                       <div className={cn(
                         "w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors",
                         feat.accent
-                          ? "bg-[hsl(var(--terracotta-light))]"
+                          ? isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
                           : "bg-secondary"
                       )}>
-                        <span className="text-primary text-lg">✦</span>
+                        <span className={cn("text-lg", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>✦</span>
                       </div>
                       <div>
                         <h3 className="font-bold text-foreground text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
