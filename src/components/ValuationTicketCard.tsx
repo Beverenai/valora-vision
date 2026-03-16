@@ -209,7 +209,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
         {/* Hero Image */}
         <div className={cn(
           "relative w-full min-h-[120px] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink transition-all duration-500",
-          mapExpanded ? "max-h-[25%]" : "max-h-[42%]"
+          mapExpanded ? "max-h-[80px] md:max-h-[25%]" : "max-h-[42%]"
         )}>
           <img
             src={heroImage}
