@@ -42,7 +42,6 @@ const RentValuation: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [simulatedProgress, setSimulatedProgress] = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [submittedLeadId, setSubmittedLeadId] = useState<string | null>(null);
 
   const addressState = (location.state as { address?: { streetAddress?: string; city?: string; province?: string; country?: string; urbanization?: string } })?.address;
@@ -56,12 +55,6 @@ const RentValuation: React.FC = () => {
         urbanization: addressState.urbanization || "",
       }
     : INITIAL_RENT_DATA;
-
-  useEffect(() => {
-    if (addressState?.streetAddress) {
-      setIsExpanded(true);
-    }
-  }, []);
 
   useEffect(() => {
     document.title = "Free Rental Estimate | ValoraCasa";
@@ -170,15 +163,9 @@ const RentValuation: React.FC = () => {
     }
   };
 
-  const handleContinueFromCard = () => {
-    if (formData.streetAddress || formData.city) {
-      setIsExpanded(true);
-    }
-  };
-
   const handleBack = () => {
     if (currentStep === 0) {
-      setIsExpanded(false);
+      navigate("/");
     } else {
       handlePrevStep();
     }
@@ -202,8 +189,6 @@ const RentValuation: React.FC = () => {
     }
   };
 
-  const accentHsl = "hsl(var(--success))";
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-12">
@@ -219,11 +204,10 @@ const RentValuation: React.FC = () => {
             processingProgress={simulatedProgress}
             referenceCode={submittedLeadId ? formatRefCode(submittedLeadId) : undefined}
           />
-        ) : isExpanded ? (
+        ) : (
           <div className="flex items-center justify-center w-full" style={{ perspective: "800px" }}>
             <div className="relative w-full max-w-[380px] md:max-w-[520px] flex">
               <div className="flex-1 flex flex-col bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-r-2 border-dashed border-foreground/15">
-                {/* Header band */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-foreground/10 overflow-hidden">
                   <div className="w-8 h-8 rounded-full bg-[hsl(var(--success))] flex items-center justify-center shrink-0">
                     <MapPin size={14} className="text-primary-foreground" />
@@ -285,7 +269,6 @@ const RentValuation: React.FC = () => {
                   )}
                 </div>
 
-                {/* Step indicator */}
                 <div className="px-4 pb-4 pt-2">
                   <div className="flex items-center justify-between">
                     {RENT_STEPS.map((step, i) => {
@@ -341,26 +324,8 @@ const RentValuation: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
-          <>
-            <ValuationTicketCard
-              address=""
-              estimatedValue=""
-              propertyType="Villa"
-              leadId="a1b2c3d4e5f6"
-              accentType="rent"
-              addressValue={formData.streetAddress}
-              onAddressChange={(val) => handleChange("streetAddress", val)}
-              onContinue={handleContinueFromCard}
-              mode="input"
-            />
-            <p className="text-sm text-muted-foreground/60 tracking-wide mt-2 animate-fade-in">
-              12,400+ valuations · 100% free · 2 minutes
-            </p>
-          </>
         )}
       </main>
-
     </div>
   );
 };

@@ -4,9 +4,9 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { label: "Valuation", href: "/sell" },
-  { label: "Rentals", href: "/rent" },
-  { label: "Find Agents", href: "/for-professionals" },
+  { label: "Valuation", href: "/sell/valuation" },
+  { label: "Rentals", href: "/rent/valuation" },
+  { label: "Lookup", href: "/lookup" },
 ];
 
 const Navbar = () => {
