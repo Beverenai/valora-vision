@@ -8,12 +8,11 @@ import ComparablePropertiesSection from "@/components/result/ComparablePropertie
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
-  Calendar, Leaf, ShieldCheck, Star, Users, ThumbsUp, Meh, ThumbsDown, Send, Home,
-  ChevronDown,
+  Calendar, Leaf, ShieldCheck, Star, Users, Home,
+  ChevronDown, ArrowUp, ArrowDown, Sparkles,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import { formatRefCode } from "@/utils/referenceCode";
@@ -125,7 +124,6 @@ const ValuationResultCard: React.FC<{
 const AIAnalysisSection: React.FC<{ content: string }> = ({ content }) => {
   const paragraphs = content.split("\n\n").filter(Boolean);
   const firstParagraph = paragraphs[0] || "";
-  // Extract first sentence for pull-quote
   const firstSentence = firstParagraph.split(/\.\s/)[0] + ".";
 
   return (
@@ -136,12 +134,10 @@ const AIAnalysisSection: React.FC<{ content: string }> = ({ content }) => {
           Property Analysis
         </p>
 
-        {/* Pull-quote */}
         <p className="font-heading italic text-lg md:text-xl text-foreground/60 leading-relaxed mb-10 border-l-2 border-gold pl-6">
           {firstSentence}
         </p>
 
-        {/* Drop-cap first paragraph */}
         <p className="text-[15px] leading-[2] text-foreground/70 font-light first-letter:text-5xl first-letter:font-heading first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:leading-none first-letter:text-foreground">
           {firstParagraph}
         </p>
@@ -224,52 +220,78 @@ const ProfessionalSpotlight: React.FC<{
   </section>
 );
 
-const FeedbackSection: React.FC<{ leadId: string; leadType: "sell" | "rent" }> = ({ leadId, leadType }) => {
+const ValuationPredictionGame: React.FC<{ leadId: string; leadType: "sell" | "rent" }> = ({ leadId, leadType }) => {
   const { toast } = useToast();
-  const [rating, setRating] = useState<number | null>(null);
-  const [comment, setComment] = useState("");
+  const [prediction, setPrediction] = useState<"higher" | "lower" | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async () => {
-    if (rating === null) return;
-    const { error } = await supabase.from("valuation_feedback").insert({ lead_id: leadId, lead_type: leadType, rating, comment: comment || null });
+  const handlePrediction = async (guess: "higher" | "lower") => {
+    setPrediction(guess);
+    const { error } = await supabase.from("valuation_feedback").insert({
+      lead_id: leadId,
+      lead_type: leadType,
+      rating: guess === "higher" ? 5 : 1,
+      comment: `prediction:${guess}`,
+    });
     if (error) {
-      toast({ title: "Error", description: "Could not submit feedback.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not save your prediction.", variant: "destructive" });
     } else {
       setSubmitted(true);
-      toast({ title: "Thank you!", description: "Your feedback helps us improve." });
     }
   };
 
-  const options = [
-    { value: 5, icon: <ThumbsUp size={20} />, label: "Helpful" },
-    { value: 3, icon: <Meh size={20} />, label: "Okay" },
-    { value: 1, icon: <ThumbsDown size={20} />, label: "Not helpful" },
-  ];
-
-  if (submitted) return (
-    <section className="py-16 md:py-24 text-center">
-      <p className="text-muted-foreground text-sm">Thank you for your feedback.</p>
-    </section>
-  );
+  const responseText = prediction === "higher"
+    ? "Many owners are surprised — your property is performing well against the market."
+    : "Great instinct — the Costa del Sol market has been rising steadily.";
 
   return (
     <section className="py-16 md:py-24">
       <div className="max-w-md mx-auto px-6 text-center">
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Was this valuation helpful?</p>
-        <div className="flex justify-center gap-3 mb-6">
-          {options.map((opt) => (
-            <button key={opt.value} onClick={() => setRating(opt.value)}
-              className={`flex flex-col items-center gap-1 px-5 py-4 border transition-colors ${rating === opt.value ? "border-accent bg-accent/10 text-accent" : "border-border text-muted-foreground hover:border-foreground/30"}`}>
-              {opt.icon}
-              <span className="text-[0.6rem] uppercase tracking-[0.1em] font-semibold">{opt.label}</span>
+        <div className="w-10 h-px bg-gold mx-auto mb-8" />
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-4">
+          Your Prediction
+        </p>
+        <p className="text-lg font-light text-foreground/80 mb-8">
+          Did you think it would be…
+        </p>
+
+        {!submitted ? (
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => handlePrediction("higher")}
+              className={`flex flex-col items-center gap-2 px-8 py-6 border rounded-lg transition-all duration-200 ${
+                prediction === "higher"
+                  ? "border-gold bg-gold/10 text-gold"
+                  : "border-border text-muted-foreground hover:border-gold/50 hover:text-foreground"
+              }`}
+            >
+              <ArrowUp size={28} strokeWidth={1.5} />
+              <span className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold">Higher</span>
             </button>
-          ))}
-        </div>
-        {rating !== null && (
-          <div className="space-y-3 animate-fade-in">
-            <Textarea placeholder="Any additional comments? (optional)" value={comment} onChange={(e) => setComment(e.target.value)} className="border-border bg-card resize-none" rows={3} />
-            <Button onClick={handleSubmit} className="bg-gold text-primary hover:bg-gold-dark"><Send size={14} /> Submit Feedback</Button>
+            <button
+              onClick={() => handlePrediction("lower")}
+              className={`flex flex-col items-center gap-2 px-8 py-6 border rounded-lg transition-all duration-200 ${
+                prediction === "lower"
+                  ? "border-gold bg-gold/10 text-gold"
+                  : "border-border text-muted-foreground hover:border-gold/50 hover:text-foreground"
+              }`}
+            >
+              <ArrowDown size={28} strokeWidth={1.5} />
+              <span className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold">Lower</span>
+            </button>
+          </div>
+        ) : (
+          <div className="animate-fade-in">
+            <div className="inline-flex items-center gap-2 text-gold mb-4">
+              <Sparkles size={16} />
+              <span className="text-[0.6rem] uppercase tracking-[0.2em] font-semibold">
+                {prediction === "higher" ? "↑ Higher" : "↓ Lower"}
+              </span>
+              <Sparkles size={16} />
+            </div>
+            <p className="text-[15px] leading-[2] text-foreground/70 font-light max-w-sm mx-auto">
+              {responseText}
+            </p>
           </div>
         )}
       </div>
@@ -428,12 +450,13 @@ const SellResult: React.FC = () => {
           />
           
           <div className="w-full h-px bg-border" />
-          
-          <ProfessionalSpotlight companyName="Costa Del Sol Premium Realty" tagline="Full-service luxury property experts since 2005" rating={5} reviewCount={127} onContact={() => toast({ title: "Contact Requested", description: "The agent will reach out to you shortly." })} onViewProfile={() => toast({ title: "Coming Soon", description: "Agent profiles are coming soon." })} />
+
+          <ValuationPredictionGame leadId={id!} leadType="sell" />
           
           <div className="w-full h-px bg-border" />
           
-          <FeedbackSection leadId={id!} leadType="sell" />
+          <ProfessionalSpotlight companyName="Costa Del Sol Premium Realty" tagline="Full-service luxury property experts since 2005" rating={5} reviewCount={127} onContact={() => toast({ title: "Contact Requested", description: "The agent will reach out to you shortly." })} onViewProfile={() => toast({ title: "Coming Soon", description: "Agent profiles are coming soon." })} />
+          
           <ValuationDisclaimer />
         </div>
       </CardRevealWrapper>
