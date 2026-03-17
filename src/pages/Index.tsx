@@ -566,7 +566,7 @@ const Index = () => {
                         <>
                           <div className="flex -space-x-2">
                             {[0, 1, 2].map(n => (
-                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", isSell ? "bg-primary" : "bg-[hsl(var(--rent))]")} style={{ opacity: 1 - n * 0.2 }}>
+                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", isSell ? "bg-primary" : "bg-[hsl(var(--buy))]")} style={{ opacity: 1 - n * 0.2 }}>
                                 {["A", "B", "C"][n]}
                               </div>
                             ))}
