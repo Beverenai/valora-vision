@@ -91,7 +91,7 @@ const StatsBar = () => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const [valuationType, setValuationType] = useState<"sell" | "rent">("sell");
+  const [valuationType, setValuationType] = useState<"sell" | "buy">("sell");
   const [addressData, setAddressData] = useState({
     streetAddress: "",
     urbanization: "",
