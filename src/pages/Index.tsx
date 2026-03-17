@@ -526,7 +526,7 @@ const Index = () => {
                               ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10"
                               : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12"
                             }
-                            stroke={isSell ? "hsl(var(--primary))" : "hsl(var(--rent))"}
+                            stroke={isSell ? "hsl(var(--primary))" : "hsl(var(--buy))"}
                             strokeWidth="2"
                             strokeLinecap="round"
                           />
