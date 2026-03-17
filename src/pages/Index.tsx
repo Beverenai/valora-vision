@@ -535,7 +535,7 @@ const Index = () => {
                               ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10 V50 H0Z"
                               : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12 V50 H0Z"
                             }
-                            fill={isSell ? "hsl(var(--primary) / 0.08)" : "hsl(var(--rent) / 0.08)"}
+                            fill={isSell ? "hsl(var(--primary) / 0.08)" : "hsl(var(--buy) / 0.08)"}
                           />
                         </svg>
                       </div>
