@@ -113,8 +113,9 @@ const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
 
   const isSell = valuationType === "sell";
-  const testimonials = isSell ? TESTIMONIALS_SELL : TESTIMONIALS_RENT;
-  const reportFeatures = isSell ? REPORT_FEATURES_SELL : REPORT_FEATURES_RENT;
+  const isBuy = valuationType === "buy";
+  const testimonials = isSell ? TESTIMONIALS_SELL : TESTIMONIALS_BUY;
+  const reportFeatures = isSell ? REPORT_FEATURES_SELL : REPORT_FEATURES_BUY;
 
   // Reset testimonial index when switching type
   useEffect(() => {
