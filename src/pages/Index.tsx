@@ -278,7 +278,9 @@ const Index = () => {
                 Three Simple Steps
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
-                From address to valuation in under two minutes
+                {isSell
+                  ? "From address to valuation in under two minutes"
+                  : "From listing link to price analysis in seconds"}
               </p>
             </motion.div>
 
