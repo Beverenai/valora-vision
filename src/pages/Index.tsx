@@ -182,22 +182,22 @@ const Index = () => {
                   className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide mb-4 transition-colors duration-300 ${
                     isSell
                       ? "bg-[hsl(var(--terracotta-light))] text-primary"
-                      : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]"
+                      : "bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))]"
                   }`}
                 >
-                  {isSell ? "Free Property Valuation" : "Free Rental Estimate"}
+                  {isSell ? "Free Property Valuation" : "Free Price Analysis"}
                 </span>
                 <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
                   {isSell ? (
                     <>What is your property<br />in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?</>
                   ) : (
-                    <>How much could your<br />property <span className="font-['DM_Serif_Display'] italic normal-case">earn</span> in rent?</>
+                    <>Is this property<br /><span className="font-['DM_Serif_Display'] italic normal-case">worth the price</span>?</>
                   )}
                 </h1>
                 <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed mt-4">
                   {isSell
                     ? "Get a detailed market report in under 2 minutes. Completely free."
-                    : "Get a rental income estimate in under 2 minutes. Completely free."
+                    : "Paste a listing link and we'll compare it to the market."
                   }
                 </p>
               </motion.div>
