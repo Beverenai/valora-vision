@@ -131,7 +131,7 @@ const Index = () => {
 
   const handleGetValuation = useCallback(() => {
     if (valuationType === "buy") {
-      navigate("/buy");
+      navigate("/buy", { state: { listingUrl } });
       return;
     }
     navigate("/sell/valuation", {
