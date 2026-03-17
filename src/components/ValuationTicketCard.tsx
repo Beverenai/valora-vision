@@ -134,9 +134,23 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const isCompact = mode === "compact" || (!mode && compact);
   const isLarge = size === "hero";
 
-  const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined) && !isProcessing;
-  const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
+  const isBuyMode = valuationType === "buy";
+  const hasInput = (onAddressChange !== undefined || onAddressFieldChange !== undefined || (isBuyMode && onListingUrlChange !== undefined)) && !isProcessing;
+  const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined && !isBuyMode;
+  const hasBuyInput = isBuyMode && onListingUrlChange !== undefined;
   const handleContinue = onContinue || onSubmit;
+
+  // Platform detection for BUY mode
+  const detectedPlatform = useMemo(() => {
+    if (!listingUrl) return null;
+    const url = listingUrl.toLowerCase();
+    if (url.includes("idealista.com")) return "Idealista";
+    if (url.includes("fotocasa.es")) return "Fotocasa";
+    if (url.includes("kyero.com")) return "Kyero";
+    if (url.includes("spainhouses.net")) return "SpainHouses";
+    if (url.includes("pisos.com")) return "Pisos.com";
+    return null;
+  }, [listingUrl]);
 
   const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : accentType === "buy" ? "hsl(var(--buy))" : "hsl(var(--success))";
   const accentClass = accentType === "sell" ? "bg-primary" : accentType === "buy" ? "bg-[hsl(var(--buy))]" : "bg-[hsl(var(--success))]";
