@@ -503,14 +503,14 @@ const Index = () => {
 
                   {feat.visual === "metric" && (
                     <div className="mt-auto">
-                      <p className={cn("text-2xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
-                        {isSell ? "€3,200" : "€1,850"}
+                      <p className={cn("text-2xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
+                        {isSell ? "€3,200" : "€3,150"}
                         <span className="text-sm text-muted-foreground font-normal">/m²</span>
                       </p>
                       <div className="flex gap-1 mt-2">
                         {[65, 78, 85, 72, 90, 88, 95].map((h, j) => (
                           <div key={j} className="flex-1 rounded-sm bg-border" style={{ height: `${h * 0.3}px` }}>
-                            <div className={cn("w-full rounded-sm", isSell ? "bg-primary/30" : "bg-[hsl(var(--rent)/0.3)]")} style={{ height: `${h * 0.3}px` }} />
+                            <div className={cn("w-full rounded-sm", isSell ? "bg-primary/30" : "bg-[hsl(var(--buy)/0.3)]")} style={{ height: `${h * 0.3}px` }} />
                           </div>
                         ))}
                       </div>
