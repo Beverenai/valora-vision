@@ -4,8 +4,8 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { label: "Valuation", href: "/sell/valuation" },
-  { label: "Rentals", href: "/rent/valuation" },
+  { label: "Sell", href: "/sell/valuation" },
+  { label: "Buy Analysis", href: "/buy" },
   { label: "Lookup", href: "/lookup" },
 ];
 

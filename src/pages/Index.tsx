@@ -32,13 +32,13 @@ const REPORT_FEATURES_SELL = [
   { title: "Agent Recommendations", desc: "Matched local agents ready to help you sell.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
 ];
 
-const REPORT_FEATURES_RENT = [
-  { title: "Monthly Rental Estimate", desc: "Long-term rental income projection for your property.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
-  { title: "Seasonal Income Forecast", desc: "High and low season weekly rate estimates.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Occupancy Projections", desc: "Expected occupancy rates based on local demand.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Annual Revenue Estimate", desc: "Total projected annual rental income.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
-  { title: "Comparable Rentals", desc: "Similar properties currently rented near you.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Agent Recommendations", desc: "Matched local agents ready to help you rent.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+const REPORT_FEATURES_BUY = [
+  { title: "Price Score", desc: "See if the asking price is fair, above, or below market value.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
+  { title: "Price Spectrum", desc: "Visual comparison of asking price vs market range.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Comparable Analysis", desc: "Compare with similar properties currently listed nearby.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Negotiation Hints", desc: "Data-driven advice on how to approach your offer.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
+  { title: "Area Insights", desc: "Median price/m² and trends in the area.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Agent Recommendations", desc: "Matched local agents to help you buy.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
 ];
 
 const TESTIMONIALS_SELL = [
@@ -47,10 +47,10 @@ const TESTIMONIALS_SELL = [
   { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
 
-const TESTIMONIALS_RENT = [
-  { quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.", name: "Carlos M.", location: "Estepona" },
-  { quote: "Helped us decide between long-term and seasonal rental. The seasonal forecast was incredibly accurate.", name: "Maria L.", location: "Marbella" },
-  { quote: "We increased our rental income by 30% after following the recommendations in the report.", name: "Peter & Julia W.", location: "Mijas" },
+const TESTIMONIALS_BUY = [
+  { quote: "I was about to overpay by €45,000. ValoraCasa showed me the property was 12% above market value.", name: "Stefan R.", location: "Marbella" },
+  { quote: "The price analysis confirmed the asking price was fair. Gave me confidence to make an offer immediately.", name: "Emma & David K.", location: "Estepona" },
+  { quote: "Used it on every property we viewed. Saved us thousands in negotiations.", name: "Linda M.", location: "Fuengirola" },
 ];
 
 /* ─── SECTION LABEL ─── */
@@ -91,7 +91,7 @@ const StatsBar = () => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const [valuationType, setValuationType] = useState<"sell" | "rent">("sell");
+  const [valuationType, setValuationType] = useState<"sell" | "buy">("sell");
   const [addressData, setAddressData] = useState({
     streetAddress: "",
     urbanization: "",
@@ -113,8 +113,9 @@ const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
 
   const isSell = valuationType === "sell";
-  const testimonials = isSell ? TESTIMONIALS_SELL : TESTIMONIALS_RENT;
-  const reportFeatures = isSell ? REPORT_FEATURES_SELL : REPORT_FEATURES_RENT;
+  const isBuy = valuationType === "buy";
+  const testimonials = isSell ? TESTIMONIALS_SELL : TESTIMONIALS_BUY;
+  const reportFeatures = isSell ? REPORT_FEATURES_SELL : REPORT_FEATURES_BUY;
 
   // Reset testimonial index when switching type
   useEffect(() => {
@@ -128,8 +129,11 @@ const Index = () => {
 
 
   const handleGetValuation = useCallback(() => {
-    const route = valuationType === "sell" ? "/sell/valuation" : "/rent/valuation";
-    navigate(route, {
+    if (valuationType === "buy") {
+      navigate("/buy");
+      return;
+    }
+    navigate("/sell/valuation", {
       state: {
         addressData: {
           ...addressData,
@@ -148,11 +152,11 @@ const Index = () => {
         summaryText: "Your property has been analysed using comparable market data, location scoring, and current demand indicators.",
       }
     : {
-        estimatedValue: "€3,200/mo",
-        secondaryValue: "€38,400/yr",
-        headline: "VALUED",
-        subtitle: "Rental Income",
-        summaryText: "Your rental potential has been analysed using comparable rentals, seasonal demand, and occupancy projections.",
+        estimatedValue: "€395,000",
+        secondaryValue: "FAIR PRICE",
+        headline: "ANALYSED",
+        subtitle: "Your Analysis",
+        summaryText: "This property has been analysed against comparable listings in the area. The asking price aligns well with current market data.",
       };
 
   return (
@@ -178,22 +182,22 @@ const Index = () => {
                   className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide mb-4 transition-colors duration-300 ${
                     isSell
                       ? "bg-[hsl(var(--terracotta-light))] text-primary"
-                      : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]"
+                      : "bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))]"
                   }`}
                 >
-                  {isSell ? "Free Property Valuation" : "Free Rental Estimate"}
+                  {isSell ? "Free Property Valuation" : "Free Price Analysis"}
                 </span>
                 <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
                   {isSell ? (
                     <>What is your property<br />in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?</>
                   ) : (
-                    <>How much could your<br />property <span className="font-['DM_Serif_Display'] italic normal-case">earn</span> in rent?</>
+                    <>Is this property<br /><span className="font-['DM_Serif_Display'] italic normal-case">worth the price</span>?</>
                   )}
                 </h1>
                 <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed mt-4">
                   {isSell
                     ? "Get a detailed market report in under 2 minutes. Completely free."
-                    : "Get a rental income estimate in under 2 minutes. Completely free."
+                    : "Paste a listing link and we'll compare it to the market."
                   }
                 </p>
               </motion.div>
@@ -211,7 +215,7 @@ const Index = () => {
             mapExpanded={mapExpanded}
             onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
             valuationType={valuationType}
-            onValuationTypeChange={setValuationType}
+            onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
           />
         </div>
 
@@ -293,9 +297,9 @@ const Index = () => {
                   <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">01</span>
                   <div className={cn(
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
+                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
                   )}>
-                    <MapPin className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                    <MapPin className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
                   </div>
                 </div>
                 {/* Content */}
@@ -328,9 +332,9 @@ const Index = () => {
                   <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">02</span>
                   <div className={cn(
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
+                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
                   )}>
-                    <SlidersHorizontal className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                    <SlidersHorizontal className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
@@ -354,7 +358,7 @@ const Index = () => {
                             "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium",
                             isSell
                               ? "bg-[hsl(var(--terracotta-light))] text-primary"
-                              : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]"
+                              : "bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))]"
                           )}
                         >
                           <pill.icon className="h-3.5 w-3.5" />
@@ -378,9 +382,9 @@ const Index = () => {
                   <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">03</span>
                   <div className={cn(
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
+                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
                   )}>
-                    <Sparkles className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                    <Sparkles className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
@@ -478,35 +482,35 @@ const Index = () => {
 
                   {/* ── Visual previews ── */}
                   {feat.visual === "hero" && (
-                    <div className={cn("rounded-xl p-4 mt-auto", isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]")}>
+                    <div className={cn("rounded-xl p-4 mt-auto", isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]")}>
                       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                        {isSell ? "Estimated value" : "Monthly estimate"}
+                        {isSell ? "Estimated value" : "Price score"}
                       </p>
-                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
-                        {isSell ? "€845,000" : "€3,200"}
+                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
+                        {isSell ? "€845,000" : "FAIR PRICE"}
                       </p>
                       <div className="flex items-center gap-2 mt-3">
                         <div className="flex-1 h-2 rounded-full bg-background overflow-hidden">
-                          <div className={cn("h-full rounded-full", isSell ? "bg-primary" : "bg-[hsl(var(--rent))]")} style={{ width: "78%" }} />
+                          <div className={cn("h-full rounded-full", isSell ? "bg-primary" : "bg-[hsl(var(--buy))]")} style={{ width: "78%" }} />
                         </div>
                         <span className="text-[0.65rem] text-muted-foreground whitespace-nowrap">High confidence</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
-                        {isSell ? "Range: €790K – €900K" : "Range: €2,800 – €3,600/mo"}
+                        {isSell ? "Range: €790K – €900K" : "Asking: €395K · Est: €380K"}
                       </p>
                     </div>
                   )}
 
                   {feat.visual === "metric" && (
                     <div className="mt-auto">
-                      <p className={cn("text-2xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
-                        {isSell ? "€3,200" : "€1,850"}
+                      <p className={cn("text-2xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
+                        {isSell ? "€3,200" : "€3,150"}
                         <span className="text-sm text-muted-foreground font-normal">/m²</span>
                       </p>
                       <div className="flex gap-1 mt-2">
                         {[65, 78, 85, 72, 90, 88, 95].map((h, j) => (
                           <div key={j} className="flex-1 rounded-sm bg-border" style={{ height: `${h * 0.3}px` }}>
-                            <div className={cn("w-full rounded-sm", isSell ? "bg-primary/30" : "bg-[hsl(var(--rent)/0.3)]")} style={{ height: `${h * 0.3}px` }} />
+                            <div className={cn("w-full rounded-sm", isSell ? "bg-primary/30" : "bg-[hsl(var(--buy)/0.3)]")} style={{ height: `${h * 0.3}px` }} />
                           </div>
                         ))}
                       </div>
@@ -522,7 +526,7 @@ const Index = () => {
                               ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10"
                               : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12"
                             }
-                            stroke={isSell ? "hsl(var(--primary))" : "hsl(var(--rent))"}
+                            stroke={isSell ? "hsl(var(--primary))" : "hsl(var(--buy))"}
                             strokeWidth="2"
                             strokeLinecap="round"
                           />
@@ -531,13 +535,13 @@ const Index = () => {
                               ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10 V50 H0Z"
                               : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12 V50 H0Z"
                             }
-                            fill={isSell ? "hsl(var(--primary) / 0.08)" : "hsl(var(--rent) / 0.08)"}
+                            fill={isSell ? "hsl(var(--primary) / 0.08)" : "hsl(var(--buy) / 0.08)"}
                           />
                         </svg>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <TrendingUp className={cn("h-4 w-4", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
-                        <span className={cn("text-sm font-semibold", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
+                        <TrendingUp className={cn("h-4 w-4", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
+                        <span className={cn("text-sm font-semibold", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
                           {isSell ? "+4.2%" : "+6.1%"}
                         </span>
                       </div>
@@ -562,7 +566,7 @@ const Index = () => {
                         <>
                           <div className="flex -space-x-2">
                             {[0, 1, 2].map(n => (
-                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", isSell ? "bg-primary" : "bg-[hsl(var(--rent))]")} style={{ opacity: 1 - n * 0.2 }}>
+                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", isSell ? "bg-primary" : "bg-[hsl(var(--buy))]")} style={{ opacity: 1 - n * 0.2 }}>
                                 {["A", "B", "C"][n]}
                               </div>
                             ))}
@@ -573,7 +577,7 @@ const Index = () => {
                         <>
                           <div className="flex gap-1.5">
                             {[1, 2, 3, 4, 5].map(n => (
-                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? (isSell ? "bg-primary" : "bg-[hsl(var(--rent))]") : "bg-border")} />
+                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? (isSell ? "bg-primary" : "bg-[hsl(var(--buy))]") : "bg-border")} />
                             ))}
                           </div>
                           <span className="text-xs text-muted-foreground">Strong property score</span>
@@ -591,7 +595,7 @@ const Index = () => {
               viewport={{ once: true }}
               className="flex justify-center mt-10"
             >
-              <span className={cn("inline-block rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider", isSell ? "bg-[hsl(var(--terracotta-light))] text-primary" : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]")}>
+              <span className={cn("inline-block rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider", isSell ? "bg-[hsl(var(--terracotta-light))] text-primary" : "bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))]")}>
                 All included — completely free
               </span>
             </motion.div>
@@ -613,15 +617,15 @@ const Index = () => {
               </div>
               <SectionLabel>Market Data</SectionLabel>
               <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
-                {valuationType === "sell" ? "Recent Valuations" : "Recent Rental Estimates"}
+                {valuationType === "sell" ? "Recent Valuations" : "Recent Price Analyses"}
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
-                {valuationType === "sell" ? "238 property valuations completed this week" : "185 rental estimates completed this week"}
+                {valuationType === "sell" ? "238 property valuations completed this week" : "185 price analyses completed this week"}
               </p>
             </div>
           </div>
           <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden px-5 md:px-8">
-            <PropertyShowcaseCarousel accentType={valuationType} />
+            <PropertyShowcaseCarousel accentType={valuationType === "buy" ? "sell" : valuationType} />
           </div>
         </section>
 
@@ -646,7 +650,7 @@ const Index = () => {
                 >
                   <div className="flex gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={cn("h-5 w-5", isSell ? "fill-primary text-primary" : "fill-[hsl(var(--rent))] text-[hsl(var(--rent))]")} />
+                      <Star key={i} className={cn("h-5 w-5", isSell ? "fill-primary text-primary" : "fill-[hsl(var(--buy))] text-[hsl(var(--buy))]")} />
                     ))}
                   </div>
                   <p className="text-xl md:text-2xl font-['DM_Serif_Display'] italic text-muted-foreground max-w-2xl leading-relaxed">
@@ -665,7 +669,7 @@ const Index = () => {
                   onClick={() => setTestimonialIdx(i)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
-                    i === testimonialIdx ? (isSell ? "bg-primary" : "bg-[hsl(var(--rent))]") + " w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
+                    i === testimonialIdx ? (isSell ? "bg-primary" : "bg-[hsl(var(--buy))]") + " w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
                   )}
                 />
               ))}
@@ -678,7 +682,7 @@ const Index = () => {
         {/* ═══════════ FINAL CTA ═══════════ */}
         <section
           className="w-full py-8 md:py-20 px-5 md:px-8 pb-32"
-          style={{ background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--${isSell ? 'terracotta-light' : 'rent-light'})) 100%)` }}
+          style={{ background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--${isSell ? 'terracotta-light' : 'buy-light'})) 100%)` }}
         >
           <div className="flex flex-col items-center text-center gap-4 mb-2">
             <SectionLabel>Start Now</SectionLabel>
@@ -695,7 +699,7 @@ const Index = () => {
                 {isSell ? (
                   <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?</>
                 ) : (
-                  <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">rental income</span>?</>
+                  <>Ready to find out if<br />the price is <span className="font-['DM_Serif_Display'] italic normal-case">really fair</span>?</>
                 )}
               </motion.h2>
             </AnimatePresence>
@@ -715,7 +719,7 @@ const Index = () => {
             mapExpanded={mapExpandedBottom}
             onMapPhaseChange={(phase) => setMapExpandedBottom(phase === "verify")}
             valuationType={valuationType}
-            onValuationTypeChange={setValuationType}
+            onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
           />
         </section>
 

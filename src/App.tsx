@@ -8,6 +8,8 @@ import SellValuation from "./pages/SellValuation.tsx";
 import RentValuation from "./pages/RentValuation.tsx";
 import SellResult from "./pages/SellResult.tsx";
 import RentResult from "./pages/RentResult.tsx";
+import BuyAnalysis from "./pages/BuyAnalysis.tsx";
+import BuyResult from "./pages/BuyResult.tsx";
 import ValuationLookup from "./pages/ValuationLookup.tsx";
 import Admin from "./pages/Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/sell/result/:id" element={<SellResult />} />
           <Route path="/rent/valuation" element={<RentValuation />} />
           <Route path="/rent/result/:id" element={<RentResult />} />
+          <Route path="/buy" element={<BuyAnalysis />} />
+          <Route path="/buy/result/:id" element={<BuyResult />} />
           <Route path="/lookup" element={<ValuationLookup />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

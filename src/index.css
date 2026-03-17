@@ -47,6 +47,10 @@
     --text-secondary: 0 0% 47%;
     --text-muted: 0 0% 73%;
     --surface: 40 9% 97%;
+    --buy: 210 60% 45%;
+    --buy-light: 210 50% 93%;
+    --buy-foreground: 210 60% 30%;
+    --gold: 38 85% 55%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;

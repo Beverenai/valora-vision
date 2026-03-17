@@ -19,7 +19,7 @@ interface ValuationTicketCardProps {
   headline?: string;
   subtitle?: string;
   summaryText?: string;
-  accentType?: "sell" | "rent";
+  accentType?: "sell" | "rent" | "buy";
   onShare?: () => void;
   onDownload?: () => void;
   /* Embedded input mode */
@@ -60,8 +60,8 @@ interface ValuationTicketCardProps {
   /* Size variant for different contexts */
   size?: CardSize;
   /* Valuation type toggle */
-  valuationType?: "sell" | "rent";
-  onValuationTypeChange?: (type: "sell" | "rent") => void;
+  valuationType?: "sell" | "rent" | "buy";
+  onValuationTypeChange?: (type: "sell" | "rent" | "buy") => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
@@ -133,8 +133,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
   const handleContinue = onContinue || onSubmit;
 
-  const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
-  const accentClass = accentType === "sell" ? "bg-primary" : "bg-[hsl(var(--success))]";
+  const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : accentType === "buy" ? "hsl(var(--buy))" : "hsl(var(--success))";
+  const accentClass = accentType === "sell" ? "bg-primary" : accentType === "buy" ? "bg-[hsl(var(--buy))]" : "bg-[hsl(var(--success))]";
   const heroImage = (propertyType && PROPERTY_IMAGES[propertyType]) || DEFAULT_IMAGE;
 
   const refCode = referenceCode || (leadId ? formatRefCode(leadId) : "VC-0000-0000");
@@ -348,8 +348,10 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               {!mapExpanded && onValuationTypeChange && (
                 <div className="mt-4 flex justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                   <SkyToggle
-                    checked={valuationType === "rent"}
-                    onChange={(checked) => onValuationTypeChange(checked ? "rent" : "sell")}
+                    checked={valuationType === "buy"}
+                    onChange={(checked) => onValuationTypeChange(checked ? "buy" : "sell")}
+                    leftLabel="Sell Property"
+                    rightLabel="Buy Analysis"
                   />
                 </div>
               )}
