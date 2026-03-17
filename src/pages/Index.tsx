@@ -699,7 +699,7 @@ const Index = () => {
                 {isSell ? (
                   <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?</>
                 ) : (
-                  <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">rental income</span>?</>
+                  <>Ready to find out if<br />the price is <span className="font-['DM_Serif_Display'] italic normal-case">really fair</span>?</>
                 )}
               </motion.h2>
             </AnimatePresence>
