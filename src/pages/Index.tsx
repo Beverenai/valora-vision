@@ -141,7 +141,7 @@ const Index = () => {
         },
       },
     });
-  }, [addressData, navigate, valuationType]);
+  }, [addressData, navigate, valuationType, listingUrl]);
 
   // Showcase card data based on mode
   const showcaseData = isSell
