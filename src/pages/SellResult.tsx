@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CardRevealWrapper from "@/components/shared/CardRevealWrapper";
-import PropertyFeaturesSection from "@/components/result/PropertyFeaturesSection";
-import ComparablePropertiesSection from "@/components/result/ComparablePropertiesSection";
+import PropertyFeaturesSection from "@/components/result/PropertyFeaturesSection.tsx";
+import ComparablePropertiesSection from "@/components/result/ComparablePropertiesSection.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
