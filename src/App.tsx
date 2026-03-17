@@ -8,6 +8,8 @@ import SellValuation from "./pages/SellValuation.tsx";
 import RentValuation from "./pages/RentValuation.tsx";
 import SellResult from "./pages/SellResult.tsx";
 import RentResult from "./pages/RentResult.tsx";
+import BuyAnalysis from "./pages/BuyAnalysis.tsx";
+import BuyResult from "./pages/BuyResult.tsx";
 import ValuationLookup from "./pages/ValuationLookup.tsx";
 import Admin from "./pages/Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
