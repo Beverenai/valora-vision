@@ -719,7 +719,7 @@ const Index = () => {
             mapExpanded={mapExpandedBottom}
             onMapPhaseChange={(phase) => setMapExpandedBottom(phase === "verify")}
             valuationType={valuationType}
-            onValuationTypeChange={setValuationType}
+            onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
           />
         </section>
 
