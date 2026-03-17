@@ -17,7 +17,7 @@ const Footer = () => (
         </p>
         <div className="flex flex-col gap-2">
           <Link to="/sell/valuation" className="text-sm text-foreground/70 hover:text-foreground">Sell Valuation</Link>
-          <Link to="/rent/valuation" className="text-sm text-foreground/70 hover:text-foreground">Rental Estimate</Link>
+          <Link to="/buy" className="text-sm text-foreground/70 hover:text-foreground">Buy Analysis</Link>
           <Link to="/lookup" className="text-sm text-foreground/70 hover:text-foreground">Lookup Valuation</Link>
         </div>
       </div>

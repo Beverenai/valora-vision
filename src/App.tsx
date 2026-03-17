@@ -28,6 +28,8 @@ const App = () => (
           <Route path="/sell/result/:id" element={<SellResult />} />
           <Route path="/rent/valuation" element={<RentValuation />} />
           <Route path="/rent/result/:id" element={<RentResult />} />
+          <Route path="/buy" element={<BuyAnalysis />} />
+          <Route path="/buy/result/:id" element={<BuyResult />} />
           <Route path="/lookup" element={<ValuationLookup />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
