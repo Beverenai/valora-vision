@@ -47,10 +47,10 @@ const TESTIMONIALS_SELL = [
   { quote: "Used it to compare agents' prices. The valuation was within 3% of the final sale price.", name: "Robert D.", location: "Benalmádena" },
 ];
 
-const TESTIMONIALS_RENT = [
-  { quote: "The rental estimate was spot-on. We now earn €3,200/month from our apartment in Estepona.", name: "Carlos M.", location: "Estepona" },
-  { quote: "Helped us decide between long-term and seasonal rental. The seasonal forecast was incredibly accurate.", name: "Maria L.", location: "Marbella" },
-  { quote: "We increased our rental income by 30% after following the recommendations in the report.", name: "Peter & Julia W.", location: "Mijas" },
+const TESTIMONIALS_BUY = [
+  { quote: "I was about to overpay by €45,000. ValoraCasa showed me the property was 12% above market value.", name: "Stefan R.", location: "Marbella" },
+  { quote: "The price analysis confirmed the asking price was fair. Gave me confidence to make an offer immediately.", name: "Emma & David K.", location: "Estepona" },
+  { quote: "Used it on every property we viewed. Saved us thousands in negotiations.", name: "Linda M.", location: "Fuengirola" },
 ];
 
 /* ─── SECTION LABEL ─── */
