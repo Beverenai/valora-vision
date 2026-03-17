@@ -60,8 +60,8 @@ interface ValuationTicketCardProps {
   /* Size variant for different contexts */
   size?: CardSize;
   /* Valuation type toggle */
-  valuationType?: "sell" | "rent";
-  onValuationTypeChange?: (type: "sell" | "rent") => void;
+  valuationType?: "sell" | "rent" | "buy";
+  onValuationTypeChange?: (type: "sell" | "rent" | "buy") => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
