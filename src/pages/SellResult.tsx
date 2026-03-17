@@ -3,8 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CardRevealWrapper from "@/components/shared/CardRevealWrapper";
-import PropertyFeaturesSection from "@/components/result/PropertyFeaturesSection.tsx";
-import ComparablePropertiesSection from "@/components/result/ComparablePropertiesSection.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -13,10 +11,147 @@ import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
   Calendar, Leaf, ShieldCheck, Star, Users, Home,
   ChevronDown, ArrowUp, ArrowDown, Sparkles,
+  Waves, Car, Fence, TreePine, Dumbbell, ArrowUpDown, Wind, Flame,
+  ParkingCircle, Shield, Warehouse, Sun, Eye, Grape, ChefHat, Tv,
+  Snowflake, Droplets, Lock, Wifi, MapPin, Check,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import { formatRefCode } from "@/utils/referenceCode";
 import { Copy, Check as CheckIcon } from "lucide-react";
+
+// ── Property Features (inlined) ──
+const FEATURE_ICON_MAP: Record<string, React.ElementType> = {
+  pool: Waves, swimming: Waves, piscina: Waves,
+  garage: Car, parking: ParkingCircle,
+  terrace: Fence, terraza: Fence, roof: Fence,
+  garden: TreePine, jardin: TreePine,
+  gym: Dumbbell, fitness: Dumbbell,
+  elevator: ArrowUpDown, lift: ArrowUpDown,
+  "air conditioning": Snowflake, "aire acondicionado": Snowflake, ac: Snowflake,
+  heating: Flame, calefaccion: Flame,
+  security: Shield, alarm: Shield, vigilancia: Shield,
+  storage: Warehouse, trastero: Warehouse,
+  solarium: Sun, sun: Sun,
+  views: Eye, sea: Eye, mountain: Eye,
+  wine: Grape, bodega: Grape,
+  kitchen: ChefHat,
+  tv: Tv, cinema: Tv, entertainment: Tv,
+  jacuzzi: Droplets, spa: Droplets, sauna: Droplets,
+  gated: Lock,
+  wifi: Wifi, internet: Wifi,
+  bbq: Flame, barbecue: Flame,
+};
+
+function getFeatureIcon(feature: string): React.ElementType {
+  const lower = feature.toLowerCase();
+  for (const [keyword, Icon] of Object.entries(FEATURE_ICON_MAP)) {
+    if (lower.includes(keyword)) return Icon;
+  }
+  return Wind;
+}
+
+const PropertyFeaturesSection: React.FC<{ features: string | null }> = ({ features }) => {
+  if (!features) return null;
+  const items = features.split(",").map((f) => f.trim()).filter(Boolean);
+  if (items.length === 0) return null;
+  return (
+    <section className="py-16 md:py-24">
+      <div className="max-w-2xl mx-auto px-6">
+        <div className="w-10 h-px bg-gold mb-8" />
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-10">What Makes It Special</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-6">
+          {items.map((feature) => {
+            const Icon = getFeatureIcon(feature);
+            return (
+              <div key={feature} className="flex items-center gap-3">
+                <span className="flex-shrink-0 w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+                  <Icon size={16} className="text-gold" />
+                </span>
+                <span className="text-sm font-medium text-foreground capitalize">{feature.toLowerCase()}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ── Comparable Properties (inlined) ──
+interface Comparable {
+  id?: string; price?: number; price_per_sqm?: number; built_size_sqm?: number;
+  bedrooms?: number; bathrooms?: number; property_type?: string; address?: string;
+  city?: string; distance_km?: number; image_urls?: string[]; listing_url?: string;
+}
+
+const compFmt = (n: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+
+const ComparableCard: React.FC<{ comp: Comparable; leadBedrooms?: number | null; leadBathrooms?: number | null; leadBuiltSize?: number | null }> = ({
+  comp, leadBedrooms, leadBathrooms, leadBuiltSize,
+}) => {
+  const [flipped, setFlipped] = useState(false);
+  const imageUrl = comp.image_urls?.[0] || "/placeholder.svg";
+  const matches = [
+    { label: "Bedrooms", value: comp.bedrooms, match: comp.bedrooms != null && comp.bedrooms === leadBedrooms, icon: <Bed size={14} /> },
+    { label: "Bathrooms", value: comp.bathrooms, match: comp.bathrooms != null && comp.bathrooms === leadBathrooms, icon: <Bath size={14} /> },
+    { label: "Built size", value: comp.built_size_sqm ? `${comp.built_size_sqm} m²` : "—", match: comp.built_size_sqm != null && leadBuiltSize != null && Math.abs(comp.built_size_sqm - leadBuiltSize) < leadBuiltSize * 0.15, icon: <Home size={14} /> },
+    { label: "Distance", value: comp.distance_km != null ? `${comp.distance_km.toFixed(1)} km` : "—", match: false, icon: <MapPin size={14} /> },
+  ];
+  return (
+    <div className="flex-shrink-0 w-[280px] h-[380px] cursor-pointer" style={{ perspective: "1000px" }} onClick={() => setFlipped(!flipped)}>
+      <div className="relative w-full h-full transition-transform duration-500" style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "none" }}>
+        <div className="absolute inset-0 rounded-lg overflow-hidden bg-card border border-border shadow-sm" style={{ backfaceVisibility: "hidden" }}>
+          <div className="h-[200px] bg-muted overflow-hidden"><img src={imageUrl} alt={comp.address || "Comparable"} className="w-full h-full object-cover" /></div>
+          <div className="p-5">
+            {comp.price && <p className="text-2xl font-light tracking-tight text-foreground">{compFmt(comp.price)}</p>}
+            {comp.price_per_sqm && <p className="text-xs text-muted-foreground mt-1">{compFmt(comp.price_per_sqm)}/m²</p>}
+            <p className="text-sm text-foreground/80 mt-3 line-clamp-2">{comp.address || "Address unavailable"}</p>
+            <p className="text-xs text-muted-foreground mt-1">{comp.city}</p>
+            <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-4">Tap to compare →</p>
+          </div>
+        </div>
+        <div className="absolute inset-0 rounded-lg overflow-hidden bg-card border border-border shadow-sm p-6 flex flex-col" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">How It Compares</p>
+          <div className="flex-1 space-y-5">
+            {matches.map((m) => (
+              <div key={m.label} className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground">{m.icon}<span className="text-sm">{m.label}</span></div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">{m.value ?? "—"}</span>
+                  {m.match && <span className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center"><Check size={12} className="text-accent" /></span>}
+                </div>
+              </div>
+            ))}
+          </div>
+          {comp.property_type && <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-4">{comp.property_type.replace(/-/g, " ")}</p>}
+          <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-2">← Tap to flip back</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ComparablePropertiesSection: React.FC<{ comparables: Comparable[] | null; leadBedrooms?: number | null; leadBathrooms?: number | null; leadBuiltSize?: number | null }> = ({ comparables, leadBedrooms, leadBathrooms, leadBuiltSize }) => {
+  if (!comparables || comparables.length === 0) return null;
+  return (
+    <section className="py-16 md:py-24">
+      <div className="max-w-[1000px] mx-auto px-6">
+        <div className="w-10 h-px bg-gold mb-8" />
+        <div className="flex items-baseline justify-between mb-10">
+          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Comparable Properties</p>
+          <p className="text-xs text-muted-foreground">{comparables.length} found</p>
+        </div>
+        <div className="flex gap-5 overflow-x-auto pb-4 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
+          {comparables.map((comp, i) => (
+            <div key={comp.id || i} className="snap-start">
+              <ComparableCard comp={comp} leadBedrooms={leadBedrooms} leadBathrooms={leadBathrooms} leadBuiltSize={leadBuiltSize} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [
