@@ -129,8 +129,11 @@ const Index = () => {
 
 
   const handleGetValuation = useCallback(() => {
-    const route = valuationType === "sell" ? "/sell/valuation" : "/rent/valuation";
-    navigate(route, {
+    if (valuationType === "buy") {
+      navigate("/buy");
+      return;
+    }
+    navigate("/sell/valuation", {
       state: {
         addressData: {
           ...addressData,
