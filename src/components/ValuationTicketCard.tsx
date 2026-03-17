@@ -348,8 +348,10 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
               {!mapExpanded && onValuationTypeChange && (
                 <div className="mt-4 flex justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                   <SkyToggle
-                    checked={valuationType === "rent"}
-                    onChange={(checked) => onValuationTypeChange(checked ? "rent" : "sell")}
+                    checked={valuationType === "buy"}
+                    onChange={(checked) => onValuationTypeChange(checked ? "buy" : "sell")}
+                    leftLabel="Sell Property"
+                    rightLabel="Buy Analysis"
                   />
                 </div>
               )}
