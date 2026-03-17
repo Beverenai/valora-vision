@@ -358,7 +358,7 @@ const Index = () => {
                             "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium",
                             isSell
                               ? "bg-[hsl(var(--terracotta-light))] text-primary"
-                              : "bg-[hsl(var(--rent-light))] text-[hsl(var(--rent-foreground))]"
+                              : "bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))]"
                           )}
                         >
                           <pill.icon className="h-3.5 w-3.5" />
