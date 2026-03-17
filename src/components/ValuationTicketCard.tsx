@@ -62,6 +62,9 @@ interface ValuationTicketCardProps {
   /* Valuation type toggle */
   valuationType?: "sell" | "rent" | "buy";
   onValuationTypeChange?: (type: "sell" | "rent" | "buy") => void;
+  /* BUY mode: listing URL input */
+  listingUrl?: string;
+  onListingUrlChange?: (url: string) => void;
 }
 
 const PROPERTY_IMAGES: Record<string, string> = {
