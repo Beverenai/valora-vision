@@ -304,22 +304,32 @@ const Index = () => {
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
                     isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
                   )}>
-                    <MapPin className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
+                    {isSell
+                      ? <MapPin className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                      : <Link2 className="h-5 w-5 md:h-6 md:w-6 text-[hsl(var(--buy-foreground))]" />}
                   </div>
                 </div>
                 {/* Content */}
                 <div className="flex-1 pt-1">
                   <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    Enter your address
+                    {isSell ? "Enter your address" : "Paste a listing link"}
                   </h3>
                   <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    Start typing and select your property from the suggestions.
+                    {isSell
+                      ? "Start typing and select your property from the suggestions."
+                      : "Copy any property URL from Idealista, Fotocasa, Kyero or similar portals."}
                   </p>
-                  {/* Mini preview: fake address input */}
+                  {/* Mini preview */}
                   <div className="mt-4 rounded-xl border border-border bg-card p-3 md:p-4 max-w-sm">
                     <div className="flex items-center gap-2.5 rounded-lg bg-secondary/70 px-3 py-2.5">
-                      <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <span className="text-sm text-muted-foreground/60 truncate">Calle Sierra Blanca 12, Marbella…</span>
+                      {isSell
+                        ? <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                        : <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />}
+                      <span className="text-sm text-muted-foreground/60 truncate">
+                        {isSell
+                          ? "Calle Sierra Blanca 12, Marbella…"
+                          : "idealista.com/inmueble/1234567…"}
+                      </span>
                     </div>
                   </div>
                 </div>
