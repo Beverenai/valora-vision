@@ -217,6 +217,8 @@ const Index = () => {
             onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
             valuationType={valuationType}
             onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
+            listingUrl={listingUrl}
+            onListingUrlChange={setListingUrl}
           />
         </div>
 

@@ -353,10 +353,63 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           /* ── Hero INPUT mode ── */
           <div className="flex-1 flex flex-col justify-start gap-3 pb-8 md:pb-12 relative z-[2]" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
             <span className={cn("font-ticket-cursive leading-[0.7] text-foreground block -ml-1", cursiveSize)}>
-              Your Valuation
+              {isBuyMode ? "Your Analysis" : "Your Valuation"}
             </span>
 
-            {hasGoogleInput ? (
+            {hasBuyInput ? (
+              /* ── BUY MODE: URL paste input ── */
+              <div className="mt-2">
+                <div className="relative">
+                  <Link2 size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="url"
+                    value={listingUrl || ""}
+                    onChange={(e) => onListingUrlChange?.(e.target.value)}
+                    placeholder="https://www.idealista.com/inmueble/12345678/"
+                    className="w-full rounded-xl border border-border bg-card pl-8 pr-9 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-[hsl(var(--buy))]/40 transition-shadow"
+                    style={{ fontSize: "16px" }}
+                    autoComplete="off"
+                  />
+                  {listingUrl && (
+                    <button
+                      type="button"
+                      onClick={() => onListingUrlChange?.("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {/* Platform badge */}
+                {detectedPlatform && (
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))] text-xs font-medium">
+                      {detectedPlatform} detected
+                    </span>
+                  </div>
+                )}
+                {/* Analyze button */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleContinue?.(); }}
+                  disabled={!listingUrl?.trim()}
+                  className="flex items-center justify-end gap-1.5 text-sm font-medium text-[hsl(var(--buy-foreground))] mt-2 self-end transition-all disabled:opacity-0 disabled:pointer-events-none hover:gap-2.5 w-full justify-end"
+                >
+                  Analyze Property
+                  <ArrowRight size={14} />
+                </button>
+                {/* Toggle */}
+                {onValuationTypeChange && (
+                  <div className="mt-4 flex justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                    <SkyToggle
+                      checked={valuationType === "buy"}
+                      onChange={(checked) => onValuationTypeChange(checked ? "buy" : "sell")}
+                      leftLabel="Sell Property"
+                      rightLabel="Buy Analysis"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : hasGoogleInput ? (
               <div className="mt-2">
                 <GoogleAddressInput
                   addressData={addressData!}
