@@ -540,8 +540,8 @@ const Index = () => {
                         </svg>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <TrendingUp className={cn("h-4 w-4", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
-                        <span className={cn("text-sm font-semibold", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
+                        <TrendingUp className={cn("h-4 w-4", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
+                        <span className={cn("text-sm font-semibold", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
                           {isSell ? "+4.2%" : "+6.1%"}
                         </span>
                       </div>
