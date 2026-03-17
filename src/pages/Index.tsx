@@ -482,21 +482,21 @@ const Index = () => {
 
                   {/* ── Visual previews ── */}
                   {feat.visual === "hero" && (
-                    <div className={cn("rounded-xl p-4 mt-auto", isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]")}>
+                    <div className={cn("rounded-xl p-4 mt-auto", isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]")}>
                       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                        {isSell ? "Estimated value" : "Monthly estimate"}
+                        {isSell ? "Estimated value" : "Price score"}
                       </p>
-                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")}>
-                        {isSell ? "€845,000" : "€3,200"}
+                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
+                        {isSell ? "€845,000" : "FAIR PRICE"}
                       </p>
                       <div className="flex items-center gap-2 mt-3">
                         <div className="flex-1 h-2 rounded-full bg-background overflow-hidden">
-                          <div className={cn("h-full rounded-full", isSell ? "bg-primary" : "bg-[hsl(var(--rent))]")} style={{ width: "78%" }} />
+                          <div className={cn("h-full rounded-full", isSell ? "bg-primary" : "bg-[hsl(var(--buy))]")} style={{ width: "78%" }} />
                         </div>
                         <span className="text-[0.65rem] text-muted-foreground whitespace-nowrap">High confidence</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
-                        {isSell ? "Range: €790K – €900K" : "Range: €2,800 – €3,600/mo"}
+                        {isSell ? "Range: €790K – €900K" : "Asking: €395K · Est: €380K"}
                       </p>
                     </div>
                   )}
