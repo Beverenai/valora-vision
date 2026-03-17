@@ -1,5 +1,5 @@
-import React, { useRef, useCallback, useState, useEffect } from "react";
-import { Share2, Download, ArrowDown, MapPin, ArrowRight, Bed, Bath, Ruler, LandPlot, Home, Sparkles } from "lucide-react";
+import React, { useRef, useCallback, useState, useEffect, useMemo } from "react";
+import { Share2, Download, ArrowDown, MapPin, ArrowRight, Bed, Bath, Ruler, LandPlot, Home, Sparkles, Link2, X } from "lucide-react";
 import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
 import { Button } from "@/components/ui/button";
 import SkyToggle from "@/components/ui/sky-toggle";
