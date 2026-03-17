@@ -152,11 +152,11 @@ const Index = () => {
         summaryText: "Your property has been analysed using comparable market data, location scoring, and current demand indicators.",
       }
     : {
-        estimatedValue: "€3,200/mo",
-        secondaryValue: "€38,400/yr",
-        headline: "VALUED",
-        subtitle: "Rental Income",
-        summaryText: "Your rental potential has been analysed using comparable rentals, seasonal demand, and occupancy projections.",
+        estimatedValue: "€395,000",
+        secondaryValue: "FAIR PRICE",
+        headline: "ANALYSED",
+        subtitle: "Your Analysis",
+        summaryText: "This property has been analysed against comparable listings in the area. The asking price aligns well with current market data.",
       };
 
   return (
