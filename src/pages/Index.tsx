@@ -92,6 +92,7 @@ const StatsBar = () => (
 const Index = () => {
   const navigate = useNavigate();
   const [valuationType, setValuationType] = useState<"sell" | "buy">("sell");
+  const [listingUrl, setListingUrl] = useState("");
   const [addressData, setAddressData] = useState({
     streetAddress: "",
     urbanization: "",
@@ -130,7 +131,7 @@ const Index = () => {
 
   const handleGetValuation = useCallback(() => {
     if (valuationType === "buy") {
-      navigate("/buy");
+      navigate("/buy", { state: { listingUrl } });
       return;
     }
     navigate("/sell/valuation", {
@@ -140,7 +141,7 @@ const Index = () => {
         },
       },
     });
-  }, [addressData, navigate, valuationType]);
+  }, [addressData, navigate, valuationType, listingUrl]);
 
   // Showcase card data based on mode
   const showcaseData = isSell
@@ -216,6 +217,8 @@ const Index = () => {
             onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
             valuationType={valuationType}
             onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
+            listingUrl={listingUrl}
+            onListingUrlChange={setListingUrl}
           />
         </div>
 

@@ -1,35 +1,56 @@
 
 
-## Plan: Add URL Input Mode to ValuationTicketCard for BUY
+## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
 
 ### Problem
-When the user toggles to BUY mode on the landing page, the card still shows the Google Address input. It should show a URL paste field instead.
+The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
 
 ### Changes
 
-**1. `src/components/ValuationTicketCard.tsx`**
+**1. `src/pages/Index.tsx` — Full visual overhaul**
 
-Add new props: `listingUrl?: string`, `onListingUrlChange?: (url: string) => void`
+- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
+- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
+- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
+- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
+- **Testimonials**: Already decent (no card), keep as-is
+- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
+- **Recent Valuations**: Remove `border-t`, keep the section otherwise
 
-In the input rendering section (lines ~333-381), add a branch: when `valuationType === "buy"`, render a URL input instead of GoogleAddressInput:
-- Icon: `Link2` (from lucide) instead of `MapPin`
-- Placeholder: `"https://www.idealista.com/inmueble/12345678/"`
-- Platform detection badge (Idealista/Fotocasa/Kyero/SpainHouses) shown inline when URL matches
-- Cursive label changes to "Your Analysis" instead of "Your Valuation"
-- Continue button navigates to `/buy` (already handled by `handleGetValuation` in Index.tsx)
-- The SkyToggle stays below the input in both modes
+**2. Floating agency logos treatment**
 
-**2. `src/pages/Index.tsx`**
+```text
+Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
+          (flat row, equal weight, boring)
 
-Add state: `const [listingUrl, setListingUrl] = useState("")`
+New:      Engel & Völkers         Sotheby's
+                    Panorama
+             DM Properties      Terra Meridiana
+                       Drumelia
+                La Sala Estates
+          (scattered, varying opacity 20-40%, subtle float animation)
+```
 
-Pass new props to ValuationTicketCard:
-- `listingUrl={listingUrl}`
-- `onListingUrlChange={setListingUrl}`
+Each name gets:
+- Random-ish X offset (predefined, not truly random)
+- `opacity` between 0.2 and 0.4
+- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
+- Font size varies slightly between names
 
-Update `handleGetValuation` for buy mode: navigate to `/buy` with the URL as state so BuyAnalysis can pre-fill it.
+**3. How It Works — typographic layout**
 
-### Files Modified
-- `src/components/ValuationTicketCard.tsx` — new URL input branch for buy mode
-- `src/pages/Index.tsx` — new state + pass props
+Replace boxed cards with a minimal layout:
+- Large `01` / `02` / `03` in light weight, oversized
+- Title + description flowing next to number
+- Thin horizontal hairline between steps (1px, very faint)
+- No background cards, no shadows
+
+**4. Report Features — editorial scatter**
+
+Replace uniform grid with:
+- 2-column layout on desktop, but cards have varying visual treatment
+- Some cards: icon + text only (transparent bg)
+- Some cards: very light terracotta-tinted bg
+- Staggered `motion.div` entrance with `whileInView`
+- No uniform rounded-2xl boxes
 
