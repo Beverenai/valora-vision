@@ -133,8 +133,8 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const hasGoogleInput = onAddressFieldChange !== undefined && addressData !== undefined;
   const handleContinue = onContinue || onSubmit;
 
-  const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : "hsl(var(--success))";
-  const accentClass = accentType === "sell" ? "bg-primary" : "bg-[hsl(var(--success))]";
+  const accentHsl = accentType === "sell" ? "hsl(var(--primary))" : accentType === "buy" ? "hsl(var(--buy))" : "hsl(var(--success))";
+  const accentClass = accentType === "sell" ? "bg-primary" : accentType === "buy" ? "bg-[hsl(var(--buy))]" : "bg-[hsl(var(--success))]";
   const heroImage = (propertyType && PROPERTY_IMAGES[propertyType]) || DEFAULT_IMAGE;
 
   const refCode = referenceCode || (leadId ? formatRefCode(leadId) : "VC-0000-0000");
