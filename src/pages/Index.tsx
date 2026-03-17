@@ -215,7 +215,7 @@ const Index = () => {
             mapExpanded={mapExpanded}
             onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
             valuationType={valuationType}
-            onValuationTypeChange={setValuationType}
+            onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
           />
         </div>
 
