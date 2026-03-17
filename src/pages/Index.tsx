@@ -577,7 +577,7 @@ const Index = () => {
                         <>
                           <div className="flex gap-1.5">
                             {[1, 2, 3, 4, 5].map(n => (
-                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? (isSell ? "bg-primary" : "bg-[hsl(var(--rent))]") : "bg-border")} />
+                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? (isSell ? "bg-primary" : "bg-[hsl(var(--buy))]") : "bg-border")} />
                             ))}
                           </div>
                           <span className="text-xs text-muted-foreground">Strong property score</span>
