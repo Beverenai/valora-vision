@@ -19,7 +19,7 @@ interface ValuationTicketCardProps {
   headline?: string;
   subtitle?: string;
   summaryText?: string;
-  accentType?: "sell" | "rent";
+  accentType?: "sell" | "rent" | "buy";
   onShare?: () => void;
   onDownload?: () => void;
   /* Embedded input mode */
