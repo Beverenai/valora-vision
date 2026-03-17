@@ -32,13 +32,13 @@ const REPORT_FEATURES_SELL = [
   { title: "Agent Recommendations", desc: "Matched local agents ready to help you sell.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
 ];
 
-const REPORT_FEATURES_RENT = [
-  { title: "Monthly Rental Estimate", desc: "Long-term rental income projection for your property.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
-  { title: "Seasonal Income Forecast", desc: "High and low season weekly rate estimates.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Occupancy Projections", desc: "Expected occupancy rates based on local demand.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Annual Revenue Estimate", desc: "Total projected annual rental income.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
-  { title: "Comparable Rentals", desc: "Similar properties currently rented near you.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Agent Recommendations", desc: "Matched local agents ready to help you rent.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+const REPORT_FEATURES_BUY = [
+  { title: "Price Score", desc: "See if the asking price is fair, above, or below market value.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
+  { title: "Price Spectrum", desc: "Visual comparison of asking price vs market range.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Comparable Analysis", desc: "Compare with similar properties currently listed nearby.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Negotiation Hints", desc: "Data-driven advice on how to approach your offer.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
+  { title: "Area Insights", desc: "Median price/m² and trends in the area.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Agent Recommendations", desc: "Matched local agents to help you buy.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
 ];
 
 const TESTIMONIALS_SELL = [
