@@ -332,9 +332,9 @@ const Index = () => {
                   <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">02</span>
                   <div className={cn(
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--rent-light))]"
+                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
                   )}>
-                    <SlidersHorizontal className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--rent-foreground))]")} />
+                    <SlidersHorizontal className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
