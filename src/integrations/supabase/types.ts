@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      buy_analyses: {
+        Row: {
+          address: string | null
+          analysis: string | null
+          area_median_price_per_m2: number | null
+          asking_price: number
+          asking_price_per_m2: number | null
+          bathrooms: number | null
+          city: string | null
+          comparable_properties: Json | null
+          comparables_count: number | null
+          confidence_level: string | null
+          created_at: string | null
+          email: string | null
+          estimated_high: number | null
+          estimated_low: number | null
+          estimated_price_per_m2: number | null
+          estimated_value: number | null
+          feature_adjustments: Json | null
+          features: Json | null
+          id: string
+          image_urls: string[] | null
+          latitude: number | null
+          longitude: number | null
+          market_trends: string | null
+          price_deviation_percent: number | null
+          price_score: string | null
+          property_code: string | null
+          property_type: string | null
+          rooms: number | null
+          size_m2: number | null
+          source_platform: string | null
+          source_url: string
+          status: string | null
+          thumbnail_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          analysis?: string | null
+          area_median_price_per_m2?: number | null
+          asking_price: number
+          asking_price_per_m2?: number | null
+          bathrooms?: number | null
+          city?: string | null
+          comparable_properties?: Json | null
+          comparables_count?: number | null
+          confidence_level?: string | null
+          created_at?: string | null
+          email?: string | null
+          estimated_high?: number | null
+          estimated_low?: number | null
+          estimated_price_per_m2?: number | null
+          estimated_value?: number | null
+          feature_adjustments?: Json | null
+          features?: Json | null
+          id?: string
+          image_urls?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          market_trends?: string | null
+          price_deviation_percent?: number | null
+          price_score?: string | null
+          property_code?: string | null
+          property_type?: string | null
+          rooms?: number | null
+          size_m2?: number | null
+          source_platform?: string | null
+          source_url: string
+          status?: string | null
+          thumbnail_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          analysis?: string | null
+          area_median_price_per_m2?: number | null
+          asking_price?: number
+          asking_price_per_m2?: number | null
+          bathrooms?: number | null
+          city?: string | null
+          comparable_properties?: Json | null
+          comparables_count?: number | null
+          confidence_level?: string | null
+          created_at?: string | null
+          email?: string | null
+          estimated_high?: number | null
+          estimated_low?: number | null
+          estimated_price_per_m2?: number | null
+          estimated_value?: number | null
+          feature_adjustments?: Json | null
+          features?: Json | null
+          id?: string
+          image_urls?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          market_trends?: string | null
+          price_deviation_percent?: number | null
+          price_score?: string | null
+          property_code?: string | null
+          property_type?: string | null
+          rooms?: number | null
+          size_m2?: number | null
+          source_platform?: string | null
+          source_url?: string
+          status?: string | null
+          thumbnail_url?: string | null
+        }
+        Relationships: []
+      }
       leads_rent: {
         Row: {
           address: string
