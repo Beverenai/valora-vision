@@ -411,15 +411,19 @@ const Index = () => {
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
                     isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
                   )}>
-                    <Sparkles className={cn("h-5 w-5 md:h-6 md:w-6", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
+                    {isSell
+                      ? <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                      : <ShieldCheck className="h-5 w-5 md:h-6 md:w-6 text-[hsl(var(--buy-foreground))]" />}
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
                   <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    See what you'll receive
+                    {isSell ? "See what you'll receive" : "Get your price score"}
                   </h3>
                   <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    A beautifully detailed valuation card with all the key data — ready to share.
+                    {isSell
+                      ? "A beautifully detailed valuation card with all the key data — ready to share."
+                      : "See if the asking price is fair, overpriced or a bargain — with comparable data and negotiation tips."}
                   </p>
                 </div>
               </motion.div>
