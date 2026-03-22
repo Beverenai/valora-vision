@@ -1,56 +1,129 @@
 
 
-## Plan: Elevated Editorial Design — Floating Logos, No Borders, Designer Sections
+## Plan: Robust Backend Engine + Admin Dashboard
 
-### Problem
-The page looks boxy and template-like: heavy `border-t` dividers between every section, plain rectangular cards in grids, and agency names listed as flat text. The editorial magazine aesthetic is lost.
+This is a large infrastructure overhaul based on the Backend Blueprint v3. The goal is to move from on-demand scraping to pre-scraped data, add automated scheduling, materialized views for fast queries, and a comprehensive admin dashboard.
 
-### Changes
+---
 
-**1. `src/pages/Index.tsx` — Full visual overhaul**
+### Current State vs Blueprint
 
-- **Remove all `border-t border-border`** from every section — use whitespace and subtle background shifts instead
-- **Trusted By section**: Replace the plain text list with a floating, staggered layout using `framer-motion` — each agency name floats at a slightly different Y offset and opacity, with gentle hover animations. No box, no border, just names drifting in space with varying sizes and opacities
-- **How It Works**: Remove the boxed cards. Instead, use a clean numbered list with large step numbers (`text-6xl` font-light), title, and description flowing inline — no background cards, no borders, just typography and whitespace
-- **Report Features (What you get)**: Replace the grid of identical rounded boxes with a staggered, asymmetric layout — alternating left/right alignment, varying card sizes, some with just text (no background), some with a faint accent tint. Use `motion.div` with viewport-triggered fade-in at different delays
-- **Testimonials**: Already decent (no card), keep as-is
-- **Final CTA**: Remove `border-t`, keep the gradient — it's already good
-- **Recent Valuations**: Remove `border-t`, keep the section otherwise
+**What exists now:**
+- `zones` table (simple: name, slug, region) — no scraping config
+- `scrape_zones` table (separate, has location_id, tier, last_scraped_at) — partially overlapping with zones
+- `properties_for_sale` / `properties_for_rent` / `short_term_rentals` tables — working but no PostGIS `location_point` column indexed
+- `scrape-properties` edge function — manual trigger only, no scheduling
+- `calculate-valuation` edge function — works but uses basic RPC, no materialized views
+- `analyze-listing` edge function — works for BUY flow
+- Admin page — simple leads table only, no backend health visibility
 
-**2. Floating agency logos treatment**
+**What the blueprint adds:**
+1. Unified zone config with scraping parameters (merge `scrape_zones` into `zones`)
+2. `scrape_jobs` table for job queue tracking
+3. Materialized views (`active_listings`, `zone_stats`) for fast queries
+4. `pg_cron` + `pg_net` for automated scraping
+5. `process-scrape-job` edge function (cron-driven job processor)
+6. Enhanced `find_comparables` RPC with similarity scoring
+7. `system_health_check()` RPC for admin
+8. Stale property deactivation
+9. Admin dashboard with zones, jobs, health metrics
 
-```text
-Current:  Engel & Völkers    Sotheby's    Panorama    DM Properties ...
-          (flat row, equal weight, boring)
+---
 
-New:      Engel & Völkers         Sotheby's
-                    Panorama
-             DM Properties      Terra Meridiana
-                       Drumelia
-                La Sala Estates
-          (scattered, varying opacity 20-40%, subtle float animation)
-```
+### Implementation — 4 Stages
 
-Each name gets:
-- Random-ish X offset (predefined, not truly random)
-- `opacity` between 0.2 and 0.4
-- Gentle `animate={{ y: [0, -6, 0] }}` with staggered duration (3-5s)
-- Font size varies slightly between names
+#### Stage 1: Database Schema Enhancement (migration)
 
-**3. How It Works — typographic layout**
+**Modify `zones` table** — add scraping config columns:
+- `municipality TEXT`
+- `idealista_location TEXT` (the location ID for Apify)
+- `tier TEXT CHECK (tier IN ('hot', 'warm', 'cold'))` default 'warm'
+- `max_items INTEGER DEFAULT 500`
+- `last_scraped_at TIMESTAMPTZ`
+- `last_scrape_count INTEGER DEFAULT 0`
+- `last_scrape_status TEXT DEFAULT 'pending'`
+- `total_properties INTEGER DEFAULT 0`
+- `center_lat DECIMAL(10,7)`, `center_lng DECIMAL(10,7)`
 
-Replace boxed cards with a minimal layout:
-- Large `01` / `02` / `03` in light weight, oversized
-- Title + description flowing next to number
-- Thin horizontal hairline between steps (1px, very faint)
-- No background cards, no shadows
+**Create `scrape_jobs` table:**
+- `id`, `zone_id` (FK zones), `status` (pending/running/completed/failed), `apify_run_id`, `items_found`, `items_upserted`, `error_message`, `started_at`, `completed_at`, `created_at`
+- RLS: public select, service role insert/update
 
-**4. Report Features — editorial scatter**
+**Add `location_point` geography column** to `properties_for_sale` (if not already there) with PostGIS trigger for auto-population.
 
-Replace uniform grid with:
-- 2-column layout on desktop, but cards have varying visual treatment
-- Some cards: icon + text only (transparent bg)
-- Some cards: very light terracotta-tinted bg
-- Staggered `motion.div` entrance with `whileInView`
-- No uniform rounded-2xl boxes
+**Create materialized views:**
+- `active_listings` — filtered view of active properties with PostGIS index
+- `zone_stats` — pre-aggregated stats per zone/type/operation including feature premiums
+
+**Create RPC functions:**
+- `refresh_search_views()` — refreshes both materialized views
+- `find_comparables()` — enhanced version with tiered radius expansion (2km → 5km → 10km → 25km) and similarity scoring
+- `calculate_valuation()` — SQL-level valuation with IQR outlier removal and data-driven feature premiums from zone_stats
+- `system_health_check()` — returns JSON with total/active properties, stale zones, today's valuations, pending/failed jobs
+- `deactivate_stale_properties()` — marks properties inactive after 60 days
+- `queue_due_scrapes()` — inserts pending scrape_jobs based on zone tier schedules
+
+**Insert initial zone data** for Costa del Sol (Marbella, Puerto Banús, Estepona, etc.) using the insert tool.
+
+#### Stage 2: Edge Function — process-scrape-job
+
+**Create `supabase/functions/process-scrape-job/index.ts`:**
+- Called by pg_cron every minute
+- Picks the oldest pending `scrape_job`, marks it running
+- Starts Apify actor for that zone
+- Polls for completion (max 5 min)
+- Upserts results into `properties_for_sale` / `properties_for_rent`
+- Updates job status + zone metadata
+- Calls `refresh_search_views()` on success
+
+#### Stage 3: pg_cron Scheduling
+
+Using the insert tool (not migration — contains project-specific URLs):
+- Schedule `queue_due_scrapes()` hourly
+- Schedule `process-scrape-job` edge function call every minute via `pg_net`
+- Schedule `deactivate_stale_properties()` daily at 04:00
+
+#### Stage 4: Admin Dashboard Overhaul
+
+**`src/pages/Admin.tsx`** — complete redesign with tabs:
+
+**Tab 1: Leads** (existing, enhanced)
+- Add "buy" type filter (pull from `buy_analyses` too)
+- Show buy analyses alongside sell/rent leads
+
+**Tab 2: Zones**
+- Table of all zones with: name, tier, last_scraped_at, total_properties, status
+- Color-coded staleness (green = fresh, yellow = aging, red = stale)
+- "Scrape Now" button per zone (calls `scrape-properties` edge function)
+- Inline add/edit zone capability
+
+**Tab 3: Scrape Jobs**
+- Recent jobs list with status, zone, items found/upserted, duration, errors
+- Filter by status (pending/running/completed/failed)
+- Auto-refresh
+
+**Tab 4: System Health**
+- Calls `system_health_check()` RPC
+- Cards: Total Properties, Active Properties, Stale Zones, Today's Valuations, Pending Jobs, Failed Jobs (24h)
+- Visual indicators (green/yellow/red)
+
+---
+
+### Files Created
+- `supabase/functions/process-scrape-job/index.ts`
+
+### Files Modified
+- `src/pages/Admin.tsx` — full redesign with tabs
+- Database migration (new tables, views, functions)
+
+### Secrets Required
+- `APIFY_API_TOKEN` — already configured
+- `LOVABLE_API_KEY` — already configured
+
+### Implementation Order
+1. Database migration (schema + views + functions)
+2. Insert zone data
+3. `process-scrape-job` edge function
+4. pg_cron scheduling
+5. Admin dashboard UI
 
