@@ -326,10 +326,10 @@ function ZonesTab() {
     if (!zone.idealista_location) return;
     setScraping(zone.id);
     try {
-      // Insert a pending scrape job
-      await supabase.from("scrape_jobs").insert({ zone_id: zone.id });
-      // Immediately trigger the process function
-      await supabase.functions.invoke("process-scrape-job", { body: {} });
+      const { error } = await supabase.functions.invoke("process-scrape-job", {
+        body: { zone_id: zone.id },
+      });
+      if (error) console.error("Scrape trigger error:", error);
       await fetchZones();
     } catch (e) {
       console.error("Scrape trigger error:", e);
