@@ -44,6 +44,18 @@ Deno.serve(async (req) => {
   );
 
   try {
+    // Check if a specific zone_id was passed (manual trigger from admin)
+    let manualZoneId: string | null = null;
+    try {
+      const body = await req.json();
+      if (body?.zone_id) manualZoneId = body.zone_id;
+    } catch (_) { /* no body or invalid JSON — that's fine */ }
+
+    // If manual zone_id, create a pending job for it first
+    if (manualZoneId) {
+      await supabase.from("scrape_jobs").insert({ zone_id: manualZoneId, status: "pending" });
+    }
+
     // 1. Pick the oldest pending job
     const { data: job, error: jobError } = await supabase
       .from("scrape_jobs")
