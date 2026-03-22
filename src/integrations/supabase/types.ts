@@ -679,6 +679,53 @@ export type Database = {
           },
         ]
       }
+      scrape_jobs: {
+        Row: {
+          apify_run_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          items_found: number | null
+          items_upserted: number | null
+          started_at: string | null
+          status: string
+          zone_id: string
+        }
+        Insert: {
+          apify_run_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          items_found?: number | null
+          items_upserted?: number | null
+          started_at?: string | null
+          status?: string
+          zone_id: string
+        }
+        Update: {
+          apify_run_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          items_found?: number | null
+          items_upserted?: number | null
+          started_at?: string | null
+          status?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrape_jobs_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scrape_zones: {
         Row: {
           created_at: string | null
@@ -851,31 +898,67 @@ export type Database = {
       }
       zones: {
         Row: {
+          center_lat: number | null
+          center_lng: number | null
           country: string
           created_at: string | null
           id: string
+          idealista_location: string | null
+          idealista_operation: string | null
           is_active: boolean | null
+          last_scrape_count: number | null
+          last_scrape_status: string | null
+          last_scraped_at: string | null
+          max_items: number | null
+          municipality: string | null
           name: string
+          province: string | null
           region: string
           slug: string
+          tier: string | null
+          total_properties: number | null
         }
         Insert: {
+          center_lat?: number | null
+          center_lng?: number | null
           country?: string
           created_at?: string | null
           id?: string
+          idealista_location?: string | null
+          idealista_operation?: string | null
           is_active?: boolean | null
+          last_scrape_count?: number | null
+          last_scrape_status?: string | null
+          last_scraped_at?: string | null
+          max_items?: number | null
+          municipality?: string | null
           name: string
+          province?: string | null
           region: string
           slug: string
+          tier?: string | null
+          total_properties?: number | null
         }
         Update: {
+          center_lat?: number | null
+          center_lng?: number | null
           country?: string
           created_at?: string | null
           id?: string
+          idealista_location?: string | null
+          idealista_operation?: string | null
           is_active?: boolean | null
+          last_scrape_count?: number | null
+          last_scrape_status?: string | null
+          last_scraped_at?: string | null
+          max_items?: number | null
+          municipality?: string | null
           name?: string
+          province?: string | null
           region?: string
           slug?: string
+          tier?: string | null
+          total_properties?: number | null
         }
         Relationships: []
       }
@@ -1052,6 +1135,7 @@ export type Database = {
             }
             Returns: string
           }
+      deactivate_stale_properties: { Args: never; Returns: undefined }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -1283,6 +1367,8 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      queue_due_scrapes: { Args: never; Returns: undefined }
+      refresh_search_views: { Args: never; Returns: undefined }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown
@@ -1864,6 +1950,7 @@ export type Database = {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
       }
+      system_health_check: { Args: never; Returns: Json }
       unlockrows: { Args: { "": string }; Returns: number }
       updategeometrysrid: {
         Args: {
