@@ -667,7 +667,7 @@ const Index = () => {
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <SectionLabel>Testimonials</SectionLabel>
-            <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
+            <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
               What Owners Say
             </h2>
             <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-10">
