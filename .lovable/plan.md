@@ -1,28 +1,19 @@
 
 
-## Plan: Bold Hero Gradient
+## Plan: Remove All Barcodes from ValuationTicketCard
 
-### Change
+Remove the three barcode sections from `ValuationTicketCard.tsx` and clean up the unused `barcodeHeight` config property.
 
-**`src/pages/Index.tsx`** — Update the hero gradient from 6% opacity to ~20%, and use a two-stop terracotta-to-peach gradient for SELL, and a matching blue-to-teal gradient for BUY.
+### Changes in `src/components/ValuationTicketCard.tsx`
 
-Current (line 172-174):
-```
-'linear-gradient(180deg, hsl(21 62% 53% / 0.06) 0%, transparent 60%)'
-```
+1. **Remove `barcodeHeight` from size configs** (lines 172, 183) and from the destructure (line 187)
 
-New SELL gradient:
-```
-'linear-gradient(180deg, hsl(21 62% 53% / 0.18) 0%, hsl(30 80% 80% / 0.10) 50%, transparent 85%)'
-```
+2. **Remove barcode block in compact/result mode** (lines 344-350) — the 6-line barcode + ref code below the result
 
-New BUY gradient:
-```
-'linear-gradient(180deg, hsl(210 60% 45% / 0.18) 0%, hsl(195 50% 70% / 0.10) 50%, transparent 85%)'
-```
+3. **Remove barcode block in non-hero result mode** (lines 490-496) — same pattern in the default-size result view
 
-This creates a clearly visible warm wash at the top that fades to the background color — bold enough to notice, soft enough not to compete with the card.
+4. **Remove barcode block for input mode** (lines 501-508) — the "VALORACASA" barcode at the bottom of input state
 
 ### Files Modified
-- `src/pages/Index.tsx` — 2 lines changed (gradient values)
+- `src/components/ValuationTicketCard.tsx`
 
