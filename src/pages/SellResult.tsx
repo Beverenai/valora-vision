@@ -13,24 +13,72 @@ import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
   Calendar, Leaf, Home, Info,
 } from "lucide-react";
+import type { Comparable } from "@/components/result/AnalysisGroup.tsx";
 
-// ── Group 2: Analysis + Comparables (single chunk) ──
-const AnalysisContent = lazy(() =>
+// ── Lazy wrappers: each returns a single default-exported component ──
+
+const LazyAnalysisBundle = lazy(() =>
   lazyRetry(() =>
     import("@/components/result/AnalysisGroup.tsx").then((mod) => ({
-      default: mod.PropertyFeaturesSection,
+      default: (props: {
+        features: string | null;
+        comparables: Comparable[] | null;
+        leadBedrooms?: number | null;
+        leadBathrooms?: number | null;
+        leadBuiltSize?: number | null;
+        leadPricePerSqm?: number | null;
+        marketContent: string;
+        chartData: { month: string; price: number }[];
+      }) => (
+        <>
+          <mod.PropertyFeaturesSection features={props.features} />
+          <div className="w-full h-px bg-border" />
+          <mod.ComparablePropertiesSection
+            comparables={props.comparables}
+            leadBedrooms={props.leadBedrooms}
+            leadBathrooms={props.leadBathrooms}
+            leadBuiltSize={props.leadBuiltSize}
+            leadPricePerSqm={props.leadPricePerSqm}
+          />
+          <div className="w-full h-px bg-border" />
+          <mod.AreaComparisonSection
+            userPricePerSqm={props.leadPricePerSqm || null}
+            userSize={props.leadBuiltSize || null}
+            userBedrooms={props.leadBedrooms || null}
+            comparables={props.comparables}
+          />
+          <div className="w-full h-px bg-border" />
+          <mod.MarketTrendsSection content={props.marketContent} chartData={props.chartData} />
+        </>
+      ),
     }))
   )
 );
 
-// We also need the other exports — use a wrapper component
-const LazyAnalysisGroup = lazy(() =>
-  lazyRetry(() => import("@/components/result/AnalysisGroup.tsx"))
-);
-
-// ── Group 3: Agent section + Game + Disclaimer (loads last) ──
-const LazyAgentGroup = lazy(() =>
-  lazyRetry(() => import("@/components/result/AgentGroup.tsx"))
+const LazyAgentBundle = lazy(() =>
+  lazyRetry(() =>
+    import("@/components/result/AgentGroup.tsx").then((mod) => ({
+      default: (props: {
+        leadId: string;
+        latitude: number | null;
+        longitude: number | null;
+        city: string | null;
+        propertyAddress: string;
+      }) => (
+        <>
+          <mod.ValuationPredictionGame leadId={props.leadId} leadType="sell" />
+          <div className="w-full h-px bg-border" />
+          <mod.MatchedAgentsSection
+            latitude={props.latitude}
+            longitude={props.longitude}
+            city={props.city}
+            propertyAddress={props.propertyAddress}
+          />
+          <mod.ValuationDisclaimer />
+        </>
+      ),
+    }))
+  )
 );
 
 const SectionFallback = () => (
@@ -321,50 +369,31 @@ const SellResult: React.FC = () => {
           
           <div className="w-full h-px bg-border" />
 
-          {/* Group 2: Lazy-loaded analysis sections */}
+          {/* Group 2: Lazy — features, comparables, area comparison, market trends */}
           <Suspense fallback={<SectionFallback />}>
-            <LazyAnalysisGroup.PropertyFeaturesSection features={lead?.features || null} />
-            
-            <div className="w-full h-px bg-border" />
-
-            <LazyAnalysisGroup.ComparablePropertiesSection
+            <LazyAnalysisBundle
+              features={lead?.features || null}
               comparables={lead?.comparable_properties as any[] || null}
               leadBedrooms={lead?.bedrooms}
               leadBathrooms={lead?.bathrooms}
               leadBuiltSize={lead?.built_size_sqm}
               leadPricePerSqm={lead?.price_per_sqm}
+              marketContent={lead?.market_trends || MOCK_TRENDS}
+              chartData={PRICE_TREND_DATA}
             />
-
-            <div className="w-full h-px bg-border" />
-
-            <LazyAnalysisGroup.AreaComparisonSection
-              userPricePerSqm={lead?.price_per_sqm || null}
-              userSize={lead?.built_size_sqm || null}
-              userBedrooms={lead?.bedrooms || null}
-              comparables={lead?.comparable_properties as any[] || null}
-            />
-
-            <div className="w-full h-px bg-border" />
-            
-            <LazyAnalysisGroup.MarketTrendsSection content={lead?.market_trends || MOCK_TRENDS} chartData={PRICE_TREND_DATA} />
           </Suspense>
           
           <div className="w-full h-px bg-border" />
 
-          {/* Group 3: Lazy-loaded agent + game sections */}
+          {/* Group 3: Lazy — prediction game, matched agents, disclaimer */}
           <Suspense fallback={<SectionFallback />}>
-            <LazyAgentGroup.ValuationPredictionGame leadId={id!} leadType="sell" />
-            
-            <div className="w-full h-px bg-border" />
-            
-            <LazyAgentGroup.MatchedAgentsSection
+            <LazyAgentBundle
+              leadId={id!}
               latitude={lead?.latitude || null}
               longitude={lead?.longitude || null}
               city={lead?.city || null}
               propertyAddress={propertyAddress}
             />
-            
-            <LazyAgentGroup.ValuationDisclaimer />
           </Suspense>
         </div>
       </CardRevealWrapper>
