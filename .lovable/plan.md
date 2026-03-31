@@ -1,42 +1,67 @@
 
 
-## Plan: Fix the Two Broken Links in the Scraping Pipeline
+## Plan: Wizzair-Inspired Design Updates
 
-### Problem
-The backend infrastructure is correctly set up (tables, functions, cron schedules, edge function) but two issues prevent anything from actually running:
+Apply a modern, clean aesthetic inspired by Wizzair across the landing page — gradient hero, bolder CTAs, tighter typography hierarchy.
 
-1. **Cron job uses wrong function name**: `extensions.http_post()` instead of `net.http_post()` — fails every 2 minutes
-2. **Admin "Scrape Now" blocked by RLS**: `scrape_jobs` only allows `service_role` to insert, but the admin button uses the anon client
-
-### Fixes
-
-**Fix 1: Replace the broken cron job (database operation)**
-- Unschedule job #4 (`process-scrape-queue`)
-- Re-create it using `net.http_post()` instead of `extensions.http_post()`
-
-**Fix 2: Add RLS policy for anon insert on `scrape_jobs`** (migration)
-- Add: `CREATE POLICY "Anyone can create scrape jobs" ON scrape_jobs FOR INSERT TO public WITH CHECK (true);`
-- This matches the pattern used for `leads_sell`, `leads_rent`, `buy_analyses`
-
-**Fix 3: Route admin "Scrape Now" through the edge function** (alternative to Fix 2)
-Instead of inserting directly into `scrape_jobs` from the client (which hits RLS), change the admin button to call `process-scrape-job` with the `zone_id` in the body, and have the edge function create the job itself. This is more secure — no public insert on `scrape_jobs`.
-
-I recommend **Fix 1 + Fix 3** (fix the cron + route scrapes through the edge function).
+---
 
 ### Changes
 
-**Database**: Unschedule broken cron job, re-create with `net.http_post()`
+**1. `src/index.css` — New CSS variables + gradient tokens**
+- Add `--hero-gradient-sell` and `--hero-gradient-buy` custom properties for hero backgrounds
+- Remove the default serif heading rule (`h1-h6 { font-family: DM Serif Display }`) — headings will use `Plus Jakarta Sans` by default via Tailwind's `font-heading` class, with DM Serif Display used selectively for italic accent phrases only
+- Add a `--gold-dark` variable if missing (for hover states on CTA buttons)
 
-**Migration**: No new RLS policy needed (keep `scrape_jobs` insert restricted to service_role)
+**2. `src/pages/Index.tsx` — Hero section redesign**
+- Wrap the hero in a gradient background: warm terracotta gradient for SELL mode, cool blue gradient for BUY mode (subtle, from top to transparent)
+- Remove the badge pill ("Free Property Valuation") — replace with a small uppercase label
+- Make the h1 use `font-heading` (Plus Jakarta Sans) consistently — keep the italic DM Serif accent on "really" and "worth the price" 
+- Enlarge the CTA area: add a visible standalone CTA button below the ValuationTicketCard with prominent styling (large, rounded-full, with arrow icon)
+- Tighten spacing: reduce `min-h-[85vh]` to `min-h-[75vh]`, reduce gaps
 
-**`supabase/functions/process-scrape-job/index.ts`**: Accept optional `{ zone_id }` in request body. If provided, insert a pending job for that zone (using service_role client) before processing.
+**3. `src/pages/Index.tsx` — Section headings consistency**
+- All section h2s already use `font-sans font-black uppercase` — keep this
+- Reduce italic subtitle font size from `text-xl` to `text-lg` for tighter hierarchy
+- Make section labels slightly bolder
 
-**`src/pages/Admin.tsx`**: Change `triggerScrape()` to only call `supabase.functions.invoke("process-scrape-job", { body: { zone_id: zone.id } })` — remove the direct `scrape_jobs` insert.
+**4. `src/components/Navbar.tsx` — Cleaner navbar**
+- Add a prominent CTA button in the nav ("Get Valuation" or "Start Free") styled as a filled button with `bg-primary text-white rounded-full px-5 py-2`
+- Replace the "Sign In" text with the CTA button on desktop
+
+**5. `src/components/CTABanner.tsx` & `src/components/InlineCTA.tsx` — Bigger CTA buttons**
+- Make buttons `rounded-full` with larger padding and a subtle shadow
+- Add `text-base` instead of `text-sm`
+
+**6. `src/components/CrossSellBanner.tsx` — Rounded CTA button**
+- Same treatment: `rounded-full`, larger padding
+
+---
+
+### Technical Details
+
+**Hero gradient implementation** (in Index.tsx):
+```
+style={{ 
+  background: isSell 
+    ? 'linear-gradient(180deg, hsl(21 62% 53% / 0.06) 0%, transparent 60%)' 
+    : 'linear-gradient(180deg, hsl(210 60% 45% / 0.06) 0%, transparent 60%)' 
+}}
+```
+
+**Typography hierarchy** (tightened):
+- h1: `font-heading text-4xl md:text-7xl font-black` (unchanged)
+- h2: `font-heading text-3xl md:text-5xl font-black` (slightly smaller than current 4xl/6xl)
+- Subtitles: `text-lg` (down from `text-xl`)
+- Body: `text-base` (unchanged)
+
+**Nav CTA button**: Replaces "Sign In" placeholder with an actionable button that links to `/#hero` or scrolls to the ValuationTicketCard.
 
 ### Files Modified
-- `supabase/functions/process-scrape-job/index.ts` — accept optional `zone_id` param to create + process job
-- `src/pages/Admin.tsx` — simplify triggerScrape to single edge function call
-
-### Database Operations
-- Unschedule cron job #4, re-create with correct `net.http_post()` syntax
+- `src/index.css` — remove default serif heading rule
+- `src/pages/Index.tsx` — hero gradient, tighter spacing, subtitle sizes
+- `src/components/Navbar.tsx` — add CTA button
+- `src/components/CTABanner.tsx` — rounded-full buttons
+- `src/components/InlineCTA.tsx` — rounded-full buttons
+- `src/components/CrossSellBanner.tsx` — rounded-full buttons
 
