@@ -170,55 +170,38 @@ const ProOnboard = () => {
         .replace(/-+/g, "-")
         .slice(0, 60);
 
-      // 3. Insert professional
-      const { error: profError } = await supabase.from("professionals").insert({
-        user_id: userId,
-        company_name: companyName,
-        contact_name: contactName,
-        email,
-        phone,
-        website: website || null,
-        office_address: address,
-        slug,
-        type: "agency",
-        description: description || null,
-        logo_url: logoUrl,
-        languages,
-        instagram_url: socialInstagram || null,
-        facebook_url: socialFacebook || null,
-        linkedin_url: socialLinkedin || null,
-        avg_rating: googleRating || 0,
-        total_reviews: googleReviewCount || 0,
-        team_size: team.length || null,
-        is_active: true,
-        is_verified: false,
-      });
-      if (profError) throw profError;
-
-      // 4. Insert team members
-      if (team.length > 0) {
-        const { data: profData } = await supabase
-          .from("professionals")
-          .select("id")
-          .eq("slug", slug)
-          .single();
-
-        if (profData) {
-          const teamInserts = team.map((m, i) => ({
-            professional_id: profData.id,
-            name: m.name,
-            role: m.role || null,
-            photo_url: m.photo_url || null,
-            sort_order: i,
-          }));
-          await supabase.from("agent_team_members").insert(teamInserts);
+      // 3. Publish profile via edge function (bypasses RLS since session isn't active yet)
+      const { data: publishData, error: publishError } = await supabase.functions.invoke(
+        "publish-agent-profile",
+        {
+          body: {
+            user_id: userId,
+            company_name: companyName,
+            contact_name: contactName,
+            email,
+            phone,
+            website: website || null,
+            office_address: address,
+            slug,
+            description: description || null,
+            logo_url: logoUrl,
+            languages,
+            instagram_url: socialInstagram || null,
+            facebook_url: socialFacebook || null,
+            linkedin_url: socialLinkedin || null,
+            avg_rating: googleRating || 0,
+            total_reviews: googleReviewCount || 0,
+            team_size: team.length || null,
+            team: team.map((m) => ({
+              name: m.name,
+              role: m.role || null,
+              photo_url: m.photo_url || null,
+            })),
+          },
         }
-      }
-
-      // 5. Insert Google reviews as agent_reviews
-      if (googleRating && googleReviewCount) {
-        // We don't have individual reviews, just the aggregate — stored on professionals table already
-      }
+      );
+      if (publishError) throw publishError;
+      if (publishData?.error) throw new Error(publishData.error);
 
       navigate(`/pro/onboard/success?slug=${slug}`);
     } catch (e: any) {
