@@ -274,6 +274,7 @@ export default function AgentProfile() {
   );
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <Navbar />
 
