@@ -257,7 +257,7 @@ const AreaComparisonSection: React.FC<{
     <section className="py-16 md:py-24">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-10">
+        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-10">
           Your Property vs the Market
         </p>
 
