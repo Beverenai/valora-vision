@@ -18,6 +18,7 @@ import ProLanding from "./pages/ProLanding.tsx";
 import ProOnboard from "./pages/ProOnboard.tsx";
 import ProOnboardSuccess from "./pages/ProOnboardSuccess.tsx";
 import ProLogin from "./pages/ProLogin.tsx";
+import ProDashboard from "./pages/ProDashboard.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/pro/onboard" element={<ProOnboard />} />
           <Route path="/pro/onboard/success" element={<ProOnboardSuccess />} />
           <Route path="/pro/login" element={<ProLogin />} />
+          <Route path="/pro/dashboard" element={<ProDashboard />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
