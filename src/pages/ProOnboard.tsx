@@ -10,8 +10,28 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import ProgressIndicator from "@/components/shared/ProgressIndicator";
+import PhoneInput from "@/components/shared/PhoneInput";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
+
+interface AddressData {
+  streetAddress: string;
+  urbanization: string;
+  city: string;
+  province: string;
+  country: string;
+  complex?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+const ValidationIcon = ({ valid, error }: { valid: boolean; error: string }) => {
+  if (valid) return <Check className="w-4 h-4 text-green-600 shrink-0" />;
+  if (error) return <X className="w-4 h-4 text-destructive shrink-0" />;
+  return null;
+};
 
 const wizardSteps = [
   { name: "Info", label: "Basic Info" },
