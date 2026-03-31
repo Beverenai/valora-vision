@@ -1,30 +1,29 @@
 
 
-## Plan: Fix Mobile Overflow (No Horizontal Scroll)
+## Plan: Fix BUY Toggle Visibility + Add Agent CTA
 
-### Problem
-On mobile, content overflows horizontally causing a sideways scroll. The screenshot shows this on the home page with the valuation card / map verify step. There's no global `overflow-x: hidden` anywhere.
+### Problem 1: Toggle Disappears in BUY Mode
+The card's main content area (line 271 of `ValuationTicketCard.tsx`) uses `overflow-hidden` when the map is not expanded. In BUY mode, the URL input + platform badge + analyze button + toggle stack up and the toggle gets clipped by the fixed card height (`min-h-[440px]`).
 
-### Root Fix
+**Fix in `src/components/ValuationTicketCard.tsx`:**
+- Move the SkyToggle in the BUY input section (lines 394-403) to BEFORE the analyze button, so it appears higher in the card and doesn't get clipped
+- Alternatively, increase the card's min-height when in buy mode, or change `overflow-hidden` to `overflow-visible` for the buy input section
 
-**`src/index.css`** — Add `overflow-x: hidden` to `html` and `body`:
+Best approach: Move the toggle above the analyze button in buy mode (swap lines 384-392 with 394-403). This keeps the toggle visible without changing card dimensions.
 
-```css
-html, body, #root {
-  background-color: #FAFAF7;
-  overflow-x: hidden;
-}
+### Problem 2: Add Agent CTA at Bottom
+Add a subtle "Are you a real estate agent?" link after the final CTA section, before the Footer.
+
+**Fix in `src/pages/Index.tsx` (after line 756):**
+```tsx
+<div className="text-center py-8">
+  <Link to="/pro" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+    Are you a real estate agent? <span className="underline font-medium">List your agency</span>
+  </Link>
+</div>
 ```
 
-This single global rule prevents any element from causing horizontal scroll on any page. It's the standard approach for mobile-first sites.
-
-### Secondary: Navbar absolute mobile menu
-
-**`src/components/Navbar.tsx`** — The mobile dropdown uses `absolute` with `left-0 right-0` which can cause layout issues. No width constraint issues here since it's within the viewport, but worth confirming it behaves after the global fix.
-
-### Why this works
-The overflow is caused by elements with negative margins, wide `absolute` positioned elements, or animation transforms that momentarily extend beyond viewport. Rather than hunting down each individual case across 15+ pages, `overflow-x: hidden` on `html`/`body` is the industry-standard fix that handles all cases at once.
-
 ### Files Modified
-- `src/index.css` — add `overflow-x: hidden` (1 line change)
+- `src/components/ValuationTicketCard.tsx` — reorder toggle before analyze button in buy mode
+- `src/pages/Index.tsx` — add agent CTA link before Footer
 
