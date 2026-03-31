@@ -332,7 +332,7 @@ const ProOnboard = () => {
                 </div>
                 <div>
                   <Label htmlFor="address">Office address *</Label>
-                  <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Av. Ricardo Soriano 72, Marbella" />
+                  <Input id="address" autoComplete="off" value={address} onChange={(e) => setAddress(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Av. Ricardo Soriano 72, Marbella" />
                 </div>
               </div>
 
