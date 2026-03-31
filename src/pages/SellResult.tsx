@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CardRevealWrapper from "@/components/shared/CardRevealWrapper";

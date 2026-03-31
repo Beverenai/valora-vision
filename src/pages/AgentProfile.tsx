@@ -571,5 +571,6 @@ export default function AgentProfile() {
 
       <Footer />
     </div>
+    </ErrorBoundary>
   );
 }

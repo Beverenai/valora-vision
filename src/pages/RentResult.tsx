@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { useParams, useNavigate } from "react-router-dom";
 
 import ValuationTicketCard from "@/components/ValuationTicketCard";
