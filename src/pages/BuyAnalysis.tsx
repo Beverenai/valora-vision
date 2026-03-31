@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link2, Search, ArrowRight, ExternalLink, AlertCircle } from "lucide-react";
@@ -54,9 +55,7 @@ const BuyAnalysis: React.FC = () => {
   const detectedPlatform = url.length > 10 ? detectPlatform(url) : null;
   const urlValid = url.length > 10 && isValidUrl(url);
 
-  useEffect(() => {
-    document.title = "Buy Analysis | ValoraCasa";
-  }, []);
+  useSEO({ title: "Buy Analysis | ValoraCasa", description: "Analyze any property listing to see if the price is fair." });
 
   // Simulated progress
   useEffect(() => {

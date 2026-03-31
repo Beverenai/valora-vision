@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PartyPopper, ArrowRight, Eye, CreditCard, BarChart3 } from "lucide-react";
@@ -10,9 +11,7 @@ const ProOnboardSuccess = () => {
   const [params] = useSearchParams();
   const slug = params.get("slug") || "your-agency";
 
-  useEffect(() => {
-    document.title = "Welcome to ValoraCasa! | ValoraCasa";
-  }, []);
+  useSEO({ title: "Welcome to ValoraCasa!", description: "Your agency profile is live. Start receiving qualified leads." });
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -442,10 +443,11 @@ const ProDashboard = () => {
   const [impressionsByDay, setImpressionsByDay] = useState<{ date: string; count: number }[]>([]);
   const [leadsByDay, setLeadsByDay] = useState<{ date: string; count: number }[]>([]);
   const [section, setSection] = useState<Section>("overview");
+  useSEO({ title: "Agent Dashboard | ValoraCasa", description: "Manage your profile, leads, and analytics." });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    document.title = "Agent Dashboard | ValoraCasa";
+    // title handled by useSEO
     checkAuthAndLoad();
   }, []);
 

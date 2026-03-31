@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,16 @@ export default function AgentProfile() {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const primaryCity = useMemo(() => {
+    if (zones.length > 0) return zones[0].name;
+    return "Costa del Sol";
+  }, [zones]);
+
+  useSEO({
+    title: professional ? `${professional.company_name} — Real Estate Agent in ${primaryCity} | ValoraCasa` : "Agent Profile | ValoraCasa",
+    description: professional?.tagline || professional?.description?.slice(0, 155) || "View this real estate agent's profile on ValoraCasa.",
+  });
+
   // Contact form state
   const [contactForm, setContactForm] = useState({
     name: "", email: "", phone: "", interest: "selling",
@@ -156,8 +167,7 @@ export default function AgentProfile() {
         setZones(zoneData || []);
       }
 
-      // SEO
-      document.title = `${prof.company_name} — Real Estate Agent | ValoraCasa`;
+      // SEO title is handled by useSEO hook below
 
       setLoading(false);
     }

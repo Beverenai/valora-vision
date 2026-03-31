@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -10,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 
 const ProLogin = () => {
+  useSEO({ title: "Agent Login | ValoraCasa", description: "Sign in to your ValoraCasa agent dashboard." });
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");

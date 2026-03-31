@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, MapPin, ArrowDown } from "lucide-react";
 import { useFormWizard } from "@/hooks/use-form-wizard";
@@ -62,9 +63,7 @@ const SellValuation: React.FC = () => {
       }
     : INITIAL_SELL_DATA;
 
-  useEffect(() => {
-    document.title = "Free Property Valuation | ValoraCasa";
-  }, []);
+  useSEO({ title: "Free Property Valuation | ValoraCasa", description: "Get an instant, free valuation for your property in Costa del Sol." });
 
   const {
     currentStep,

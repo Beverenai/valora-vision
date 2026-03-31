@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Loader2, Globe, Mail, Phone, MapPin, Building2, User, ArrowLeft, SkipForward, Edit2, Plus, X, Instagram, Facebook, Linkedin } from "lucide-react";
@@ -63,6 +64,7 @@ interface AiStep {
 }
 
 const ProOnboard = () => {
+  useSEO({ title: "Join ValoraCasa | Agent Onboarding", description: "Create your agency profile and start receiving leads." });
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(0);

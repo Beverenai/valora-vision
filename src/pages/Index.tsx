@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize, TrendingUp, Users, Search, BarChart3, Link2, ShieldCheck, Target } from "lucide-react";
@@ -90,6 +91,7 @@ const StatsBar = () => (
 /* ─── MAIN PAGE ─── */
 
 const Index = () => {
+  useSEO({ title: "ValoraCasa — Free Property Valuations in Costa del Sol", description: "Get a free, instant property valuation for Costa del Sol. Compare agents, analyze listings, and make informed real estate decisions." });
   const navigate = useNavigate();
   const [valuationType, setValuationType] = useState<"sell" | "buy">("sell");
   const [listingUrl, setListingUrl] = useState("");

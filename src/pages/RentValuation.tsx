@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, MapPin, ArrowDown } from "lucide-react";
 import { useFormWizard } from "@/hooks/use-form-wizard";
@@ -56,9 +57,7 @@ const RentValuation: React.FC = () => {
       }
     : INITIAL_RENT_DATA;
 
-  useEffect(() => {
-    document.title = "Free Rental Estimate | ValoraCasa";
-  }, []);
+  useSEO({ title: "Free Rental Estimate | ValoraCasa", description: "Find out what your property could rent for in Costa del Sol." });
 
   const {
     currentStep,

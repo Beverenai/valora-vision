@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -37,9 +38,7 @@ const RentResult: React.FC = () => {
   const [lead, setLead] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    document.title = "Your Rental Estimate | ValoraCasa";
-  }, []);
+  useSEO({ title: "Your Rental Estimate | ValoraCasa", description: "View your personalized rental estimate report for Costa del Sol." });
 
   useEffect(() => {
     if (!id) { navigate("/rent"); return; }

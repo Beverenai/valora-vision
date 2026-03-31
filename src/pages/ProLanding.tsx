@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Building2, Users, Mail, BarChart3, Shield, Zap } from "lucide-react";
@@ -66,10 +67,11 @@ const faqs = [
 ];
 
 const ProLanding = () => {
+  useSEO({ title: "For Agents — List Your Agency on ValoraCasa", description: "Join ValoraCasa to receive qualified leads from property sellers and buyers across Costa del Sol." });
   const [valuationCount, setValuationCount] = useState<number | null>(null);
 
   useEffect(() => {
-    document.title = "For Real Estate Agents | ValoraCasa";
+    // title handled by useSEO
     const fetchCount = async () => {
       const { count } = await supabase.from("leads_sell").select("*", { count: "exact", head: true });
       if (count !== null) setValuationCount(count);

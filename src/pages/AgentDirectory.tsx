@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FC } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -139,8 +140,9 @@ export default function AgentDirectory() {
   const [sort, setSort] = useState<"rating" | "reviews">("rating");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  useSEO({ title: "Real Estate Agents in Costa del Sol | ValoraCasa", description: "Browse verified real estate agents across Costa del Sol. Filter by location, language, and rating to find your ideal property expert." });
+
   useEffect(() => {
-    document.title = "Real Estate Agents in Costa del Sol | ValoraCasa";
     loadData();
   }, []);
 

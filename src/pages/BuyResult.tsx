@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -83,7 +84,7 @@ const BuyResult: React.FC = () => {
   const [data, setData] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { document.title = "Price Analysis | ValoraCasa"; }, []);
+  useSEO({ title: "Price Analysis | ValoraCasa", description: "See a detailed price analysis for this property listing." });
 
   useEffect(() => {
     if (!id) { navigate("/buy"); return; }
