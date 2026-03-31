@@ -362,7 +362,7 @@ const BuyResult: React.FC = () => {
             className="mb-16"
           >
             <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-            <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">What Affects The Price</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">What Affects The Price</p>
 
             <div className="space-y-3">
               {Object.entries(data.feature_adjustments).map(([key, value]) => (
