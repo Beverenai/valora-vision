@@ -13,13 +13,13 @@ import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
   Calendar, Leaf, Home, Info,
 } from "lucide-react";
-import type { Comparable } from "@/components/result/AnalysisGroup.tsx";
+import type { Comparable } from "@/components/ResultAnalysisGroup";
 
 // ── Lazy wrappers: each returns a single default-exported component ──
 
 const LazyAnalysisBundle = lazy(() =>
   lazyRetry(() =>
-    import("@/components/result/AnalysisGroup.tsx").then((mod) => ({
+    import("@/components/ResultAnalysisGroup").then((mod) => ({
       default: (props: {
         features: string | null;
         comparables: Comparable[] | null;
