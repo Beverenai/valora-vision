@@ -91,6 +91,7 @@ const StatsBar = () => (
 /* ─── MAIN PAGE ─── */
 
 const Index = () => {
+  useSEO({ title: "ValoraCasa — Free Property Valuations in Costa del Sol", description: "Get a free, instant property valuation for Costa del Sol. Compare agents, analyze listings, and make informed real estate decisions." });
   const navigate = useNavigate();
   const [valuationType, setValuationType] = useState<"sell" | "buy">("sell");
   const [listingUrl, setListingUrl] = useState("");

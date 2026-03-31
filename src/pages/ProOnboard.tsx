@@ -64,6 +64,7 @@ interface AiStep {
 }
 
 const ProOnboard = () => {
+  useSEO({ title: "Join ValoraCasa | Agent Onboarding", description: "Create your agency profile and start receiving leads." });
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(0);

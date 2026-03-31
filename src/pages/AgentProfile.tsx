@@ -107,6 +107,16 @@ export default function AgentProfile() {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const primaryCity = useMemo(() => {
+    if (zones.length > 0) return zones[0].name;
+    return "Costa del Sol";
+  }, [zones]);
+
+  useSEO({
+    title: professional ? `${professional.company_name} — Real Estate Agent in ${primaryCity} | ValoraCasa` : "Agent Profile | ValoraCasa",
+    description: professional?.tagline || professional?.description?.slice(0, 155) || "View this real estate agent's profile on ValoraCasa.",
+  });
+
   // Contact form state
   const [contactForm, setContactForm] = useState({
     name: "", email: "", phone: "", interest: "selling",

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 
 const ValuationLookup = () => {
+  useSEO({ title: "Look Up Your Valuation | ValoraCasa", description: "Retrieve a previous valuation using your reference code." });
   const [refCode, setRefCode] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();

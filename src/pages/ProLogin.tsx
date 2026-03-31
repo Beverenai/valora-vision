@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 
 const ProLogin = () => {
+  useSEO({ title: "Agent Login | ValoraCasa", description: "Sign in to your ValoraCasa agent dashboard." });
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");

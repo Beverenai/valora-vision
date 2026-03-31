@@ -67,6 +67,7 @@ const faqs = [
 ];
 
 const ProLanding = () => {
+  useSEO({ title: "For Agents — List Your Agency on ValoraCasa", description: "Join ValoraCasa to receive qualified leads from property sellers and buyers across Costa del Sol." });
   const [valuationCount, setValuationCount] = useState<number | null>(null);
 
   useEffect(() => {
