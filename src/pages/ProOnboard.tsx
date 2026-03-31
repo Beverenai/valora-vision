@@ -10,8 +10,28 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import ProgressIndicator from "@/components/shared/ProgressIndicator";
+import PhoneInput from "@/components/shared/PhoneInput";
+import GoogleAddressInput from "@/components/shared/GoogleAddressInput";
+
+interface AddressData {
+  streetAddress: string;
+  urbanization: string;
+  city: string;
+  province: string;
+  country: string;
+  complex?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+const ValidationIcon = ({ valid, error }: { valid: boolean; error: string }) => {
+  if (valid) return <Check className="w-4 h-4 text-green-600 shrink-0" />;
+  if (error) return <X className="w-4 h-4 text-destructive shrink-0" />;
+  return null;
+};
 
 const wizardSteps = [
   { name: "Info", label: "Basic Info" },
@@ -56,6 +76,18 @@ const ProOnboard = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [address, setAddress] = useState("");
+  const [addressData, setAddressData] = useState<AddressData>({
+    streetAddress: "", urbanization: "", city: "", province: "", country: "", latitude: undefined, longitude: undefined,
+  });
+  const [addressConfirmed, setAddressConfirmed] = useState(false);
+
+  // Validation state
+  const [emailError, setEmailError] = useState("");
+  const [emailValid, setEmailValid] = useState(false);
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [websiteError, setWebsiteError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [websiteTouched, setWebsiteTouched] = useState(false);
 
   // Step 2 AI
   const [aiSteps, setAiSteps] = useState<AiStep[]>([]);
@@ -78,8 +110,45 @@ const ProOnboard = () => {
 
   const progressPercentage = ((step + 1) / wizardSteps.length) * 100;
 
+  // Validation helpers
+  const validateEmail = (val: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!val.trim()) { setEmailError(""); setEmailValid(false); return; }
+    if (!emailRegex.test(val)) { setEmailError("Invalid email format"); setEmailValid(false); }
+    else { setEmailError(""); }
+  };
+
+  const checkEmailUniqueness = async (val: string) => {
+    if (!val.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
+    setEmailChecking(true);
+    try {
+      const { data } = await supabase.from("professionals").select("id").eq("email", val).maybeSingle();
+      if (data) { setEmailError("This email is already registered"); setEmailValid(false); }
+      else { setEmailError(""); setEmailValid(true); }
+    } catch { setEmailValid(true); }
+    setEmailChecking(false);
+  };
+
+  const validateWebsite = (val: string) => {
+    if (!val.trim()) { setWebsiteError(""); return; }
+    try { new URL(val); setWebsiteError(""); } catch { setWebsiteError("Enter a valid URL (e.g., https://...)"); }
+  };
+
+  const handleAddressChange = (field: keyof AddressData, value: string | number | undefined) => {
+    setAddressData(prev => ({ ...prev, [field]: value }));
+    if (field === "latitude" || field === "longitude") {
+      if (field === "latitude") setLat(value as number);
+      if (field === "longitude") setLng(value as number);
+    }
+    // Reconstruct address string
+    const updated = { ...addressData, [field]: value };
+    const parts = [updated.streetAddress, updated.city, updated.province].filter(Boolean);
+    setAddress(parts.join(", ") || "");
+    setAddressConfirmed(false);
+  };
+
   // Step 1 validation
-  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim();
+  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && emailValid;
 
   // Ref to hold API result so animation can read it asynchronously
   const apiResultRef = useRef<any>(null);
@@ -308,31 +377,78 @@ const ProOnboard = () => {
 
               <div className="space-y-5">
                 <div>
-                  <Label htmlFor="companyName">Agency name *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="companyName">Agency name *</Label>
+                    <ValidationIcon valid={!!companyName.trim()} error="" />
+                  </div>
                   <Input id="companyName" autoComplete="off" value={companyName} onChange={(e) => setCompanyName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Costa del Sol Premium Realty" />
                 </div>
                 <div>
-                  <Label htmlFor="contactName">Your name *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="contactName">Your name *</Label>
+                    <ValidationIcon valid={!!contactName.trim()} error="" />
+                  </div>
                   <Input id="contactName" autoComplete="off" value={contactName} onChange={(e) => setContactName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="María García" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="email">Email *</Label>
-                    <Input id="email" type="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={(e) => e.target.select()} placeholder="info@agency.com" />
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="email">Email *</Label>
+                      <div className="flex items-center gap-1">
+                        {emailChecking && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
+                        <ValidationIcon valid={emailValid} error={emailError} />
+                      </div>
+                    </div>
+                    <Input
+                      id="email" type="email" autoComplete="off"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); validateEmail(e.target.value); setEmailValid(false); }}
+                      onBlur={(e) => { validateEmail(e.target.value); checkEmailUniqueness(e.target.value); }}
+                      onFocus={(e) => e.target.select()}
+                      placeholder="info@agency.com"
+                      className={cn(emailTouched && emailError && "border-destructive")}
+                    />
+                    {emailTouched && emailError && <p className="text-xs text-destructive mt-1">{emailError}</p>}
                   </div>
                   <div>
-                    <Label htmlFor="phone">Phone *</Label>
-                    <Input id="phone" type="tel" autoComplete="off" value={phone} onChange={(e) => setPhone(e.target.value)} onFocus={(e) => e.target.select()} placeholder="+34 600 000 000" />
+                    <div className="flex items-center justify-between">
+                      <Label>Phone *</Label>
+                      <ValidationIcon valid={!!phone.trim()} error="" />
+                    </div>
+                    <PhoneInput value={phone} onChange={setPhone} />
+                    <p className="text-xs text-muted-foreground mt-1">e.g., +34 612 345 678</p>
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="website">Website URL</Label>
-                  <Input id="website" type="url" autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} onFocus={(e) => e.target.select()} placeholder="https://www.youragency.com" />
-                  <p className="text-xs text-muted-foreground mt-1">We'll use this to auto-fill your profile</p>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="website">Website URL</Label>
+                    <ValidationIcon valid={!!website.trim() && !websiteError} error={websiteError} />
+                  </div>
+                  <Input
+                    id="website" type="url" autoComplete="off"
+                    value={website}
+                    onChange={(e) => { setWebsite(e.target.value); setWebsiteTouched(true); }}
+                    onBlur={(e) => validateWebsite(e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="https://www.youragency.com"
+                    className={cn(websiteTouched && websiteError && "border-destructive")}
+                  />
+                  {websiteTouched && websiteError
+                    ? <p className="text-xs text-destructive mt-1">{websiteError}</p>
+                    : <p className="text-xs text-muted-foreground mt-1">e.g., https://www.youragency.com — We'll use this to auto-fill your profile</p>
+                  }
                 </div>
                 <div>
-                  <Label htmlFor="address">Office address *</Label>
-                  <Input id="address" autoComplete="off" value={address} onChange={(e) => setAddress(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Av. Ricardo Soriano 72, Marbella" />
+                  <div className="flex items-center justify-between">
+                    <Label>Office address *</Label>
+                    <ValidationIcon valid={addressConfirmed} error="" />
+                  </div>
+                  <GoogleAddressInput
+                    addressData={addressData}
+                    onChange={handleAddressChange}
+                    onLocationConfirmed={() => setAddressConfirmed(true)}
+                  />
+                  {addressConfirmed && <p className="text-xs text-green-600 mt-1">Location confirmed ✓</p>}
                 </div>
               </div>
 
