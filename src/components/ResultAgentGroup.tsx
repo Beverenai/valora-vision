@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ShieldCheck, Star, MapPin, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 
 // ── Types ──
