@@ -88,7 +88,9 @@ const SealedWrapper: React.FC<{
   dragProgress: number;
   onDragX: (x: number) => void;
   onTear: () => void;
-}> = ({ accentType, dragProgress, onDragX, onTear }) => {
+  onTap: () => void;
+  showTapHint: boolean;
+}> = ({ accentType, dragProgress, onDragX, onTear, onTap, showTapHint }) => {
   const x = useMotionValue(0);
   const isSell = accentType === "sell";
 
