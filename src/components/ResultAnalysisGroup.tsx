@@ -42,10 +42,11 @@ export const PropertyFeaturesSection: React.FC<{ features: string | null }> = ({
   const items = features.split(",").map((f) => f.trim()).filter(Boolean);
   if (items.length === 0) return null;
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-10">What Makes It Special</p>
+        <SectionLabel className="mb-2">What Makes It Special</SectionLabel>
+        <h2 className="font-serif text-2xl sm:text-3xl mb-6">Property Features</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-6">
           {items.map((feature) => {
             const Icon = getFeatureIcon(feature);
