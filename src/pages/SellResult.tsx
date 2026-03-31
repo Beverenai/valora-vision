@@ -183,7 +183,7 @@ const ComparablePropertiesSection: React.FC<{
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
         <div className="flex items-baseline justify-between mb-3">
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Comparable Properties</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Comparable Properties</p>
           <p className="text-xs text-muted-foreground">{comparables.length} found</p>
         </div>
         <p className="text-sm text-muted-foreground mb-10">Similar properties currently on the market near you</p>
