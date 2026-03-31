@@ -116,6 +116,7 @@ export default function AgentProfile() {
 
     async function load() {
       setLoading(true);
+      setError(false);
 
       // Fetch professional
       const { data: prof, error: profError } = await supabase
@@ -125,7 +126,7 @@ export default function AgentProfile() {
         .single();
       console.log("[AgentProfile] slug query:", slug, "result:", prof, "error:", profError);
 
-      if (!prof) { setLoading(false); return; }
+      if (profError || !prof) { setLoading(false); setError(true); return; }
       setProfessional(prof as unknown as Professional);
 
       // Fetch team, reviews, zones in parallel
