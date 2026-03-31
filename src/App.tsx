@@ -13,6 +13,7 @@ import BuyResult from "./pages/BuyResult.tsx";
 import ValuationLookup from "./pages/ValuationLookup.tsx";
 import Admin from "./pages/Admin.tsx";
 import AgentProfile from "./pages/AgentProfile.tsx";
+import AgentDirectory from "./pages/AgentDirectory.tsx";
 import ProLanding from "./pages/ProLanding.tsx";
 import ProOnboard from "./pages/ProOnboard.tsx";
 import ProOnboardSuccess from "./pages/ProOnboardSuccess.tsx";
