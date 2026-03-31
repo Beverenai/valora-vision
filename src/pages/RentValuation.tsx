@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, MapPin, ArrowDown } from "lucide-react";
 import { useFormWizard } from "@/hooks/use-form-wizard";
