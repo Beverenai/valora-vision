@@ -755,6 +755,13 @@ const Index = () => {
           />
         </section>
 
+        {/* Agent CTA */}
+        <div className="text-center py-8">
+          <Link to="/pro" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Are you a real estate agent? <span className="underline font-medium">List your agency</span>
+          </Link>
+        </div>
+
       </div>
 
     </div>
