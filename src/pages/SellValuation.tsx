@@ -63,9 +63,7 @@ const SellValuation: React.FC = () => {
       }
     : INITIAL_SELL_DATA;
 
-  useEffect(() => {
-    document.title = "Free Property Valuation | ValoraCasa";
-  }, []);
+  useSEO({ title: "Free Property Valuation | ValoraCasa", description: "Get an instant, free valuation for your property in Costa del Sol." });
 
   const {
     currentStep,

@@ -11,9 +11,7 @@ const ProOnboardSuccess = () => {
   const [params] = useSearchParams();
   const slug = params.get("slug") || "your-agency";
 
-  useEffect(() => {
-    document.title = "Welcome to ValoraCasa! | ValoraCasa";
-  }, []);
+  useSEO({ title: "Welcome to ValoraCasa!", description: "Your agency profile is live. Start receiving qualified leads." });
 
   return (
     <div className="min-h-screen bg-background">

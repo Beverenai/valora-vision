@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Loader2, Globe, Mail, Phone, MapPin, Building2, User, ArrowLeft, SkipForward, Edit2, Plus, X, Instagram, Facebook, Linkedin } from "lucide-react";

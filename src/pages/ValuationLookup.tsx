@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { useNavigate } from "react-router-dom";
 import { Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

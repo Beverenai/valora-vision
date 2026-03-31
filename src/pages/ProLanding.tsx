@@ -70,7 +70,7 @@ const ProLanding = () => {
   const [valuationCount, setValuationCount] = useState<number | null>(null);
 
   useEffect(() => {
-    document.title = "For Real Estate Agents | ValoraCasa";
+    // title handled by useSEO
     const fetchCount = async () => {
       const { count } = await supabase.from("leads_sell").select("*", { count: "exact", head: true });
       if (count !== null) setValuationCount(count);

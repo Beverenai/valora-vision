@@ -157,8 +157,7 @@ export default function AgentProfile() {
         setZones(zoneData || []);
       }
 
-      // SEO
-      document.title = `${prof.company_name} — Real Estate Agent | ValoraCasa`;
+      // SEO title is handled by useSEO hook below
 
       setLoading(false);
     }

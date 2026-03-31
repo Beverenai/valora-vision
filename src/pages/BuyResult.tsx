@@ -84,7 +84,7 @@ const BuyResult: React.FC = () => {
   const [data, setData] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { document.title = "Price Analysis | ValoraCasa"; }, []);
+  useSEO({ title: "Price Analysis | ValoraCasa", description: "See a detailed price analysis for this property listing." });
 
   useEffect(() => {
     if (!id) { navigate("/buy"); return; }

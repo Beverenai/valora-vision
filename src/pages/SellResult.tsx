@@ -851,7 +851,7 @@ const SellResult: React.FC = () => {
   const [lead, setLead] = useState<LeadData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { document.title = "Your Property Valuation | ValoraCasa"; }, []);
+  useSEO({ title: "Your Property Valuation | ValoraCasa", description: "View your personalized property valuation report for Costa del Sol." });
 
   useEffect(() => {
     if (!id) { navigate("/sell"); return; }

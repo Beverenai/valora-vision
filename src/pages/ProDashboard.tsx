@@ -446,7 +446,7 @@ const ProDashboard = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    document.title = "Agent Dashboard | ValoraCasa";
+    // title handled by useSEO
     checkAuthAndLoad();
   }, []);
 
