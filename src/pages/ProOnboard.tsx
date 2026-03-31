@@ -309,30 +309,30 @@ const ProOnboard = () => {
               <div className="space-y-5">
                 <div>
                   <Label htmlFor="companyName">Agency name *</Label>
-                  <Input id="companyName" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Costa del Sol Premium Realty" />
+                  <Input id="companyName" autoComplete="off" value={companyName} onChange={(e) => setCompanyName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Costa del Sol Premium Realty" />
                 </div>
                 <div>
                   <Label htmlFor="contactName">Your name *</Label>
-                  <Input id="contactName" value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="María García" />
+                  <Input id="contactName" autoComplete="off" value={contactName} onChange={(e) => setContactName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="María García" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">Email *</Label>
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="info@agency.com" />
+                    <Input id="email" type="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={(e) => e.target.select()} placeholder="info@agency.com" />
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone *</Label>
-                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 600 000 000" />
+                    <Input id="phone" type="tel" autoComplete="off" value={phone} onChange={(e) => setPhone(e.target.value)} onFocus={(e) => e.target.select()} placeholder="+34 600 000 000" />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="website">Website URL</Label>
-                  <Input id="website" type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://www.youragency.com" />
+                  <Input id="website" type="url" autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} onFocus={(e) => e.target.select()} placeholder="https://www.youragency.com" />
                   <p className="text-xs text-muted-foreground mt-1">We'll use this to auto-fill your profile</p>
                 </div>
                 <div>
                   <Label htmlFor="address">Office address *</Label>
-                  <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Av. Ricardo Soriano 72, Marbella" />
+                  <Input id="address" autoComplete="off" value={address} onChange={(e) => setAddress(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Av. Ricardo Soriano 72, Marbella" />
                 </div>
               </div>
 
