@@ -932,6 +932,7 @@ const SellResult: React.FC = () => {
   );
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <CardRevealWrapper accentType="sell" cardElement={cardElement} loading={loading}>
         <div className="max-w-[1000px] mx-auto">
