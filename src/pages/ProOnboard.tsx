@@ -309,7 +309,7 @@ const ProOnboard = () => {
               <div className="space-y-5">
                 <div>
                   <Label htmlFor="companyName">Agency name *</Label>
-                  <Input id="companyName" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Costa del Sol Premium Realty" />
+                  <Input id="companyName" autoComplete="off" value={companyName} onChange={(e) => setCompanyName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Costa del Sol Premium Realty" />
                 </div>
                 <div>
                   <Label htmlFor="contactName">Your name *</Label>
