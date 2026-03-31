@@ -1,46 +1,95 @@
 
 
-## Plan: Agent Directory Page (`/agentes`)
+## Plan: Agent Dashboard (`/pro/dashboard`)
 
 ### Overview
-Create a new page at `/agentes` that lists all published agents with search, filtering, and sorting. Add route to App.tsx.
+Create a sidebar-based dashboard for logged-in agents with 5 sections: Overview, Profile Editor, Leads, Analytics, and Subscription. Protected by auth — redirects to `/pro/login` if not logged in.
 
-### 1. New File: `src/pages/AgentDirectory.tsx`
+---
 
-**Hero Section**
-- Headline: "Find a Real Estate Expert" (serif font)
-- Subline: "Verified agents across Costa del Sol"
-- No Mapbox — use a simple text search input that filters by company name or location
+### 1. New Files
 
-**Filter Bar** (horizontal, sticky below hero)
-- Location dropdown: hardcoded municipalities (Marbella, Estepona, Benahavís, Mijas, Fuengirola, Benalmádena, Torremolinos, Málaga, Nerja, Manilva)
-- Language multi-select: EN, ES, NO, SV, DE, FR, NL
-- Sort: "Highest rated" (default), "Most reviews"
-- Note: "Nearest to you" skipped for now (no geolocation column on professionals table; can add later)
+**`src/pages/ProDashboard.tsx`** — Main layout + routing
+- Auth guard: check `supabase.auth.getSession()` on mount, redirect to `/pro/login` if no session
+- Fetch the agent's `professionals` record by `user_id = auth.uid()`
+- Desktop: Sidebar (left) + content area (right) using Shadcn Sidebar components
+- Mobile: Bottom tab bar (Dashboard, Profile, Leads, More dropdown)
+- Internal state `activeSection` controls which content panel renders
+- Sections: `overview`, `profile`, `leads`, `analytics`, `subscription`
 
-**Agent Cards Grid**
-- 3 columns desktop, 1 mobile
-- Each card: circular logo (48px) with initials fallback (terracotta bg), company name, star rating + review count, truncated description, primary zone name (fetched from `zones` table via `service_zones[0]`), language badges, "View Profile" link to `/agentes/:slug`
-- Verified badge (green checkmark) if `is_verified = true`
+**Content Sections (all inline in ProDashboard or extracted as sub-components):**
 
-**Data Query**
-- Query `professionals` table where `is_active = true`
-- Join zone names via a separate query on `zones` for display
-- Client-side filtering by location (match zone names), language (intersect `languages` array)
-- Client-side sorting by `avg_rating` or `total_reviews`
-- Pagination: "Load more" button, 12 per page
+**Overview Section:**
+- Welcome: "Welcome back, {company_name}"
+- 4 stat cards: Profile Views (from `professional_impressions` count this month), Leads Received (`agent_contact_requests` count this month), Average Rating, Search Appearances (impressions count)
+- Recent leads table (last 5 from `agent_contact_requests` where `professional_id = agent.id`)
+- "View all leads" link → switches to leads section
 
-**Empty State**
-- "No agents found in this area. Try expanding your search."
+**Profile Section:**
+- Editable form mirroring onboarding Step 3 fields (company name, tagline, description, logo, languages, service areas, social links, team)
+- "Save changes" → `supabase.from('professionals').update(...)` with RLS (user owns record)
+- "Preview public profile" → opens `/agentes/:slug` in new tab
 
-**SEO**
-- `document.title = "Real Estate Agents in Costa del Sol | ValoraCasa"`
+**Leads Section:**
+- Full table of `agent_contact_requests` for this professional
+- Filter tabs: All, New, Contacted, Converted
+- Each row: name, email, phone, message (truncated), date
+- Expand row to see full message
+- Note: status filtering requires a `status` column on `agent_contact_requests`
 
-### 2. Update `src/App.tsx`
-- Add route: `<Route path="/agentes" element={<AgentDirectory />} />`
-- Place above the existing `/agentes/:slug` route
+**Analytics Section:**
+- Line chart: impressions over last 30 days (from `professional_impressions`, grouped by date)
+- Bar chart: leads over last 30 days
+- Stats row: total views, total leads, conversion rate
+- "Detailed analytics coming soon with Premium plan" placeholder
+
+**Subscription Section:**
+- Current plan display (placeholder — "Free" for now)
+- Pricing cards (reuse from `/pro` page or simplified version)
+- "Manage subscription" button (placeholder)
+
+### 2. Database Migration
+
+Add `status` column to `agent_contact_requests`:
+```sql
+ALTER TABLE public.agent_contact_requests 
+ADD COLUMN status text NOT NULL DEFAULT 'new';
+```
+
+Add RLS policy so agents can read their own contact requests:
+```sql
+CREATE POLICY "Agents can read own contact requests"
+ON public.agent_contact_requests FOR SELECT TO authenticated
+USING (professional_id IN (
+  SELECT id FROM professionals WHERE user_id = auth.uid()
+));
+```
+
+Add RLS policy so agents can update status on their own contact requests:
+```sql
+CREATE POLICY "Agents can update own contact requests"
+ON public.agent_contact_requests FOR UPDATE TO authenticated
+USING (professional_id IN (
+  SELECT id FROM professionals WHERE user_id = auth.uid()
+))
+WITH CHECK (professional_id IN (
+  SELECT id FROM professionals WHERE user_id = auth.uid()
+));
+```
+
+### 3. Update `src/App.tsx`
+- Add route: `<Route path="/pro/dashboard" element={<ProDashboard />} />`
+
+### 4. Update `src/pages/ProLogin.tsx`
+- After successful login, navigate to `/pro/dashboard` instead of `/agentes/:slug`
 
 ### Files
-- **New**: `src/pages/AgentDirectory.tsx`
-- **Modified**: `src/App.tsx` (add route)
+- **New**: `src/pages/ProDashboard.tsx`
+- **Modified**: `src/App.tsx` (add route), `src/pages/ProLogin.tsx` (redirect to dashboard)
+- **Migration**: add `status` column + RLS policies on `agent_contact_requests`
+
+### Implementation Order
+1. Database migration (status column + RLS)
+2. Create ProDashboard.tsx with all sections
+3. Update App.tsx route + ProLogin redirect
 
