@@ -390,7 +390,7 @@ const BuyResult: React.FC = () => {
             className="mb-16"
           >
             <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-            <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Property Analysis</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">Property Analysis</p>
 
             {data.analysis.split("\n\n").filter(Boolean).map((p, i) => (
               <p key={i} className={cn("text-[15px] leading-[2] text-foreground/70 font-light", i > 0 && "mt-6")}>
