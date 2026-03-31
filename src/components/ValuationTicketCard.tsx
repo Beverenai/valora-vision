@@ -381,6 +381,17 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                     </span>
                   </div>
                 )}
+                {/* Toggle */}
+                {onValuationTypeChange && (
+                  <div className="mt-3 flex justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                    <SkyToggle
+                      checked={valuationType === "buy"}
+                      onChange={(checked) => onValuationTypeChange(checked ? "buy" : "sell")}
+                      leftLabel="Sell Property"
+                      rightLabel="Buy Analysis"
+                    />
+                  </div>
+                )}
                 {/* Analyze button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); handleContinue?.(); }}
@@ -390,17 +401,6 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
                   Analyze Property
                   <ArrowRight size={14} />
                 </button>
-                {/* Toggle */}
-                {onValuationTypeChange && (
-                  <div className="mt-4 flex justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-                    <SkyToggle
-                      checked={valuationType === "buy"}
-                      onChange={(checked) => onValuationTypeChange(checked ? "buy" : "sell")}
-                      leftLabel="Sell Property"
-                      rightLabel="Buy Analysis"
-                    />
-                  </div>
-                )}
               </div>
             ) : hasGoogleInput ? (
               <div className="mt-2">
