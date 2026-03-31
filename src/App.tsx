@@ -1,5 +1,7 @@
-import { lazy, Suspense } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense, useEffect } from "react";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,40 +29,68 @@ const ProLogin = lazy(() => lazyRetry(() => import("./pages/ProLogin.tsx")));
 const ProDashboard = lazy(() => lazyRetry(() => import("./pages/ProDashboard.tsx")));
 const ResetPassword = lazy(() => lazyRetry(() => import("./pages/ResetPassword.tsx")));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Suspense fallback={<PageLoadingFallback />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/sell/valuation" element={<SellValuation />} />
-            <Route path="/sell/result/:id" element={<SellResult />} />
-            <Route path="/rent/valuation" element={<RentValuation />} />
-            <Route path="/rent/result/:id" element={<RentResult />} />
-            <Route path="/buy" element={<BuyAnalysis />} />
-            <Route path="/buy/result/:id" element={<BuyResult />} />
-            <Route path="/lookup" element={<ValuationLookup />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/agentes" element={<AgentDirectory />} />
-            <Route path="/agentes/:slug" element={<AgentProfile />} />
-            <Route path="/pro" element={<ProLanding />} />
-            <Route path="/pro/onboard" element={<ProOnboard />} />
-            <Route path="/pro/onboard/success" element={<ProOnboardSuccess />} />
-            <Route path="/pro/login" element={<ProLogin />} />
-            <Route path="/pro/dashboard" element={<ProDashboard />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
+});
+
+const App = () => {
+  useEffect(() => {
+    const runPrefetch = () => {
+      import("./pages/SellResult.tsx");
+      import("./pages/AgentDirectory.tsx");
+    };
+    if ("requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(runPrefetch);
+    } else {
+      setTimeout(runPrefetch, 2000);
+    }
+  }, []);
+
+  return (
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Suspense fallback={<PageLoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/sell/valuation" element={<SellValuation />} />
+              <Route path="/sell/result/:id" element={<SellResult />} />
+              <Route path="/rent/valuation" element={<RentValuation />} />
+              <Route path="/rent/result/:id" element={<RentResult />} />
+              <Route path="/buy" element={<BuyAnalysis />} />
+              <Route path="/buy/result/:id" element={<BuyResult />} />
+              <Route path="/lookup" element={<ValuationLookup />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/agentes" element={<AgentDirectory />} />
+              <Route path="/agentes/:slug" element={<AgentProfile />} />
+              <Route path="/pro" element={<ProLanding />} />
+              <Route path="/pro/onboard" element={<ProOnboard />} />
+              <Route path="/pro/onboard/success" element={<ProOnboardSuccess />} />
+              <Route path="/pro/login" element={<ProLogin />} />
+              <Route path="/pro/dashboard" element={<ProDashboard />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </PersistQueryClientProvider>
+  );
+};
 
 export default App;
