@@ -76,6 +76,18 @@ const ProOnboard = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [address, setAddress] = useState("");
+  const [addressData, setAddressData] = useState<AddressData>({
+    streetAddress: "", urbanization: "", city: "", province: "", country: "", latitude: undefined, longitude: undefined,
+  });
+  const [addressConfirmed, setAddressConfirmed] = useState(false);
+
+  // Validation state
+  const [emailError, setEmailError] = useState("");
+  const [emailValid, setEmailValid] = useState(false);
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [websiteError, setWebsiteError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [websiteTouched, setWebsiteTouched] = useState(false);
 
   // Step 2 AI
   const [aiSteps, setAiSteps] = useState<AiStep[]>([]);
