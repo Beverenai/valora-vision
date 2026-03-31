@@ -81,53 +81,132 @@ const ProOnboard = () => {
   // Step 1 validation
   const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim();
 
-  // Run AI onboarding
+  // Ref to hold API result so animation can read it asynchronously
+  const apiResultRef = useRef<any>(null);
+  const apiDoneRef = useRef(false);
+
   const runAiOnboarding = useCallback(async () => {
     setAiSteps([]);
     setAiDone(false);
+    apiResultRef.current = null;
+    apiDoneRef.current = false;
 
-    // Simulate initial steps appearing
-    const addStep = (s: AiStep) => setAiSteps((prev) => [...prev, s]);
+    // Define the checklist steps based on whether website was provided
+    const hasWebsite = !!website.trim();
+    const stepDefs = hasWebsite
+      ? [
+          { key: "scan_website", loadingLabel: "Scanning your website...", doneLabel: "Website scanned", skipLabel: "No website data" },
+          { key: "generate_desc", loadingLabel: "Generating description...", doneLabel: "Generated description", skipLabel: "Using default description" },
+          { key: "find_team", loadingLabel: "Looking for team members...", doneLabel: "", skipLabel: "No team members found" },
+          { key: "languages", loadingLabel: "Detecting languages...", doneLabel: "", skipLabel: "Default languages set" },
+          { key: "google", loadingLabel: "Checking Google reviews...", doneLabel: "", skipLabel: "No Google reviews found" },
+          { key: "social", loadingLabel: "Finding social media...", doneLabel: "Found social links", skipLabel: "No social links found" },
+        ]
+      : [
+          { key: "generate_desc", loadingLabel: "Generating description...", doneLabel: "Generated description", skipLabel: "Using default description" },
+          { key: "google", loadingLabel: "Checking Google reviews...", doneLabel: "", skipLabel: "No Google reviews found" },
+          { key: "languages", loadingLabel: "Detecting languages...", doneLabel: "", skipLabel: "Default languages set" },
+        ];
 
-    if (website) {
-      addStep({ key: "scan", status: "loading", label: "Scanning your website..." });
-    }
-    addStep({ key: "profile", status: "loading", label: "Building your profile..." });
+    // Start API call (fire and forget, store result in ref)
+    const apiPromise = (async () => {
+      try {
+        const res = await supabase.functions.invoke("onboard-agency", {
+          body: { company_name: companyName, contact_name: contactName, email, phone, website, address },
+        });
+        if (res.error) throw new Error(res.error.message);
+        const data = res.data;
+        if (!data.success) throw new Error(data.error || "Failed");
 
-    try {
-      const res = await supabase.functions.invoke("onboard-agency", {
-        body: { company_name: companyName, contact_name: contactName, email, phone, website, address },
+        // Store results
+        if (data.description) setDescription(data.description);
+        if (data.logo_url) setLogoUrl(data.logo_url);
+        if (data.team?.length) setTeam(data.team);
+        if (data.languages?.length) setLanguages(data.languages);
+        if (data.service_areas?.length) setServiceAreas(data.service_areas);
+        if (data.social?.instagram) setSocialInstagram(data.social.instagram);
+        if (data.social?.facebook) setSocialFacebook(data.social.facebook);
+        if (data.social?.linkedin) setSocialLinkedin(data.social.linkedin);
+        if (data.google_rating) setGoogleRating(data.google_rating);
+        if (data.google_review_count) setGoogleReviewCount(data.google_review_count);
+        if (data.lat) setLat(data.lat);
+        if (data.lng) setLng(data.lng);
+
+        apiResultRef.current = data;
+      } catch (e) {
+        console.error("Onboard error:", e);
+        apiResultRef.current = { fallback: true };
+      }
+      apiDoneRef.current = true;
+    })();
+
+    // Animate steps sequentially
+    const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    const animateStep = (def: typeof stepDefs[0], index: number): Promise<void> => {
+      return new Promise(async (resolve) => {
+        // Show this step as loading
+        setAiSteps((prev) => [...prev, { key: def.key, status: "loading", label: def.loadingLabel }]);
+        await delay(800);
+
+        // Determine final status from API result (if available) or default to done
+        const data = apiResultRef.current;
+        let finalStatus: "done" | "skip" = "done";
+        let finalLabel = def.doneLabel || def.loadingLabel.replace("...", "");
+
+        if (data && !data.fallback) {
+          const apiSteps: AiStep[] = data.steps || [];
+          const match = apiSteps.find((s: AiStep) => s.key === def.key);
+          if (match) {
+            finalStatus = match.status === "skip" ? "skip" : "done";
+            finalLabel = match.label;
+          } else {
+            // Derive from data
+            if (def.key === "find_team") {
+              const count = data.team?.length || 0;
+              finalLabel = count > 0 ? `Found ${count} team member${count > 1 ? "s" : ""}` : def.skipLabel;
+              finalStatus = count > 0 ? "done" : "skip";
+            } else if (def.key === "languages") {
+              const langs = data.languages || [];
+              finalLabel = langs.length > 2 ? `Detected languages: ${langs.join(", ")}` : def.skipLabel;
+              finalStatus = langs.length > 2 ? "done" : "skip";
+            } else if (def.key === "google") {
+              finalLabel = data.google_rating ? `Found ${data.google_review_count} reviews (${data.google_rating}★)` : def.skipLabel;
+              finalStatus = data.google_rating ? "done" : "skip";
+            } else if (def.key === "scan_website") {
+              finalLabel = data.logo_url ? "Found your logo" : "Website scanned";
+            } else if (def.key === "social") {
+              const hasSocial = data.social?.instagram || data.social?.facebook || data.social?.linkedin;
+              finalLabel = hasSocial ? "Found social links" : def.skipLabel;
+              finalStatus = hasSocial ? "done" : "skip";
+            }
+          }
+        } else if (!data) {
+          // API not done yet, show as done optimistically
+          finalLabel = def.doneLabel || def.loadingLabel.replace("...", "");
+        }
+
+        // Update step to final state
+        setAiSteps((prev) => prev.map((s) => (s.key === def.key ? { ...s, status: finalStatus, label: finalLabel } : s)));
+        resolve();
       });
+    };
 
-      if (res.error) throw new Error(res.error.message);
-      const data = res.data;
-
-      if (!data.success) throw new Error(data.error || "Failed to build profile");
-
-      // Update state from AI results
-      if (data.description) setDescription(data.description);
-      if (data.logo_url) setLogoUrl(data.logo_url);
-      if (data.team?.length) setTeam(data.team);
-      if (data.languages?.length) setLanguages(data.languages);
-      if (data.service_areas?.length) setServiceAreas(data.service_areas);
-      if (data.social?.instagram) setSocialInstagram(data.social.instagram);
-      if (data.social?.facebook) setSocialFacebook(data.social.facebook);
-      if (data.social?.linkedin) setSocialLinkedin(data.social.linkedin);
-      if (data.google_rating) setGoogleRating(data.google_rating);
-      if (data.google_review_count) setGoogleReviewCount(data.google_review_count);
-      if (data.lat) setLat(data.lat);
-      if (data.lng) setLng(data.lng);
-
-      // Show AI steps from response
-      const responseSteps: AiStep[] = data.steps || [];
-      setAiSteps(responseSteps.length > 0 ? responseSteps : [
-        { key: "done", status: "done", label: "Profile created successfully" },
-      ]);
-    } catch (e) {
-      console.error("Onboard error:", e);
-      setAiSteps([{ key: "error", status: "done", label: "Profile created with defaults" }]);
+    // Run steps sequentially
+    for (let i = 0; i < stepDefs.length; i++) {
+      await animateStep(stepDefs[i], i);
     }
 
+    // Wait for API if it hasn't finished
+    if (!apiDoneRef.current) {
+      setAiSteps((prev) => [...prev, { key: "finalizing", status: "loading", label: "Almost ready..." }]);
+      await apiPromise;
+      setAiSteps((prev) => prev.filter((s) => s.key !== "finalizing"));
+    }
+
+    // Add final "complete" step
+    setAiSteps((prev) => [...prev, { key: "complete", status: "done", label: "Profile ready!" }]);
+    await delay(800);
     setAiDone(true);
   }, [companyName, contactName, email, phone, website, address]);
 
@@ -140,7 +219,7 @@ const ProOnboard = () => {
 
   useEffect(() => {
     if (aiDone && step === 1) {
-      const t = setTimeout(() => setStep(2), 2000);
+      const t = setTimeout(() => setStep(2), 500);
       return () => clearTimeout(t);
     }
   }, [aiDone, step]);
