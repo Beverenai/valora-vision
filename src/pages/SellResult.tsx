@@ -679,7 +679,26 @@ const MatchedAgentsSection: React.FC<{ latitude: number | null; longitude: numbe
     );
   }
 
-  if (agents.length === 0) return null;
+  if (agents.length === 0) {
+    return (
+      <section className="py-16 md:py-24">
+        <div className="max-w-[1000px] mx-auto px-6 text-center">
+          <div className="w-10 h-px bg-gold mx-auto mb-8" />
+          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-3">
+            Recommended Local Experts
+          </p>
+          <p className="text-sm text-muted-foreground mb-6">
+            Local agents coming soon. Want to be featured here?
+          </p>
+          <Link to="/pro">
+            <Button variant="outline" className="rounded-full">
+              Join as an Agent
+            </Button>
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 md:py-24">
