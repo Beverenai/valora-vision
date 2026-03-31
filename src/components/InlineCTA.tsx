@@ -10,7 +10,7 @@ const InlineCTA = ({ text, href }: InlineCTAProps) => (
   <div className="max-w-[1400px] mx-auto mb-12">
     <Link
       to={href}
-      className="flex items-center justify-center gap-2 bg-primary p-4 text-sm font-medium text-gold hover:bg-navy-deep transition-colors border border-border"
+      className="flex items-center justify-center gap-2 bg-primary p-4 text-base font-semibold text-gold hover:bg-primary/90 transition-colors rounded-full shadow-md"
     >
       {text}
       <ArrowRight className="h-4 w-4" />

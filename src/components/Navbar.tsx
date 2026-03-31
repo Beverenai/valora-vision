@@ -37,9 +37,12 @@ const Navbar = () => {
             {link.label}
           </Link>
         ))}
-        <span className="text-sm text-muted-foreground cursor-pointer hover:text-foreground">
-          Sign In
-        </span>
+        <Link
+          to="/sell/valuation"
+          className="bg-primary text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+        >
+          Get Valuation
+        </Link>
       </nav>
 
       {/* Mobile toggle */}

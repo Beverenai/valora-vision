@@ -20,7 +20,7 @@ const CTABanner = ({ title, subtitle, buttonText, href }: CTABannerProps) => (
       )}
       <Link
         to={href}
-        className="mt-6 inline-flex items-center gap-2 bg-gold text-primary px-6 py-3 text-sm font-medium hover:bg-gold-dark transition-colors"
+        className="mt-6 inline-flex items-center gap-2 bg-gold text-primary px-8 py-3.5 text-base font-semibold rounded-full hover:bg-gold-dark transition-colors shadow-md"
       >
         {buttonText}
         <ArrowRight className="h-4 w-4" />
