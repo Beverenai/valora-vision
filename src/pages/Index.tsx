@@ -733,7 +733,7 @@ const Index = () => {
                 )}
               </motion.h2>
             </AnimatePresence>
-            <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground">
+            <p className="font-['DM_Serif_Display'] italic text-lg md:text-xl text-muted-foreground">
               Free, confidential, and takes less than 2 minutes
             </p>
           </div>
