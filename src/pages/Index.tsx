@@ -56,12 +56,7 @@ const TESTIMONIALS_BUY = [
   { quote: "Used it on every property we viewed. Saved us thousands in negotiations.", name: "Linda M.", location: "Fuengirola" },
 ];
 
-/* ─── SECTION LABEL ─── */
-const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <p className={cn("text-[0.65rem] tracking-[0.15em] uppercase font-semibold text-muted-foreground", className)}>
-    {children}
-  </p>
-);
+/* ─── SECTION LABEL ─── imported from @/components/ui/SectionLabel */
 
 /* ─── DIVIDER ─── */
 const SectionDivider = () => (

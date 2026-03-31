@@ -255,11 +255,11 @@ import { ChevronDown } from "lucide-react";
 
 export const MarketTrendsSection: React.FC<{ content: string; chartData: { month: string; price: number }[] }> = ({ content, chartData }) => (
   <Collapsible>
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-3xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
         <div className="flex items-center justify-between">
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Market Trends</p>
+          <SectionLabel className="mb-0">Market Trends</SectionLabel>
           <CollapsibleTrigger asChild>
             <button className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 font-medium transition-colors">
               View trends <ChevronDown size={14} className="transition-transform data-[state=open]:rotate-180" />

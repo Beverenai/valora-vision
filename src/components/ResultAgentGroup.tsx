@@ -214,10 +214,10 @@ export const ValuationPredictionGame: React.FC<{ leadId: string; leadType: "sell
     : "Great instinct — the Costa del Sol market has been rising steadily.";
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-md mx-auto px-6 text-center">
         <div className="w-10 h-px bg-gold mx-auto mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-4">Your Prediction</p>
+        <SectionLabel>Your Prediction</SectionLabel>
         <p className="text-lg font-light text-foreground/80 mb-8">Did you think it would be…</p>
         {!submitted ? (
           <div className="flex justify-center gap-4">
