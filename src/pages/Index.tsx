@@ -753,23 +753,26 @@ const Index = () => {
             onMapPhaseChange={(phase) => setMapExpandedBottom(phase === "verify")}
             valuationType={valuationType}
             onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
+            listingUrl={listingUrl}
+            onListingUrlChange={setListingUrl}
           />
         </section>
 
-        <section className="py-12 px-4">
+        <section className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="border border-border/60 rounded-2xl px-6 py-8 md:px-10 md:py-10 bg-card/50 backdrop-blur-sm">
-              <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
+            <div className="relative border border-border/40 rounded-2xl px-6 py-10 md:px-12 md:py-14 bg-card overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+              <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-primary/70 mb-4">
                 For Professionals
               </p>
-              <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-2">
+              <h3 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-3">
                 Are you a real estate agent?
               </h3>
-              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+              <p className="text-sm text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
                 Join ValoraCasa and get qualified leads, a professional profile page, and AI-powered tools to grow your business.
               </p>
               <Link to="/pro">
-                <Button className="rounded-full px-8">
+                <Button className="rounded-full px-10 py-3 text-base font-semibold shadow-md hover:shadow-lg transition-all">
                   List Your Agency
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
