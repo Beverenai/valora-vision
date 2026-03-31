@@ -64,6 +64,7 @@ const ProOnboard = () => {
   // Step 3 editable data
   const [description, setDescription] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [languages, setLanguages] = useState<string[]>(["es", "en"]);
   const [serviceAreas, setServiceAreas] = useState<string[]>([]);
