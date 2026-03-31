@@ -311,7 +311,7 @@ const BuyResult: React.FC = () => {
           >
             <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
             <div className="flex items-baseline justify-between mb-8">
-              <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Comparable Properties</p>
+              <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Comparable Properties</p>
               <p className="text-xs text-muted-foreground">{comparables.length} found</p>
             </div>
 
