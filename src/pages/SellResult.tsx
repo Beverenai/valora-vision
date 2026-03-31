@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import CardRevealWrapper from "@/components/shared/CardRevealWrapper";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
   Calendar, Leaf, ShieldCheck, Star, Users, Home,
   ChevronDown, ArrowUp, ArrowDown, Sparkles,
   Waves, Car, Fence, TreePine, Dumbbell, ArrowUpDown, Wind, Flame,
   ParkingCircle, Shield, Warehouse, Sun, Eye, Grape, ChefHat, Tv,
-  Snowflake, Droplets, Lock, Wifi, MapPin, Check,
+  Snowflake, Droplets, Lock, Wifi, MapPin, Check, Info, ExternalLink,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import { formatRefCode } from "@/utils/referenceCode";
@@ -77,7 +82,7 @@ const PropertyFeaturesSection: React.FC<{ features: string | null }> = ({ featur
   );
 };
 
-// ── Comparable Properties (inlined) ──
+// ── Comparable Properties ──
 interface Comparable {
   id?: string; price?: number; price_per_sqm?: number; built_size_sqm?: number;
   bedrooms?: number; bathrooms?: number; property_type?: string; address?: string;
@@ -86,65 +91,193 @@ interface Comparable {
 
 const compFmt = (n: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
-const ComparableCard: React.FC<{ comp: Comparable; leadBedrooms?: number | null; leadBathrooms?: number | null; leadBuiltSize?: number | null }> = ({
-  comp, leadBedrooms, leadBathrooms, leadBuiltSize,
-}) => {
-  const [flipped, setFlipped] = useState(false);
+function calcSimilarity(comp: Comparable, leadSize: number | null, leadBedrooms: number | null, maxDistance: number): number {
+  let score = 0;
+  let factors = 0;
+  // Size match (40% weight)
+  if (comp.built_size_sqm && leadSize) {
+    const sizeDiff = Math.abs(comp.built_size_sqm - leadSize) / leadSize;
+    score += Math.max(0, 1 - sizeDiff) * 40;
+    factors += 40;
+  }
+  // Room match (30% weight)
+  if (comp.bedrooms != null && leadBedrooms != null) {
+    const roomDiff = Math.abs(comp.bedrooms - leadBedrooms);
+    score += Math.max(0, 1 - roomDiff / 3) * 30;
+    factors += 30;
+  }
+  // Distance (30% weight)
+  if (comp.distance_km != null) {
+    score += Math.max(0, 1 - comp.distance_km / Math.max(maxDistance, 5)) * 30;
+    factors += 30;
+  }
+  return factors > 0 ? Math.round((score / factors) * 100) : 50;
+}
+
+function getPriceColor(compPricePerSqm: number | undefined, leadPricePerSqm: number | null): string {
+  if (!compPricePerSqm || !leadPricePerSqm) return "text-foreground";
+  const diff = (compPricePerSqm - leadPricePerSqm) / leadPricePerSqm;
+  if (diff < -0.1) return "text-emerald-600";
+  if (diff > 0.1) return "text-accent";
+  return "text-muted-foreground";
+}
+
+const ComparableCard: React.FC<{
+  comp: Comparable; leadBedrooms?: number | null; leadBathrooms?: number | null;
+  leadBuiltSize?: number | null; leadPricePerSqm?: number | null; maxDistance: number;
+}> = ({ comp, leadBedrooms, leadBuiltSize, leadPricePerSqm, maxDistance }) => {
   const imageUrl = comp.image_urls?.[0] || "/placeholder.svg";
-  const matches = [
-    { label: "Bedrooms", value: comp.bedrooms, match: comp.bedrooms != null && comp.bedrooms === leadBedrooms, icon: <Bed size={14} /> },
-    { label: "Bathrooms", value: comp.bathrooms, match: comp.bathrooms != null && comp.bathrooms === leadBathrooms, icon: <Bath size={14} /> },
-    { label: "Built size", value: comp.built_size_sqm ? `${comp.built_size_sqm} m²` : "—", match: comp.built_size_sqm != null && leadBuiltSize != null && Math.abs(comp.built_size_sqm - leadBuiltSize) < leadBuiltSize * 0.15, icon: <Home size={14} /> },
-    { label: "Distance", value: comp.distance_km != null ? `${comp.distance_km.toFixed(1)} km` : "—", match: false, icon: <MapPin size={14} /> },
-  ];
+  const similarity = calcSimilarity(comp, leadBuiltSize || null, leadBedrooms || null, maxDistance);
+  const priceColorClass = getPriceColor(comp.price_per_sqm, leadPricePerSqm || null);
+
   return (
-    <div className="flex-shrink-0 w-[280px] h-[380px] cursor-pointer" style={{ perspective: "1000px" }} onClick={() => setFlipped(!flipped)}>
-      <div className="relative w-full h-full transition-transform duration-500" style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "none" }}>
-        <div className="absolute inset-0 rounded-lg overflow-hidden bg-card border border-border shadow-sm" style={{ backfaceVisibility: "hidden" }}>
-          <div className="h-[200px] bg-muted overflow-hidden"><img src={imageUrl} alt={comp.address || "Comparable"} className="w-full h-full object-cover" /></div>
-          <div className="p-5">
-            {comp.price && <p className="text-2xl font-light tracking-tight text-foreground">{compFmt(comp.price)}</p>}
-            {comp.price_per_sqm && <p className="text-xs text-muted-foreground mt-1">{compFmt(comp.price_per_sqm)}/m²</p>}
-            <p className="text-sm text-foreground/80 mt-3 line-clamp-2">{comp.address || "Address unavailable"}</p>
-            <p className="text-xs text-muted-foreground mt-1">{comp.city}</p>
-            <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-4">Tap to compare →</p>
-          </div>
+    <div className="rounded-lg overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
+      <div className="h-[180px] bg-muted overflow-hidden">
+        <img src={imageUrl} alt={comp.address || "Comparable"} className="w-full h-full object-cover" loading="lazy" />
+      </div>
+      <div className="p-5">
+        <p className="text-xs text-muted-foreground capitalize">
+          {comp.property_type?.replace(/-/g, " ") || "Property"} · {comp.bedrooms ?? "—"} bed · {comp.bathrooms ?? "—"} bath
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {comp.built_size_sqm ? `${comp.built_size_sqm} m² built` : ""}
+        </p>
+
+        <div className="flex items-baseline justify-between mt-3">
+          {comp.price && <p className="text-xl font-light tracking-tight text-foreground">{compFmt(comp.price)}</p>}
+          {comp.price_per_sqm && <p className={`text-xs font-medium ${priceColorClass}`}>{compFmt(comp.price_per_sqm)}/m²</p>}
         </div>
-        <div className="absolute inset-0 rounded-lg overflow-hidden bg-card border border-border shadow-sm p-6 flex flex-col" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">How It Compares</p>
-          <div className="flex-1 space-y-5">
-            {matches.map((m) => (
-              <div key={m.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">{m.icon}<span className="text-sm">{m.label}</span></div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-foreground">{m.value ?? "—"}</span>
-                  {m.match && <span className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center"><Check size={12} className="text-accent" /></span>}
-                </div>
-              </div>
-            ))}
+
+        <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
+          <MapPin size={12} />
+          <span>{comp.distance_km != null ? `${comp.distance_km.toFixed(1)} km away` : ""}</span>
+          {comp.city && <span>· {comp.city}</span>}
+        </div>
+
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[0.6rem] uppercase tracking-[0.15em] text-muted-foreground">Similarity</span>
+            <span className="text-xs font-semibold text-foreground">{similarity}%</span>
           </div>
-          {comp.property_type && <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-4">{comp.property_type.replace(/-/g, " ")}</p>}
-          <p className="text-[0.55rem] uppercase tracking-[0.15em] text-muted-foreground/50 mt-2">← Tap to flip back</p>
+          <Progress value={similarity} className="h-1.5" />
         </div>
       </div>
     </div>
   );
 };
 
-const ComparablePropertiesSection: React.FC<{ comparables: Comparable[] | null; leadBedrooms?: number | null; leadBathrooms?: number | null; leadBuiltSize?: number | null }> = ({ comparables, leadBedrooms, leadBathrooms, leadBuiltSize }) => {
+const ComparablePropertiesSection: React.FC<{
+  comparables: Comparable[] | null; leadBedrooms?: number | null;
+  leadBathrooms?: number | null; leadBuiltSize?: number | null; leadPricePerSqm?: number | null;
+}> = ({ comparables, leadBedrooms, leadBathrooms, leadBuiltSize, leadPricePerSqm }) => {
+  const [showAll, setShowAll] = useState(false);
   if (!comparables || comparables.length === 0) return null;
+
+  const maxDistance = Math.max(...comparables.map((c) => c.distance_km || 0), 1);
+  const displayed = showAll ? comparables : comparables.slice(0, 6);
+
   return (
     <section className="py-16 md:py-24">
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <div className="flex items-baseline justify-between mb-10">
+        <div className="flex items-baseline justify-between mb-3">
           <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Comparable Properties</p>
           <p className="text-xs text-muted-foreground">{comparables.length} found</p>
         </div>
-        <div className="flex gap-5 overflow-x-auto pb-4 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
-          {comparables.map((comp, i) => (
-            <div key={comp.id || i} className="snap-start">
-              <ComparableCard comp={comp} leadBedrooms={leadBedrooms} leadBathrooms={leadBathrooms} leadBuiltSize={leadBuiltSize} />
+        <p className="text-sm text-muted-foreground mb-10">Similar properties currently on the market near you</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {displayed.map((comp, i) => (
+            <ComparableCard
+              key={comp.id || i} comp={comp}
+              leadBedrooms={leadBedrooms} leadBathrooms={leadBathrooms}
+              leadBuiltSize={leadBuiltSize} leadPricePerSqm={leadPricePerSqm}
+              maxDistance={maxDistance}
+            />
+          ))}
+        </div>
+
+        {comparables.length > 6 && !showAll && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="mt-8 text-sm text-accent hover:text-accent/80 font-medium transition-colors"
+          >
+            View all {comparables.length} comparable properties →
+          </button>
+        )}
+      </div>
+    </section>
+  );
+};
+
+// ── Area Comparison Section ──
+const AreaComparisonSection: React.FC<{
+  userPricePerSqm: number | null; userSize: number | null; userBedrooms: number | null;
+  comparables: Comparable[] | null;
+}> = ({ userPricePerSqm, userSize, userBedrooms, comparables }) => {
+  if (!comparables || comparables.length < 3) return null;
+
+  const validPrices = comparables.filter((c) => c.price_per_sqm && c.price_per_sqm > 0).map((c) => c.price_per_sqm!);
+  const validSizes = comparables.filter((c) => c.built_size_sqm && c.built_size_sqm > 0).map((c) => c.built_size_sqm!);
+  const validBedrooms = comparables.filter((c) => c.bedrooms != null).map((c) => c.bedrooms!);
+
+  const avgPrice = validPrices.length > 0 ? Math.round(validPrices.reduce((a, b) => a + b, 0) / validPrices.length) : null;
+  const avgSize = validSizes.length > 0 ? Math.round(validSizes.reduce((a, b) => a + b, 0) / validSizes.length) : null;
+  const avgBeds = validBedrooms.length > 0 ? +(validBedrooms.reduce((a, b) => a + b, 0) / validBedrooms.length).toFixed(1) : null;
+
+  const bars = [
+    userPricePerSqm && avgPrice ? {
+      label: "Price/m²",
+      userValue: `${compFmt(userPricePerSqm)}`,
+      areaValue: `${compFmt(avgPrice)}`,
+      pct: Math.min((userPricePerSqm / Math.max(avgPrice, 1)) * 100, 150),
+      diff: Math.round(((userPricePerSqm - avgPrice) / avgPrice) * 100),
+    } : null,
+    userSize && avgSize ? {
+      label: "Size",
+      userValue: `${userSize} m²`,
+      areaValue: `${avgSize} m²`,
+      pct: Math.min((userSize / Math.max(avgSize, 1)) * 100, 150),
+      diff: Math.round(((userSize - avgSize) / avgSize) * 100),
+    } : null,
+    userBedrooms != null && avgBeds != null ? {
+      label: "Bedrooms",
+      userValue: `${userBedrooms}`,
+      areaValue: `${avgBeds}`,
+      pct: Math.min((userBedrooms / Math.max(avgBeds, 1)) * 100, 150),
+      diff: Math.round(((userBedrooms - avgBeds) / avgBeds) * 100),
+    } : null,
+  ].filter(Boolean) as { label: string; userValue: string; areaValue: string; pct: number; diff: number }[];
+
+  if (bars.length === 0) return null;
+
+  return (
+    <section className="py-16 md:py-24">
+      <div className="max-w-2xl mx-auto px-6">
+        <div className="w-10 h-px bg-gold mb-8" />
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-10">
+          Your Property vs the Market
+        </p>
+
+        <div className="space-y-8">
+          {bars.map((bar) => (
+            <div key={bar.label}>
+              <div className="flex items-baseline justify-between mb-2">
+                <span className="text-sm font-medium text-foreground">{bar.label}</span>
+                <span className={`text-xs font-semibold ${bar.diff >= 0 ? "text-emerald-600" : "text-accent"}`}>
+                  {bar.diff >= 0 ? "+" : ""}{bar.diff}% {bar.diff >= 0 ? "above" : "below"} average
+                </span>
+              </div>
+              <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gold transition-all duration-700"
+                  style={{ width: `${Math.min(bar.pct / 1.5, 100)}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-1.5">
+                <span className="text-xs text-foreground font-medium">Yours: {bar.userValue}</span>
+                <span className="text-xs text-muted-foreground">Area avg: {bar.areaValue}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -231,30 +364,72 @@ const PropertySummaryCard: React.FC<{
   );
 };
 
+// ── Upgraded Valuation Result Card with Price Range Bar ──
 const ValuationResultCard: React.FC<{
-  estimatedLow: number; estimatedHigh: number; monthlyRentalLow: number; monthlyRentalHigh: number;
-  weeklyHighSeasonLow: number; weeklyHighSeasonHigh: number; comparableCount: number; city?: string;
-}> = ({ estimatedLow, estimatedHigh, monthlyRentalLow, monthlyRentalHigh, weeklyHighSeasonLow, weeklyHighSeasonHigh, comparableCount, city }) => (
-  <section className="py-16 md:py-24">
-    <div className="text-center max-w-2xl mx-auto px-6">
-      <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">Estimated Market Value</p>
-      <p className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-foreground">{fmt(estimatedLow)}</p>
-      <p className="text-3xl md:text-4xl font-light tracking-tight text-gold mt-3">— {fmt(estimatedHigh)}</p>
-      <p className="text-sm text-muted-foreground mt-8">Based on {comparableCount} comparable properties{city ? ` in ${city}` : ""}</p>
-    </div>
+  estimatedValue: number; estimatedLow: number; estimatedHigh: number;
+  monthlyRental: number; comparableCount: number; city?: string;
+}> = ({ estimatedValue, estimatedLow, estimatedHigh, monthlyRental, comparableCount, city }) => {
+  const confidenceLevel = comparableCount >= 15 ? "HIGH" : comparableCount >= 8 ? "MEDIUM" : "LOW";
+  const confidenceColor = confidenceLevel === "HIGH" ? "text-emerald-600 bg-emerald-50" : confidenceLevel === "MEDIUM" ? "text-amber-600 bg-amber-50" : "text-red-500 bg-red-50";
+  const confidenceText = confidenceLevel === "HIGH"
+    ? `Based on ${comparableCount} comparable properties within 5km`
+    : confidenceLevel === "MEDIUM"
+    ? `Based on ${comparableCount} comparable properties within 5km`
+    : "Limited comparable data available";
 
-    <div className="flex justify-center gap-12 md:gap-20 mt-16 md:mt-20">
-      <div className="text-center">
-        <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-2">Monthly Rental</p>
-        <p className="text-2xl md:text-3xl font-light tracking-tight text-foreground">{fmt(monthlyRentalLow)}<span className="text-muted-foreground"> – </span>{fmt(monthlyRentalHigh)}</p>
+  // Position of estimate on the range bar (0-100%)
+  const rangeSpan = estimatedHigh - estimatedLow;
+  const estimatePosition = rangeSpan > 0 ? ((estimatedValue - estimatedLow) / rangeSpan) * 100 : 50;
+
+  return (
+    <section className="py-16 md:py-24">
+      <div className="text-center max-w-2xl mx-auto px-6">
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">Estimated Market Value</p>
+        <p className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-foreground">{fmt(estimatedValue)}</p>
+
+        {/* Price Range Bar */}
+        <div className="mt-10 max-w-md mx-auto">
+          <div className="flex justify-between mb-2">
+            <span className="text-xs text-muted-foreground">{fmt(estimatedLow)}</span>
+            <span className="text-xs text-muted-foreground">{fmt(estimatedHigh)}</span>
+          </div>
+          <div className="relative h-3 bg-muted rounded-full">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gold/20 via-gold/40 to-gold/20" />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gold border-2 border-background shadow-md"
+              style={{ left: `calc(${estimatePosition}% - 8px)` }}
+            />
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground/60">Low</span>
+            <span className="text-[0.55rem] uppercase tracking-[0.1em] text-gold font-semibold">Est.</span>
+            <span className="text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground/60">High</span>
+          </div>
+        </div>
+
+        {/* Confidence Badge */}
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.6rem] uppercase tracking-[0.15em] font-semibold ${confidenceColor}`}>
+            Confidence: {confidenceLevel}
+          </span>
+          <div className="group relative">
+            <Info size={14} className="text-muted-foreground/50 cursor-help" />
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              Range represents ±15% based on comparable market data
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">{confidenceText}{city ? ` in ${city}` : ""}</p>
+
+        {/* Monthly Rental */}
+        <div className="mt-16">
+          <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-2">Estimated Monthly Rental</p>
+          <p className="text-2xl md:text-3xl font-light tracking-tight text-foreground">{fmt(monthlyRental)}</p>
+        </div>
       </div>
-      <div className="text-center">
-        <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-2">Weekly High Season</p>
-        <p className="text-2xl md:text-3xl font-light tracking-tight text-foreground">{fmt(weeklyHighSeasonLow)}<span className="text-muted-foreground"> – </span>{fmt(weeklyHighSeasonHigh)}</p>
-      </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const AIAnalysisSection: React.FC<{ content: string }> = ({ content }) => {
   const paragraphs = content.split("\n\n").filter(Boolean);
@@ -325,35 +500,221 @@ const MarketTrendsSection: React.FC<{ content: string; chartData: { month: strin
   </Collapsible>
 );
 
-const ProfessionalSpotlight: React.FC<{
-  companyName: string; tagline: string; rating: number; reviewCount: number;
-  onContact: () => void; onViewProfile: () => void;
-}> = ({ companyName, tagline, rating, reviewCount, onContact, onViewProfile }) => (
-  <section className="py-16 md:py-24">
-    <div className="max-w-xl mx-auto px-6 text-center">
-      <div className="w-10 h-px bg-gold mx-auto mb-8" />
-      <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Recommended Local Expert</p>
-      <div className="w-20 h-20 mx-auto bg-muted border border-border rounded-full flex items-center justify-center mb-5">
-        <Users className="text-muted-foreground/40" size={28} />
-      </div>
-      <h3 className="font-heading text-xl font-bold text-foreground">{companyName}</h3>
-      <p className="text-sm text-muted-foreground mt-1">{tagline}</p>
-      <div className="flex items-center justify-center gap-2 mt-3">
-        <div className="flex gap-0.5">
-          {Array.from({ length: rating }).map((_, i) => <Star key={i} size={14} className="fill-gold text-gold" />)}
+// ── Matched Agents Section ──
+interface MatchedAgent {
+  id: string; company_name: string; slug: string; logo_url: string | null;
+  tagline: string | null; bio: string | null; avg_rating: number | null;
+  total_reviews: number | null; is_verified: boolean | null;
+  languages: string[] | null; website: string | null; distance_km: number | null;
+}
+
+const AgentCard: React.FC<{ agent: MatchedAgent; onContact: (agent: MatchedAgent) => void }> = ({ agent, onContact }) => {
+  const initials = agent.company_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const rating = agent.avg_rating || 0;
+  const fullStars = Math.floor(rating);
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-6 flex flex-col items-center text-center">
+      {agent.logo_url ? (
+        <img src={agent.logo_url} alt={agent.company_name} className="w-16 h-16 rounded-full object-cover border border-border" />
+      ) : (
+        <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center text-lg font-semibold text-muted-foreground">
+          {initials}
         </div>
-        <span className="text-xs text-muted-foreground">{reviewCount} reviews</span>
-        <span className="inline-flex items-center gap-1 bg-accent/10 text-accent text-[0.55rem] uppercase tracking-[0.1em] font-semibold px-2 py-0.5">
-          <ShieldCheck size={10} /> Verified
-        </span>
+      )}
+
+      <div className="mt-4">
+        <div className="flex items-center justify-center gap-1.5">
+          <h3 className="font-heading text-base font-bold text-foreground">{agent.company_name}</h3>
+          {agent.is_verified && (
+            <ShieldCheck size={14} className="text-accent" />
+          )}
+        </div>
+        {agent.tagline && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{agent.tagline}</p>}
       </div>
-      <div className="flex justify-center gap-3 mt-8">
-        <Button onClick={onContact} className="bg-gold text-primary hover:bg-gold-dark">Contact {companyName.split(" ")[0]}</Button>
-        <Button variant="outline" onClick={onViewProfile}>View Profile</Button>
+
+      <div className="flex items-center gap-1.5 mt-3">
+        <div className="flex gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} size={12} className={i < fullStars ? "fill-gold text-gold" : "text-muted-foreground/30"} />
+          ))}
+        </div>
+        <span className="text-xs text-muted-foreground">{agent.total_reviews || 0} reviews</span>
+      </div>
+
+      {agent.distance_km != null && (
+        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+          <MapPin size={11} /> {agent.distance_km} km from property
+        </p>
+      )}
+
+      {agent.languages && agent.languages.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-1 mt-3">
+          {agent.languages.slice(0, 4).map((lang) => (
+            <span key={lang} className="text-[0.55rem] uppercase tracking-[0.1em] bg-muted px-2 py-0.5 rounded text-muted-foreground">{lang}</span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2 mt-5 w-full">
+        <Button onClick={() => onContact(agent)} className="bg-gold text-primary-foreground hover:bg-gold-dark w-full text-sm">
+          Contact {agent.company_name.split(" ")[0]}
+        </Button>
+        <Link to={`/agentes/${agent.slug}`}>
+          <Button variant="outline" className="w-full text-sm">View Profile</Button>
+        </Link>
       </div>
     </div>
-  </section>
-);
+  );
+};
+
+const ContactAgentModal: React.FC<{
+  agent: MatchedAgent | null; open: boolean; onClose: () => void; propertyAddress: string;
+}> = ({ agent, open, onClose, propertyAddress }) => {
+  const { toast } = useToast();
+  const [sending, setSending] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+
+  useEffect(() => {
+    if (open && propertyAddress) {
+      setForm((f) => ({
+        ...f,
+        message: `I valued my property on ValoraCasa at ${propertyAddress} and would like your expert opinion.`,
+      }));
+    }
+  }, [open, propertyAddress]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agent || !form.name || !form.email) return;
+    setSending(true);
+    const { error } = await supabase.from("agent_contact_requests").insert({
+      professional_id: agent.id,
+      name: form.name,
+      email: form.email,
+      phone: form.phone || null,
+      message: form.message || null,
+      interest: "valuation",
+    });
+    setSending(false);
+    if (error) {
+      toast({ title: "Error", description: "Could not send message. Please try again.", variant: "destructive" });
+    } else {
+      toast({ title: "Message Sent!", description: `${agent.company_name} will be in touch soon.` });
+      onClose();
+      setForm({ name: "", email: "", phone: "", message: "" });
+    }
+  };
+
+  if (!agent) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex items-center gap-3 mb-2">
+            {agent.logo_url ? (
+              <img src={agent.logo_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-muted-foreground">
+                {agent.company_name.slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <DialogTitle className="font-heading">Contact {agent.company_name}</DialogTitle>
+          </div>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="contact-name">Name *</Label>
+            <Input id="contact-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          </div>
+          <div>
+            <Label htmlFor="contact-email">Email *</Label>
+            <Input id="contact-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          </div>
+          <div>
+            <Label htmlFor="contact-phone">Phone</Label>
+            <Input id="contact-phone" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="contact-message">Message</Label>
+            <Textarea id="contact-message" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={3} />
+          </div>
+          <Button type="submit" disabled={sending} className="w-full bg-gold text-primary-foreground hover:bg-gold-dark">
+            {sending ? "Sending..." : "Send Message"}
+          </Button>
+          <p className="text-[0.6rem] text-muted-foreground/60 text-center">
+            Your contact details are shared with {agent.company_name} only.
+          </p>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const MatchedAgentsSection: React.FC<{ latitude: number | null; longitude: number | null; city: string | null; propertyAddress: string }> = ({
+  latitude, longitude, city, propertyAddress,
+}) => {
+  const [agents, setAgents] = useState<MatchedAgent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [contactAgent, setContactAgent] = useState<MatchedAgent | null>(null);
+
+  useEffect(() => {
+    if (!latitude || !longitude) { setLoading(false); return; }
+    supabase
+      .rpc("match_agents_by_location", { p_lat: latitude, p_lng: longitude, p_limit: 3 })
+      .then(({ data, error }) => {
+        if (!error && data) setAgents(data as MatchedAgent[]);
+        setLoading(false);
+      });
+  }, [latitude, longitude]);
+
+  if (loading) {
+    return (
+      <section className="py-16 md:py-24">
+        <div className="max-w-[1000px] mx-auto px-6 text-center">
+          <div className="animate-pulse text-muted-foreground text-sm">Finding local experts…</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (agents.length === 0) return null;
+
+  return (
+    <section className="py-16 md:py-24">
+      <div className="max-w-[1000px] mx-auto px-6">
+        <div className="w-10 h-px bg-gold mb-8" />
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-3">Recommended Local Experts</p>
+        <p className="text-sm text-muted-foreground mb-10">Matched based on proximity, reviews, and expertise</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {agents.map((agent) => (
+            <AgentCard key={agent.id} agent={agent} onContact={setContactAgent} />
+          ))}
+        </div>
+
+        {city && (
+          <p className="text-sm text-accent mt-8 text-center">
+            <Link to={`/agentes?location=${encodeURIComponent(city)}`} className="hover:underline">
+              See all agents in {city} →
+            </Link>
+          </p>
+        )}
+        <p className="text-[0.55rem] text-muted-foreground/50 text-center mt-3">
+          Rankings based on proximity, verified reviews, and platform activity
+        </p>
+
+        <ContactAgentModal
+          agent={contactAgent}
+          open={!!contactAgent}
+          onClose={() => setContactAgent(null)}
+          propertyAddress={propertyAddress}
+        />
+      </div>
+    </section>
+  );
+};
 
 const ValuationPredictionGame: React.FC<{ leadId: string; leadType: "sell" | "rent" }> = ({ leadId, leadType }) => {
   const { toast } = useToast();
@@ -459,6 +820,7 @@ interface LeadData {
   price_per_sqm: number | null;
   monthly_rental_estimate: number | null; analysis: string | null; market_trends: string | null; features: string | null;
   comparable_properties: any[] | null; status: string | null;
+  latitude: number | null; longitude: number | null;
 }
 
 const SellResult: React.FC = () => {
@@ -478,7 +840,7 @@ const SellResult: React.FC = () => {
     const fetchLead = async () => {
       const { data, error } = await supabase
         .from("leads_sell")
-        .select("id, address, city, property_type, built_size_sqm, plot_size_sqm, bedrooms, bathrooms, orientation, condition, views, year_built, energy_certificate, estimated_value, price_range_low, price_range_high, price_per_sqm, monthly_rental_estimate, analysis, market_trends, features, comparable_properties, status")
+        .select("id, address, city, property_type, built_size_sqm, plot_size_sqm, bedrooms, bathrooms, orientation, condition, views, year_built, energy_certificate, estimated_value, price_range_low, price_range_high, price_per_sqm, monthly_rental_estimate, analysis, market_trends, features, comparable_properties, status, latitude, longitude")
         .eq("id", id)
         .maybeSingle();
       if (cancelled) return;
@@ -507,14 +869,12 @@ const SellResult: React.FC = () => {
   const estimatedValue = lead?.estimated_value || Math.round(builtSize * 3500);
   const estimatedLow = lead?.price_range_low || Math.round(estimatedValue * 0.85);
   const estimatedHigh = lead?.price_range_high || Math.round(estimatedValue * 1.15);
-  const monthlyRentalLow = lead?.monthly_rental_estimate || Math.round(estimatedValue * 0.004);
-  const monthlyRentalHigh = Math.round(monthlyRentalLow * 1.5);
-  const weeklyHighLow = Math.round(monthlyRentalLow * 0.85);
-  const weeklyHighHigh = Math.round(monthlyRentalHigh * 0.75);
+  const monthlyRental = lead?.monthly_rental_estimate || Math.round(estimatedValue * 0.004);
   const comparableCount = (lead?.comparable_properties as any[])?.length || 0;
+  const propertyAddress = lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : "";
 
   const handleShare = () => {
-    const shareText = `My property at ${lead?.address || ""}${lead?.city ? `, ${lead.city}` : ""} is valued at ${fmt(estimatedLow)} – ${fmt(estimatedHigh)}.`;
+    const shareText = `My property at ${propertyAddress} is valued at ${fmt(estimatedValue)}.`;
     if (navigator.share) {
       navigator.share({ title: `Property Valuation – ${lead?.address || ""}`, text: shareText, url: window.location.href });
     } else {
@@ -535,10 +895,10 @@ const SellResult: React.FC = () => {
 
   const cardElement = (
     <ValuationTicketCard
-      address={lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : ""}
+      address={propertyAddress}
       city={lead?.city || undefined}
-      estimatedValue={fmt(estimatedLow)}
-      secondaryValue={fmt(estimatedHigh)}
+      estimatedValue={fmt(estimatedValue)}
+      secondaryValue={`${fmt(estimatedLow)} – ${fmt(estimatedHigh)}`}
       propertyType={lead?.property_type || undefined}
       leadId={id!}
       headline="VALUED"
@@ -565,15 +925,18 @@ const SellResult: React.FC = () => {
           
           <div className="w-full h-px bg-border" />
           
-          <ValuationResultCard estimatedLow={estimatedLow} estimatedHigh={estimatedHigh} monthlyRentalLow={monthlyRentalLow} monthlyRentalHigh={monthlyRentalHigh} weeklyHighSeasonLow={weeklyHighLow} weeklyHighSeasonHigh={weeklyHighHigh} comparableCount={comparableCount > 0 ? comparableCount : 47} city={lead?.city || undefined} />
+          <ValuationResultCard
+            estimatedValue={estimatedValue}
+            estimatedLow={estimatedLow}
+            estimatedHigh={estimatedHigh}
+            monthlyRental={monthlyRental}
+            comparableCount={comparableCount > 0 ? comparableCount : 15}
+            city={lead?.city || undefined}
+          />
           
           <div className="w-full h-px bg-border" />
           
           <AIAnalysisSection content={lead?.analysis || MOCK_ANALYSIS} />
-          
-          <div className="w-full h-px bg-border" />
-          
-          <MarketTrendsSection content={lead?.market_trends || MOCK_TRENDS} chartData={PRICE_TREND_DATA} />
           
           <div className="w-full h-px bg-border" />
 
@@ -582,7 +945,21 @@ const SellResult: React.FC = () => {
             leadBedrooms={lead?.bedrooms}
             leadBathrooms={lead?.bathrooms}
             leadBuiltSize={lead?.built_size_sqm}
+            leadPricePerSqm={lead?.price_per_sqm}
           />
+
+          <div className="w-full h-px bg-border" />
+
+          <AreaComparisonSection
+            userPricePerSqm={lead?.price_per_sqm || null}
+            userSize={lead?.built_size_sqm || null}
+            userBedrooms={lead?.bedrooms || null}
+            comparables={lead?.comparable_properties as any[] || null}
+          />
+
+          <div className="w-full h-px bg-border" />
+          
+          <MarketTrendsSection content={lead?.market_trends || MOCK_TRENDS} chartData={PRICE_TREND_DATA} />
           
           <div className="w-full h-px bg-border" />
 
@@ -590,7 +967,12 @@ const SellResult: React.FC = () => {
           
           <div className="w-full h-px bg-border" />
           
-          <ProfessionalSpotlight companyName="Costa Del Sol Premium Realty" tagline="Full-service luxury property experts since 2005" rating={5} reviewCount={127} onContact={() => toast({ title: "Contact Requested", description: "The agent will reach out to you shortly." })} onViewProfile={() => navigate("/agentes/costa-del-sol-premium-realty")} />
+          <MatchedAgentsSection
+            latitude={lead?.latitude || null}
+            longitude={lead?.longitude || null}
+            city={lead?.city || null}
+            propertyAddress={propertyAddress}
+          />
           
           <ValuationDisclaimer />
         </div>
