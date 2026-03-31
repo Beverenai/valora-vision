@@ -1,135 +1,106 @@
 
 
-## Plan: Agent Onboarding Flow (Full Build)
+## Plan: Result Page Upgrade — Price Range, Area Comparison & Agent Matching
 
-A complete B2B agent onboarding system with 3 new pages, authentication, an AI-powered profile generation edge function, and database updates.
+This upgrades the SellResult page with an enhanced valuation display, a new area comparison section, and real agent matching — replacing the hardcoded placeholder agent.
 
 ---
 
-### 1. Database Migration
+### 1. Database: Agent Matching RPC Function
 
-**Alter `professionals` table:**
-- Ensure `user_id` references `auth.users(id)` (currently nullable — keep nullable but populate on signup)
+Create a new migration with a `match_agents_by_location` RPC function:
 
-**Create `user_roles` table** (required for admin vs agent access):
 ```sql
-CREATE TYPE public.app_role AS ENUM ('admin', 'agent', 'user');
-CREATE TABLE public.user_roles (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  role app_role NOT NULL,
-  UNIQUE (user_id, role)
-);
--- RLS + security definer function has_role()
+CREATE OR REPLACE FUNCTION match_agents_by_location(
+  p_lat double precision,
+  p_lng double precision,
+  p_limit integer DEFAULT 3
+) RETURNS TABLE (
+  id uuid, company_name text, slug text, logo_url text,
+  tagline text, bio text, avg_rating numeric, total_reviews integer,
+  is_verified boolean, languages text[], website text,
+  distance_km double precision
+)
 ```
 
-**Add RLS policies to `professionals`:**
-- Agents can UPDATE their own row (`user_id = auth.uid()`)
-- Agents can INSERT if they don't already have a profile
+This queries `professionals` joined with `professional_zones` → `zones` (which have `center_lat`/`center_lng`), calculates distance using the Haversine formula, and returns the closest active professionals sorted by rating and proximity.
 
-**Add INSERT policy to `agent_team_members`:**
-- Agents can insert/update/delete team members for their own professional_id
+No new tables needed — all data exists.
 
 ---
 
-### 2. Authentication Setup
+### 2. Upgrade: `ValuationResultCard` → Price Range Bar
 
-- Use `cloud--configure_auth` to enable email/password auth
-- Create `src/pages/ProLogin.tsx` — simple login/signup form for agents
-- Create `src/pages/ResetPassword.tsx` — password reset page
-- On signup during onboarding: create auth user, assign `agent` role, link to `professionals` row
-
----
-
-### 3. Edge Function: `onboard-agency`
-
-**`supabase/functions/onboard-agency/index.ts`**
-
-Input: `{ name, email, website, address, phone }`
-
-Processing pipeline:
-1. **If website provided**: Use Firecrawl (already connected) to scrape the website → extract logo, team members, social links from the HTML/content
-2. **Lovable AI** (gemini-3-flash-preview): Generate a 2-3 sentence agency description from the scraped content + name + location
-3. **Google Places API** (`VITE_GOOGLE_MAPS_API_KEY`): Search for the business by name + address → fetch rating, review count
-4. **Geocode** the office address using Google Geocoding API
-
-Output: JSON with `logo_url`, `description`, `team[]`, `social{}`, `google_rating`, `google_review_count`, `languages[]`, `lat`, `lng`
+Replace the current two-line price display with:
+- Large centered estimated value (midpoint)
+- Visual range bar showing low–estimate–high with a dot marker
+- Confidence badge (green HIGH / amber MEDIUM / red LOW) based on comparable count
+- Tooltip explaining ±15% range
+- Keep monthly rental and weekly high season below
 
 ---
 
-### 4. New Pages
+### 3. New Section: `AreaComparisonSection`
 
-**`src/pages/ProLanding.tsx`** (`/pro`)
-- Hero section with headline, subhead, CTA button
-- "How it works" 3-step visual
-- Pricing cards (3 tiers: Basic €149, Premium €299, Elite €499) with feature comparison
-- Social proof section with live valuation count from DB
-- FAQ accordion (5 questions)
-- Footer CTA
+Insert after Comparable Properties, before Market Trends. Three horizontal comparison bars:
 
-**`src/pages/ProOnboard.tsx`** (`/pro/onboard`)
-- 3-step wizard using existing `useFormWizard` hook pattern
-- **Step 1**: Form fields (agency name, your name, email, phone, website, office address with Google autocomplete)
-- **Step 2**: AI progress screen — animated checklist items appearing one by one. Calls `onboard-agency` edge function. Auto-advances when done. "Skip" link as fallback.
-- **Step 3**: Live profile preview (reuses AgentProfile layout) with inline edit capabilities. Logo/cover upload, editable description textarea, team member add/remove, service area multi-select, language multi-select, social link inputs.
-- "Publish" button: creates Supabase Auth account → inserts `professionals` row → inserts `user_roles` → redirects to success
+- **Price/m²**: user's `price_per_sqm` vs area median (calculated from comparables)
+- **Size**: user's `built_size_sqm` vs area average
+- **Bedrooms**: user's bedrooms vs area average
 
-**`src/pages/ProOnboardSuccess.tsx`** (`/pro/onboard/success`)
-- Welcome screen with confetti
-- Link to view profile (`/agentes/:slug`)
-- Link to choose plan
-- Next steps checklist
+Each bar shows the user's value, area average, and percentage difference with color coding (green = above average, terracotta = below).
+
+Data source: computed client-side from the `comparable_properties` array already stored on the lead.
 
 ---
 
-### 5. Routes
+### 4. Upgrade: `ProfessionalSpotlight` → `MatchedAgentsSection`
 
-Add to `src/App.tsx`:
-```tsx
-<Route path="/pro" element={<ProLanding />} />
-<Route path="/pro/onboard" element={<ProOnboard />} />
-<Route path="/pro/onboard/success" element={<ProOnboardSuccess />} />
-<Route path="/pro/login" element={<ProLogin />} />
-<Route path="/reset-password" element={<ResetPassword />} />
+Replace the single hardcoded agent with a section showing up to 3 real agents:
+
+- On mount, call `supabase.rpc('match_agents_by_location', { p_lat, p_lng })` using the lead's coordinates
+- Each agent card: logo (initials fallback), name, tagline, star rating, review count, distance, languages, verified badge
+- Primary CTA: "Contact [Name]" → opens a contact modal
+- Secondary: "View Profile" → `/agentes/:slug`
+- Below cards: "See all agents in [city]" link
+- If no agents found: hide section gracefully
+
+**Contact Modal**: Dialog with name, email, phone, message (pre-filled with property address). Inserts into `agent_contact_requests`. Privacy note below submit.
+
+---
+
+### 5. Upgrade: AI Analysis Prompt
+
+In `calculate-valuation/index.ts`, enhance the analysis prompt to include real comparable data:
+
+```
+"Based on ${comparables.length} comparable properties within 5km...
+Comparable price range: €${min}–€${max}.
+Area median price/m²: €${medianPricePerSqm}.
+Your property's price/m² of €${pricePerSqm} is X% above/below the median..."
 ```
 
-Add "For Agents" link to Navbar.
+This makes the AI output data-driven instead of generic.
 
 ---
 
-### 6. Firecrawl Integration
+### 6. Comparable Cards Upgrade
 
-The prompt requires scraping agent websites. Check if Firecrawl connector is already linked; if not, connect it. The edge function will use `FIRECRAWL_API_KEY` to call the scrape API for extracting logo, team, and social links from the agency website.
+Update existing `ComparableCard` to add:
+- **Similarity score** progress bar (calculated from size match + room match + distance)
+- **Price color coding**: green if comp price/m² is lower, terracotta if higher, gray if within ±10%
+- Show 6 cards by default with "View all X" expandable
 
 ---
-
-### Files Created
-- `src/pages/ProLanding.tsx`
-- `src/pages/ProOnboard.tsx`
-- `src/pages/ProOnboardSuccess.tsx`
-- `src/pages/ProLogin.tsx`
-- `src/pages/ResetPassword.tsx`
-- `supabase/functions/onboard-agency/index.ts`
 
 ### Files Modified
-- `src/App.tsx` — add 5 new routes
-- `src/components/Navbar.tsx` — add "For Agents" link
-- Database migration (user_roles table, RLS policies)
 
-### Secrets Required
-- `LOVABLE_API_KEY` — already configured
-- `VITE_GOOGLE_MAPS_API_KEY` — already configured (will use for Places + Geocoding in edge function; need to also add as a runtime secret)
-- `FIRECRAWL_API_KEY` — needs connector check/link
+- `src/pages/SellResult.tsx` — upgrade ValuationResultCard, add AreaComparisonSection, replace ProfessionalSpotlight with MatchedAgentsSection + contact modal, upgrade ComparableCard
+- `supabase/functions/calculate-valuation/index.ts` — enhance AI prompt with real comp data
+- 1 new migration — `match_agents_by_location` RPC function
 
 ### Implementation Order
-1. Database migration (user_roles, RLS updates)
-2. Configure auth (email/password)
-3. Connect Firecrawl if needed
-4. Add Google Maps API key as runtime secret
-5. `onboard-agency` edge function
-6. `ProLanding.tsx` — B2B landing page
-7. `ProOnboard.tsx` — 3-step wizard
-8. `ProOnboardSuccess.tsx` — success page
-9. `ProLogin.tsx` + `ResetPassword.tsx` — auth pages
-10. Routes + Navbar update
+1. Database migration (agent matching RPC)
+2. Upgrade SellResult.tsx sections (all UI changes in one file)
+3. Upgrade AI prompt in edge function
 
