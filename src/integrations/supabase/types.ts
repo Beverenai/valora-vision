@@ -1529,6 +1529,23 @@ export type Database = {
         Returns: boolean
       }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      match_agents_by_location: {
+        Args: { p_lat: number; p_limit?: number; p_lng: number }
+        Returns: {
+          avg_rating: number
+          bio: string
+          company_name: string
+          distance_km: number
+          id: string
+          is_verified: boolean
+          languages: string[]
+          logo_url: string
+          slug: string
+          tagline: string
+          total_reviews: number
+          website: string
+        }[]
+      }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }
