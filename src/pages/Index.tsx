@@ -646,10 +646,10 @@ const Index = () => {
                 <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
               </div>
               <SectionLabel>Market Data</SectionLabel>
-              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
+              <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
                 {valuationType === "sell" ? "Recent Valuations" : "Recent Price Analyses"}
               </h2>
-              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
+              <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
                 {valuationType === "sell" ? "238 property valuations completed this week" : "185 price analyses completed this week"}
               </p>
             </div>
