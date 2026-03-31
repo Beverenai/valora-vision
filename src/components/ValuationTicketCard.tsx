@@ -180,7 +180,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       cursiveSize: "text-[2rem] md:text-[2.8rem] lg:text-[3.5rem]",
       resultCursiveSize: "text-[1.8rem] md:text-[3rem] lg:text-[4rem]",
       priceSize: "text-[1.6rem] md:text-[2.5rem] lg:text-[3.5rem]",
-      barcodeHeight: "h-[35px] md:h-[55px] lg:h-[70px]",
+      
     },
   }[size];
 
