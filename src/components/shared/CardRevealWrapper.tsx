@@ -296,6 +296,13 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
   const [phase, setPhase] = useState<"sealed" | "tearing" | "sliding" | "revealed">("sealed");
   const [dragProgress, setDragProgress] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showTapHint, setShowTapHint] = useState(false);
+
+  useEffect(() => {
+    if (phase !== "sealed") return;
+    const timer = setTimeout(() => setShowTapHint(true), 3000);
+    return () => clearTimeout(timer);
+  }, [phase]);
   const [cardTilt, setCardTilt] = useState({ x: 0, y: 0 });
   const cardContainerRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
