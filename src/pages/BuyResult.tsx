@@ -186,7 +186,7 @@ const BuyResult: React.FC = () => {
             </div>
 
             {/* Asking price */}
-            <p className="text-[0.6rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-1">Asking Price</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Asking Price</p>
             <p className="text-4xl md:text-5xl font-light tracking-tight text-foreground">{fmt(askingPrice)}</p>
 
             {/* Score badge */}
