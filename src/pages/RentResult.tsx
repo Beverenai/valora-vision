@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { useParams, useNavigate } from "react-router-dom";
 
 import ValuationTicketCard from "@/components/ValuationTicketCard";
@@ -115,6 +116,7 @@ const RentResult: React.FC = () => {
   );
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <CardRevealWrapper accentType="rent" cardElement={cardElement} loading={loading}>
         <div className="max-w-[1000px] mx-auto">
@@ -122,6 +124,7 @@ const RentResult: React.FC = () => {
         </div>
       </CardRevealWrapper>
     </div>
+    </ErrorBoundary>
   );
 };
 

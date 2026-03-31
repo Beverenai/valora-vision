@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
@@ -101,6 +102,7 @@ export default function AgentProfile() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [zones, setZones] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -115,6 +117,7 @@ export default function AgentProfile() {
 
     async function load() {
       setLoading(true);
+      setError(false);
 
       // Fetch professional
       const { data: prof, error: profError } = await supabase
@@ -124,7 +127,7 @@ export default function AgentProfile() {
         .single();
       console.log("[AgentProfile] slug query:", slug, "result:", prof, "error:", profError);
 
-      if (!prof) { setLoading(false); return; }
+      if (profError || !prof) { setLoading(false); setError(true); return; }
       setProfessional(prof as unknown as Professional);
 
       // Fetch team, reviews, zones in parallel
@@ -207,14 +210,24 @@ export default function AgentProfile() {
     );
   }
 
-  if (!professional) {
+  if (error || !professional) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <h2 className="text-xl font-semibold text-foreground">Agente no encontrado</h2>
-          <p className="text-muted-foreground text-center max-w-md">No pudimos encontrar un perfil con esta dirección. Puede que el perfil aún no esté publicado.</p>
-          <Button asChild variant="outline"><Link to="/">Volver al inicio</Link></Button>
+          <h2 className="text-xl font-semibold text-foreground">{error ? "Something went wrong" : "Agente no encontrado"}</h2>
+          <p className="text-muted-foreground text-center max-w-md">
+            {error
+              ? "We couldn't load this profile. Please try again."
+              : "No pudimos encontrar un perfil con esta dirección. Puede que el perfil aún no esté publicado."}
+          </p>
+          {error ? (
+            <Button variant="outline" onClick={() => { setError(false); setLoading(true); /* re-trigger useEffect */ window.location.reload(); }}>
+              Retry
+            </Button>
+          ) : (
+            <Button asChild variant="outline"><Link to="/">Volver al inicio</Link></Button>
+          )}
         </div>
       </div>
     );
@@ -261,6 +274,7 @@ export default function AgentProfile() {
   );
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -448,9 +462,9 @@ export default function AgentProfile() {
             )}
 
             {/* Service Areas */}
-            {zones.length > 0 && (
-              <section>
-                <p className={SECTION_LABEL}>SERVICE AREAS</p>
+            <section>
+              <p className={SECTION_LABEL}>SERVICE AREAS</p>
+              {zones.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {zones.map(z => (
                     <Badge key={z.id} variant="outline" className="text-sm px-3 py-1.5">
@@ -459,8 +473,10 @@ export default function AgentProfile() {
                     </Badge>
                   ))}
                 </div>
-              </section>
-            )}
+              ) : (
+                <p className="text-sm text-muted-foreground">Service areas not specified</p>
+              )}
+            </section>
 
             {/* Reviews */}
             <section>
@@ -555,5 +571,6 @@ export default function AgentProfile() {
 
       <Footer />
     </div>
+    </ErrorBoundary>
   );
 }
