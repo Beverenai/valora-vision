@@ -170,8 +170,8 @@ const Index = () => {
           className="min-h-[75vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
           style={{
             background: isSell
-              ? 'linear-gradient(180deg, hsl(21 62% 53% / 0.06) 0%, transparent 60%)'
-              : 'linear-gradient(180deg, hsl(210 60% 45% / 0.06) 0%, transparent 60%)'
+              ? 'linear-gradient(180deg, hsl(21 62% 53% / 0.18) 0%, hsl(30 80% 80% / 0.10) 50%, transparent 85%)'
+              : 'linear-gradient(180deg, hsl(210 60% 45% / 0.18) 0%, hsl(195 50% 70% / 0.10) 50%, transparent 85%)'
           }}
         >
           <div className="flex flex-col items-center text-center gap-4 mb-2 pt-6 md:pt-10">
