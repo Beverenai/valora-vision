@@ -322,7 +322,7 @@ const ProOnboard = () => {
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone *</Label>
-                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+34 600 000 000" />
+                    <Input id="phone" type="tel" autoComplete="off" value={phone} onChange={(e) => setPhone(e.target.value)} onFocus={(e) => e.target.select()} placeholder="+34 600 000 000" />
                   </div>
                 </div>
                 <div>
