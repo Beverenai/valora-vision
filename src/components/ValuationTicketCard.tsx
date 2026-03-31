@@ -484,15 +484,6 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
           </>
         )}
 
-        {/* Barcode for input mode */}
-        {hasInput && !isProcessing && (
-          <div className="mt-auto relative h-[35px] md:h-[45px] w-full">
-            <div className="h-full w-full" style={{ background: `repeating-linear-gradient(90deg, ${accentHsl} 0px, ${accentHsl} 2px, transparent 2px, transparent 4px, ${accentHsl} 4px, ${accentHsl} 8px, transparent 8px, transparent 9px)` }} />
-            <p className="absolute -bottom-3 left-0 w-full text-center text-[0.5rem] tracking-[3px] text-foreground/60">
-              VALORACASA
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Stub */}
