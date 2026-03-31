@@ -425,7 +425,7 @@ const ValuationResultCard: React.FC<{
 
         {/* Monthly Rental */}
         <div className="mt-16">
-          <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-2">Estimated Monthly Rental</p>
+          <p className="text-[0.55rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-2">Estimated Monthly Rental</p>
           <p className="text-2xl md:text-3xl font-light tracking-tight text-foreground">{fmt(monthlyRental)}</p>
         </div>
       </div>
