@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PartyPopper, ArrowRight, Eye, CreditCard, BarChart3 } from "lucide-react";
