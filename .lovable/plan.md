@@ -1,37 +1,61 @@
 
 
-## Plan: Mobile Responsiveness Polish
+## Plan: Empty States and Error Boundaries
 
-After reviewing all five pages, most already use responsive Tailwind classes (`grid-cols-1 md:grid-cols-*`, mobile tab bar, etc.). Here are the specific fixes needed:
+### Current State (already handled)
+- No reviews: already shows "Be the first to review [Name]" (line 527)
+- No team: already hides section (line 412)
+- Service areas: currently hides entirely when empty — needs a fallback message instead
 
-### 1. `/pro` Landing — Pricing cards (already responsive)
-**No fix needed.** Line 156 uses `grid md:grid-cols-3 gap-6` which stacks on mobile. Verified.
+### Changes
 
-### 2. `/pro/onboard` — Step 1 form + Step 2 animation
-**No fix needed.** Form fields use `grid-cols-1 sm:grid-cols-2` (line 393) so they go full-width on mobile. Step 2 animation is centered via `text-center` + `max-w-sm mx-auto` (lines 471, 475). Verified.
+**1. New file: `src/components/shared/ErrorBoundary.tsx`**
+- React class component error boundary
+- Catches render errors in children
+- Fallback UI: "Something went wrong. Please try again." with a Retry button that calls `this.setState({ hasError: false })` to re-render children
+- Accepts optional `fallback` prop for custom messages
 
-### 3. `/agentes/:slug` — Contact form + stats bar
-**Minor fix needed in `src/pages/AgentProfile.tsx`:**
-- **Stats bar** (line 330): Already has `overflow-x-auto` with `shrink-0` items — works fine.
-- **Contact form** (line 538): On mobile (`isMobile`), the contact form renders in the grid without the `sticky` class — correct. However, the 2-column grid `grid-cols-1 md:grid-cols-[1fr_340px]` (line 371) already stacks on mobile, placing the form below content. This works.
-- **Hero buttons** (line 309): The "Contact" and "Website" buttons don't wrap well on small screens. Change `flex gap-3` to `flex flex-wrap gap-3` to prevent overflow.
+**2. `src/pages/AgentProfile.tsx`**
+- Wrap the main content (below Navbar) in `<ErrorBoundary>`
+- Add an `error` state to the data-loading logic; if `profError` occurs, show error state with retry button instead of just silently failing
+- Service areas (line 451): change from hiding entirely to showing "Service areas not specified" when `zones.length === 0` and the professional has no `service_zones`
 
-### 4. `/agentes` Directory — Card grid
-**No fix needed.** Line uses `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` — single column on mobile. Verified.
+**3. `src/pages/SellResult.tsx`**
+- Wrap the main result content in `<ErrorBoundary>`
+- The existing polling/error logic already shows toast on failure; add a visible error state with retry when fetch fails permanently
 
-### 5. `/pro/dashboard` — Bottom tab bar
-**No fix needed.** Already implemented: `isMobile` check (line 568) renders `MobileTabBar` with `fixed bottom-0` tab bar showing 4 items, and hides the sidebar. Content has `pb-20` to avoid overlap.
+**4. `src/pages/RentResult.tsx`**
+- Wrap main content in `<ErrorBoundary>`
 
----
+### ErrorBoundary Component
+```tsx
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="text-center py-16">
+          <AlertTriangle className="mx-auto mb-3 text-muted-foreground" />
+          <p>Something went wrong. Please try again.</p>
+          <Button onClick={() => this.setState({ hasError: false })}>Retry</Button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+```
 
-### Summary of Changes
+### AgentProfile Error + Service Areas Changes
+- Line 127: instead of just `return` on error, set an `error` state
+- Render error state with retry button that re-calls `load()`
+- Line 451: replace `{zones.length > 0 && (...)}` with always-show section: if zones empty, render "Service areas not specified" text
 
-**File: `src/pages/AgentProfile.tsx` — Line 309**
-- Change `<div className="flex gap-3 shrink-0">` to `<div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">`
-- This prevents the hero CTA buttons from overflowing on narrow screens
-
-That's the only fix needed. All other pages already handle mobile correctly.
-
-### Files Modified
-- `src/pages/AgentProfile.tsx` (1 line change)
+### Files
+- **New**: `src/components/shared/ErrorBoundary.tsx`
+- **Modified**: `src/pages/AgentProfile.tsx`, `src/pages/SellResult.tsx`, `src/pages/RentResult.tsx`
 
