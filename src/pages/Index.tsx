@@ -273,10 +273,10 @@ const Index = () => {
               className="text-center mb-8 md:mb-16"
             >
               <SectionLabel>How It Works</SectionLabel>
-              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3">
+              <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
                 Three Simple Steps
               </h2>
-              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
+              <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
                 {isSell
                   ? "From address to valuation in under two minutes"
                   : "From listing link to price analysis in seconds"}
