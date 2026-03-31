@@ -170,10 +170,11 @@ export const MatchedAgentsSection: React.FC<{ latitude: number | null; longitude
   }
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-3">Recommended Local Experts</p>
+        <SectionLabel className="mb-2">Recommended Local Experts</SectionLabel>
+        <h2 className="font-serif text-2xl sm:text-3xl mb-2">Local Agents</h2>
         <p className="text-sm text-muted-foreground mb-10">Matched based on proximity, reviews, and expertise</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {agents.map((agent) => <AgentCard key={agent.id} agent={agent} onContact={setContactAgent} />)}
