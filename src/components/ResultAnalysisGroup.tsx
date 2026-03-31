@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
+import { SectionLabel } from "@/components/ui/SectionLabel";
 import {
   Waves, Car, ParkingCircle, Fence, TreePine, Dumbbell, ArrowUpDown, Wind, Flame,
   Shield, Warehouse, Sun, Eye, Grape, ChefHat, Tv, Snowflake, Droplets, Lock, Wifi, MapPin,
@@ -41,10 +42,11 @@ export const PropertyFeaturesSection: React.FC<{ features: string | null }> = ({
   const items = features.split(",").map((f) => f.trim()).filter(Boolean);
   if (items.length === 0) return null;
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-10">What Makes It Special</p>
+        <SectionLabel className="mb-2">What Makes It Special</SectionLabel>
+        <h2 className="font-serif text-2xl sm:text-3xl mb-6">Property Features</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-6">
           {items.map((feature) => {
             const Icon = getFeatureIcon(feature);
@@ -152,14 +154,15 @@ export const ComparablePropertiesSection: React.FC<{
   const displayed = showAll ? comparables : comparables.slice(0, 6);
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <div className="flex items-baseline justify-between mb-3">
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Comparable Properties</p>
+        <div className="flex items-baseline justify-between mb-2">
+          <SectionLabel className="mb-0">Comparable Properties</SectionLabel>
           <p className="text-xs text-muted-foreground">{comparables.length} found</p>
         </div>
-        <p className="text-sm text-muted-foreground mb-10">Similar properties currently on the market near you</p>
+        <h2 className="font-serif text-2xl sm:text-3xl mb-2">Similar Properties</h2>
+        <p className="text-sm text-muted-foreground mb-10">Currently on the market near you</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {displayed.map((comp, i) => (
             <ComparableCard
@@ -216,10 +219,11 @@ export const AreaComparisonSection: React.FC<{
   if (bars.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-10">Your Property vs the Market</p>
+        <SectionLabel className="mb-2">Your Property vs the Market</SectionLabel>
+        <h2 className="font-serif text-2xl sm:text-3xl mb-6">Area Comparison</h2>
         <div className="space-y-8">
           {bars.map((bar) => (
             <div key={bar.label}>
@@ -251,11 +255,11 @@ import { ChevronDown } from "lucide-react";
 
 export const MarketTrendsSection: React.FC<{ content: string; chartData: { month: string; price: number }[] }> = ({ content, chartData }) => (
   <Collapsible>
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-3xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
         <div className="flex items-center justify-between">
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Market Trends</p>
+          <SectionLabel className="mb-0">Market Trends</SectionLabel>
           <CollapsibleTrigger asChild>
             <button className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 font-medium transition-colors">
               View trends <ChevronDown size={14} className="transition-transform data-[state=open]:rotate-180" />

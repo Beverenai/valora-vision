@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ShieldCheck, Star, MapPin, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 
 // ── Types ──
@@ -157,10 +158,10 @@ export const MatchedAgentsSection: React.FC<{ latitude: number | null; longitude
 
   if (agents.length === 0) {
     return (
-      <section className="py-16 md:py-24">
+      <section className="py-8 sm:py-12 border-b border-border/50">
         <div className="max-w-[1000px] mx-auto px-6 text-center">
           <div className="w-10 h-px bg-gold mx-auto mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-3">Recommended Local Experts</p>
+          <SectionLabel>Recommended Local Experts</SectionLabel>
           <p className="text-sm text-muted-foreground mb-6">Local agents coming soon. Want to be featured here?</p>
           <Link to="/pro"><Button variant="outline" className="rounded-full">Join as an Agent</Button></Link>
         </div>
@@ -169,10 +170,11 @@ export const MatchedAgentsSection: React.FC<{ latitude: number | null; longitude
   }
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-3">Recommended Local Experts</p>
+        <SectionLabel className="mb-2">Recommended Local Experts</SectionLabel>
+        <h2 className="font-serif text-2xl sm:text-3xl mb-2">Local Agents</h2>
         <p className="text-sm text-muted-foreground mb-10">Matched based on proximity, reviews, and expertise</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {agents.map((agent) => <AgentCard key={agent.id} agent={agent} onContact={setContactAgent} />)}
@@ -212,10 +214,10 @@ export const ValuationPredictionGame: React.FC<{ leadId: string; leadType: "sell
     : "Great instinct — the Costa del Sol market has been rising steadily.";
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-md mx-auto px-6 text-center">
         <div className="w-10 h-px bg-gold mx-auto mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-4">Your Prediction</p>
+        <SectionLabel>Your Prediction</SectionLabel>
         <p className="text-lg font-light text-foreground/80 mb-8">Did you think it would be…</p>
         {!submitted ? (
           <div className="flex justify-center gap-4">

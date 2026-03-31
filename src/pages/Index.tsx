@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize, TrendingUp, Users, Search, BarChart3, Link2, ShieldCheck, Target, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { SectionLabel } from "@/components/ui/SectionLabel";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
 
@@ -55,12 +56,7 @@ const TESTIMONIALS_BUY = [
   { quote: "Used it on every property we viewed. Saved us thousands in negotiations.", name: "Linda M.", location: "Fuengirola" },
 ];
 
-/* ─── SECTION LABEL ─── */
-const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <p className={cn("text-[0.65rem] tracking-[0.15em] uppercase font-semibold text-muted-foreground", className)}>
-    {children}
-  </p>
-);
+/* ─── SECTION LABEL ─── imported from @/components/ui/SectionLabel */
 
 /* ─── DIVIDER ─── */
 const SectionDivider = () => (

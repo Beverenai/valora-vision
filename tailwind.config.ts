@@ -12,6 +12,10 @@ export default {
         "2xl": "1400px",
       },
     },
+    screens: {
+      'xs': '400px',
+      'tablet': '900px',
+    },
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
