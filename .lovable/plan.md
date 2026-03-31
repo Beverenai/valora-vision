@@ -1,37 +1,38 @@
 
 
-## Plan: Fix Agent Profile "Not Found" Error
+## Plan: Fix Logo Display in Onboarding Step 3
 
-### Root Cause
-The `professionals` table is **empty** — the `publish-agent-profile` edge function either wasn't deployed or is failing silently. The function code itself is correct, so the fix involves:
+### Problem
+The logo `<img>` tag has no `onError` handler, so broken/unreachable URLs show a broken image icon. There's also no file upload capability for the logo.
 
-1. **Deploying the edge function** (it was created but may not have been deployed)
-2. **Hardening the error handling** on the client side so failures are visible
-3. **Making the profile page more resilient** with case-insensitive slug matching and better fallback UI
+### Changes in `src/pages/ProOnboard.tsx`
 
-### Changes
+**1. Add `onError` fallback to logo image (line 332)**
+- Add `onError` handler that hides the broken image and shows the initials fallback instead
+- Use a local state flag `logoFailed` to toggle between image and initials
 
-**1. Deploy `publish-agent-profile` edge function**
-- Use the deploy tool to ensure it's live
+**2. Add file upload for logo**
+- Add a hidden `<input type="file" accept="image/*">` element
+- Add an "Upload logo" button next to the current logo display
+- On file select, create an object URL (`URL.createObjectURL`) for immediate preview and update `logoUrl`
+- Reset `logoFailed` when a new logo is set
 
-**2. `src/pages/ProOnboard.tsx` — Better error logging**
-- Add `console.log` after the edge function call to log the full response
-- Log the generated slug before calling the function
-- Ensure the response body is checked properly (edge function returns `{ error: ... }` on failure with status 500, but `supabase.functions.invoke` doesn't throw on non-2xx — it returns the parsed body in `data`)
+**3. Improve initials fallback styling**
+- Use terracotta background (`bg-[#D4713B]`) with white text instead of the current `bg-primary/10`
 
-**3. `src/pages/AgentProfile.tsx` — Case-insensitive slug + better fallback**
-- Change `.eq("slug", slug)` to `.ilike("slug", slug)` for case-insensitive matching
-- Replace the bare "Agent not found" with a styled empty state showing a message and link back to the homepage
+### Implementation Detail
 
-**4. `supabase/functions/publish-agent-profile/index.ts` — Add more detailed error logging**
-- Log the incoming payload (sans password) for debugging
-- Log success with the created professional ID
+Add state:
+```tsx
+const [logoFailed, setLogoFailed] = useState(false);
+```
+
+Replace the logo section (lines 328-340) with:
+- Image with `onError={() => setLogoFailed(true)}`
+- Show initials when `!logoUrl || logoFailed`
+- Hidden file input + "Upload" button that sets `logoUrl` via `URL.createObjectURL` and resets `logoFailed`
+- Replace "Logo can be changed after publishing" text with the upload button
 
 ### Files Modified
-- `src/pages/ProOnboard.tsx` — add debug logging + better error handling
-- `src/pages/AgentProfile.tsx` — case-insensitive slug query + improved not-found UI
-- `supabase/functions/publish-agent-profile/index.ts` — add request/success logging
-
-### Deploy
-- Deploy `publish-agent-profile` edge function
+- `src/pages/ProOnboard.tsx`
 
