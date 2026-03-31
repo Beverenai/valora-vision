@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSEO } from "@/hooks/use-seo";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize, TrendingUp, Users, Search, BarChart3, Link2, ShieldCheck, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -754,6 +754,13 @@ const Index = () => {
             onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
           />
         </section>
+
+        {/* Agent CTA */}
+        <div className="text-center py-8">
+          <Link to="/pro" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Are you a real estate agent? <span className="underline font-medium">List your agency</span>
+          </Link>
+        </div>
 
       </div>
 
