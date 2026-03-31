@@ -313,7 +313,7 @@ const ProOnboard = () => {
                 </div>
                 <div>
                   <Label htmlFor="contactName">Your name *</Label>
-                  <Input id="contactName" value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="María García" />
+                  <Input id="contactName" autoComplete="off" value={contactName} onChange={(e) => setContactName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="María García" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
