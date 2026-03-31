@@ -111,8 +111,13 @@ const SealedWrapper: React.FC<{
 
   return (
     <div
-      className="relative w-[320px] h-[480px] sm:w-[360px] sm:h-[540px] mx-auto"
+      className="relative w-[320px] h-[480px] sm:w-[360px] sm:h-[540px] mx-auto cursor-pointer outline-none"
       style={{ perspective: "800px" }}
+      tabIndex={0}
+      role="button"
+      aria-label="Open valuation"
+      onClick={onTap}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
     >
       <div
         className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-[80%] h-6 rounded-full blur-xl"
