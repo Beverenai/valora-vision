@@ -234,6 +234,7 @@ const SealedWrapper: React.FC<{
             onDragX(0);
           }
         }}
+        onClick={(e) => e.stopPropagation()}
         style={{ x, right: "0px", top: "35%" }}
         className={cn(
           "absolute z-30 flex items-center gap-1.5 px-3 py-2 rounded-l-xl cursor-grab active:cursor-grabbing shadow-lg -translate-y-1/2",
