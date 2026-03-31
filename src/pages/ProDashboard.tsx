@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, User, MessageSquare, BarChart3, CreditCard, Settings,
   Star, Eye, TrendingUp, Loader2, ExternalLink, ChevronDown, Check, X,
-  Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus
+  Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
@@ -26,6 +26,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
+import { cn } from "@/lib/utils";
 
 type Section = "overview" | "profile" | "leads" | "analytics" | "subscription";
 
@@ -63,16 +65,35 @@ interface Lead {
   status: string;
 }
 
-const navItems = [
-  { key: "overview" as Section, label: "Dashboard", icon: LayoutDashboard },
-  { key: "profile" as Section, label: "My Profile", icon: User },
-  { key: "leads" as Section, label: "Leads", icon: MessageSquare },
-  { key: "analytics" as Section, label: "Analytics", icon: BarChart3 },
-  { key: "subscription" as Section, label: "Subscription", icon: CreditCard },
+const navGroups = [
+  {
+    label: "Main",
+    items: [
+      { key: "overview" as Section, label: "Dashboard", icon: LayoutDashboard },
+      { key: "profile" as Section, label: "My Profile", icon: User },
+    ],
+  },
+  {
+    label: "Business",
+    items: [
+      { key: "leads" as Section, label: "Leads", icon: MessageSquare },
+      { key: "analytics" as Section, label: "Analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { key: "subscription" as Section, label: "Subscription", icon: CreditCard },
+    ],
+  },
 ];
 
+const allNavItems = navGroups.flatMap((g) => g.items);
+
 /* ─── Sidebar ─── */
-function DashboardSidebar({ active, onNav, companyName }: { active: Section; onNav: (s: Section) => void; companyName: string }) {
+function DashboardSidebar({ active, onNav, companyName, isVerified, badges }: {
+  active: Section; onNav: (s: Section) => void; companyName: string; isVerified: boolean; badges?: Partial<Record<Section, number>>;
+}) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
@@ -81,49 +102,97 @@ function DashboardSidebar({ active, onNav, companyName }: { active: Section; onN
       <SidebarContent>
         {!collapsed && (
           <div className="p-4 border-b">
-            <p className="font-heading font-bold text-sm truncate">{companyName}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-heading font-bold text-sm truncate">{companyName}</p>
+              {isVerified && <Shield size={14} className="text-primary shrink-0" />}
+            </div>
             <p className="text-xs text-muted-foreground">Agent Dashboard</p>
           </div>
         )}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.key}>
-                  <SidebarMenuButton
-                    onClick={() => onNav(item.key)}
-                    className={active === item.key ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
-                  >
-                    <item.icon className="mr-2 h-4 w-4" />
-                    {!collapsed && <span>{item.label}</span>}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {navGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className="text-[0.6rem] uppercase tracking-widest">{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.key}>
+                    <SidebarMenuButton
+                      onClick={() => onNav(item.key)}
+                      className={cn(
+                        active === item.key
+                          ? "bg-primary/5 text-primary font-medium border-l-2 border-primary"
+                          : "hover:bg-muted/50"
+                      )}
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {!collapsed && (
+                        <span className="flex-1 flex items-center justify-between">
+                          {item.label}
+                          {badges?.[item.key] ? (
+                            <span className="text-[0.6rem] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                              {badges[item.key]}
+                            </span>
+                          ) : null}
+                        </span>
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
     </Sidebar>
   );
 }
 
-/* ─── Mobile Bottom Bar ─── */
-function MobileTabBar({ active, onNav }: { active: Section; onNav: (s: Section) => void }) {
-  const mobileItems = navItems.slice(0, 4);
+/* ─── Mobile Dropdown Nav ─── */
+function MobileDropdownNav({ active, onNav, badges }: { active: Section; onNav: (s: Section) => void; badges?: Partial<Record<Section, number>> }) {
+  const [open, setOpen] = useState(false);
+  const activeItem = allNavItems.find((i) => i.key === active);
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t flex justify-around py-2 md:hidden">
-      {mobileItems.map((item) => (
-        <button
-          key={item.key}
-          onClick={() => onNav(item.key)}
-          className={`flex flex-col items-center gap-0.5 text-xs px-2 py-1 rounded-md transition-colors ${
-            active === item.key ? "text-primary font-medium" : "text-muted-foreground"
-          }`}
-        >
-          <item.icon className="h-5 w-5" />
-          {item.label}
-        </button>
-      ))}
+    <div className="relative px-4 pt-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium bg-card border border-border"
+      >
+        <span className="flex items-center gap-2">
+          {activeItem && <activeItem.icon size={16} />}
+          {activeItem?.label}
+        </span>
+        <ChevronDown size={16} className={cn("transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="absolute top-full left-4 right-4 mt-1 rounded-xl border border-border bg-card shadow-lg z-50 py-1">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              <p className="px-4 py-1.5 text-[0.6rem] uppercase tracking-widest font-semibold text-muted-foreground">{group.label}</p>
+              {group.items.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => { onNav(item.key); setOpen(false); }}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors",
+                    active === item.key
+                      ? "text-primary bg-primary/5"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <item.icon size={15} />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {badges?.[item.key] ? (
+                    <span className="text-[0.6rem] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                      {badges[item.key]}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -140,34 +209,17 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads }: {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
 
-  const stats = [
-    { label: "Profile Views", value: impressionsCount, icon: Eye },
-    { label: "Leads Received", value: thisMonthLeads.length, icon: MessageSquare },
-    { label: "Average Rating", value: agent.avg_rating ? `${Number(agent.avg_rating).toFixed(1)}★` : "—", icon: Star },
-    { label: "Search Appearances", value: impressionsCount, icon: TrendingUp },
-  ];
-
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl font-bold">Welcome back, {agent.company_name}</h1>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((s) => (
-          <Card key={s.label}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <s.icon className="h-4 w-4" />
-                <span className="text-xs">{s.label}</span>
-              </div>
-              <p className="text-2xl font-bold">{s.value}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex items-center gap-3">
+        <h1 className="font-serif text-2xl font-bold">Welcome back, {agent.company_name}</h1>
+        {agent.is_verified && <Shield size={18} className="text-primary" />}
       </div>
 
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Recent Leads</CardTitle>
+            <CardTitle className="text-lg font-serif">Recent Leads</CardTitle>
             <Button variant="link" size="sm" onClick={onViewLeads}>View all leads</Button>
           </div>
         </CardHeader>
@@ -225,52 +277,25 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-xl font-bold">Edit Profile</h2>
-        <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")}>
+        <h2 className="font-serif text-xl font-bold">Edit Profile</h2>
+        <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")} className="rounded-full">
           <ExternalLink className="h-4 w-4 mr-1" /> Preview
         </Button>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <Label>Company Name</Label>
-          <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
-        </div>
-        <div>
-          <Label>Tagline</Label>
-          <Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} placeholder="Your elevator pitch" />
-        </div>
-        <div>
-          <Label>Description</Label>
-          <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} />
-        </div>
+        <div><Label>Company Name</Label><Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} /></div>
+        <div><Label>Tagline</Label><Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} placeholder="Your elevator pitch" /></div>
+        <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} /></div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>Phone</Label>
-            <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-          </div>
-          <div>
-            <Label>Website</Label>
-            <Input value={form.website} onChange={(e) => set("website", e.target.value)} />
-          </div>
+          <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+          <div><Label>Website</Label><Input value={form.website} onChange={(e) => set("website", e.target.value)} /></div>
         </div>
-        <div>
-          <Label>Office Address</Label>
-          <Input value={form.office_address} onChange={(e) => set("office_address", e.target.value)} />
-        </div>
+        <div><Label>Office Address</Label><Input value={form.office_address} onChange={(e) => set("office_address", e.target.value)} /></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label>Instagram</Label>
-            <Input value={form.instagram_url} onChange={(e) => set("instagram_url", e.target.value)} placeholder="https://instagram.com/..." />
-          </div>
-          <div>
-            <Label>Facebook</Label>
-            <Input value={form.facebook_url} onChange={(e) => set("facebook_url", e.target.value)} placeholder="https://facebook.com/..." />
-          </div>
-          <div>
-            <Label>LinkedIn</Label>
-            <Input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/..." />
-          </div>
+          <div><Label>Instagram</Label><Input value={form.instagram_url} onChange={(e) => set("instagram_url", e.target.value)} placeholder="https://instagram.com/..." /></div>
+          <div><Label>Facebook</Label><Input value={form.facebook_url} onChange={(e) => set("facebook_url", e.target.value)} placeholder="https://facebook.com/..." /></div>
+          <div><Label>LinkedIn</Label><Input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/..." /></div>
         </div>
       </div>
 
@@ -291,7 +316,7 @@ function LeadsSection({ leads, onUpdateStatus }: { leads: Lead[]; onUpdateStatus
 
   return (
     <div className="space-y-4">
-      <h2 className="font-heading text-xl font-bold">Leads</h2>
+      <h2 className="font-serif text-xl font-bold">Leads</h2>
       <div className="flex gap-2 flex-wrap">
         {["all", "new", "contacted", "converted"].map((s) => (
           <Button key={s} variant={filter === s ? "default" : "outline"} size="sm" onClick={() => setFilter(s)} className="capitalize rounded-full">
@@ -356,15 +381,10 @@ function AnalyticsSection({ impressions, leads }: { impressions: { date: string;
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading text-xl font-bold">Analytics</h2>
-      <div className="grid grid-cols-3 gap-4">
-        <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">Total Views</p><p className="text-2xl font-bold">{totalViews}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">Total Leads</p><p className="text-2xl font-bold">{totalLeads}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">Conversion</p><p className="text-2xl font-bold">{totalViews ? `${((totalLeads / totalViews) * 100).toFixed(1)}%` : "—"}</p></CardContent></Card>
-      </div>
+      <h2 className="font-serif text-xl font-bold">Analytics</h2>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Profile Views (30 days)</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base font-serif">Profile Views (30 days)</CardTitle></CardHeader>
         <CardContent>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -381,7 +401,7 @@ function AnalyticsSection({ impressions, leads }: { impressions: { date: string;
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Leads (30 days)</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base font-serif">Leads (30 days)</CardTitle></CardHeader>
         <CardContent>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -410,10 +430,10 @@ function AnalyticsSection({ impressions, leads }: { impressions: { date: string;
 function SubscriptionSection() {
   return (
     <div className="space-y-6 max-w-lg">
-      <h2 className="font-heading text-xl font-bold">Subscription</h2>
+      <h2 className="font-serif text-xl font-bold">Subscription</h2>
       <Card>
         <CardHeader>
-          <CardTitle>Free Plan</CardTitle>
+          <CardTitle className="font-serif">Free Plan</CardTitle>
           <CardDescription>Your current plan</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -447,32 +467,18 @@ const ProDashboard = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // title handled by useSEO
     checkAuthAndLoad();
   }, []);
 
   const checkAuthAndLoad = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/pro/login");
-      return;
-    }
+    if (!session) { navigate("/pro/login"); return; }
 
-    // Fetch agent profile
-    const { data: prof, error } = await supabase
-      .from("professionals")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .single();
-
-    if (error || !prof) {
-      navigate("/pro/onboard");
-      return;
-    }
+    const { data: prof, error } = await supabase.from("professionals").select("*").eq("user_id", session.user.id).single();
+    if (error || !prof) { navigate("/pro/onboard"); return; }
 
     setAgent(prof as unknown as Professional);
 
-    // Fetch leads + impressions in parallel
     const [leadsRes, impressionsRes] = await Promise.all([
       supabase.from("agent_contact_requests").select("*").eq("professional_id", prof.id).order("created_at", { ascending: false }),
       supabase.from("professional_impressions").select("created_at").eq("professional_id", prof.id),
@@ -480,11 +486,9 @@ const ProDashboard = () => {
 
     if (leadsRes.data) setLeads(leadsRes.data as unknown as Lead[]);
 
-    // Process impressions for count + chart
     const imps = impressionsRes.data || [];
     setImpressionsCount(imps.length);
 
-    // Group by day for last 30 days
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const dayMap: Record<string, number> = {};
@@ -513,7 +517,6 @@ const ProDashboard = () => {
 
     setImpressionsByDay(Object.entries(dayMap).map(([date, count]) => ({ date, count })));
     setLeadsByDay(Object.entries(leadDayMap).map(([date, count]) => ({ date, count })));
-
     setLoading(false);
   };
 
@@ -549,8 +552,32 @@ const ProDashboard = () => {
 
   if (!agent) return null;
 
+  const thisMonthLeads = leads.filter((l) => {
+    if (!l.created_at) return false;
+    const d = new Date(l.created_at);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  const newLeadsCount = leads.filter((l) => l.status === "new").length;
+
+  const statsTiles: StatTile[] = [
+    { key: "leads-total", label: "Total Leads", value: leads.length, icon: MessageSquare, color: "text-primary" },
+    { key: "leads-new", label: "New This Month", value: thisMonthLeads.length, icon: TrendingUp, color: "text-emerald-500" },
+    { key: "views", label: "Profile Views", value: impressionsCount, icon: Eye, color: "text-blue-500" },
+    { key: "rating", label: "Avg Rating", value: agent.avg_rating ? `${Number(agent.avg_rating).toFixed(1)}★` : "—", icon: Star, color: "text-amber-500" },
+  ];
+
+  const badges: Partial<Record<Section, number>> = {};
+  if (newLeadsCount > 0) badges.leads = newLeadsCount;
+
   const content = (
     <div className="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-y-auto">
+      {/* Stats bar */}
+      <div className="mb-6">
+        <StatsBar tiles={statsTiles} />
+      </div>
+
       {section === "overview" && (
         <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} />
       )}
@@ -571,10 +598,14 @@ const ProDashboard = () => {
     return (
       <div className="min-h-screen bg-background">
         <div className="border-b p-4">
-          <p className="font-heading font-bold text-sm">{agent.company_name}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-serif font-bold text-sm">{agent.company_name}</p>
+            {agent.is_verified && <Shield size={14} className="text-primary" />}
+          </div>
+          <p className="text-[0.6rem] uppercase tracking-widest text-muted-foreground">Agent Dashboard</p>
         </div>
+        <MobileDropdownNav active={section} onNav={setSection} badges={badges} />
         {content}
-        <MobileTabBar active={section} onNav={setSection} />
       </div>
     );
   }
@@ -582,11 +613,11 @@ const ProDashboard = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <DashboardSidebar active={section} onNav={setSection} companyName={agent.company_name} />
+        <DashboardSidebar active={section} onNav={setSection} companyName={agent.company_name} isVerified={!!agent.is_verified} badges={badges} />
         <div className="flex-1 flex flex-col">
           <header className="h-12 flex items-center border-b px-4">
             <SidebarTrigger className="mr-4" />
-            <span className="text-sm text-muted-foreground capitalize">{section}</span>
+            <span className="text-sm text-muted-foreground capitalize font-serif">{section}</span>
           </header>
           {content}
         </div>

@@ -4,11 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatRefCode } from "@/utils/referenceCode";
 import { Lock, ExternalLink, RefreshCw, Activity, Database, Zap, Users, AlertTriangle, CheckCircle, Clock, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 
 const ADMIN_PASSWORD = "valoracasa2024";
 
@@ -73,14 +75,14 @@ interface HealthData {
 
 // ─── Helper Components ────────────────────────────────────
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, dark }: { status: string; dark?: boolean }) {
   const colors: Record<string, string> = {
     completed: "bg-emerald-500/10 text-emerald-600",
     ready: "bg-emerald-500/10 text-emerald-600",
     success: "bg-emerald-500/10 text-emerald-600",
     running: "bg-blue-500/10 text-blue-600",
     processing: "bg-blue-500/10 text-blue-600",
-    pending: "bg-muted text-muted-foreground",
+    pending: dark ? "bg-white/10 text-white/60" : "bg-muted text-muted-foreground",
     failed: "bg-destructive/10 text-destructive",
   };
   return (
@@ -113,42 +115,59 @@ function StalenessIndicator({ lastScraped, tier }: { lastScraped: string | null;
   return <span className={`text-xs font-medium ${color}`}>{ago}</span>;
 }
 
-function HealthCard({ label, value, icon: Icon, color = "text-foreground" }: { label: string; value: number | string; icon: any; color?: string }) {
-  return (
-    <Card>
-      <CardContent className="p-4 flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-lg bg-muted flex items-center justify-center ${color}`}>
-          <Icon size={18} />
-        </div>
-        <div>
-          <p className="text-2xl font-bold text-foreground">{value}</p>
-          <p className="text-xs text-muted-foreground">{label}</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 // ─── Main Admin Component ─────────────────────────────────
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [dark, setDark] = useState(true);
+  const [section, setSection] = useState<AdminSection>("leads");
   const navigate = useNavigate();
+
+  // Stats data for the stats bar
+  const [leadCount, setLeadCount] = useState(0);
+  const [zoneCount, setZoneCount] = useState(0);
+  const [jobCount, setJobCount] = useState(0);
+  const [healthScore, setHealthScore] = useState("—");
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) setAuthenticated(true);
   };
 
+  // Fetch quick stats
+  useEffect(() => {
+    if (!authenticated) return;
+    const fetchStats = async () => {
+      const [sellRes, rentRes, buyRes, zonesRes, jobsRes] = await Promise.all([
+        supabase.from("leads_sell").select("id", { count: "exact", head: true }),
+        supabase.from("leads_rent").select("id", { count: "exact", head: true }),
+        supabase.from("buy_analyses").select("id", { count: "exact", head: true }),
+        supabase.from("zones").select("id", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("scrape_jobs").select("id", { count: "exact", head: true }).eq("status", "completed"),
+      ]);
+      setLeadCount((sellRes.count || 0) + (rentRes.count || 0) + (buyRes.count || 0));
+      setZoneCount(zonesRes.count || 0);
+      setJobCount(jobsRes.count || 0);
+    };
+    fetchStats();
+  }, [authenticated]);
+
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-5">
+      <div className="min-h-screen bg-[hsl(220,18%,9%)] flex items-center justify-center px-5">
         <div className="max-w-sm w-full flex flex-col items-center gap-6">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
             <Lock size={24} className="text-primary" />
           </div>
-          <h1 className="text-xl font-semibold text-foreground">Admin Access</h1>
+          <h1 className="text-xl font-serif font-semibold text-white">Admin Access</h1>
           <div className="w-full flex gap-2">
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password" onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+            />
             <Button onClick={handleLogin}>Enter</Button>
           </div>
         </div>
@@ -156,30 +175,57 @@ const Admin = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-semibold text-foreground mb-6">ValoraCasa Admin</h1>
-        <Tabs defaultValue="leads">
-          <TabsList className="mb-4">
-            <TabsTrigger value="leads"><Users size={14} className="mr-1.5" />Leads</TabsTrigger>
-            <TabsTrigger value="zones"><Database size={14} className="mr-1.5" />Zones</TabsTrigger>
-            <TabsTrigger value="jobs"><Zap size={14} className="mr-1.5" />Scrape Jobs</TabsTrigger>
-            <TabsTrigger value="health"><Activity size={14} className="mr-1.5" />Health</TabsTrigger>
-          </TabsList>
+  const statsTiles: StatTile[] = [
+    { key: "leads", label: "Total Leads", value: leadCount, icon: Users, color: "text-primary" },
+    { key: "zones", label: "Active Zones", value: zoneCount, icon: Database, color: "text-emerald-500" },
+    { key: "jobs", label: "Jobs Completed", value: jobCount, icon: Zap, color: "text-blue-500" },
+    { key: "health", label: "Health", value: healthScore, icon: Activity, color: "text-amber-500" },
+  ];
 
-          <TabsContent value="leads"><LeadsTab navigate={navigate} /></TabsContent>
-          <TabsContent value="zones"><ZonesTab /></TabsContent>
-          <TabsContent value="jobs"><JobsTab /></TabsContent>
-          <TabsContent value="health"><HealthTab /></TabsContent>
-        </Tabs>
+  return (
+    <div className={cn(
+      "min-h-screen flex flex-col",
+      dark ? "bg-[hsl(220,18%,9%)]" : "bg-background"
+    )}>
+      <AdminHeader dark={dark} onToggleDark={() => setDark(!dark)} />
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar — hidden on mobile, shown via dropdown in content area */}
+        <div className="hidden md:block">
+          <AdminSidebar active={section} onNav={setSection} dark={dark} badges={{ leads: leadCount }} />
+        </div>
+
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          {/* Mobile nav dropdown */}
+          <div className="md:hidden px-4 pt-4">
+            <AdminSidebar active={section} onNav={setSection} dark={dark} badges={{ leads: leadCount }} />
+          </div>
+
+          {/* Stats bar */}
+          <div className="px-4 md:px-6 pt-4 md:pt-6">
+            <StatsBar
+              tiles={statsTiles}
+              activeKey={section}
+              onSelect={(key) => setSection(key as AdminSection)}
+              dark={dark}
+            />
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 px-4 md:px-6 py-6">
+            {section === "leads" && <LeadsTab navigate={navigate} dark={dark} />}
+            {section === "zones" && <ZonesTab dark={dark} />}
+            {section === "jobs" && <JobsTab dark={dark} />}
+            {section === "health" && <HealthTab dark={dark} onHealthScore={setHealthScore} />}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 // ─── LEADS TAB ────────────────────────────────────────────
-function LeadsTab({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
+function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>; dark: boolean }) {
   const [leads, setLeads] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [typeFilter, setTypeFilter] = useState("all");
@@ -227,7 +273,7 @@ function LeadsTab({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
     <div>
       <div className="flex gap-3 mb-4 flex-wrap items-center">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="sell">Sell</SelectItem>
@@ -236,7 +282,7 @@ function LeadsTab({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -244,32 +290,26 @@ function LeadsTab({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
             <SelectItem value="ready">Ready</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="sm" onClick={fetchLeads} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={fetchLeads} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className="text-sm text-muted-foreground ml-auto">{filtered.length} leads</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} leads</span>
       </div>
 
-      <div className="border border-border rounded-lg overflow-x-auto">
+      <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Ref</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Address</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Value</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground"></th>
+            <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
+              {["Ref", "Date", "Type", "Name", "Email", "Address", "Status", "Value", ""].map((h) => (
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {filtered.map((lead) => (
-              <tr key={`${lead.type}-${lead.id}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+              <tr key={`${lead.type}-${lead.id}`} className={cn("border-b transition-colors", dark ? "border-white/5 hover:bg-white/5" : "border-border/50 hover:bg-muted/30")}>
                 <td className="px-4 py-3 font-mono text-xs text-primary">{formatRefCode(lead.id)}</td>
-                <td className="px-4 py-3 text-muted-foreground">{lead.created_at ? new Date(lead.created_at).toLocaleDateString() : "—"}</td>
+                <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{lead.created_at ? new Date(lead.created_at).toLocaleDateString() : "—"}</td>
                 <td className="px-4 py-3">
                   <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
                     lead.type === "sell" ? "bg-primary/10 text-primary"
@@ -277,11 +317,11 @@ function LeadsTab({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
                     : "bg-emerald-500/10 text-emerald-600"
                   }`}>{lead.type}</span>
                 </td>
-                <td className="px-4 py-3 text-foreground">{lead.full_name}</td>
-                <td className="px-4 py-3 text-muted-foreground">{lead.email}</td>
-                <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate">{lead.address}</td>
-                <td className="px-4 py-3"><StatusBadge status={lead.status || "pending"} /></td>
-                <td className="px-4 py-3 font-medium text-foreground">
+                <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{lead.full_name}</td>
+                <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{lead.email}</td>
+                <td className={cn("px-4 py-3 max-w-[200px] truncate", dark ? "text-white/50" : "text-muted-foreground")}>{lead.address}</td>
+                <td className="px-4 py-3"><StatusBadge status={lead.status || "pending"} dark={dark} /></td>
+                <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>
                   {lead.type === "sell" && lead.estimated_value ? `€${lead.estimated_value.toLocaleString()}`
                     : lead.type === "buy" && lead.asking_price ? `€${lead.asking_price.toLocaleString()}`
                     : lead.type === "rent" && lead.annual_income_estimate ? `€${lead.annual_income_estimate.toLocaleString()}/yr`
@@ -291,14 +331,14 @@ function LeadsTab({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
                   <Button variant="ghost" size="sm" onClick={() => {
                     if (lead.type === "buy") navigate(`/buy/result/${lead.id}`);
                     else navigate(`/${lead.type}/result/${lead.id}`);
-                  }}>
+                  }} className={cn(dark && "text-white/40 hover:text-white hover:bg-white/10")}>
                     <ExternalLink size={14} />
                   </Button>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={9} className="text-center py-12 text-muted-foreground">{loading ? "Loading..." : "No leads found"}</td></tr>
+              <tr><td colSpan={9} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No leads found"}</td></tr>
             )}
           </tbody>
         </table>
@@ -308,7 +348,7 @@ function LeadsTab({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
 }
 
 // ─── ZONES TAB ────────────────────────────────────────────
-function ZonesTab() {
+function ZonesTab({ dark }: { dark: boolean }) {
   const [zones, setZones] = useState<ZoneRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [scraping, setScraping] = useState<string | null>(null);
@@ -326,9 +366,7 @@ function ZonesTab() {
     if (!zone.idealista_location) return;
     setScraping(zone.id);
     try {
-      const { error } = await supabase.functions.invoke("process-scrape-job", {
-        body: { zone_id: zone.id },
-      });
+      const { error } = await supabase.functions.invoke("process-scrape-job", { body: { zone_id: zone.id } });
       if (error) console.error("Scrape trigger error:", error);
       await fetchZones();
     } catch (e) {
@@ -341,38 +379,34 @@ function ZonesTab() {
   return (
     <div>
       <div className="flex gap-3 mb-4 items-center">
-        <Button variant="outline" size="sm" onClick={fetchZones} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={fetchZones} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className="text-sm text-muted-foreground ml-auto">{zones.length} zones</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{zones.length} zones</span>
       </div>
 
-      <div className="border border-border rounded-lg overflow-x-auto">
+      <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Zone</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Municipality</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tier</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Location ID</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Last Scraped</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Properties</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground"></th>
+            <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
+              {["Zone", "Municipality", "Tier", "Location ID", "Last Scraped", "Properties", "Status", ""].map((h) => (
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {zones.map((zone) => (
-              <tr key={zone.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-3 font-medium text-foreground">{zone.name}</td>
-                <td className="px-4 py-3 text-muted-foreground">{zone.municipality || "—"}</td>
+              <tr key={zone.id} className={cn("border-b transition-colors", dark ? "border-white/5 hover:bg-white/5" : "border-border/50 hover:bg-muted/30")}>
+                <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>{zone.name}</td>
+                <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{zone.municipality || "—"}</td>
                 <td className="px-4 py-3"><TierBadge tier={zone.tier} /></td>
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{zone.idealista_location || "—"}</td>
+                <td className={cn("px-4 py-3 font-mono text-xs", dark ? "text-white/40" : "text-muted-foreground")}>{zone.idealista_location || "—"}</td>
                 <td className="px-4 py-3"><StalenessIndicator lastScraped={zone.last_scraped_at} tier={zone.tier} /></td>
-                <td className="px-4 py-3 text-foreground">{zone.total_properties || 0}</td>
-                <td className="px-4 py-3"><StatusBadge status={zone.last_scrape_status || "pending"} /></td>
+                <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{zone.total_properties || 0}</td>
+                <td className="px-4 py-3"><StatusBadge status={zone.last_scrape_status || "pending"} dark={dark} /></td>
                 <td className="px-4 py-3">
-                  <Button variant="outline" size="sm" disabled={!zone.idealista_location || scraping === zone.id} onClick={() => triggerScrape(zone)}>
+                  <Button variant="outline" size="sm" disabled={!zone.idealista_location || scraping === zone.id} onClick={() => triggerScrape(zone)}
+                    className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
                     {scraping === zone.id ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
                     Scrape
                   </Button>
@@ -387,25 +421,20 @@ function ZonesTab() {
 }
 
 // ─── SCRAPE JOBS TAB ──────────────────────────────────────
-function JobsTab() {
+function JobsTab({ dark }: { dark: boolean }) {
   const [jobs, setJobs] = useState<ScrapeJobRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("scrape_jobs")
-      .select("*, zones(name)")
-      .order("created_at", { ascending: false })
-      .limit(100);
+    const { data } = await supabase.from("scrape_jobs").select("*, zones(name)").order("created_at", { ascending: false }).limit(100);
     setJobs((data as ScrapeJobRow[]) || []);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
-  // Auto-refresh every 30s if there are running jobs
   useEffect(() => {
     const hasRunning = jobs.some(j => j.status === "running" || j.status === "pending");
     if (!hasRunning) return;
@@ -419,7 +448,7 @@ function JobsTab() {
     <div>
       <div className="flex gap-3 mb-4 items-center flex-wrap">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -428,23 +457,19 @@ function JobsTab() {
             <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="sm" onClick={fetchJobs} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={fetchJobs} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className="text-sm text-muted-foreground ml-auto">{filtered.length} jobs</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} jobs</span>
       </div>
 
-      <div className="border border-border rounded-lg overflow-x-auto">
+      <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Zone</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Items Found</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Upserted</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Duration</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Created</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Error</th>
+            <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
+              {["Zone", "Status", "Items Found", "Upserted", "Duration", "Created", "Error"].map((h) => (
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -453,19 +478,19 @@ function JobsTab() {
                 ? `${Math.round((new Date(job.completed_at).getTime() - new Date(job.started_at).getTime()) / 1000)}s`
                 : job.started_at ? "Running..." : "—";
               return (
-                <tr key={job.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-medium text-foreground">{job.zones?.name || "—"}</td>
-                  <td className="px-4 py-3"><StatusBadge status={job.status} /></td>
-                  <td className="px-4 py-3 text-foreground">{job.items_found ?? "—"}</td>
-                  <td className="px-4 py-3 text-foreground">{job.items_upserted ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{duration}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{job.created_at ? new Date(job.created_at).toLocaleString() : "—"}</td>
+                <tr key={job.id} className={cn("border-b transition-colors", dark ? "border-white/5 hover:bg-white/5" : "border-border/50 hover:bg-muted/30")}>
+                  <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>{job.zones?.name || "—"}</td>
+                  <td className="px-4 py-3"><StatusBadge status={job.status} dark={dark} /></td>
+                  <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{job.items_found ?? "—"}</td>
+                  <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{job.items_upserted ?? "—"}</td>
+                  <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{duration}</td>
+                  <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{job.created_at ? new Date(job.created_at).toLocaleString() : "—"}</td>
                   <td className="px-4 py-3 text-destructive text-xs max-w-[200px] truncate">{job.error_message || ""}</td>
                 </tr>
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-12 text-muted-foreground">{loading ? "Loading..." : "No jobs found"}</td></tr>
+              <tr><td colSpan={7} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No jobs found"}</td></tr>
             )}
           </tbody>
         </table>
@@ -475,42 +500,63 @@ function JobsTab() {
 }
 
 // ─── HEALTH TAB ───────────────────────────────────────────
-function HealthTab() {
+function HealthTab({ dark, onHealthScore }: { dark: boolean; onHealthScore: (v: string) => void }) {
   const [health, setHealth] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchHealth = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.rpc("system_health_check");
-    if (!error && data) setHealth(data as unknown as HealthData);
+    if (!error && data) {
+      const h = data as unknown as HealthData;
+      setHealth(h);
+      const score = h.failed_scrape_jobs_24h === 0 && h.zones_stale === 0 ? "Good" : h.failed_scrape_jobs_24h > 3 ? "Poor" : "Fair";
+      onHealthScore(score);
+    }
     setLoading(false);
-  }, []);
+  }, [onHealthScore]);
 
   useEffect(() => { fetchHealth(); }, [fetchHealth]);
 
   if (!health) {
-    return <div className="py-12 text-center text-muted-foreground">{loading ? "Loading health data..." : "Failed to load health data"}</div>;
+    return <div className={cn("py-12 text-center", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading health data..." : "Failed to load health data"}</div>;
   }
+
+  const cards = [
+    { label: "Active Sale Properties", value: health.active_sale_properties, icon: Database, color: "text-primary" },
+    { label: "Active Rent Properties", value: health.active_rent_properties, icon: Database, color: "text-emerald-600" },
+    { label: "Total Zones", value: health.zones_total, icon: Activity },
+    { label: "Stale Zones", value: health.zones_stale, icon: AlertTriangle, color: health.zones_stale > 0 ? "text-amber-600" : "text-emerald-600" },
+    { label: "Sell Valuations Today", value: health.sell_valuations_today, icon: Users, color: "text-primary" },
+    { label: "Buy Analyses Today", value: health.buy_analyses_today, icon: Users, color: "text-blue-600" },
+    { label: "Pending Jobs", value: health.pending_scrape_jobs, icon: Clock, color: health.pending_scrape_jobs > 5 ? "text-amber-600" : undefined },
+    { label: "Running Jobs", value: health.running_scrape_jobs, icon: Play, color: "text-blue-600" },
+    { label: "Completed Jobs (24h)", value: health.completed_scrape_jobs_24h, icon: CheckCircle, color: "text-emerald-600" },
+    { label: "Failed Jobs (24h)", value: health.failed_scrape_jobs_24h, icon: AlertTriangle, color: health.failed_scrape_jobs_24h > 0 ? "text-destructive" : "text-emerald-600" },
+  ];
 
   return (
     <div>
       <div className="flex gap-3 mb-6 items-center">
-        <Button variant="outline" size="sm" onClick={fetchHealth} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={fetchHealth} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <HealthCard label="Active Sale Properties" value={health.active_sale_properties} icon={Database} color="text-primary" />
-        <HealthCard label="Active Rent Properties" value={health.active_rent_properties} icon={Database} color="text-emerald-600" />
-        <HealthCard label="Total Zones" value={health.zones_total} icon={Activity} />
-        <HealthCard label="Stale Zones" value={health.zones_stale} icon={AlertTriangle} color={health.zones_stale > 0 ? "text-amber-600" : "text-emerald-600"} />
-        <HealthCard label="Sell Valuations Today" value={health.sell_valuations_today} icon={Users} color="text-primary" />
-        <HealthCard label="Buy Analyses Today" value={health.buy_analyses_today} icon={Users} color="text-blue-600" />
-        <HealthCard label="Pending Jobs" value={health.pending_scrape_jobs} icon={Clock} color={health.pending_scrape_jobs > 5 ? "text-amber-600" : "text-muted-foreground"} />
-        <HealthCard label="Running Jobs" value={health.running_scrape_jobs} icon={Play} color="text-blue-600" />
-        <HealthCard label="Completed Jobs (24h)" value={health.completed_scrape_jobs_24h} icon={CheckCircle} color="text-emerald-600" />
-        <HealthCard label="Failed Jobs (24h)" value={health.failed_scrape_jobs_24h} icon={AlertTriangle} color={health.failed_scrape_jobs_24h > 0 ? "text-destructive" : "text-emerald-600"} />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        {cards.map((c) => (
+          <div key={c.label} className={cn(
+            "rounded-xl p-4 flex items-center gap-3",
+            dark ? "bg-white/5 border border-white/10" : "bg-card border border-border"
+          )}>
+            <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", dark ? "bg-white/10" : "bg-muted")}>
+              <c.icon size={16} className={c.color || (dark ? "text-white/60" : "text-muted-foreground")} />
+            </div>
+            <div>
+              <p className={cn("text-xl font-bold leading-none", dark ? "text-white" : "text-foreground")}>{c.value}</p>
+              <p className={cn("text-[0.6rem] uppercase tracking-wider mt-0.5", dark ? "text-white/40" : "text-muted-foreground")}>{c.label}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
