@@ -154,14 +154,15 @@ export const ComparablePropertiesSection: React.FC<{
   const displayed = showAll ? comparables : comparables.slice(0, 6);
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <div className="flex items-baseline justify-between mb-3">
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Comparable Properties</p>
+        <div className="flex items-baseline justify-between mb-2">
+          <SectionLabel className="mb-0">Comparable Properties</SectionLabel>
           <p className="text-xs text-muted-foreground">{comparables.length} found</p>
         </div>
-        <p className="text-sm text-muted-foreground mb-10">Similar properties currently on the market near you</p>
+        <h2 className="font-serif text-2xl sm:text-3xl mb-2">Similar Properties</h2>
+        <p className="text-sm text-muted-foreground mb-10">Currently on the market near you</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {displayed.map((comp, i) => (
             <ComparableCard
