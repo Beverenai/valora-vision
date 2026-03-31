@@ -257,7 +257,7 @@ const SealedWrapper: React.FC<{
         animate={{ opacity: [0.4, 0.8, 0.4] }}
         transition={{ repeat: Infinity, duration: 2.5 }}
       >
-        ← Slide to open
+        {showTapHint ? "Tap or slide to reveal" : "← Slide to open"}
       </motion.p>
     </div>
   );
