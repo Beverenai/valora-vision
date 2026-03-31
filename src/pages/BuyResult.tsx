@@ -186,7 +186,7 @@ const BuyResult: React.FC = () => {
             </div>
 
             {/* Asking price */}
-            <p className="text-[0.6rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-1">Asking Price</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-1">Asking Price</p>
             <p className="text-4xl md:text-5xl font-light tracking-tight text-foreground">{fmt(askingPrice)}</p>
 
             {/* Score badge */}
@@ -215,7 +215,7 @@ const BuyResult: React.FC = () => {
           className="mb-16"
         >
           <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Price Verdict</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">Price Verdict</p>
 
           <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-12 mb-8">
             <div>
@@ -242,7 +242,7 @@ const BuyResult: React.FC = () => {
           className="mb-16"
         >
           <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">The Numbers</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-8">The Numbers</p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border rounded-xl overflow-hidden">
             {[
@@ -267,7 +267,7 @@ const BuyResult: React.FC = () => {
           className="mb-16"
         >
           <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">Price Spectrum</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-8">Price Spectrum</p>
 
           <div className="relative h-16 mb-4">
             {/* Bar */}
@@ -311,7 +311,7 @@ const BuyResult: React.FC = () => {
           >
             <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
             <div className="flex items-baseline justify-between mb-8">
-              <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Comparable Properties</p>
+              <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Comparable Properties</p>
               <p className="text-xs text-muted-foreground">{comparables.length} found</p>
             </div>
 
@@ -362,7 +362,7 @@ const BuyResult: React.FC = () => {
             className="mb-16"
           >
             <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-            <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">What Affects The Price</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">What Affects The Price</p>
 
             <div className="space-y-3">
               {Object.entries(data.feature_adjustments).map(([key, value]) => (
@@ -390,7 +390,7 @@ const BuyResult: React.FC = () => {
             className="mb-16"
           >
             <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-            <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Property Analysis</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">Property Analysis</p>
 
             {data.analysis.split("\n\n").filter(Boolean).map((p, i) => (
               <p key={i} className={cn("text-[15px] leading-[2] text-foreground/70 font-light", i > 0 && "mt-6")}>
@@ -408,7 +408,7 @@ const BuyResult: React.FC = () => {
           className="mb-16"
         >
           <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Negotiation Insight</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">Negotiation Insight</p>
 
           <div className="bg-card border border-border rounded-xl p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
@@ -429,7 +429,7 @@ const BuyResult: React.FC = () => {
           className="mb-16 text-center"
         >
           <div className="w-10 h-px bg-[hsl(var(--buy))] mx-auto mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-4">Next Steps</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-4">Next Steps</p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button

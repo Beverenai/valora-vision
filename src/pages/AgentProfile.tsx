@@ -84,7 +84,7 @@ function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
   );
 }
 
-const SECTION_LABEL = "text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6";
+const SECTION_LABEL = "text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6";
 
 const ROLE_COLORS: Record<string, string> = {
   seller: "bg-primary/10 text-primary",
@@ -313,7 +313,7 @@ export default function AgentProfile() {
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
-              <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground">{professional.company_name}</h1>
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">{professional.company_name}</h1>
               <div className="flex items-center gap-3 mt-2 flex-wrap">
                 <StarRating rating={professional.avg_rating} />
                 <span className="text-sm text-muted-foreground">

@@ -65,7 +65,7 @@ const PropertyFeaturesSection: React.FC<{ features: string | null }> = ({ featur
     <section className="py-16 md:py-24">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-10">What Makes It Special</p>
+        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-10">What Makes It Special</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-6">
           {items.map((feature) => {
             const Icon = getFeatureIcon(feature);
@@ -183,7 +183,7 @@ const ComparablePropertiesSection: React.FC<{
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
         <div className="flex items-baseline justify-between mb-3">
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Comparable Properties</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Comparable Properties</p>
           <p className="text-xs text-muted-foreground">{comparables.length} found</p>
         </div>
         <p className="text-sm text-muted-foreground mb-10">Similar properties currently on the market near you</p>
@@ -257,7 +257,7 @@ const AreaComparisonSection: React.FC<{
     <section className="py-16 md:py-24">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-10">
+        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-10">
           Your Property vs the Market
         </p>
 
@@ -356,7 +356,7 @@ const PropertySummaryCard: React.FC<{
     <section className="py-10 md:py-16">
       {propertyType && (
         <div className="text-center mb-8">
-          <p className="text-[0.6rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">{propertyType.replace(/-/g, " ")}</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">{propertyType.replace(/-/g, " ")}</p>
         </div>
       )}
       <div className="flex flex-wrap justify-center divide-x divide-border">
@@ -386,7 +386,7 @@ const ValuationResultCard: React.FC<{
   return (
     <section className="py-16 md:py-24">
       <div className="text-center max-w-2xl mx-auto px-6">
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">Estimated Market Value</p>
+        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-8">Estimated Market Value</p>
         <p className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-foreground">{fmt(estimatedValue)}</p>
 
         {/* Price Range Bar */}
@@ -425,7 +425,7 @@ const ValuationResultCard: React.FC<{
 
         {/* Monthly Rental */}
         <div className="mt-16">
-          <p className="text-[0.55rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-2">Estimated Monthly Rental</p>
+          <p className="text-[0.55rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-2">Estimated Monthly Rental</p>
           <p className="text-2xl md:text-3xl font-light tracking-tight text-foreground">{fmt(monthlyRental)}</p>
         </div>
       </div>
@@ -442,7 +442,7 @@ const AIAnalysisSection: React.FC<{ content: string }> = ({ content }) => {
     <section className="py-16 md:py-24">
       <div className="max-w-2xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-10">
+        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-10">
           Property Analysis
         </p>
 
@@ -468,7 +468,7 @@ const MarketTrendsSection: React.FC<{ content: string; chartData: { month: strin
       <div className="max-w-3xl mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
         <div className="flex items-center justify-between">
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">Market Trends</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">Market Trends</p>
           <CollapsibleTrigger asChild>
             <button className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent/80 font-medium transition-colors">
               View trends <ChevronDown size={14} className="transition-transform data-[state=open]:rotate-180" />

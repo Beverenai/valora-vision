@@ -90,7 +90,7 @@ const ProLanding = () => {
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="font-heading text-4xl md:text-6xl font-bold text-foreground leading-tight"
+            className="font-serif text-4xl md:text-6xl font-bold text-foreground leading-tight"
           >
             Reach homeowners when
             <br />

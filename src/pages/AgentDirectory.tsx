@@ -222,7 +222,7 @@ export default function AgentDirectory() {
 
       {/* Hero */}
       <section className="bg-gradient-to-b from-secondary to-background pt-24 pb-12 px-4 text-center">
-        <h1 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-foreground mb-3">
+        <h1 className="font-serif text-3xl md:text-5xl text-foreground mb-3">
           Find a Real Estate Expert
         </h1>
         <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xl mx-auto">

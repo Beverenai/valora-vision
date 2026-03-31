@@ -56,7 +56,7 @@ const TESTIMONIALS_BUY = [
 
 /* ─── SECTION LABEL ─── */
 const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <p className={cn("text-xs tracking-[0.2em] uppercase text-muted-foreground", className)}>
+  <p className={cn("text-[0.65rem] tracking-[0.15em] uppercase font-semibold text-muted-foreground", className)}>
     {children}
   </p>
 );
@@ -186,10 +186,10 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center"
               >
-                <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground font-semibold mb-3">
+                <span className="text-[0.65rem] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-3">
                   {isSell ? "Free Property Valuation" : "Free Price Analysis"}
                 </span>
-                <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
+                <h1 className="font-serif text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
                   {isSell ? (
                     <>What is your property<br />in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?</>
                   ) : (
@@ -275,7 +275,7 @@ const Index = () => {
               className="text-center mb-8 md:mb-16"
             >
               <SectionLabel>How It Works</SectionLabel>
-              <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
+              <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
                 Three Simple Steps
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
@@ -482,7 +482,7 @@ const Index = () => {
               className="text-center mb-12"
             >
               <SectionLabel>Included Free</SectionLabel>
-              <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3 max-w-2xl mx-auto">
+              <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3 max-w-2xl mx-auto">
                 Everything In Your Report
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
@@ -499,7 +499,7 @@ const Index = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.08 }}
                   className={cn(
-                    "rounded-2xl border border-border bg-card p-5 md:p-6 flex flex-col justify-between gap-4 transition-shadow hover:shadow-md",
+                    "rounded-xl border border-border bg-card p-5 md:p-6 flex flex-col justify-between gap-4 transition-shadow hover:shadow-md",
                     feat.gridClass
                   )}
                 >
@@ -648,7 +648,7 @@ const Index = () => {
                 <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
               </div>
               <SectionLabel>Market Data</SectionLabel>
-              <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
+              <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
                 {valuationType === "sell" ? "Recent Valuations" : "Recent Price Analyses"}
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
@@ -667,7 +667,7 @@ const Index = () => {
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <SectionLabel>Testimonials</SectionLabel>
-            <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
+            <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
               What Owners Say
             </h2>
             <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-10">
@@ -726,7 +726,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.3 }}
-                className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground leading-[1.05]"
+                className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground leading-[1.05]"
               >
                 {isSell ? (
                   <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?</>
