@@ -210,14 +210,24 @@ export default function AgentProfile() {
     );
   }
 
-  if (!professional) {
+  if (error || !professional) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <h2 className="text-xl font-semibold text-foreground">Agente no encontrado</h2>
-          <p className="text-muted-foreground text-center max-w-md">No pudimos encontrar un perfil con esta dirección. Puede que el perfil aún no esté publicado.</p>
-          <Button asChild variant="outline"><Link to="/">Volver al inicio</Link></Button>
+          <h2 className="text-xl font-semibold text-foreground">{error ? "Something went wrong" : "Agente no encontrado"}</h2>
+          <p className="text-muted-foreground text-center max-w-md">
+            {error
+              ? "We couldn't load this profile. Please try again."
+              : "No pudimos encontrar un perfil con esta dirección. Puede que el perfil aún no esté publicado."}
+          </p>
+          {error ? (
+            <Button variant="outline" onClick={() => { setError(false); setLoading(true); /* re-trigger useEffect */ window.location.reload(); }}>
+              Retry
+            </Button>
+          ) : (
+            <Button asChild variant="outline"><Link to="/">Volver al inicio</Link></Button>
+          )}
         </div>
       </div>
     );
