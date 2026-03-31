@@ -1,39 +1,47 @@
 
 
-## Plan: Add Empty State Fallback for Matched Agents Section
+## Plan: Add Tap + Keyboard Triggers to Card Reveal
 
-### Current State
-The implementation is already complete — the `match_agents_by_location` RPC exists and works, agent cards are real (not hardcoded), and the contact modal is functional. The only issue is that when no agents are found (line 682), the section returns `null` — silently hiding itself.
+### Problem
+The sealed card only opens via drag gesture, which is unreliable on some devices and impossible for automated testing or keyboard users.
 
-### Change
+### Changes in `src/components/shared/CardRevealWrapper.tsx`
 
-**`src/pages/SellResult.tsx` — line 682**
+**1. Add tap-to-open on the sealed card body (lines 347-381)**
+- Wrap the sealed card area with an `onClick={triggerReveal}` and `onKeyDown` (Enter/Space) handler
+- Add `tabIndex={0}` and `role="button"` for keyboard accessibility
+- The existing drag interaction remains as primary; tap/click acts as secondary trigger
 
-Replace `if (agents.length === 0) return null;` with a fallback empty state:
+**2. Add delayed hint text (lines 247-253)**
+- Replace the static "← Slide to open" text with a state-driven hint
+- After 3 seconds of no interaction, change text to "Tap or slide to reveal"
+- Add a `showTapHint` state with a `setTimeout` in the sealed phase
+- Reset the timer if the user starts dragging
 
+**3. Implementation detail**
+
+In `CardRevealWrapper`:
 ```tsx
-if (agents.length === 0) {
-  return (
-    <section className="py-16 md:py-24">
-      <div className="max-w-[1000px] mx-auto px-6 text-center">
-        <div className="w-10 h-px bg-gold mx-auto mb-8" />
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-3">
-          Recommended Local Experts
-        </p>
-        <p className="text-sm text-muted-foreground mb-6">
-          Local agents coming soon. Want to be featured here?
-        </p>
-        <Link to="/pro">
-          <Button variant="outline" className="rounded-full">
-            Join as an Agent
-          </Button>
-        </Link>
-      </div>
-    </section>
-  );
-}
+const [showTapHint, setShowTapHint] = useState(false);
+
+useEffect(() => {
+  if (phase !== "sealed") return;
+  const timer = setTimeout(() => setShowTapHint(true), 3000);
+  return () => clearTimeout(timer);
+}, [phase]);
 ```
 
+In `SealedWrapper`, add a new prop `onTap` and wire it:
+- The outer `div` gets `onClick={onTap}`, `onKeyDown` (Enter/Space calls `onTap`), `tabIndex={0}`, `role="button"`, `aria-label="Open valuation"`
+- Exclude the drag tab from triggering tap (use `e.stopPropagation()` on the drag handle)
+
+Update the hint text (line 252):
+```tsx
+{showTapHint ? "Tap or slide to reveal" : "← Slide to open"}
+```
+
+Pass `showTapHint` and `onTap={onTear}` as new props to `SealedWrapper`.
+
 ### Files Modified
-- `src/pages/SellResult.tsx` — replace empty-state `return null` with CTA fallback
+- `src/components/shared/CardRevealWrapper.tsx`
 
