@@ -377,31 +377,78 @@ const ProOnboard = () => {
 
               <div className="space-y-5">
                 <div>
-                  <Label htmlFor="companyName">Agency name *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="companyName">Agency name *</Label>
+                    <ValidationIcon valid={!!companyName.trim()} error="" />
+                  </div>
                   <Input id="companyName" autoComplete="off" value={companyName} onChange={(e) => setCompanyName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Costa del Sol Premium Realty" />
                 </div>
                 <div>
-                  <Label htmlFor="contactName">Your name *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="contactName">Your name *</Label>
+                    <ValidationIcon valid={!!contactName.trim()} error="" />
+                  </div>
                   <Input id="contactName" autoComplete="off" value={contactName} onChange={(e) => setContactName(e.target.value)} onFocus={(e) => e.target.select()} placeholder="María García" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="email">Email *</Label>
-                    <Input id="email" type="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={(e) => e.target.select()} placeholder="info@agency.com" />
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="email">Email *</Label>
+                      <div className="flex items-center gap-1">
+                        {emailChecking && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
+                        <ValidationIcon valid={emailValid} error={emailError} />
+                      </div>
+                    </div>
+                    <Input
+                      id="email" type="email" autoComplete="off"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); validateEmail(e.target.value); setEmailValid(false); }}
+                      onBlur={(e) => { validateEmail(e.target.value); checkEmailUniqueness(e.target.value); }}
+                      onFocus={(e) => e.target.select()}
+                      placeholder="info@agency.com"
+                      className={cn(emailTouched && emailError && "border-destructive")}
+                    />
+                    {emailTouched && emailError && <p className="text-xs text-destructive mt-1">{emailError}</p>}
                   </div>
                   <div>
-                    <Label htmlFor="phone">Phone *</Label>
-                    <Input id="phone" type="tel" autoComplete="off" value={phone} onChange={(e) => setPhone(e.target.value)} onFocus={(e) => e.target.select()} placeholder="+34 600 000 000" />
+                    <div className="flex items-center justify-between">
+                      <Label>Phone *</Label>
+                      <ValidationIcon valid={!!phone.trim()} error="" />
+                    </div>
+                    <PhoneInput value={phone} onChange={setPhone} />
+                    <p className="text-xs text-muted-foreground mt-1">e.g., +34 612 345 678</p>
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="website">Website URL</Label>
-                  <Input id="website" type="url" autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} onFocus={(e) => e.target.select()} placeholder="https://www.youragency.com" />
-                  <p className="text-xs text-muted-foreground mt-1">We'll use this to auto-fill your profile</p>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="website">Website URL</Label>
+                    <ValidationIcon valid={!!website.trim() && !websiteError} error={websiteError} />
+                  </div>
+                  <Input
+                    id="website" type="url" autoComplete="off"
+                    value={website}
+                    onChange={(e) => { setWebsite(e.target.value); setWebsiteTouched(true); }}
+                    onBlur={(e) => validateWebsite(e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="https://www.youragency.com"
+                    className={cn(websiteTouched && websiteError && "border-destructive")}
+                  />
+                  {websiteTouched && websiteError
+                    ? <p className="text-xs text-destructive mt-1">{websiteError}</p>
+                    : <p className="text-xs text-muted-foreground mt-1">e.g., https://www.youragency.com — We'll use this to auto-fill your profile</p>
+                  }
                 </div>
                 <div>
-                  <Label htmlFor="address">Office address *</Label>
-                  <Input id="address" autoComplete="off" value={address} onChange={(e) => setAddress(e.target.value)} onFocus={(e) => e.target.select()} placeholder="Av. Ricardo Soriano 72, Marbella" />
+                  <div className="flex items-center justify-between">
+                    <Label>Office address *</Label>
+                    <ValidationIcon valid={addressConfirmed} error="" />
+                  </div>
+                  <GoogleAddressInput
+                    addressData={addressData}
+                    onChange={handleAddressChange}
+                    onLocationConfirmed={() => setAddressConfirmed(true)}
+                  />
+                  {addressConfirmed && <p className="text-xs text-green-600 mt-1">Location confirmed ✓</p>}
                 </div>
               </div>
 
