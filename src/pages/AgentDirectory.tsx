@@ -231,71 +231,9 @@ export default function AgentDirectory() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visible.map((agent) => {
-                const zone = getPrimaryZone(agent);
-                const [logoFailed, setLogoFailed] = useState(false);
-                return (
-                  <Card key={agent.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-3 mb-3">
-                        {agent.logo_url && !logoFailed ? (
-                          <img
-                            src={agent.logo_url}
-                            alt={agent.company_name}
-                            className="w-12 h-12 rounded-full object-cover shrink-0"
-                            onError={() => setLogoFailed(true)}
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0">
-                            <span className="text-primary-foreground font-semibold text-sm">
-                              {getInitials(agent.company_name)}
-                            </span>
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <h3 className="font-semibold text-foreground truncate">{agent.company_name}</h3>
-                            {agent.is_verified && (
-                              <CheckCircle className="h-4 w-4 text-[hsl(var(--success))] shrink-0" />
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                            <span>{(agent.avg_rating || 0).toFixed(1)}</span>
-                            <span>({agent.total_reviews || 0})</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {agent.tagline || agent.description || "Real estate professional"}
-                      </p>
-
-                      {zone && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                          <MapPin className="h-3 w-3" />
-                          <span>{zone}</span>
-                        </div>
-                      )}
-
-                      {agent.languages && agent.languages.length > 0 && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-4">
-                          <Globe className="h-3 w-3" />
-                          <span>{agent.languages.join(" · ")}</span>
-                        </div>
-                      )}
-
-                      <Link
-                        to={`/agentes/${agent.slug}`}
-                        className="inline-flex items-center text-sm font-medium text-primary hover:underline"
-                      >
-                        View Profile
-                        <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
-                      </Link>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              {visible.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} zone={getPrimaryZone(agent)} />
+              ))}
             </div>
 
             {hasMore && (
