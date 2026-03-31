@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (profError) throw profError;
+    console.log("[publish-agent-profile] Created professional:", profData.id);
 
     // 2. Insert team members
     if (team && team.length > 0 && profData) {
