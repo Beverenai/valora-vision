@@ -194,7 +194,7 @@ const Index = () => {
                     <>Is this property<br /><span className="font-['DM_Serif_Display'] italic normal-case">worth the price</span>?</>
                   )}
                 </h1>
-                <p className="font-['DM_Serif_Display'] italic text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed mt-4">
+                <p className="font-['DM_Serif_Display'] italic text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mt-3">
                   {isSell
                     ? "Get a detailed market report in under 2 minutes. Completely free."
                     : "Paste a listing link and we'll compare it to the market."
