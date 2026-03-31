@@ -306,7 +306,7 @@ export default function AgentProfile() {
               )}
             </div>
 
-            <div className="flex gap-3 shrink-0">
+            <div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">
               <Button
                 className="rounded-full"
                 onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}
