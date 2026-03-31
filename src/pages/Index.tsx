@@ -724,7 +724,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.3 }}
-                className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground leading-[1.05]"
+                className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground leading-[1.05]"
               >
                 {isSell ? (
                   <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?</>
