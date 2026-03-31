@@ -95,7 +95,7 @@ const SealedWrapper: React.FC<{
   const isSell = accentType === "sell";
 
   const foilGradient = isSell
-    ? "linear-gradient(135deg, #8B4513 0%, #D4742B 25%, #C96A2C 40%, #E8A56E 55%, #B85E1E 70%, #D4742B 100%)"
+    ? "linear-gradient(135deg, #8B4513 0%, hsl(21 62% 53%) 25%, #C96A2C 40%, #E8A56E 55%, #B85E1E 70%, hsl(21 62% 53%) 100%)"
     : "linear-gradient(135deg, #2D6A4F 0%, #52B788 25%, #40916C 40%, #74C69D 55%, #2D6A4F 70%, #52B788 100%)";
 
   const embossedText = isSell ? "VALUED" : "ESTIMATED";
