@@ -326,9 +326,22 @@ serve(async (req) => {
 
         const systemPrompt = `You are a professional property analyst for ValoraCasa, a Spanish property valuation service. Write in English. Be specific, data-driven, and professional. Do not use markdown formatting.`;
 
+        // Build comparable context for data-driven analysis
+        const compPrices = comparables.filter((c: any) => c.price && c.price > 0).map((c: any) => Number(c.price));
+        const compPricesPerSqm = comparables.filter((c: any) => (isSell ? c.price_per_sqm : c.rent_per_sqm) > 0).map((c: any) => Number(isSell ? c.price_per_sqm : c.rent_per_sqm));
+        const minCompPrice = compPrices.length > 0 ? Math.min(...compPrices) : 0;
+        const maxCompPrice = compPrices.length > 0 ? Math.max(...compPrices) : 0;
+        const medianCompPriceSqm = compPricesPerSqm.length > 0 ? median(compPricesPerSqm) : 0;
+        const userVsMedianPct = medianCompPriceSqm > 0 ? Math.round(((pricePerSqm - medianCompPriceSqm) / medianCompPriceSqm) * 100) : 0;
+        const userVsMedianDir = userVsMedianPct >= 0 ? "above" : "below";
+
+        const compContext = comparables.length > 0
+          ? `Based on ${comparables.length} comparable properties within 5km. Comparable price range: €${minCompPrice.toLocaleString()}–€${maxCompPrice.toLocaleString()}. Area median price/m²: €${Math.round(medianCompPriceSqm).toLocaleString()}. The property's price/m² of €${pricePerSqm.toLocaleString()} is ${Math.abs(userVsMedianPct)}% ${userVsMedianDir} the area median.`
+          : `Limited comparable data available in this area.`;
+
         const analysisPrompt = isSell
-          ? `Write a 3-paragraph property analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated value: €${estimatedValue.toLocaleString()}. Based on ${comparables.length} comparable properties. Price per m²: €${pricePerSqm}. Discuss the property's strengths, how features affect value, and market positioning. Keep it concise (150-200 words).`
-          : `Write a 3-paragraph rental income analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated monthly rent: €${monthlyRent.toLocaleString()}. Based on ${comparables.length} comparable rentals. Discuss rental demand, seasonal factors, and income potential. Keep it concise (150-200 words).`;
+          ? `Write a 3-paragraph property analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated value: €${estimatedValue.toLocaleString()}. ${compContext} Discuss the property's strengths, how features affect value, and market positioning. Reference the real comparable data. Keep it concise (150-200 words).`
+          : `Write a 3-paragraph rental income analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated monthly rent: €${monthlyRent.toLocaleString()}. ${compContext} Discuss rental demand, seasonal factors, and income potential. Reference the real comparable data. Keep it concise (150-200 words).`;
 
         const trendsPrompt = `Write a 2-paragraph market trends summary for ${city || "Costa del Sol"}, Spain as of March 2026. Cover price trends, demand drivers, and outlook. Reference real market dynamics (international buyers, Golden Visa, supply constraints). Keep it concise (120-150 words). Do not use markdown.`;
 
