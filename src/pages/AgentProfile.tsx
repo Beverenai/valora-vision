@@ -84,7 +84,7 @@ function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
   );
 }
 
-const SECTION_LABEL = "text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6";
+const SECTION_LABEL = "text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6";
 
 const ROLE_COLORS: Record<string, string> = {
   seller: "bg-primary/10 text-primary",

@@ -99,7 +99,7 @@ const SealedWrapper: React.FC<{
     : "linear-gradient(135deg, #2D6A4F 0%, #52B788 25%, #40916C 40%, #74C69D 55%, #2D6A4F 70%, #52B788 100%)";
 
   const embossedText = isSell ? "VALUED" : "ESTIMATED";
-  const tabColor = isSell ? "bg-[#D4742B]" : "bg-[#52B788]";
+  const tabColor = isSell ? "bg-primary" : "bg-[#52B788]";
 
   const diamondPattern = `
     repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 21px),

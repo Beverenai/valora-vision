@@ -529,7 +529,7 @@ const ProOnboard = () => {
                   {logoUrl && !logoFailed ? (
                     <img src={logoUrl} alt="Logo" className="w-16 h-16 rounded-xl object-cover border" onError={() => setLogoFailed(true)} />
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-[#D4713B] flex items-center justify-center text-white font-heading font-bold text-xl">
+                    <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center text-white font-heading font-bold text-xl">
                       {companyName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                     </div>
                   )}

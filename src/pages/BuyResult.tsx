@@ -429,7 +429,7 @@ const BuyResult: React.FC = () => {
           className="mb-16 text-center"
         >
           <div className="w-10 h-px bg-[hsl(var(--buy))] mx-auto mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-4">Next Steps</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-4">Next Steps</p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button

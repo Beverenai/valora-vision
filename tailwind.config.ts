@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         heading: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
+        serif: ["'Playfair Display'", "serif"],
         "ticket-cursive": ["'Italianno'", "cursive"],
       },
       colors: {
