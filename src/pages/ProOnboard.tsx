@@ -200,6 +200,7 @@ const ProOnboard = () => {
           },
         }
       );
+      console.log("[ProOnboard] publish response:", { publishData, publishError, slug });
       if (publishError) throw publishError;
       if (publishData?.error) throw new Error(publishData.error);
 

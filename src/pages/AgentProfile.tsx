@@ -117,11 +117,12 @@ export default function AgentProfile() {
       setLoading(true);
 
       // Fetch professional
-      const { data: prof } = await supabase
+      const { data: prof, error: profError } = await supabase
         .from("professionals")
         .select("*")
-        .eq("slug", slug)
+        .ilike("slug", slug)
         .single();
+      console.log("[AgentProfile] slug query:", slug, "result:", prof, "error:", profError);
 
       if (!prof) { setLoading(false); return; }
       setProfessional(prof as unknown as Professional);
@@ -211,8 +212,9 @@ export default function AgentProfile() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <p className="text-muted-foreground">Agent not found</p>
-          <Button asChild variant="outline"><Link to="/">Go Home</Link></Button>
+          <h2 className="text-xl font-semibold text-foreground">Agente no encontrado</h2>
+          <p className="text-muted-foreground text-center max-w-md">No pudimos encontrar un perfil con esta dirección. Puede que el perfil aún no esté publicado.</p>
+          <Button asChild variant="outline"><Link to="/">Volver al inicio</Link></Button>
         </div>
       </div>
     );

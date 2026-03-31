@@ -33,6 +33,8 @@ Deno.serve(async (req) => {
       team,
     } = await req.json();
 
+    console.log("[publish-agent-profile] Received:", { user_id, company_name, contact_name, email, slug });
+
     if (!user_id || !company_name || !contact_name || !email || !slug) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
@@ -74,6 +76,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (profError) throw profError;
+    console.log("[publish-agent-profile] Created professional:", profData.id);
 
     // 2. Insert team members
     if (team && team.length > 0 && profData) {
