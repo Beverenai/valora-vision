@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { useParams, useNavigate } from "react-router-dom";
 
