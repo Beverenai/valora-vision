@@ -318,7 +318,7 @@ const ProOnboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">Email *</Label>
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="info@agency.com" />
+                    <Input id="email" type="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={(e) => e.target.select()} placeholder="info@agency.com" />
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone *</Label>
