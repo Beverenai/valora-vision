@@ -117,11 +117,12 @@ export default function AgentProfile() {
       setLoading(true);
 
       // Fetch professional
-      const { data: prof } = await supabase
+      const { data: prof, error: profError } = await supabase
         .from("professionals")
         .select("*")
-        .eq("slug", slug)
+        .ilike("slug", slug)
         .single();
+      console.log("[AgentProfile] slug query:", slug, "result:", prof, "error:", profError);
 
       if (!prof) { setLoading(false); return; }
       setProfessional(prof as unknown as Professional);
