@@ -450,9 +450,9 @@ export default function AgentProfile() {
             )}
 
             {/* Service Areas */}
-            {zones.length > 0 && (
-              <section>
-                <p className={SECTION_LABEL}>SERVICE AREAS</p>
+            <section>
+              <p className={SECTION_LABEL}>SERVICE AREAS</p>
+              {zones.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {zones.map(z => (
                     <Badge key={z.id} variant="outline" className="text-sm px-3 py-1.5">
@@ -461,8 +461,10 @@ export default function AgentProfile() {
                     </Badge>
                   ))}
                 </div>
-              </section>
-            )}
+              ) : (
+                <p className="text-sm text-muted-foreground">Service areas not specified</p>
+              )}
+            </section>
 
             {/* Reviews */}
             <section>
