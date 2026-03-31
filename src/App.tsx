@@ -39,6 +39,7 @@ const App = () => (
           <Route path="/buy/result/:id" element={<BuyResult />} />
           <Route path="/lookup" element={<ValuationLookup />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/agentes" element={<AgentDirectory />} />
           <Route path="/agentes/:slug" element={<AgentProfile />} />
           <Route path="/pro" element={<ProLanding />} />
           <Route path="/pro/onboard" element={<ProOnboard />} />
