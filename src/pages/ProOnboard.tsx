@@ -329,14 +329,31 @@ const ProOnboard = () => {
               <div className="mb-6">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Logo</Label>
                 <div className="mt-2 flex items-center gap-4">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Logo" className="w-16 h-16 rounded-xl object-cover border" />
+                  {logoUrl && !logoFailed ? (
+                    <img src={logoUrl} alt="Logo" className="w-16 h-16 rounded-xl object-cover border" onError={() => setLogoFailed(true)} />
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-heading font-bold text-xl">
+                    <div className="w-16 h-16 rounded-xl bg-[#D4713B] flex items-center justify-center text-white font-heading font-bold text-xl">
                       {companyName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                     </div>
                   )}
-                  <span className="text-xs text-muted-foreground">Logo can be changed after publishing</span>
+                  <div className="flex flex-col gap-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="logo-upload"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setLogoUrl(URL.createObjectURL(file));
+                          setLogoFailed(false);
+                        }
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById("logo-upload")?.click()}>
+                      Upload logo
+                    </Button>
+                  </div>
                 </div>
               </div>
 
