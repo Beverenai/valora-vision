@@ -14,6 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_contact_requests: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          interest: string | null
+          message: string | null
+          name: string
+          phone: string | null
+          professional_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          interest?: string | null
+          message?: string | null
+          name: string
+          phone?: string | null
+          professional_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          interest?: string | null
+          message?: string | null
+          name?: string
+          phone?: string | null
+          professional_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_contact_requests_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          is_verified: boolean | null
+          lead_id: string | null
+          professional_id: string
+          rating: number
+          reviewer_name: string
+          reviewer_role: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          lead_id?: string | null
+          professional_id: string
+          rating: number
+          reviewer_name: string
+          reviewer_role?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          lead_id?: string | null
+          professional_id?: string
+          rating?: number
+          reviewer_name?: string
+          reviewer_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_reviews_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_team_members: {
+        Row: {
+          avg_rating: number | null
+          created_at: string | null
+          email: string | null
+          id: string
+          languages: string[] | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          professional_id: string
+          role: string | null
+          sort_order: number | null
+          total_reviews: number | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          languages?: string[] | null
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          professional_id: string
+          role?: string | null
+          sort_order?: number | null
+          total_reviews?: number | null
+        }
+        Update: {
+          avg_rating?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          languages?: string[] | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          professional_id?: string
+          role?: string | null
+          sort_order?: number | null
+          total_reviews?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_team_members_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       buy_analyses: {
         Row: {
           address: string | null
@@ -431,52 +569,91 @@ export type Database = {
       }
       professionals: {
         Row: {
+          avg_rating: number | null
           bio: string | null
           company_name: string
           contact_name: string
+          cover_photo_url: string | null
           created_at: string | null
+          description: string | null
           email: string
+          facebook_url: string | null
+          founded_year: number | null
           id: string
+          instagram_url: string | null
           is_active: boolean | null
           is_verified: boolean | null
           languages: string[] | null
+          linkedin_url: string | null
           logo_url: string | null
+          office_address: string | null
           phone: string | null
           photo_url: string | null
+          service_zones: string[] | null
+          slug: string
+          tagline: string | null
+          team_size: number | null
+          total_reviews: number | null
           type: string
           user_id: string | null
           website: string | null
         }
         Insert: {
+          avg_rating?: number | null
           bio?: string | null
           company_name: string
           contact_name: string
+          cover_photo_url?: string | null
           created_at?: string | null
+          description?: string | null
           email: string
+          facebook_url?: string | null
+          founded_year?: number | null
           id?: string
+          instagram_url?: string | null
           is_active?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          linkedin_url?: string | null
           logo_url?: string | null
+          office_address?: string | null
           phone?: string | null
           photo_url?: string | null
+          service_zones?: string[] | null
+          slug: string
+          tagline?: string | null
+          team_size?: number | null
+          total_reviews?: number | null
           type: string
           user_id?: string | null
           website?: string | null
         }
         Update: {
+          avg_rating?: number | null
           bio?: string | null
           company_name?: string
           contact_name?: string
+          cover_photo_url?: string | null
           created_at?: string | null
+          description?: string | null
           email?: string
+          facebook_url?: string | null
+          founded_year?: number | null
           id?: string
+          instagram_url?: string | null
           is_active?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          linkedin_url?: string | null
           logo_url?: string | null
+          office_address?: string | null
           phone?: string | null
           photo_url?: string | null
+          service_zones?: string[] | null
+          slug?: string
+          tagline?: string | null
+          team_size?: number | null
+          total_reviews?: number | null
           type?: string
           user_id?: string | null
           website?: string | null

@@ -12,6 +12,7 @@ import BuyAnalysis from "./pages/BuyAnalysis.tsx";
 import BuyResult from "./pages/BuyResult.tsx";
 import ValuationLookup from "./pages/ValuationLookup.tsx";
 import Admin from "./pages/Admin.tsx";
+import AgentProfile from "./pages/AgentProfile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/buy/result/:id" element={<BuyResult />} />
           <Route path="/lookup" element={<ValuationLookup />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/agentes/:slug" element={<AgentProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
