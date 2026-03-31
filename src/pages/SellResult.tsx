@@ -386,7 +386,7 @@ const ValuationResultCard: React.FC<{
   return (
     <section className="py-16 md:py-24">
       <div className="text-center max-w-2xl mx-auto px-6">
-        <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-8">Estimated Market Value</p>
+        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-8">Estimated Market Value</p>
         <p className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-foreground">{fmt(estimatedValue)}</p>
 
         {/* Price Range Bar */}
