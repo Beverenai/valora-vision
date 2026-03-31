@@ -480,10 +480,10 @@ const Index = () => {
               className="text-center mb-12"
             >
               <SectionLabel>Included Free</SectionLabel>
-              <h2 className="font-sans text-4xl md:text-6xl font-black uppercase tracking-tight text-foreground mt-3 max-w-2xl mx-auto">
+              <h2 className="font-sans text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3 max-w-2xl mx-auto">
                 Everything In Your Report
               </h2>
-              <p className="font-['DM_Serif_Display'] italic text-xl text-muted-foreground mt-4">
+              <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
                 All the data you need to make informed decisions
               </p>
             </motion.div>
