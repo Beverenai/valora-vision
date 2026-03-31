@@ -1,62 +1,37 @@
 
 
-## Plan: Onboarding Form Validation Polish
+## Plan: Mobile Responsiveness Polish
 
-### Overview
-Add real-time validation feedback to Step 1 of `/pro/onboard`, including visual indicators, format hints, email uniqueness check, and Google address autocomplete.
+After reviewing all five pages, most already use responsive Tailwind classes (`grid-cols-1 md:grid-cols-*`, mobile tab bar, etc.). Here are the specific fixes needed:
 
-### Changes in `src/pages/ProOnboard.tsx`
+### 1. `/pro` Landing — Pricing cards (already responsive)
+**No fix needed.** Line 156 uses `grid md:grid-cols-3 gap-6` which stacks on mobile. Verified.
 
-**1. Add validation state (near line 58)**
-```tsx
-const [emailError, setEmailError] = useState("");
-const [emailValid, setEmailValid] = useState(false);
-const [emailChecking, setEmailChecking] = useState(false);
-const [phoneError, setPhoneError] = useState("");
-const [websiteError, setWebsiteError] = useState("");
-const [addressConfirmed, setAddressConfirmed] = useState(false);
-```
+### 2. `/pro/onboard` — Step 1 form + Step 2 animation
+**No fix needed.** Form fields use `grid-cols-1 sm:grid-cols-2` (line 393) so they go full-width on mobile. Step 2 animation is centered via `text-center` + `max-w-sm mx-auto` (lines 471, 475). Verified.
 
-**2. Validation helpers**
-- `validateEmail(val)` — regex check, sets `emailError` if invalid
-- `checkEmailUniqueness(val)` — on blur, query `supabase.from('professionals').select('id').eq('email', val).maybeSingle()`. If found, set `emailError = "This email is already registered"`; otherwise set `emailValid = true`
-- `validatePhone(val)` — accept `+XX XXX XXX XXX` pattern, show error if clearly invalid
-- `validateWebsite(val)` — basic URL pattern check on blur
+### 3. `/agentes/:slug` — Contact form + stats bar
+**Minor fix needed in `src/pages/AgentProfile.tsx`:**
+- **Stats bar** (line 330): Already has `overflow-x-auto` with `shrink-0` items — works fine.
+- **Contact form** (line 538): On mobile (`isMobile`), the contact form renders in the grid without the `sticky` class — correct. However, the 2-column grid `grid-cols-1 md:grid-cols-[1fr_340px]` (line 371) already stacks on mobile, placing the form below content. This works.
+- **Hero buttons** (line 309): The "Contact" and "Website" buttons don't wrap well on small screens. Change `flex gap-3` to `flex flex-wrap gap-3` to prevent overflow.
 
-**3. Update Step 1 form fields (lines 309-336)**
+### 4. `/agentes` Directory — Card grid
+**No fix needed.** Line uses `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` — single column on mobile. Verified.
 
-Each field gets:
-- Green checkmark icon (inside input or beside label) when valid and non-empty
-- Red border + error message below when invalid
-- Helper text where relevant
+### 5. `/pro/dashboard` — Bottom tab bar
+**No fix needed.** Already implemented: `isMobile` check (line 568) renders `MobileTabBar` with `fixed bottom-0` tab bar showing 4 items, and hides the sidebar. Content has `pb-20` to avoid overlap.
 
-Specific changes:
-- **Agency name**: green check when `companyName.trim().length > 0`
-- **Your name**: green check when `contactName.trim().length > 0`
-- **Email**: validate format on blur, then check uniqueness. Show spinner while checking, green check when valid+unique, red border + error text when invalid or taken
-- **Phone**: replace plain `<Input>` with `<PhoneInput>` component (already exists at `src/components/shared/PhoneInput.tsx`). Add hint: "e.g., +34 612 345 678"
-- **Website**: validate URL format on blur. Add helper text: "e.g., https://www.youragency.com" (already partially there, keep it)
-- **Address**: replace plain `<Input>` with `<GoogleAddressInput>` component (already exists). Wire `onChange` to update `address` and capture `lat`/`lng`. Set `addressConfirmed` when location is confirmed. Show green check when confirmed.
+---
 
-**4. Visual validation wrapper**
+### Summary of Changes
 
-Create a small inline helper to render the validation icon:
-```tsx
-const ValidationIcon = ({ valid, error }: { valid: boolean; error: string }) => (
-  valid ? <Check className="w-4 h-4 text-green-600" /> :
-  error ? <X className="w-4 h-4 text-destructive" /> : null
-);
-```
+**File: `src/pages/AgentProfile.tsx` — Line 309**
+- Change `<div className="flex gap-3 shrink-0">` to `<div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">`
+- This prevents the hero CTA buttons from overflowing on narrow screens
 
-Add red border class to inputs conditionally: `className={cn(emailError && "border-destructive")}`
-
-**5. Update `canProceedStep1` (line 82)**
-- Add `!emailError` and `emailValid` conditions
-- Require `addressConfirmed` (or at minimum non-empty address with lat/lng set)
-
-### Address Integration Detail
-The `GoogleAddressInput` component needs `addressData` as an object with `streetAddress`, `city`, `province`, etc. Create a local `addressData` state object, and derive the display `address` string from it. When `onLocationConfirmed` fires, set `addressConfirmed = true` and update `lat`/`lng` state.
+That's the only fix needed. All other pages already handle mobile correctly.
 
 ### Files Modified
-- `src/pages/ProOnboard.tsx` — add validation state, swap phone/address inputs, add visual feedback
+- `src/pages/AgentProfile.tsx` (1 line change)
 
