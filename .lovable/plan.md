@@ -1,131 +1,135 @@
 
 
-## Plan: Agent Profile Page (`/agentes/:slug`)
+## Plan: Agent Onboarding Flow (Full Build)
 
-This is a large feature spanning database schema changes, a new page component, and a route addition. We'll extend the existing `professionals` table rather than creating a parallel `agencies` table, keeping the data model clean.
+A complete B2B agent onboarding system with 3 new pages, authentication, an AI-powered profile generation edge function, and database updates.
 
 ---
 
 ### 1. Database Migration
 
-Extend existing tables and add new ones:
+**Alter `professionals` table:**
+- Ensure `user_id` references `auth.users(id)` (currently nullable — keep nullable but populate on signup)
 
-**Alter `professionals` table** — add missing columns:
-- `slug` (text, unique, not null)
-- `cover_photo_url` (text)
-- `tagline` (text)
-- `avg_rating` (numeric, default 0)
-- `total_reviews` (integer, default 0)
-- `founded_year` (integer)
-- `team_size` (integer)
-- `office_address` (text)
-- `instagram_url` (text)
-- `facebook_url` (text)
-- `linkedin_url` (text)
-- `service_zones` (uuid[], references zones)
-- `description` (text) — rename/alias from `bio`
+**Create `user_roles` table** (required for admin vs agent access):
+```sql
+CREATE TYPE public.app_role AS ENUM ('admin', 'agent', 'user');
+CREATE TABLE public.user_roles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  role app_role NOT NULL,
+  UNIQUE (user_id, role)
+);
+-- RLS + security definer function has_role()
+```
 
-**Create `agent_team_members` table:**
-```
-id uuid PK
-professional_id uuid FK → professionals(id) ON DELETE CASCADE
-name text NOT NULL
-role text
-photo_url text
-avg_rating numeric DEFAULT 0
-total_reviews integer DEFAULT 0
-languages text[]
-email text
-phone text
-sort_order integer DEFAULT 0
-```
-RLS: publicly readable.
+**Add RLS policies to `professionals`:**
+- Agents can UPDATE their own row (`user_id = auth.uid()`)
+- Agents can INSERT if they don't already have a profile
 
-**Create `agent_reviews` table:**
-```
-id uuid PK
-professional_id uuid FK → professionals(id) ON DELETE CASCADE
-reviewer_name text NOT NULL
-reviewer_role text (seller/buyer/landlord)
-rating integer NOT NULL CHECK 1-5
-comment text
-is_verified boolean DEFAULT false
-lead_id uuid (optional link to valuation)
-created_at timestamptz DEFAULT now()
-```
-RLS: publicly readable, anyone can insert.
-
-**Create `agent_contact_requests` table:**
-```
-id uuid PK
-professional_id uuid FK → professionals(id)
-name text NOT NULL
-email text NOT NULL
-phone text
-interest text (selling/buying/renting/valuation/other)
-message text
-created_at timestamptz DEFAULT now()
-```
-RLS: anyone can insert, service_role can read.
+**Add INSERT policy to `agent_team_members`:**
+- Agents can insert/update/delete team members for their own professional_id
 
 ---
 
-### 2. New Page: `src/pages/AgentProfile.tsx`
+### 2. Authentication Setup
 
-Full-page component reading from Supabase. Sections:
-
-1. **Hero/Header** — Cover photo (or warm terracotta gradient fallback), overlapping circular logo (initials fallback), agency name in serif heading, star rating + review count + verified badge, tagline, two CTA buttons (Contact / Website)
-
-2. **Stats Bar** — Horizontal row: city/location, property count from `professional_zones`, founded year, team size, languages as flag badges. Horizontally scrollable on mobile.
-
-3. **About** — Section label "ABOUT" (uppercase tracked), description text, social media icon links (only rendered if URL exists)
-
-4. **Team** — Section label "OUR TEAM", grid of team member cards from `agent_team_members`. Hidden if empty. 2-3 columns desktop, 1 mobile.
-
-5. **Service Areas** — Section label "SERVICE AREAS", zone name badges from `service_zones` joined with `zones` table. No map initially (Mapbox would need API key).
-
-6. **Reviews** — Section label "CLIENT REVIEWS", summary bar (avg rating, count, star distribution), individual review cards with role badges, "Load more" if > 5. Empty state: "Be the first to review" with submit form.
-
-7. **Contact Form** — On desktop: sticky sidebar (right column in a 2-column layout wrapping sections 3-6). On mobile: full-width section at bottom with sticky "Contact" button. Fields: name, email, phone, interest dropdown, message (pre-filled). Inserts into `agent_contact_requests`.
-
-8. **Footer note** — "Valuation powered by ValoraCasa" link + disclaimer
-
-**Layout approach**: Desktop uses a `grid grid-cols-[1fr_380px]` from the About section onwards, with the contact form as the sticky right column. Mobile stacks everything linearly.
-
-**SEO**: Dynamic `document.title` and meta description via `useEffect`.
-
-**Breadcrumbs**: Home > Agents > [Agency Name]
+- Use `cloud--configure_auth` to enable email/password auth
+- Create `src/pages/ProLogin.tsx` — simple login/signup form for agents
+- Create `src/pages/ResetPassword.tsx` — password reset page
+- On signup during onboarding: create auth user, assign `agent` role, link to `professionals` row
 
 ---
 
-### 3. Route Addition
+### 3. Edge Function: `onboard-agency`
 
-**`src/App.tsx`** — Add:
+**`supabase/functions/onboard-agency/index.ts`**
+
+Input: `{ name, email, website, address, phone }`
+
+Processing pipeline:
+1. **If website provided**: Use Firecrawl (already connected) to scrape the website → extract logo, team members, social links from the HTML/content
+2. **Lovable AI** (gemini-3-flash-preview): Generate a 2-3 sentence agency description from the scraped content + name + location
+3. **Google Places API** (`VITE_GOOGLE_MAPS_API_KEY`): Search for the business by name + address → fetch rating, review count
+4. **Geocode** the office address using Google Geocoding API
+
+Output: JSON with `logo_url`, `description`, `team[]`, `social{}`, `google_rating`, `google_review_count`, `languages[]`, `lat`, `lng`
+
+---
+
+### 4. New Pages
+
+**`src/pages/ProLanding.tsx`** (`/pro`)
+- Hero section with headline, subhead, CTA button
+- "How it works" 3-step visual
+- Pricing cards (3 tiers: Basic €149, Premium €299, Elite €499) with feature comparison
+- Social proof section with live valuation count from DB
+- FAQ accordion (5 questions)
+- Footer CTA
+
+**`src/pages/ProOnboard.tsx`** (`/pro/onboard`)
+- 3-step wizard using existing `useFormWizard` hook pattern
+- **Step 1**: Form fields (agency name, your name, email, phone, website, office address with Google autocomplete)
+- **Step 2**: AI progress screen — animated checklist items appearing one by one. Calls `onboard-agency` edge function. Auto-advances when done. "Skip" link as fallback.
+- **Step 3**: Live profile preview (reuses AgentProfile layout) with inline edit capabilities. Logo/cover upload, editable description textarea, team member add/remove, service area multi-select, language multi-select, social link inputs.
+- "Publish" button: creates Supabase Auth account → inserts `professionals` row → inserts `user_roles` → redirects to success
+
+**`src/pages/ProOnboardSuccess.tsx`** (`/pro/onboard/success`)
+- Welcome screen with confetti
+- Link to view profile (`/agentes/:slug`)
+- Link to choose plan
+- Next steps checklist
+
+---
+
+### 5. Routes
+
+Add to `src/App.tsx`:
 ```tsx
-<Route path="/agentes/:slug" element={<AgentProfile />} />
+<Route path="/pro" element={<ProLanding />} />
+<Route path="/pro/onboard" element={<ProOnboard />} />
+<Route path="/pro/onboard/success" element={<ProOnboardSuccess />} />
+<Route path="/pro/login" element={<ProLogin />} />
+<Route path="/reset-password" element={<ResetPassword />} />
 ```
+
+Add "For Agents" link to Navbar.
 
 ---
 
-### 4. Update ProfessionalSpotlight Link
+### 6. Firecrawl Integration
 
-**`src/pages/SellResult.tsx`** — Change the "View Profile" button `onViewProfile` to navigate to `/agentes/:slug` instead of showing a toast.
+The prompt requires scraping agent websites. Check if Firecrawl connector is already linked; if not, connect it. The edge function will use `FIRECRAWL_API_KEY` to call the scrape API for extracting logo, team, and social links from the agency website.
 
 ---
 
 ### Files Created
-- `src/pages/AgentProfile.tsx` — main profile page (~500 lines)
+- `src/pages/ProLanding.tsx`
+- `src/pages/ProOnboard.tsx`
+- `src/pages/ProOnboardSuccess.tsx`
+- `src/pages/ProLogin.tsx`
+- `src/pages/ResetPassword.tsx`
+- `supabase/functions/onboard-agency/index.ts`
 
 ### Files Modified
-- `src/App.tsx` — add route
-- `src/pages/SellResult.tsx` — link View Profile to actual page
+- `src/App.tsx` — add 5 new routes
+- `src/components/Navbar.tsx` — add "For Agents" link
+- Database migration (user_roles table, RLS policies)
 
-### Database Migration
-- Alter `professionals` + create 3 new tables
+### Secrets Required
+- `LOVABLE_API_KEY` — already configured
+- `VITE_GOOGLE_MAPS_API_KEY` — already configured (will use for Places + Geocoding in edge function; need to also add as a runtime secret)
+- `FIRECRAWL_API_KEY` — needs connector check/link
 
 ### Implementation Order
-1. Database migration (alter + create tables)
-2. Create `AgentProfile.tsx` page with all sections
-3. Add route in `App.tsx`
-4. Update SellResult spotlight link
+1. Database migration (user_roles, RLS updates)
+2. Configure auth (email/password)
+3. Connect Firecrawl if needed
+4. Add Google Maps API key as runtime secret
+5. `onboard-agency` edge function
+6. `ProLanding.tsx` — B2B landing page
+7. `ProOnboard.tsx` — 3-step wizard
+8. `ProOnboardSuccess.tsx` — success page
+9. `ProLogin.tsx` + `ResetPassword.tsx` — auth pages
+10. Routes + Navbar update
 
