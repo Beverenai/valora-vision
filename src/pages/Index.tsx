@@ -499,7 +499,7 @@ const Index = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.08 }}
                   className={cn(
-                    "rounded-2xl border border-border bg-card p-5 md:p-6 flex flex-col justify-between gap-4 transition-shadow hover:shadow-md",
+                    "rounded-xl border border-border bg-card p-5 md:p-6 flex flex-col justify-between gap-4 transition-shadow hover:shadow-md",
                     feat.gridClass
                   )}
                 >
