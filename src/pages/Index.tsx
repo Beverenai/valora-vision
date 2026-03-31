@@ -184,13 +184,7 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center"
               >
-                <span
-                  className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide mb-4 transition-colors duration-300 ${
-                    isSell
-                      ? "bg-[hsl(var(--terracotta-light))] text-primary"
-                      : "bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))]"
-                  }`}
-                >
+                <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground font-semibold mb-3">
                   {isSell ? "Free Property Valuation" : "Free Price Analysis"}
                 </span>
                 <h1 className="font-sans text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
