@@ -327,7 +327,7 @@ const ProOnboard = () => {
                 </div>
                 <div>
                   <Label htmlFor="website">Website URL</Label>
-                  <Input id="website" type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://www.youragency.com" />
+                  <Input id="website" type="url" autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} onFocus={(e) => e.target.select()} placeholder="https://www.youragency.com" />
                   <p className="text-xs text-muted-foreground mt-1">We'll use this to auto-fill your profile</p>
                 </div>
                 <div>
