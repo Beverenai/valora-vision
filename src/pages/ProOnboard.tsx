@@ -110,8 +110,45 @@ const ProOnboard = () => {
 
   const progressPercentage = ((step + 1) / wizardSteps.length) * 100;
 
+  // Validation helpers
+  const validateEmail = (val: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!val.trim()) { setEmailError(""); setEmailValid(false); return; }
+    if (!emailRegex.test(val)) { setEmailError("Invalid email format"); setEmailValid(false); }
+    else { setEmailError(""); }
+  };
+
+  const checkEmailUniqueness = async (val: string) => {
+    if (!val.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
+    setEmailChecking(true);
+    try {
+      const { data } = await supabase.from("professionals").select("id").eq("email", val).maybeSingle();
+      if (data) { setEmailError("This email is already registered"); setEmailValid(false); }
+      else { setEmailError(""); setEmailValid(true); }
+    } catch { setEmailValid(true); }
+    setEmailChecking(false);
+  };
+
+  const validateWebsite = (val: string) => {
+    if (!val.trim()) { setWebsiteError(""); return; }
+    try { new URL(val); setWebsiteError(""); } catch { setWebsiteError("Enter a valid URL (e.g., https://...)"); }
+  };
+
+  const handleAddressChange = (field: keyof AddressData, value: string | number | undefined) => {
+    setAddressData(prev => ({ ...prev, [field]: value }));
+    if (field === "latitude" || field === "longitude") {
+      if (field === "latitude") setLat(value as number);
+      if (field === "longitude") setLng(value as number);
+    }
+    // Reconstruct address string
+    const updated = { ...addressData, [field]: value };
+    const parts = [updated.streetAddress, updated.city, updated.province].filter(Boolean);
+    setAddress(parts.join(", ") || "");
+    setAddressConfirmed(false);
+  };
+
   // Step 1 validation
-  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim();
+  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && emailValid;
 
   // Ref to hold API result so animation can read it asynchronously
   const apiResultRef = useRef<any>(null);
