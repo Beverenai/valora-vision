@@ -391,6 +391,8 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
                 dragProgress={dragProgress}
                 onDragX={setDragProgress}
                 onTear={triggerReveal}
+                onTap={triggerReveal}
+                showTapHint={showTapHint}
               />
             </motion.div>
           </motion.div>
