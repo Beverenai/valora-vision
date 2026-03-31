@@ -25,12 +25,7 @@ const ProLogin = () => {
       if (error) throw error;
 
       // Find agent's profile
-      const { data: prof } = await supabase.from("professionals").select("slug").eq("email", email).single();
-      if (prof) {
-        navigate(`/agentes/${prof.slug}`);
-      } else {
-        navigate("/pro/onboard");
-      }
+      navigate("/pro/dashboard");
     } catch (e: any) {
       toast({ title: "Login failed", description: e.message, variant: "destructive" });
     } finally {
