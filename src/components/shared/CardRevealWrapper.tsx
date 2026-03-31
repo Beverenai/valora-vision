@@ -88,7 +88,9 @@ const SealedWrapper: React.FC<{
   dragProgress: number;
   onDragX: (x: number) => void;
   onTear: () => void;
-}> = ({ accentType, dragProgress, onDragX, onTear }) => {
+  onTap: () => void;
+  showTapHint: boolean;
+}> = ({ accentType, dragProgress, onDragX, onTear, onTap, showTapHint }) => {
   const x = useMotionValue(0);
   const isSell = accentType === "sell";
 
@@ -109,8 +111,13 @@ const SealedWrapper: React.FC<{
 
   return (
     <div
-      className="relative w-[320px] h-[480px] sm:w-[360px] sm:h-[540px] mx-auto"
+      className="relative w-[320px] h-[480px] sm:w-[360px] sm:h-[540px] mx-auto cursor-pointer outline-none"
       style={{ perspective: "800px" }}
+      tabIndex={0}
+      role="button"
+      aria-label="Open valuation"
+      onClick={onTap}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
     >
       <div
         className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-[80%] h-6 rounded-full blur-xl"
@@ -227,6 +234,7 @@ const SealedWrapper: React.FC<{
             onDragX(0);
           }
         }}
+        onClick={(e) => e.stopPropagation()}
         style={{ x, right: "0px", top: "35%" }}
         className={cn(
           "absolute z-30 flex items-center gap-1.5 px-3 py-2 rounded-l-xl cursor-grab active:cursor-grabbing shadow-lg -translate-y-1/2",
@@ -249,7 +257,7 @@ const SealedWrapper: React.FC<{
         animate={{ opacity: [0.4, 0.8, 0.4] }}
         transition={{ repeat: Infinity, duration: 2.5 }}
       >
-        ← Slide to open
+        {showTapHint ? "Tap or slide to reveal" : "← Slide to open"}
       </motion.p>
     </div>
   );
@@ -288,6 +296,13 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
   const [phase, setPhase] = useState<"sealed" | "tearing" | "sliding" | "revealed">("sealed");
   const [dragProgress, setDragProgress] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showTapHint, setShowTapHint] = useState(false);
+
+  useEffect(() => {
+    if (phase !== "sealed") return;
+    const timer = setTimeout(() => setShowTapHint(true), 3000);
+    return () => clearTimeout(timer);
+  }, [phase]);
   const [cardTilt, setCardTilt] = useState({ x: 0, y: 0 });
   const cardContainerRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
@@ -376,6 +391,8 @@ const CardRevealWrapper: React.FC<CardRevealWrapperProps> = ({
                 dragProgress={dragProgress}
                 onDragX={setDragProgress}
                 onTear={triggerReveal}
+                onTap={triggerReveal}
+                showTapHint={showTapHint}
               />
             </motion.div>
           </motion.div>
