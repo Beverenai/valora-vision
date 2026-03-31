@@ -408,7 +408,7 @@ const BuyResult: React.FC = () => {
           className="mb-16"
         >
           <div className="w-10 h-px bg-[hsl(var(--buy))] mb-8" />
-          <p className="text-[0.65rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-6">Negotiation Insight</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">Negotiation Insight</p>
 
           <div className="bg-card border border-border rounded-xl p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
