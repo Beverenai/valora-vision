@@ -1,29 +1,48 @@
 
 
-## Plan: Fix BUY Toggle Visibility + Add Agent CTA
+## Plan: Fix BUY Toggle Clipping + Redesign Agent CTA
 
-### Problem 1: Toggle Disappears in BUY Mode
-The card's main content area (line 271 of `ValuationTicketCard.tsx`) uses `overflow-hidden` when the map is not expanded. In BUY mode, the URL input + platform badge + analyze button + toggle stack up and the toggle gets clipped by the fixed card height (`min-h-[440px]`).
+### Problem 1: Toggle disappears on bottom card in BUY mode
+The main content section (line 271) uses `overflow-hidden` when map is not expanded. The buy input content (URL + badge + toggle + button) exceeds the visible area and the toggle gets clipped.
 
 **Fix in `src/components/ValuationTicketCard.tsx`:**
-- Move the SkyToggle in the BUY input section (lines 394-403) to BEFORE the analyze button, so it appears higher in the card and doesn't get clipped
-- Alternatively, increase the card's min-height when in buy mode, or change `overflow-hidden` to `overflow-visible` for the buy input section
+- Line 271: Change `overflow-hidden` to `overflow-visible` when in buy input mode. The condition already exists for `mapExpanded` — extend it to also check `hasBuyInput`:
+  ```
+  mapExpanded || hasBuyInput ? "overflow-visible" : "overflow-hidden"
+  ```
+- This lets the buy input content flow naturally without clipping, while sell mode (with Google address input) retains overflow-hidden behavior when map isn't expanded.
 
-Best approach: Move the toggle above the analyze button in buy mode (swap lines 384-392 with 394-403). This keeps the toggle visible without changing card dimensions.
+### Problem 2: Agent CTA needs better design
+Current: plain text link. Redesign as an elegant banner section.
 
-### Problem 2: Add Agent CTA at Bottom
-Add a subtle "Are you a real estate agent?" link after the final CTA section, before the Footer.
-
-**Fix in `src/pages/Index.tsx` (after line 756):**
+**Replace in `src/pages/Index.tsx` (lines 758-763):**
 ```tsx
-<div className="text-center py-8">
-  <Link to="/pro" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-    Are you a real estate agent? <span className="underline font-medium">List your agency</span>
-  </Link>
-</div>
+<section className="py-12 px-4">
+  <div className="max-w-2xl mx-auto text-center">
+    <div className="border border-border/60 rounded-2xl px-6 py-8 md:px-10 md:py-10 bg-card/50 backdrop-blur-sm">
+      <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
+        For Professionals
+      </p>
+      <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-2">
+        Are you a real estate agent?
+      </h3>
+      <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+        Join ValoraCasa and get qualified leads, a professional profile page, and AI-powered tools to grow your business.
+      </p>
+      <Link to="/pro">
+        <Button className="rounded-full px-8">
+          List Your Agency
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </Link>
+    </div>
+  </div>
+</section>
 ```
 
+Uses the standardized section label style, serif heading, and primary CTA button consistent with the rest of the site.
+
 ### Files Modified
-- `src/components/ValuationTicketCard.tsx` — reorder toggle before analyze button in buy mode
-- `src/pages/Index.tsx` — add agent CTA link before Footer
+- `src/components/ValuationTicketCard.tsx` — line 271: allow overflow-visible for buy input mode
+- `src/pages/Index.tsx` — replace plain text link with designed banner section
 
