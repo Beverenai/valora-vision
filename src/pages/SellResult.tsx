@@ -356,7 +356,7 @@ const PropertySummaryCard: React.FC<{
     <section className="py-10 md:py-16">
       {propertyType && (
         <div className="text-center mb-8">
-          <p className="text-[0.6rem] uppercase tracking-[0.2em] font-semibold text-muted-foreground">{propertyType.replace(/-/g, " ")}</p>
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground">{propertyType.replace(/-/g, " ")}</p>
         </div>
       )}
       <div className="flex flex-wrap justify-center divide-x divide-border">
