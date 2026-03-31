@@ -184,7 +184,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     },
   }[size];
 
-  const { outerMaxWidth, stubWidth, mainPadding, heroImageMaxH, titleSize, cursiveSize, resultCursiveSize, priceSize, barcodeHeight } = sizeConfig;
+  const { outerMaxWidth, stubWidth, mainPadding, heroImageMaxH, titleSize, cursiveSize, resultCursiveSize, priceSize } = sizeConfig;
 
   // Rotate processing messages
   useEffect(() => {
