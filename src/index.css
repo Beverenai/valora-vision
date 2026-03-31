@@ -70,6 +70,7 @@
 
   html, body, #root {
     background-color: #FAFAF7;
+    overflow-x: hidden;
   }
 
   body {
