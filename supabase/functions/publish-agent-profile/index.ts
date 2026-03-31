@@ -33,6 +33,8 @@ Deno.serve(async (req) => {
       team,
     } = await req.json();
 
+    console.log("[publish-agent-profile] Received:", { user_id, company_name, contact_name, email, slug });
+
     if (!user_id || !company_name || !contact_name || !email || !slug) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
