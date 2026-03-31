@@ -998,6 +998,7 @@ const SellResult: React.FC = () => {
         </div>
       </CardRevealWrapper>
     </div>
+    </ErrorBoundary>
   );
 };
 

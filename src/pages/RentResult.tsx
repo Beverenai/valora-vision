@@ -116,6 +116,7 @@ const RentResult: React.FC = () => {
   );
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <CardRevealWrapper accentType="rent" cardElement={cardElement} loading={loading}>
         <div className="max-w-[1000px] mx-auto">
@@ -123,6 +124,7 @@ const RentResult: React.FC = () => {
         </div>
       </CardRevealWrapper>
     </div>
+    </ErrorBoundary>
   );
 };
 
