@@ -101,6 +101,7 @@ export default function AgentProfile() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [zones, setZones] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
