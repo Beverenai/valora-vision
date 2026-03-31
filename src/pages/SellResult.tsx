@@ -57,7 +57,7 @@ const LazyAnalysisBundle = lazy(() =>
 
 const LazyAgentBundle = lazy(() =>
   lazyRetry(() =>
-    import("@/components/result/AgentGroup.tsx").then((mod) => ({
+    import("@/components/ResultAgentGroup").then((mod) => ({
       default: (props: {
         leadId: string;
         latitude: number | null;
