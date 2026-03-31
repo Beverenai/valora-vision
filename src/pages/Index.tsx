@@ -56,7 +56,7 @@ const TESTIMONIALS_BUY = [
 
 /* ─── SECTION LABEL ─── */
 const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <p className={cn("text-xs tracking-[0.2em] uppercase text-muted-foreground", className)}>
+  <p className={cn("text-[0.65rem] tracking-[0.15em] uppercase font-semibold text-muted-foreground", className)}>
     {children}
   </p>
 );
