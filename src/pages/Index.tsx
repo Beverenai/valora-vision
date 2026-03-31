@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSEO } from "@/hooks/use-seo";
 import { useNavigate, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize, TrendingUp, Users, Search, BarChart3, Link2, ShieldCheck, Target } from "lucide-react";
+import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize, TrendingUp, Users, Search, BarChart3, Link2, ShieldCheck, Target, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
@@ -755,12 +756,27 @@ const Index = () => {
           />
         </section>
 
-        {/* Agent CTA */}
-        <div className="text-center py-8">
-          <Link to="/pro" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Are you a real estate agent? <span className="underline font-medium">List your agency</span>
-          </Link>
-        </div>
+        <section className="py-12 px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="border border-border/60 rounded-2xl px-6 py-8 md:px-10 md:py-10 bg-card/50 backdrop-blur-sm">
+              <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
+                For Professionals
+              </p>
+              <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-2">
+                Are you a real estate agent?
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                Join ValoraCasa and get qualified leads, a professional profile page, and AI-powered tools to grow your business.
+              </p>
+              <Link to="/pro">
+                <Button className="rounded-full px-8">
+                  List Your Agency
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
 
       </div>
 
