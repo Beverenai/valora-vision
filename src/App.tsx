@@ -13,6 +13,7 @@ import BuyResult from "./pages/BuyResult.tsx";
 import ValuationLookup from "./pages/ValuationLookup.tsx";
 import Admin from "./pages/Admin.tsx";
 import AgentProfile from "./pages/AgentProfile.tsx";
+import AgentDirectory from "./pages/AgentDirectory.tsx";
 import ProLanding from "./pages/ProLanding.tsx";
 import ProOnboard from "./pages/ProOnboard.tsx";
 import ProOnboardSuccess from "./pages/ProOnboardSuccess.tsx";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/buy/result/:id" element={<BuyResult />} />
           <Route path="/lookup" element={<ValuationLookup />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/agentes" element={<AgentDirectory />} />
           <Route path="/agentes/:slug" element={<AgentProfile />} />
           <Route path="/pro" element={<ProLanding />} />
           <Route path="/pro/onboard" element={<ProOnboard />} />
