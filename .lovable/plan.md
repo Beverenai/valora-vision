@@ -1,48 +1,39 @@
 
+Problem is not the overflow change alone. I checked the current code and found the real issue:
 
-## Plan: Fix BUY Toggle Clipping + Redesign Agent CTA
+1. The bottom homepage card at `src/pages/Index.tsx` lines 743-756 does not pass `listingUrl` or `onListingUrlChange` into `ValuationTicketCard`.
+2. Inside `ValuationTicketCard`, BUY mode only renders the BUY-specific URL input/toggle/button block when `onListingUrlChange` exists.
+3. Because the bottom card is missing those props, it never enters the BUY layout. So when you switch to BUY, the bottom card falls back to the wrong branch, and the button appears/disappears incorrectly.
 
-### Problem 1: Toggle disappears on bottom card in BUY mode
-The main content section (line 271) uses `overflow-hidden` when map is not expanded. The buy input content (URL + badge + toggle + button) exceeds the visible area and the toggle gets clipped.
+Plan
 
-**Fix in `src/components/ValuationTicketCard.tsx`:**
-- Line 271: Change `overflow-hidden` to `overflow-visible` when in buy input mode. The condition already exists for `mapExpanded` — extend it to also check `hasBuyInput`:
-  ```
-  mapExpanded || hasBuyInput ? "overflow-visible" : "overflow-hidden"
-  ```
-- This lets the buy input content flow naturally without clipping, while sell mode (with Google address input) retains overflow-hidden behavior when map isn't expanded.
+1. Fix the bottom BUY card wiring in `src/pages/Index.tsx`
+- Pass the same BUY props used by the top hero card:
+  - `listingUrl={listingUrl}`
+  - `onListingUrlChange={setListingUrl}`
+- Keep `valuationType`, `onValuationTypeChange`, and `mapExpandedBottom` as they are.
+- This will make the bottom card render the correct BUY UI consistently.
 
-### Problem 2: Agent CTA needs better design
-Current: plain text link. Redesign as an elegant banner section.
+2. Keep the clipping protection in `src/components/ValuationTicketCard.tsx`
+- Preserve the current `mapExpanded || hasBuyInput ? "overflow-visible" : "overflow-hidden"` logic.
+- No new structural change unless the BUY controls still visually clip after the prop fix.
 
-**Replace in `src/pages/Index.tsx` (lines 758-763):**
-```tsx
-<section className="py-12 px-4">
-  <div className="max-w-2xl mx-auto text-center">
-    <div className="border border-border/60 rounded-2xl px-6 py-8 md:px-10 md:py-10 bg-card/50 backdrop-blur-sm">
-      <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
-        For Professionals
-      </p>
-      <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-2">
-        Are you a real estate agent?
-      </h3>
-      <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-        Join ValoraCasa and get qualified leads, a professional profile page, and AI-powered tools to grow your business.
-      </p>
-      <Link to="/pro">
-        <Button className="rounded-full px-8">
-          List Your Agency
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </Link>
-    </div>
-  </div>
-</section>
-```
+3. Improve the “Are you a real estate agent?” section in `src/pages/Index.tsx`
+- Refine the current CTA banner into a more polished card:
+  - soft terracotta accent
+  - serif headline
+  - better spacing
+  - optional subtle divider / top label
+  - stronger button hierarchy
+- Keep it centered and mobile-safe.
 
-Uses the standardized section label style, serif heading, and primary CTA button consistent with the rest of the site.
+Expected result
 
-### Files Modified
-- `src/components/ValuationTicketCard.tsx` — line 271: allow overflow-visible for buy input mode
-- `src/pages/Index.tsx` — replace plain text link with designed banner section
+- Bottom card will actually stay in the BUY flow instead of rendering the wrong state.
+- BUY button/toggle will remain visible because the correct input block is used.
+- The agent CTA section will look more premium and aligned with the rest of the homepage.
 
+Files to update
+
+- `src/pages/Index.tsx`
+- `src/components/ValuationTicketCard.tsx` (only if a small follow-up visual adjustment is still needed after the real fix)
