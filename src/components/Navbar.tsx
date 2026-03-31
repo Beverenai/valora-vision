@@ -7,6 +7,7 @@ const navLinks = [
   { label: "Sell", href: "/sell/valuation" },
   { label: "Buy Analysis", href: "/buy" },
   { label: "Lookup", href: "/lookup" },
+  { label: "For Agents", href: "/pro" },
 ];
 
 const Navbar = () => {

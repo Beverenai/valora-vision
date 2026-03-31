@@ -13,6 +13,11 @@ import BuyResult from "./pages/BuyResult.tsx";
 import ValuationLookup from "./pages/ValuationLookup.tsx";
 import Admin from "./pages/Admin.tsx";
 import AgentProfile from "./pages/AgentProfile.tsx";
+import ProLanding from "./pages/ProLanding.tsx";
+import ProOnboard from "./pages/ProOnboard.tsx";
+import ProOnboardSuccess from "./pages/ProOnboardSuccess.tsx";
+import ProLogin from "./pages/ProLogin.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +39,11 @@ const App = () => (
           <Route path="/lookup" element={<ValuationLookup />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/agentes/:slug" element={<AgentProfile />} />
+          <Route path="/pro" element={<ProLanding />} />
+          <Route path="/pro/onboard" element={<ProOnboard />} />
+          <Route path="/pro/onboard/success" element={<ProOnboardSuccess />} />
+          <Route path="/pro/login" element={<ProLogin />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
