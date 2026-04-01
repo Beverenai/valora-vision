@@ -574,6 +574,10 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
 
   const handleRemoveMember = async (memberId: string, isRealAgent: boolean) => {
     if (!isAdmin) return;
+    if (memberId === agent.id) {
+      toast({ title: "Cannot remove yourself", description: "The agency owner cannot be removed from the team.", variant: "destructive" });
+      return;
+    }
     if (isRealAgent) {
       // Unlink agent from agency
       const { error } = await supabase.from("professionals").update({ agency_id: null, agency_role: null }).eq("id", memberId);
