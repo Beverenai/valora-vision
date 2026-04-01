@@ -215,12 +215,12 @@ serve(async (req) => {
       // Rent valuation
       if (comparables.length > 0) {
         const rentsPerSqm = comparables
-          .filter((c: any) => c.rent_per_sqm && c.rent_per_sqm > 0)
-          .map((c: any) => Number(c.rent_per_sqm));
+          .filter((c: any) => c.price_per_m2 && c.price_per_m2 > 0)
+          .map((c: any) => Number(c.price_per_m2));
 
         const monthlyRents = comparables
-          .filter((c: any) => c.monthly_rent && c.monthly_rent > 0)
-          .map((c: any) => Number(c.monthly_rent));
+          .filter((c: any) => c.price && c.price > 0)
+          .map((c: any) => Number(c.price));
 
         if (rentsPerSqm.length > 0) {
           const filtered = filterOutliers(rentsPerSqm);
