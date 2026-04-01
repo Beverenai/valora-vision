@@ -750,7 +750,7 @@ const Index = () => {
                 >
                   <div className="flex gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={cn("h-5 w-5", isSell ? "fill-primary text-primary" : "fill-[hsl(var(--buy))] text-[hsl(var(--buy))]")} />
+                      <Star key={i} className={cn("h-5 w-5", isRent ? "fill-[hsl(var(--rent))] text-[hsl(var(--rent))]" : isSell ? "fill-primary text-primary" : "fill-[hsl(var(--buy))] text-[hsl(var(--buy))]")} />
                     ))}
                   </div>
                   <p className="text-xl md:text-2xl font-['DM_Serif_Display'] italic text-muted-foreground max-w-2xl leading-relaxed">
