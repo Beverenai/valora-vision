@@ -220,7 +220,9 @@ const Index = () => {
           ref={heroRef}
           className="min-h-[75vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
           style={{
-            background: isSell
+            background: isRent
+              ? 'linear-gradient(180deg, hsl(152 55% 42% / 0.18) 0%, hsl(152 40% 70% / 0.10) 50%, transparent 85%)'
+              : isSell
               ? 'linear-gradient(180deg, hsl(21 62% 53% / 0.18) 0%, hsl(30 80% 80% / 0.10) 50%, transparent 85%)'
               : 'linear-gradient(180deg, hsl(210 60% 45% / 0.18) 0%, hsl(195 50% 70% / 0.10) 50%, transparent 85%)'
           }}
@@ -236,10 +238,18 @@ const Index = () => {
                 className="flex flex-col items-center"
               >
                 <span className="text-[0.65rem] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-3">
-                  {isSell ? "Free Property Valuation" : "Free Price Analysis"}
+                  {isRent ? "Free Rental Estimate" : isSell ? "Free Property Valuation" : "Free Price Analysis"}
                 </span>
                 <h1 className="font-serif text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
-                  {isSell ? (
+                  {isRent ? (
+                    <TypewriterText
+                      phrases={[
+                        "How much rent can you earn?",
+                        "What's your property's rental value?",
+                        "Free rental estimate in 2 minutes",
+                      ]}
+                    />
+                  ) : isSell ? (
                     <TypewriterText
                       phrases={[
                         "What is your apartment worth?",
@@ -253,7 +263,9 @@ const Index = () => {
                   )}
                 </h1>
                 <p className="font-['DM_Serif_Display'] italic text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mt-3">
-                  {isSell
+                  {isRent
+                    ? "Get a rental income estimate based on comparable data. Completely free."
+                    : isSell
                     ? "Get a detailed market report in under 2 minutes. Completely free."
                     : "Paste a listing link and we'll compare it to the market."
                   }
