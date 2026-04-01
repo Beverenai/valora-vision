@@ -1,28 +1,37 @@
 
 
-# Route Sell & Buy Nav Links to Homepage
+# Add Rent as Third Homepage Mode
 
-## Problem
-Clicking "Sell" or "Buy" in the navbar navigates to `/sell/valuation` or `/buy` — separate pages. The user wants these to always start on the homepage, where the SkyToggle already handles both modes.
+## What Changes
+
+Expand the homepage from 2 modes (`sell | buy`) to 3 modes (`sell | rent | buy`). Rent navigates to the homepage with `/?mode=rent` instead of `/rent/valuation`. The SkyToggle (binary Sell/Buy) stays as the primary toggle, and Rent mode is activated only via navbar link or direct URL.
 
 ## Changes
 
-### 1. Update Navbar links (`src/components/Navbar.tsx`)
+### 1. Update Navbar (`src/components/Navbar.tsx`)
+- Change Rent href from `/rent/valuation` to `/?mode=rent`
+- Change Rent CTA href similarly
 
-Change the service link hrefs so Sell and Buy both point to `/` with state to set the toggle mode:
+### 2. Expand Index.tsx state to support 3 modes
+- Change `valuationType` type from `"sell" | "buy"` to `"sell" | "rent" | "buy"`
+- Add `modeParam === "rent"` handling in the `useEffect`
+- Add rent-specific content constants:
+  - `REPORT_FEATURES_RENT` (rental income estimate, comparable rents, area rental trends, etc.)
+  - `TESTIMONIALS_RENT`
+  - Rent hero copy: "How much rent can your property earn?" / "Get a rental income estimate in under 2 minutes"
+  - Rent showcase data for the preview card
+- Add `isRent` boolean alongside `isSell` / `isBuy`
+- Rent mode uses the same address input as Sell (not URL input like Buy)
+- On submit in rent mode, navigate to `/rent/valuation` with prefilled address (same pattern as sell navigates to `/sell/valuation`)
+- Rent uses a green/teal accent color to differentiate from sell (terracotta) and buy (blue)
+- Steps text, icons, and previews adapt for rent (similar to sell flow: enter address → property details → get estimate)
 
-- **Sell** → `/?mode=sell` (or navigate with state)
-- **Buy** → `/?mode=buy`
-- **Rent** stays at `/rent/valuation` (separate flow)
-- CTA buttons follow the same pattern: Sell CTA → `/`, Buy CTA → `/`
-
-Since `<Link>` doesn't easily pass state for mode switching, use query params (`?mode=sell`, `?mode=buy`) which Index.tsx can read.
-
-### 2. Read mode from URL in Index.tsx (`src/pages/Index.tsx`)
-
-On mount, check `searchParams.get("mode")` — if `"buy"`, set `valuationType` to `"buy"`. This way clicking "Buy" in the nav lands on the homepage with the buy toggle active.
+### 3. SkyToggle stays binary
+- The SkyToggle on the hero card keeps toggling between Sell and Buy only
+- When user arrives via `/?mode=rent`, the toggle is hidden or replaced with a simple "Rental Estimate" label
+- Switching back to sell/buy via the toggle resets to the normal flow
 
 ### Files Modified
-- `src/components/Navbar.tsx` — update Sell/Buy hrefs to `/?mode=sell` / `/?mode=buy`
-- `src/pages/Index.tsx` — read `mode` query param to set initial toggle state
+- `src/components/Navbar.tsx` — Rent href → `/?mode=rent`
+- `src/pages/Index.tsx` — Add rent as third mode with content, hero, and navigation logic
 
