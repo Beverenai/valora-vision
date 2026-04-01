@@ -404,7 +404,7 @@ const ProOnboard = () => {
                     <Input
                       id="email" type="email" autoComplete="off"
                       value={email}
-                      onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); validateEmail(e.target.value); setEmailValid(false); }}
+                      onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); validateEmail(e.target.value); }}
                       onBlur={(e) => { validateEmail(e.target.value); checkEmailUniqueness(e.target.value); }}
                       onFocus={(e) => e.target.select()}
                       placeholder="info@agency.com"
