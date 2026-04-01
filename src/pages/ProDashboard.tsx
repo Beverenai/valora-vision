@@ -37,7 +37,7 @@ import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-type Section = "overview" | "profile" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
+type Section = "overview" | "profile" | "team" | "company" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
 
 interface Professional {
   id: string;
@@ -84,6 +84,8 @@ const navGroups = [
     items: [
       { key: "overview" as Section, label: "Dashboard", icon: LayoutDashboard },
       { key: "profile" as Section, label: "My Profile", icon: User },
+      { key: "team" as Section, label: "Team", icon: Users },
+      { key: "company" as Section, label: "Company Profile", icon: Building2 },
     ],
   },
   {
@@ -418,39 +420,7 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
   );
 }
 
-/* ─── Profile Section (Tabbed) ─── */
-function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave: (data: Partial<Professional>) => void; saving: boolean }) {
-  const isAdmin = !agent.agency_id || agent.agency_role === "owner" || agent.agency_role === "admin";
-
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h2 className="font-serif text-xl font-bold">Edit Profile</h2>
-        <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")} className="rounded-full">
-          <ExternalLink className="h-4 w-4 mr-1" /> Preview
-        </Button>
-      </div>
-
-      <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="personal" className="gap-1.5"><User className="h-3.5 w-3.5" /> My Profile</TabsTrigger>
-          <TabsTrigger value="team" className="gap-1.5"><Users className="h-3.5 w-3.5" /> Team</TabsTrigger>
-          <TabsTrigger value="company" className="gap-1.5"><Building2 className="h-3.5 w-3.5" /> Company</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="personal">
-          <MyProfileTab agent={agent} onSave={onSave} saving={saving} />
-        </TabsContent>
-        <TabsContent value="team">
-          <TeamTab agent={agent} isAdmin={isAdmin} />
-        </TabsContent>
-        <TabsContent value="company">
-          <CompanyProfileTab agent={agent} onSave={onSave} saving={saving} isAdmin={isAdmin} />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+/* ─── Profile Section (Personal Only) ─── */
 
 /* ─── My Profile Tab ─── */
 function MyProfileTab({ agent, onSave, saving }: { agent: Professional; onSave: (data: Partial<Professional>) => void; saving: boolean }) {
@@ -1498,7 +1468,32 @@ const ProDashboard = () => {
         <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} activeZonesCount={activeZones.length} reviewCount={reviews.length} />
       )}
       {section === "profile" && (
-        <ProfileSection agent={agent} onSave={handleSaveProfile} saving={saving} />
+        <div className="space-y-6 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-xl font-bold">My Profile</h2>
+            <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")} className="rounded-full">
+              <ExternalLink className="h-4 w-4 mr-1" /> Preview
+            </Button>
+          </div>
+          <MyProfileTab agent={agent} onSave={handleSaveProfile} saving={saving} />
+        </div>
+      )}
+      {section === "team" && (
+        <div className="space-y-6 max-w-2xl">
+          <h2 className="font-serif text-xl font-bold">Team Members</h2>
+          <TeamTab agent={agent} isAdmin={!agent.agency_id || agent.agency_role === "owner" || agent.agency_role === "admin"} />
+        </div>
+      )}
+      {section === "company" && (
+        <div className="space-y-6 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-xl font-bold">Company Profile</h2>
+            <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")} className="rounded-full">
+              <ExternalLink className="h-4 w-4 mr-1" /> Preview
+            </Button>
+          </div>
+          <CompanyProfileTab agent={agent} onSave={handleSaveProfile} saving={saving} isAdmin={!agent.agency_id || agent.agency_role === "owner" || agent.agency_role === "admin"} />
+        </div>
       )}
       {section === "leads" && (
         <LeadsSection leads={leads} onUpdateStatus={handleUpdateLeadStatus} />
