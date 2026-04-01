@@ -16,7 +16,8 @@ const Navbar = () => {
   const location = useLocation();
 
   return (
-    <header className="max-w-[1400px] mx-auto flex items-center justify-between py-4 px-6 border-b-2 border-primary relative">
+    <header className="w-full border-b-2 border-primary">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between py-4 px-6 relative">
       <Link to="/" className="flex items-center gap-1">
         <span className="font-heading text-xl font-bold text-foreground">
           Valora<span className="text-gold">Casa</span>

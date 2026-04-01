@@ -172,7 +172,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
       
     },
     hero: {
-      outerMaxWidth: "max-w-[360px] md:max-w-[720px] lg:max-w-[960px]",
+      outerMaxWidth: "max-w-[360px] md:max-w-[540px] lg:max-w-[680px] xl:max-w-[780px]",
       stubWidth: "w-[50px] md:w-[65px] lg:w-[80px]",
       mainPadding: "p-3 md:p-7 lg:p-10",
       heroImageMaxH: "max-h-[42%] md:max-h-[50%]",
