@@ -411,10 +411,10 @@ const GoogleAddressInput: React.FC<GoogleAddressInputProps> = ({
           </div>
         </div>
 
-        <div className="relative rounded-xl overflow-hidden border border-border">
+        <div className="relative rounded-xl overflow-hidden border border-border max-w-full">
           <div
             ref={mapContainerRef}
-            className="w-full"
+            className="w-full max-w-full"
             style={{ height: "220px" }}
           />
           <div className="absolute bottom-2 left-2 right-2 pointer-events-none">
