@@ -1,38 +1,46 @@
 
 
-# Move Team & Company to Sidebar Navigation
+# Show Agency Owner in Team List
 
-## What Changes
-Replace the tabbed Profile section with 3 separate sidebar navigation items. Instead of Profile → Tabs(My Profile, Team, Company), we get three top-level sections in the sidebar.
+## Problem
+When you're an agency owner, the Team tab queries `professionals WHERE agency_id = agent.id` — but the owner's own record doesn't have `agency_id` pointing to itself (it IS the agency). So the owner never appears in the team list.
+
+## Solution
+After loading team members linked via `agency_id`, prepend the agency owner (the current agent) to the team list so they always appear first as "Owner".
 
 ## Changes in `src/pages/ProDashboard.tsx`
 
-### 1. Update Section type
+In `TeamTab.loadTeam()`, after the query for `agent.type === "agency"`:
+- Create an owner entry from the `agent` prop with `agency_role: 'owner'`
+- Prepend it to the fetched team members array
+
 ```typescript
-type Section = "overview" | "profile" | "team" | "company" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
+if (agent.type === "agency") {
+  const { data } = await supabase
+    .from("professionals")
+    .select("id, contact_name, email, phone, photo_url, agency_role, slug, languages, avg_rating, total_reviews")
+    .eq("agency_id", agent.id)
+    .order("agency_role");
+  
+  // Include the agency owner (self) at the top
+  const ownerEntry = {
+    id: agent.id,
+    contact_name: agent.contact_name,
+    email: agent.email,
+    phone: agent.phone,
+    photo_url: agent.photo_url,
+    agency_role: "owner",
+    slug: agent.slug,
+    languages: agent.languages,
+    avg_rating: agent.avg_rating,
+    total_reviews: agent.total_reviews,
+  };
+  setTeamMembers([ownerEntry, ...(data || [])]);
+}
 ```
 
-### 2. Update navGroups
-Add "Team" and "Company" to the Main group (using `Users` and `Building2` icons), rename "My Profile" to keep it personal:
-```
-Main: Dashboard, My Profile, Team, Company Profile
-Business: Leads, My Zones, Reviews, Performance
-Account: Subscription, Settings
-```
-
-### 3. Remove `ProfileSection` wrapper with Tabs
-- `MyProfileTab` renders directly when `section === "profile"`
-- `TeamTab` renders when `section === "team"`
-- `CompanyProfileTab` renders when `section === "company"`
-- The `isAdmin` check moves to the page-level rendering logic
-- Delete the `ProfileSection` function entirely
-
-### 4. Update MobileDropdownNav
-Add the two new sections to the mobile dropdown as well.
-
-### 5. Update badges type
-Extend the badges `Partial<Record<Section, number>>` — team could show member count.
+Also update `handleRemoveMember` to prevent removing yourself (the owner).
 
 ## Files Modified
-- `src/pages/ProDashboard.tsx` — restructure nav and rendering
+- `src/pages/ProDashboard.tsx` — prepend owner to team list, prevent self-removal
 
