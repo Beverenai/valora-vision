@@ -120,15 +120,14 @@ const ProOnboard = () => {
     else { setEmailError(""); }
   };
 
-  const checkEmailUniqueness = async (val: string) => {
-    if (!val.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
+  const checkEmailUniqueness = async (val: string): Promise<boolean> => {
+    if (!val.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return false;
     setEmailChecking(true);
     try {
       const { data } = await supabase.from("professionals").select("id").eq("email", val).maybeSingle();
-      if (data) { setEmailError("This email is already registered"); setEmailValid(false); }
-      else { setEmailError(""); setEmailValid(true); }
-    } catch { setEmailValid(true); }
-    setEmailChecking(false);
+      if (data) { setEmailError("This email is already registered"); setEmailValid(false); setEmailChecking(false); return false; }
+      else { setEmailError(""); setEmailValid(true); setEmailChecking(false); return true; }
+    } catch { setEmailValid(true); setEmailChecking(false); return true; }
   };
 
   const validateWebsite = (val: string) => {
@@ -460,11 +459,18 @@ const ProOnboard = () => {
                 </Button>
                 <Button
                   onClick={async () => {
-                    if (!emailValid && email.trim() && !emailError) {
-                      await checkEmailUniqueness(email);
+                    const hasRequiredFields = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim();
+                    if (!hasRequiredFields) {
+                      toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
+                      return;
                     }
-                    if (canProceedStep1) setStep(1);
-                    else toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
+                    // Run email uniqueness check if not yet validated
+                    if (!emailValid && !emailError) {
+                      const isUnique = await checkEmailUniqueness(email);
+                      if (!isUnique) return;
+                    }
+                    if (emailError) return;
+                    setStep(1);
                   }}
                   className="rounded-full px-8"
                 >
