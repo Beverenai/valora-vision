@@ -1468,7 +1468,32 @@ const ProDashboard = () => {
         <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} activeZonesCount={activeZones.length} reviewCount={reviews.length} />
       )}
       {section === "profile" && (
-        <ProfileSection agent={agent} onSave={handleSaveProfile} saving={saving} />
+        <div className="space-y-6 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-xl font-bold">My Profile</h2>
+            <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")} className="rounded-full">
+              <ExternalLink className="h-4 w-4 mr-1" /> Preview
+            </Button>
+          </div>
+          <MyProfileTab agent={agent} onSave={handleSaveProfile} saving={saving} />
+        </div>
+      )}
+      {section === "team" && (
+        <div className="space-y-6 max-w-2xl">
+          <h2 className="font-serif text-xl font-bold">Team Members</h2>
+          <TeamTab agent={agent} isAdmin={!agent.agency_id || agent.agency_role === "owner" || agent.agency_role === "admin"} />
+        </div>
+      )}
+      {section === "company" && (
+        <div className="space-y-6 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-xl font-bold">Company Profile</h2>
+            <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")} className="rounded-full">
+              <ExternalLink className="h-4 w-4 mr-1" /> Preview
+            </Button>
+          </div>
+          <CompanyProfileTab agent={agent} onSave={handleSaveProfile} saving={saving} isAdmin={!agent.agency_id || agent.agency_role === "owner" || agent.agency_role === "admin"} />
+        </div>
       )}
       {section === "leads" && (
         <LeadsSection leads={leads} onUpdateStatus={handleUpdateLeadStatus} />
