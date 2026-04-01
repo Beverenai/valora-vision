@@ -84,7 +84,7 @@ const ProLogin = () => {
             {mode === "login" ? (
               <>
                 <button onClick={() => setMode("forgot")} className="text-primary hover:underline">Forgot password?</button>
-                <p className="text-muted-foreground">
+                <p className="text-foreground/60">
                   Don't have an account?{" "}
                   <Link to="/pro/onboard" className="text-primary hover:underline">Sign up</Link>
                 </p>
