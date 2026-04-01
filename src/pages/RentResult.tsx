@@ -116,7 +116,24 @@ const RentResult: React.FC = () => {
       mode="result"
       referenceCode={formatRefCode(id!)}
       onShare={handleShare}
-      onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
+      onDownload={async () => {
+        toast({ title: "Generating PDF…", description: "Your report is being prepared." });
+        try {
+          const res = await supabase.functions.invoke("generate-valuation-pdf", {
+            body: { lead_id: id, lead_type: "rent" },
+          });
+          if (res.error) throw res.error;
+          const blob = new Blob([res.data], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `ValoraCasa-RentalEstimate-${refCode}.pdf`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch {
+          toast({ title: "Coming Soon", description: "PDF download will be available shortly." });
+        }
+      }}
     />
   );
 
