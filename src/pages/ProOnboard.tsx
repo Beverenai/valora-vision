@@ -302,22 +302,46 @@ const ProOnboard = () => {
     }
     setIsSubmitting(true);
     try {
-      // 1. Create auth user
+      let userId: string | undefined;
+
+      // 1. Try to create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: window.location.origin },
       });
-      if (authError) throw authError;
-      const userId = authData.user?.id;
-      if (!userId) throw new Error("Failed to create account");
 
-      // Detect repeated signup (user already exists) — identities will be empty
-      if (!authData.user?.identities?.length) {
-        toast({ title: "Account already exists", description: "This email is already registered. Please sign in instead.", variant: "destructive" });
-        setIsSubmitting(false);
-        return;
+      if (authError) {
+        // If signup fails entirely, throw
+        throw authError;
       }
+
+      // Check if user already exists (identities empty = duplicate email)
+      if (!authData.user?.identities?.length) {
+        console.log("[ProOnboard] Email already registered, attempting sign in...");
+        // Try signing in with the provided password
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) {
+          toast({
+            title: "Account already exists",
+            description: "This email is already registered. Please use the correct password or sign in at /pro/login.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        userId = signInData.user?.id;
+        console.log("[ProOnboard] Signed in existing user:", userId);
+      } else {
+        userId = authData.user?.id;
+        console.log("[ProOnboard] Created new user:", userId);
+      }
+
+      if (!userId) throw new Error("Failed to get user account");
 
       // 2. Generate slug
       const slug = companyName
@@ -327,7 +351,7 @@ const ProOnboard = () => {
         .replace(/-+/g, "-")
         .slice(0, 60);
 
-      // 3. Publish profile via edge function (bypasses RLS since session isn't active yet)
+      // 3. Publish profile via edge function
       const { data: publishData, error: publishError } = await supabase.functions.invoke(
         "publish-agent-profile",
         {
@@ -364,7 +388,13 @@ const ProOnboard = () => {
       navigate(`/pro/onboard/success?slug=${slug}`);
     } catch (e: any) {
       console.error("Publish error:", e);
-      toast({ title: "Error", description: e.message || "Failed to publish profile", variant: "destructive" });
+      const msg = e.message || "Failed to publish profile";
+      // Show actionable messages for known errors
+      if (msg.includes("foreign key") || msg.includes("not present in table")) {
+        toast({ title: "Account error", description: "Your account could not be verified. Please try again.", variant: "destructive" });
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
     } finally {
       setIsSubmitting(false);
     }
