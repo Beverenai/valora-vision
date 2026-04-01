@@ -688,6 +688,7 @@ export type Database = {
           id: string
           idealista_url: string | null
           images: Json | null
+          is_active: boolean | null
           is_exterior: boolean | null
           latitude: number | null
           listed_at: string | null
@@ -734,6 +735,7 @@ export type Database = {
           id?: string
           idealista_url?: string | null
           images?: Json | null
+          is_active?: boolean | null
           is_exterior?: boolean | null
           latitude?: number | null
           listed_at?: string | null
@@ -780,6 +782,7 @@ export type Database = {
           id?: string
           idealista_url?: string | null
           images?: Json | null
+          is_active?: boolean | null
           is_exterior?: boolean | null
           latitude?: number | null
           listed_at?: string | null
@@ -803,6 +806,13 @@ export type Database = {
           zone_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_properties_zone"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "properties_zone_id_fkey"
             columns: ["zone_id"]
