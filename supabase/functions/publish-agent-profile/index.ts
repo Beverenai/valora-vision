@@ -33,6 +33,9 @@ Deno.serve(async (req) => {
       team_size,
       team,
       cover_photo_url,
+      type,
+      agency_role,
+      agency_id,
     } = await req.json();
 
     console.log("[publish-agent-profile] Received:", { user_id, company_name, contact_name, email, slug });
