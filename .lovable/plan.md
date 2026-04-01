@@ -1,53 +1,65 @@
 
-Fix `/pro/onboard` Step 1 by removing the broken dependency on the separate `address` string and validating against the real address state the UI already uses.
 
-1. Root cause to fix
-- The screen shows a confirmed address, but the Continue button checks `address.trim()`.
-- That `address` value is rebuilt inside `handleAddressChange` from stale `addressData`, so later updates can wipe it back to empty.
-- Result: the UI looks valid, but the submit gate still thinks a required field is missing.
+## Plan: Make Agent Onboarding Robust End-to-End
 
-2. Update Step 1 validation in `src/pages/ProOnboard.tsx`
-- Replace `address.trim()` checks with a derived `hasConfirmedAddress` boolean based on:
-  - `addressConfirmed`
-  - `addressData.streetAddress`
-  - `addressData.latitude` and `addressData.longitude`
-- Use this same boolean everywhere for consistency:
-  - `canProceedStep1`
-  - the Continue button handler
-  - the address validation icon if needed
+### Problem
 
-3. Stop storing duplicated address truth
-- Remove the fragile “reconstruct address on every field change” logic as the source of validation truth.
-- Instead derive a final address string only when needed for API calls:
-  - for `onboard-agency`
-  - for `publish-agent-profile`
-- Build it from `addressData` at send time so the backend always gets the confirmed location shown in the UI.
+The onboarding flow breaks at publish time because:
+1. `signUp` for an already-registered email returns a fake `user_id` that doesn't exist in `auth.users` — the edge function then fails with an FK constraint violation
+2. No recovery path exists — the user is stuck with no way to retry or link to their existing account
+3. The edge function has no idempotency — if publish is retried it could create duplicate rows
 
-4. Improve the Continue button UX
-- Replace the generic “Please fill in all required fields” toast with a more precise message.
-- Validate fields in order and show the first real blocker, for example:
-  - agency name missing
-  - contact name missing
-  - invalid/duplicate email
-  - phone missing
-  - address not confirmed on map
-- This makes the failure understandable instead of looking broken.
+### Changes
 
-5. Make address confirmation harder to desync
-- When the user returns from verify to search or clears the address, ensure `addressConfirmed` is reset.
-- When location is confirmed, use the confirmed address state as the single source of truth.
-- Optionally show a small inline error/help text under the address field when the map pin has not been confirmed yet.
+**A. Edge function: `supabase/functions/publish-agent-profile/index.ts`**
 
-6. Keep Step 2 trigger intact
-- After the validation fix, Continue should reliably call `setStep(1)`.
-- The existing `useEffect` that runs `runAiOnboarding()` on Step 2 can stay as-is.
+Make the function defensive and idempotent:
 
-Files
-- `src/pages/ProOnboard.tsx` — fix validation source of truth, derive request address correctly, improve toast/error UX
+1. Before inserting into `professionals`, check if a row with this `user_id` already exists. If so, update it instead of inserting (upsert pattern)
+2. Before inserting into `user_roles`, check if the role already exists to avoid duplicate key errors
+3. Before inserting team members, delete existing ones for this professional (idempotent retry)
+4. Add explicit error handling for FK violations with a clear error message: "User account not found — please sign up again"
 
-Technical notes
-- Best derived field for validation:
-  - `const hasConfirmedAddress = addressConfirmed && !!addressData.streetAddress?.trim() && typeof addressData.latitude === "number" && typeof addressData.longitude === "number"`
-- Best derived field for API payload:
-  - join `streetAddress`, `urbanization`, `city`, `province`, `country` with commas only at request time
-- `canProceedStep1` is currently unused as a real gate outside Step 1 and should either be updated to the new logic or removed to avoid future drift
+**B. Client: `src/pages/ProOnboard.tsx` — `handlePublish`**
+
+Fix the signup → publish sequence:
+
+1. After `signUp`, check `identities` array — if empty, the email is already registered
+2. When account already exists, offer two paths:
+   - Try to `signInWithPassword` with the provided email + password
+   - If sign-in succeeds, use that session's `user.id` and proceed to publish
+   - If sign-in fails (wrong password), show a clear message: "This email is already registered. Please use the correct password or sign in at /pro/login"
+3. This means an agent who failed mid-onboard can retry without creating a new email
+
+**C. Client: improve error recovery**
+
+1. Catch the specific FK/constraint errors from the edge function and show actionable messages instead of raw error strings
+2. Don't reset `isSubmitting` inside the success path — only in `finally`
+
+### Technical detail
+
+```text
+handlePublish flow:
+  1. signUp(email, password)
+  2. if identities empty → signIn(email, password)
+     → success: use session user_id, continue
+     → fail: toast "wrong password or sign in at /pro/login", return
+  3. invoke publish-agent-profile with valid user_id
+  4. navigate to success page
+
+Edge function flow:
+  1. Validate required fields
+  2. Check if professional exists for user_id
+     → exists: UPDATE instead of INSERT
+  3. Delete + re-insert team members
+  4. Upsert user_roles (INSERT ... ON CONFLICT DO NOTHING equivalent)
+  5. Return { success, slug }
+```
+
+### Files
+
+| Action | File |
+|--------|------|
+| Modified | `supabase/functions/publish-agent-profile/index.ts` — add upsert logic, idempotency |
+| Modified | `src/pages/ProOnboard.tsx` — handle existing accounts via signIn fallback, better error messages |
+
