@@ -1,61 +1,48 @@
 
 
-# Expand ProDashboard — Add Zones, Reviews, Settings Sections
+# Add Merit Score and Action Items to Dashboard Overview
 
 ## What This Does
 
-Adds 3 new sections to the agent dashboard (My Zones, Reviews, Settings) and updates the navigation to match the requested structure with 3 groups (Main, Business, Account).
+Enhances the `OverviewSection` in `ProDashboard.tsx` by adding a Merit Score card with circular progress visualization and breakdown metrics, plus contextual Action Items that guide agents to complete their profile — both placed above the existing "Recent Leads" card.
 
 ## Changes
 
-### 1. Update Section type and navGroups
+### 1. Update OverviewSection props
 
-Expand `type Section` to include `"zones" | "reviews" | "settings"`. Update `navGroups` to add Zones and Reviews under Business, and Settings under Account. Analytics label changes to "Performance".
+Add `setSection` callback so action item buttons can navigate to other sections (profile, zones).
 
-### 2. New ZonesSection component
+```typescript
+function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSection }: {
+  agent: Professional; leads: Lead[]; impressionsCount: number; 
+  onViewLeads: () => void; setSection: (s: Section) => void;
+})
+```
 
-Fetches the agent's active zones from `professional_zones` joined with `zones` table. Displays:
-- Active zones as cards showing zone name, tier badge, leads this month (counted from `agent_contact_requests`)
-- Empty state with terracotta CTA
-- Available zones grid fetched from `zones` table (excluding already-claimed zones), each with an "Add" button (mailto for now, since zone purchasing isn't wired up yet)
+### 2. Add Merit Score card
 
-Data flow: `professional_zones` (where `professional_id = agent.id` and `is_active = true`) joined with `zones` for names.
+Insert above the "Recent Leads" card:
+- Gradient card with terracotta accent border
+- Left side: score label, large number (62), percentile text
+- Right side: SVG circular progress ring (strokeDasharray based on score)
+- Bottom: 5-column grid showing sub-scores (Proximity, Rating, Response, Conversion, Profile)
 
-### 3. New ReviewsSection component
+Static values for now — will be computed from real data in a future iteration.
 
-Fetches from `agent_reviews` where `professional_id = agent.id`. Displays:
-- Summary card: average rating, total count, star distribution bar
-- List of reviews with reviewer name, role badge, rating stars, comment, date
-- Empty state if no reviews
+### 3. Add Action Items card
 
-### 4. New SettingsSection component
+Contextual prompts based on agent profile completeness:
+- Missing bio → "Add a company description" (+15 merit points)
+- Missing logo → "Upload your logo" (+20 merit points)  
+- Always show → "Select your service zones" (required for visibility)
 
-Simple settings page with:
-- Email notification preferences (placeholder toggles using Switch component)
-- Danger zone: "Delete my profile" button (shows confirmation, doesn't implement actual deletion yet)
-- Link to public profile
+Each item has an icon, description, merit point incentive, and a button that navigates to the relevant section.
 
-### 5. Wire sections into content renderer
+### 4. Wire setSection in render
 
-Add the 3 new section conditionals in the `content` JSX block (lines 821-841) and load zone/review data in `checkAuthAndLoad`.
-
-### 6. Load additional data on mount
-
-In `checkAuthAndLoad`, add parallel fetches for:
-- `professional_zones` + `zones` (for ZonesSection)
-- `agent_reviews` (for ReviewsSection)
-- All `zones` (for available zones list)
-
-Store in new state variables.
-
-## Technical Details
-
-- All new sections follow existing patterns: `font-serif` headings, Card-based layouts, terracotta accents
-- Zone data comes from existing `professional_zones` and `zones` tables — no schema changes needed
-- Reviews data comes from existing `agent_reviews` table — no schema changes needed
-- Components stay inline in ProDashboard.tsx to match the existing pattern (all sections are defined in the same file)
+Pass `setSection` prop to `OverviewSection` at line 1143.
 
 ## Files Modified
 
-- `src/pages/ProDashboard.tsx` — expand Section type, update navGroups, add 3 section components, wire data loading and rendering
+- `src/pages/ProDashboard.tsx` — expand OverviewSection with Merit Score + Action Items, update caller to pass `setSection`
 
