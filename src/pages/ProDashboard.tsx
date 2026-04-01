@@ -49,6 +49,7 @@ interface Professional {
   description: string | null;
   tagline: string | null;
   logo_url: string | null;
+  cover_photo_url: string | null;
   slug: string;
   languages: string[] | null;
   service_zones: string[] | null;
@@ -59,6 +60,9 @@ interface Professional {
   facebook_url: string | null;
   linkedin_url: string | null;
   office_address: string | null;
+  type: string;
+  agency_id: string | null;
+  agency_role: string | null;
 }
 
 interface Lead {
