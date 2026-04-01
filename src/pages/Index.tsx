@@ -3,7 +3,7 @@ import { TypewriterText } from "@/components/shared/TypewriterText";
 import { useSEO } from "@/hooks/use-seo";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize, TrendingUp, Users, Search, BarChart3, Link2, ShieldCheck, Target, ArrowRight } from "lucide-react";
+import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, Maximize, TrendingUp, Users, Search, BarChart3, Link2, ShieldCheck, Target, ArrowRight, Home, Zap, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -24,36 +24,13 @@ const AGENCIES = [
   { name: "La Sala Estates", x: "75%", y: 4, opacity: 0.32, size: "text-sm", dur: 3.4 },
 ];
 
-const HOW_STEPS = [
-  { num: "01", title: "Enter your address", desc: "Start typing and select your property from the suggestions." },
-  { num: "02", title: "Tell us about your property", desc: "Add bedrooms, bathrooms, size and key features." },
-];
-
-const REPORT_FEATURES_SELL = [
-  { title: "Estimated Market Value", desc: "Calculated price based on comparable sales data.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
-  { title: "Price Per Square Metre", desc: "See how your property compares per m² in your area.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Property Analysis", desc: "Detailed analysis of your property's strengths.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Market Trends", desc: "Current price trends and market dynamics in your area.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
-  { title: "Comparable Properties", desc: "Similar properties recently sold or listed near you.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Agent Recommendations", desc: "Matched local agents ready to help you sell.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
-];
-
-const REPORT_FEATURES_BUY = [
-  { title: "Price Score", desc: "See if the asking price is fair, above, or below market value.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
-  { title: "Price Spectrum", desc: "Visual comparison of asking price vs market range.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Comparable Analysis", desc: "Compare with similar properties currently listed nearby.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Negotiation Hints", desc: "Data-driven advice on how to approach your offer.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
-  { title: "Area Insights", desc: "Median price/m² and trends in the area.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Agent Recommendations", desc: "Matched local agents to help you buy.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
-];
-
-const REPORT_FEATURES_RENT = [
-  { title: "Monthly Rental Estimate", desc: "Calculated rent based on comparable rental data in your area.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
-  { title: "Rent Per Square Metre", desc: "See how your rental rate compares per m² in your area.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Rental Analysis", desc: "Detailed analysis of your property's rental potential.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Seasonal Breakdown", desc: "High season vs low season rates and occupancy estimates.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
-  { title: "Comparable Rentals", desc: "Similar properties currently rented near you.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
-  { title: "Agent Recommendations", desc: "Matched local agents to help you rent.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+const SERVICES = [
+  { icon: Home, title: "Free Valuation", desc: "Get an instant property valuation based on real comparable data." },
+  { icon: BarChart3, title: "Comparable Sales", desc: "See recently sold and listed properties in your area." },
+  { icon: Sparkles, title: "AI Analysis", desc: "Our AI analyzes your property's strengths and considerations." },
+  { icon: Users, title: "Agent Matching", desc: "Connect with verified local agents matched to your area." },
+  { icon: PieChart, title: "Rental Estimate", desc: "Find out how much rent your property could earn." },
+  { icon: TrendingUp, title: "Market Trends", desc: "Stay ahead with price trends and market dynamics." },
 ];
 
 const TESTIMONIALS_SELL = [
@@ -74,32 +51,22 @@ const TESTIMONIALS_RENT = [
   { quote: "Great tool for comparing long-term vs short-term rental income. Helped us decide our strategy.", name: "Sophie W.", location: "Fuengirola" },
 ];
 
-/* ─── SECTION LABEL ─── imported from @/components/ui/SectionLabel */
-
-/* ─── DIVIDER ─── */
-const SectionDivider = () => (
-  <hr className="border-border mx-5 md:mx-8" />
-);
-
 /* ─── STATS BAR ─── */
 const StatsBar = () => (
-  <div className="flex justify-between border-y border-border py-6 mx-5 md:mx-8">
-    {[
-      { label: "Valuations", value: "12,400+" },
-      { label: "Average time", value: "2 min" },
-      { label: "Cost", value: "Free" },
-    ].map((stat, i, arr) => (
-      <div
-        key={stat.label}
-        className={cn(
-          "flex-1 text-center",
-          i < arr.length - 1 && "border-r border-border"
-        )}
-      >
-        <SectionLabel className="mb-2">{stat.label}</SectionLabel>
-        <p className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">{stat.value}</p>
-      </div>
-    ))}
+  <div className="bg-brand py-8">
+    <div className="max-w-[1400px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 px-6">
+      {[
+        { label: "Valuations", value: "2,400+" },
+        { label: "Verified Agents", value: "150+" },
+        { label: "Assessed Value", value: "€2.1B" },
+        { label: "Coverage", value: "Costa del Sol" },
+      ].map((stat) => (
+        <div key={stat.label} className="text-center">
+          <p className="text-[0.6rem] uppercase tracking-[0.15em] font-semibold text-white/50 mb-1">{stat.label}</p>
+          <p className="text-2xl md:text-[2rem] font-bold text-white tracking-tight">{stat.value}</p>
+        </div>
+      ))}
+    </div>
   </div>
 );
 
@@ -144,14 +111,6 @@ const Index = () => {
   const isBuy = valuationType === "buy";
   const isRent = valuationType === "rent";
   const testimonials = isRent ? TESTIMONIALS_RENT : isBuy ? TESTIMONIALS_BUY : TESTIMONIALS_SELL;
-  const reportFeatures = isRent ? REPORT_FEATURES_RENT : isBuy ? REPORT_FEATURES_BUY : REPORT_FEATURES_SELL;
-
-  // Accent color config per mode
-  const accent = isRent
-    ? { bg: "bg-[hsl(var(--rent-light))]", text: "text-[hsl(var(--rent-foreground))]", fill: "bg-[hsl(var(--rent))]", fillAlpha: "bg-[hsl(var(--rent)/0.3)]", stroke: "hsl(var(--rent))", strokeAlpha: "hsl(var(--rent) / 0.08)" }
-    : isBuy
-    ? { bg: "bg-[hsl(var(--buy-light))]", text: "text-[hsl(var(--buy-foreground))]", fill: "bg-[hsl(var(--buy))]", fillAlpha: "bg-[hsl(var(--buy)/0.3)]", stroke: "hsl(var(--buy))", strokeAlpha: "hsl(var(--buy) / 0.08)" }
-    : { bg: "bg-[hsl(var(--terracotta-light))]", text: "text-primary", fill: "bg-primary", fillAlpha: "bg-primary/30", stroke: "hsl(var(--primary))", strokeAlpha: "hsl(var(--primary) / 0.08)" };
 
   useEffect(() => {
     setTestimonialIdx(0);
@@ -219,92 +178,82 @@ const Index = () => {
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
       <Navbar />
+
+      {/* ═══════════ HERO ═══════════ */}
+      <div
+        ref={heroRef}
+        className="min-h-[75vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
+        style={{
+          background: 'linear-gradient(135deg, hsl(243 96% 28%) 0%, hsl(310 52% 50%) 100%)'
+        }}
+      >
+        <div className="max-w-[1400px] mx-auto w-full flex flex-col items-center text-center gap-4 mb-2 pt-6 md:pt-10">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={valuationType}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center"
+            >
+              <span className="text-[0.65rem] tracking-[0.15em] uppercase text-white/50 font-semibold mb-3">
+                {isRent ? "Free Rental Estimate" : isSell ? "Free Property Valuation" : "Free Price Analysis"}
+              </span>
+              <h1 className="text-4xl md:text-[3.5rem] lg:text-[3.75rem] font-normal text-white leading-[1.1] tracking-tight max-w-3xl">
+                {isRent ? (
+                  <TypewriterText
+                    phrases={[
+                      "How much rent can you earn?",
+                      "What's your property's rental value?",
+                      "Free rental estimate in 2 minutes",
+                    ]}
+                  />
+                ) : isSell ? (
+                  <TypewriterText
+                    phrases={[
+                      "What is your property worth?",
+                      "Find the value of your home",
+                      "Free valuation in 2 minutes",
+                    ]}
+                  />
+                ) : (
+                  <>Is this property worth the price?</>
+                )}
+              </h1>
+              <p className="text-lg md:text-xl text-white/70 max-w-xl leading-relaxed mt-3">
+                {isRent
+                  ? "Get a rental income estimate based on comparable data. Completely free."
+                  : isSell
+                  ? "Get a detailed market report in under 2 minutes. Completely free."
+                  : "Paste a listing link and we'll compare it to the market."
+                }
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <ValuationTicketCard
+          address=""
+          estimatedValue=""
+          leadId=""
+          accentType={valuationType}
+          size="hero"
+          addressData={addressData}
+          onAddressFieldChange={handleAddressChange}
+          onLocationConfirmed={handleGetValuation}
+          mapExpanded={mapExpanded}
+          onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
+          valuationType={valuationType}
+          onValuationTypeChange={isRent ? undefined : (t) => setValuationType(t as "sell" | "rent" | "buy")}
+          listingUrl={listingUrl}
+          onListingUrlChange={setListingUrl}
+        />
+      </div>
+
+      {/* ═══════════ STATS BAR ═══════════ */}
+      <StatsBar />
+
       <div className="max-w-[1400px] mx-auto w-full flex flex-col">
-
-        {/* ═══════════ HERO ═══════════ */}
-        <div
-          ref={heroRef}
-          className="min-h-[75vh] flex flex-col items-center justify-center px-5 md:px-8 animate-fade-in"
-          style={{
-            background: isRent
-              ? 'linear-gradient(180deg, hsl(152 55% 42% / 0.18) 0%, hsl(152 40% 70% / 0.10) 50%, transparent 85%)'
-              : isSell
-              ? 'linear-gradient(180deg, hsl(21 62% 53% / 0.18) 0%, hsl(30 80% 80% / 0.10) 50%, transparent 85%)'
-              : 'linear-gradient(180deg, hsl(210 60% 45% / 0.18) 0%, hsl(195 50% 70% / 0.10) 50%, transparent 85%)'
-          }}
-        >
-          <div className="flex flex-col items-center text-center gap-4 mb-2 pt-6 md:pt-10">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={valuationType}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center"
-              >
-                <span className="text-[0.65rem] tracking-[0.15em] uppercase text-muted-foreground font-semibold mb-3">
-                  {isRent ? "Free Rental Estimate" : isSell ? "Free Property Valuation" : "Free Price Analysis"}
-                </span>
-                <h1 className="font-serif text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
-                  {isRent ? (
-                    <TypewriterText
-                      phrases={[
-                        "How much rent can you earn?",
-                        "What's your property's rental value?",
-                        "Free rental estimate in 2 minutes",
-                      ]}
-                    />
-                  ) : isSell ? (
-                    <TypewriterText
-                      phrases={[
-                        "What is your apartment worth?",
-                        "What can your villa sell for?",
-                        "Find the value of your property",
-                        "Free valuation in 2 minutes",
-                      ]}
-                    />
-                  ) : (
-                    <>Is this property<br /><span className="font-['DM_Serif_Display'] italic normal-case">worth the price</span>?</>
-                  )}
-                </h1>
-                <p className="font-['DM_Serif_Display'] italic text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mt-3">
-                  {isRent
-                    ? "Get a rental income estimate based on comparable data. Completely free."
-                    : isSell
-                    ? "Get a detailed market report in under 2 minutes. Completely free."
-                    : "Paste a listing link and we'll compare it to the market."
-                  }
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <ValuationTicketCard
-            address=""
-            estimatedValue=""
-            leadId=""
-            accentType={valuationType}
-            size="hero"
-            addressData={addressData}
-            onAddressFieldChange={handleAddressChange}
-            onLocationConfirmed={handleGetValuation}
-            mapExpanded={mapExpanded}
-            onMapPhaseChange={(phase) => setMapExpanded(phase === "verify")}
-            valuationType={valuationType}
-            onValuationTypeChange={isRent ? undefined : (t) => setValuationType(t as "sell" | "rent" | "buy")}
-            listingUrl={listingUrl}
-            onListingUrlChange={setListingUrl}
-          />
-        </div>
-
-        <SectionDivider />
-
-        {/* ═══════════ STATS BAR ═══════════ */}
-        <div className="py-2">
-          <StatsBar />
-        </div>
-
-        <SectionDivider />
 
         {/* ═══════════ FLOATING AGENCIES ═══════════ */}
         <section className="w-full py-8 md:py-20 overflow-hidden px-5 md:px-8">
@@ -316,7 +265,7 @@ const Index = () => {
               <motion.span
                 key={a.name}
                 className={cn(
-                  "absolute font-['DM_Serif_Display'] italic text-muted-foreground cursor-default select-none",
+                  "absolute font-sans text-muted-foreground cursor-default select-none",
                   a.size
                 )}
                 style={{ left: a.x, top: `${30 + (i % 3) * 28}%` }}
@@ -336,23 +285,21 @@ const Index = () => {
           </div>
         </section>
 
-        <SectionDivider />
-
-        {/* ═══════════ HOW IT WORKS — 3 Steps Timeline ═══════════ */}
+        {/* ═══════════ HOW IT WORKS — 4 Steps Grid ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-8 md:mb-16"
+              className="text-center mb-12 md:mb-16"
             >
-              <SectionLabel>How It Works</SectionLabel>
-              <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
-                Three Simple Steps
+              <SectionLabel className="flex flex-col items-center">How It Works</SectionLabel>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
+                Four Simple Steps
               </h2>
-              <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
+              <p className="text-lg text-muted-foreground mt-4">
                 {isRent
                   ? "From address to rental estimate in under two minutes"
                   : isSell
@@ -361,151 +308,53 @@ const Index = () => {
               </p>
             </motion.div>
 
-            {/* Timeline */}
-            <div className="relative">
-              {/* Vertical connector line */}
-              <div className="absolute left-[27px] md:left-[39px] top-0 bottom-0 w-px bg-border" />
-
-              {/* Step 01 */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="relative flex gap-5 md:gap-8 pb-8 md:pb-14"
-              >
-                <div className="flex flex-col items-center shrink-0 z-10">
-                  <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">01</span>
-                  <div className={cn(
-                    "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    accent.bg
-                  )}>
-                    {isBuy
-                      ? <Link2 className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />
-                      : <MapPin className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {[
+                {
+                  num: "01",
+                  icon: isBuy ? Link2 : MapPin,
+                  title: isBuy ? "Paste a listing link" : "Enter your address",
+                  desc: isBuy ? "Copy any property URL from Idealista, Fotocasa or similar." : "Start typing and select your property from the suggestions.",
+                },
+                {
+                  num: "02",
+                  icon: isBuy ? Search : SlidersHorizontal,
+                  title: isBuy ? "We analyze the market" : "Tell us about your property",
+                  desc: isBuy ? "We compare against similar listings in the area." : "Add bedrooms, bathrooms, size and key features.",
+                },
+                {
+                  num: "03",
+                  icon: isBuy ? ShieldCheck : Sparkles,
+                  title: isRent ? "Get your rental estimate" : isSell ? "Get your valuation" : "Get your price score",
+                  desc: isRent ? "A detailed rental estimate with seasonal breakdown." : isSell ? "A detailed valuation card with all the data." : "See if the asking price is fair or overpriced.",
+                },
+                {
+                  num: "04",
+                  icon: Users,
+                  title: "Connect with top agents",
+                  desc: "Get matched with verified local agents ready to help.",
+                },
+              ].map((step, i) => (
+                <motion.div
+                  key={step.num}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="text-center"
+                >
+                  <span className="text-[3rem] font-bold text-primary/30 leading-none block mb-3">{step.num}</span>
+                  <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
+                    <step.icon className="h-5 w-5 text-muted-foreground" />
                   </div>
-                </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    {isBuy ? "Paste a listing link" : "Enter your address"}
-                  </h3>
-                  <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    {isBuy
-                      ? "Copy any property URL from Idealista, Fotocasa, Kyero or similar portals."
-                      : "Start typing and select your property from the suggestions."}
-                  </p>
-                  <div className="mt-4 rounded-xl border border-border bg-card p-3 md:p-4 max-w-sm">
-                    <div className="flex items-center gap-2.5 rounded-lg bg-secondary/70 px-3 py-2.5">
-                      {isBuy
-                        ? <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                        : <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />}
-                      <span className="text-sm text-muted-foreground/60 truncate">
-                        {isBuy
-                          ? "idealista.com/inmueble/1234567…"
-                          : "Calle Sierra Blanca 12, Marbella…"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Step 02 */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.15 }}
-                className="relative flex gap-5 md:gap-8 pb-8 md:pb-14"
-              >
-                <div className="flex flex-col items-center shrink-0 z-10">
-                  <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">02</span>
-                  <div className={cn(
-                    "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    accent.bg
-                  )}>
-                    {isBuy
-                      ? <Search className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />
-                      : <SlidersHorizontal className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />}
-                  </div>
-                </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    {isBuy ? "We analyze the market" : "Tell us about your property"}
-                  </h3>
-                  <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    {isBuy
-                      ? "We scrape real data and compare against similar listings in the area."
-                      : "Add bedrooms, bathrooms, size and key features."}
-                  </p>
-                  <div className="mt-4 rounded-xl border border-border bg-card p-3 md:p-4 max-w-sm">
-                    {isBuy ? (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <BarChart3 className={cn("h-4 w-4", accent.text)} />
-                          <span className="text-sm font-medium text-foreground">Comparable analysis</span>
-                        </div>
-                        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold w-fit", accent.bg, accent.text)}>
-                          <Users className="h-3 w-3" />
-                          18 comparable properties found
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { icon: BedDouble, label: "3 Beds" },
-                          { icon: Bath, label: "2 Baths" },
-                          { icon: Maximize, label: "Size" },
-                        ].map((pill) => (
-                          <span
-                            key={pill.label}
-                            className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium", accent.bg, accent.text)}
-                          >
-                            <pill.icon className="h-3.5 w-3.5" />
-                            {pill.label}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Step 03 */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="relative flex gap-5 md:gap-8"
-              >
-                <div className="flex flex-col items-center shrink-0 z-10">
-                  <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">03</span>
-                  <div className={cn(
-                    "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    accent.bg
-                  )}>
-                    {isBuy
-                      ? <ShieldCheck className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />
-                      : <Sparkles className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />}
-                  </div>
-                </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    {isRent ? "Get your rental estimate" : isSell ? "See what you'll receive" : "Get your price score"}
-                  </h3>
-                  <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    {isRent
-                      ? "A detailed rental estimate with seasonal breakdown, comparable rents, and agent recommendations."
-                      : isSell
-                      ? "A beautifully detailed valuation card with all the key data — ready to share."
-                      : "See if the asking price is fair, overpriced or a bargain — with comparable data and negotiation tips."}
-                  </p>
-                </div>
-              </motion.div>
+                  <h3 className="text-base font-bold text-foreground mb-1">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.desc}</p>
+                </motion.div>
+              ))}
             </div>
 
-            {/* Flippable showcase card below step 3 */}
-            <div className="mt-6 md:mt-10 flex flex-col items-center">
+            {/* Flippable showcase card */}
+            <div className="mt-10 md:mt-16 flex flex-col items-center">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={valuationType}
@@ -543,11 +392,9 @@ const Index = () => {
           </div>
         </section>
 
-        <SectionDivider />
-
-        {/* ═══════════ REPORT FEATURES ═══════════ */}
-        <section className="w-full py-8 md:py-20 px-5 md:px-8">
-          <div className="max-w-4xl mx-auto">
+        {/* ═══════════ SERVICE GRID ═══════════ */}
+        <section className="w-full py-8 md:py-20 bg-background-alt">
+          <div className="max-w-5xl mx-auto px-5 md:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -555,157 +402,38 @@ const Index = () => {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <SectionLabel>Included Free</SectionLabel>
-              <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3 max-w-2xl mx-auto">
+              <SectionLabel className="flex flex-col items-center">What You Get</SectionLabel>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 max-w-2xl mx-auto">
                 Everything In Your Report
               </h2>
-              <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
+              <p className="text-lg text-muted-foreground mt-4">
                 All the data you need to make informed decisions
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              {reportFeatures.map((feat, i) => (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {SERVICES.map((svc, i) => (
                 <motion.div
-                  key={`${valuationType}-${feat.title}`}
+                  key={svc.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.08 }}
-                  className={cn(
-                    "rounded-xl border border-border bg-card p-5 md:p-6 flex flex-col justify-between gap-4 transition-shadow hover:shadow-md",
-                    feat.gridClass
-                  )}
+                  className="bg-card rounded-xl border border-[rgba(0,0,0,0.06)] p-6 transition-all hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
                 >
-                  <div>
-                    <h3 className="font-bold text-foreground text-sm uppercase tracking-tight">
-                      {feat.title}
-                    </h3>
-                    <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
-                      {feat.desc}
-                    </p>
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                    <svc.icon className="h-5 w-5 text-primary" />
                   </div>
-
-                  {/* ── Visual previews ── */}
-                  {feat.visual === "hero" && (
-                    <div className={cn("rounded-xl p-4 mt-auto", accent.bg)}>
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                        {isRent ? "Monthly estimate" : isSell ? "Estimated value" : "Price score"}
-                      </p>
-                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", accent.text)}>
-                        {isRent ? "€1,800/mo" : isSell ? "€845,000" : "FAIR PRICE"}
-                      </p>
-                      <div className="flex items-center gap-2 mt-3">
-                        <div className="flex-1 h-2 rounded-full bg-background overflow-hidden">
-                          <div className={cn("h-full rounded-full", accent.fill)} style={{ width: "78%" }} />
-                        </div>
-                        <span className="text-[0.65rem] text-muted-foreground whitespace-nowrap">High confidence</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {isRent ? "Range: €1,500 – €2,100/mo" : isSell ? "Range: €790K – €900K" : "Asking: €395K · Est: €380K"}
-                      </p>
-                    </div>
-                  )}
-
-                  {feat.visual === "metric" && (
-                    <div className="mt-auto">
-                      <p className={cn("text-2xl font-light tracking-tight", accent.text)}>
-                        {isRent ? "€14" : isSell ? "€3,200" : "€3,150"}
-                        <span className="text-sm text-muted-foreground font-normal">/m²</span>
-                      </p>
-                      <div className="flex gap-1 mt-2">
-                        {[65, 78, 85, 72, 90, 88, 95].map((h, j) => (
-                          <div key={j} className="flex-1 rounded-sm bg-border" style={{ height: `${h * 0.3}px` }}>
-                            <div className={cn("w-full rounded-sm", accent.fillAlpha)} style={{ height: `${h * 0.3}px` }} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {feat.visual === "chart" && (
-                    <div className="mt-auto flex items-end gap-3">
-                      <div className="flex-1">
-                        <svg viewBox="0 0 200 50" className="w-full h-10 md:h-12" fill="none">
-                          <path
-                            d="M0 40 Q25 38 50 30 T100 22 T150 18 T200 10"
-                            stroke={accent.stroke}
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                          <path
-                            d="M0 40 Q25 38 50 30 T100 22 T150 18 T200 10 V50 H0Z"
-                            fill={accent.strokeAlpha}
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <TrendingUp className={cn("h-4 w-4", accent.text)} />
-                        <span className={cn("text-sm font-semibold", accent.text)}>
-                          {isRent ? "+3.8%" : isSell ? "+4.2%" : "+6.1%"}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {feat.visual === "cards" && (
-                    <div className="mt-auto flex gap-2">
-                      {[1, 2, 3].map(n => (
-                        <div key={n} className="flex-1 rounded-lg bg-secondary border border-border p-2">
-                          <div className="w-full aspect-[4/3] rounded bg-border mb-1.5" />
-                          <div className="h-1.5 w-3/4 rounded-full bg-border" />
-                          <div className="h-1.5 w-1/2 rounded-full bg-border mt-1" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {feat.visual === "icon" && (
-                    <div className="mt-auto flex items-center gap-3">
-                      {feat.title.includes("Agent") ? (
-                        <>
-                          <div className="flex -space-x-2">
-                            {[0, 1, 2].map(n => (
-                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", accent.fill)} style={{ opacity: 1 - n * 0.2 }}>
-                                {["A", "B", "C"][n]}
-                              </div>
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground">3 matched agents</span>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex gap-1.5">
-                            {[1, 2, 3, 4, 5].map(n => (
-                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? accent.fill : "bg-border")} />
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground">Strong property score</span>
-                        </>
-                      )}
-                    </div>
-                  )}
+                  <h3 className="font-bold text-foreground text-sm mb-1">{svc.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{svc.desc}</p>
                 </motion.div>
               ))}
             </div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="flex justify-center mt-10"
-            >
-              <span className={cn("inline-block rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider", accent.bg, accent.text)}>
-                All included — completely free
-              </span>
-            </motion.div>
           </div>
         </section>
 
-        <SectionDivider />
-
         {/* ═══════════ RECENT VALUATIONS ═══════════ */}
-        <section className="w-full py-8 md:py-20 bg-secondary/50">
+        <section className="w-full py-8 md:py-20">
           <div className="max-w-5xl mx-auto px-5 md:px-8">
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-3">
@@ -715,11 +443,11 @@ const Index = () => {
                 </span>
                 <span className="text-sm text-[hsl(var(--success))] font-medium">Live</span>
               </div>
-              <SectionLabel>Market Data</SectionLabel>
-              <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
+              <SectionLabel className="flex flex-col items-center">Market Data</SectionLabel>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
                 {isRent ? "Recent Rental Estimates" : isSell ? "Recent Valuations" : "Recent Price Analyses"}
               </h2>
-              <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
+              <p className="text-lg text-muted-foreground mt-4">
                 {isRent ? "124 rental estimates completed this week" : isSell ? "238 property valuations completed this week" : "185 price analyses completed this week"}
               </p>
             </div>
@@ -729,13 +457,11 @@ const Index = () => {
           </div>
         </section>
 
-        <SectionDivider />
-
         {/* ═══════════ TESTIMONIALS ═══════════ */}
-        <section className="w-full py-8 md:py-20 px-5 md:px-8">
+        <section className="w-full py-8 md:py-20 bg-background-alt px-5 md:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <SectionLabel>Testimonials</SectionLabel>
-            <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
+            <SectionLabel className="flex flex-col items-center">Testimonials</SectionLabel>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
               What Owners Say
             </h2>
             <div className="relative min-h-[200px] flex flex-col items-center justify-center mt-10">
@@ -750,10 +476,10 @@ const Index = () => {
                 >
                   <div className="flex gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={cn("h-5 w-5", isRent ? "fill-[hsl(var(--rent))] text-[hsl(var(--rent))]" : isSell ? "fill-primary text-primary" : "fill-[hsl(var(--buy))] text-[hsl(var(--buy))]")} />
+                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                     ))}
                   </div>
-                  <p className="text-xl md:text-2xl font-['DM_Serif_Display'] italic text-muted-foreground max-w-2xl leading-relaxed">
+                  <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed italic">
                     "{testimonials[testimonialIdx]?.quote}"
                   </p>
                   <p className="text-sm text-muted-foreground/60 mt-4">
@@ -769,7 +495,7 @@ const Index = () => {
                   onClick={() => setTestimonialIdx(i)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
-                    i === testimonialIdx ? cn(accent.fill, "w-6") : "bg-border w-2 hover:bg-muted-foreground/30"
+                    i === testimonialIdx ? "bg-primary w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
                   )}
                 />
               ))}
@@ -777,13 +503,11 @@ const Index = () => {
           </div>
         </section>
 
-        <SectionDivider />
-
         {/* ═══════════ EXPLORE AREAS ═══════════ */}
         <section className="py-8 sm:py-12">
           <div className="max-w-[1400px] mx-auto px-5 md:px-8">
             <SectionLabel>Popular Areas</SectionLabel>
-            <h2 className="font-serif text-2xl sm:text-3xl mb-6">Explore Costa del Sol</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6">Explore Costa del Sol</h2>
             <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
               {[
                 { name: "Marbella", slug: "marbella", img: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200&h=200&fit=crop" },
@@ -806,35 +530,22 @@ const Index = () => {
           </div>
         </section>
 
-        <SectionDivider />
-
         {/* ═══════════ FINAL CTA ═══════════ */}
         <section
-          className="w-full py-8 md:py-20 px-5 md:px-8 pb-32"
-          style={{ background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--${isRent ? 'rent-light' : isSell ? 'terracotta-light' : 'buy-light'})) 100%)` }}
+          className="w-full py-12 md:py-20 px-5 md:px-8 pb-32"
+          style={{ background: 'linear-gradient(135deg, hsl(243 96% 28%) 0%, hsl(310 52% 50%) 100%)' }}
         >
           <div className="flex flex-col items-center text-center gap-4 mb-2">
-            <SectionLabel>Start Now</SectionLabel>
-            <hr className="w-[60px] border-border my-2" />
-            <AnimatePresence mode="wait">
-              <motion.h2
-                key={valuationType}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.3 }}
-                className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground leading-[1.05]"
-              >
-                {isRent ? (
-                  <>Ready to find out your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">rental potential</span>?</>
-                ) : isSell ? (
-                  <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?</>
-                ) : (
-                  <>Ready to find out if<br />the price is <span className="font-['DM_Serif_Display'] italic normal-case">really fair</span>?</>
-                )}
-              </motion.h2>
-            </AnimatePresence>
-            <p className="font-['DM_Serif_Display'] italic text-lg md:text-xl text-muted-foreground">
+            <h2 className="text-3xl md:text-4xl font-normal text-white leading-[1.1]">
+              {isRent ? (
+                <>Ready to find out your property's rental potential?</>
+              ) : isSell ? (
+                <>Ready to discover your property's true value?</>
+              ) : (
+                <>Ready to find out if the price is really fair?</>
+              )}
+            </h2>
+            <p className="text-lg md:text-xl text-white/70">
               Free, confidential, and takes less than 2 minutes
             </p>
           </div>
@@ -858,19 +569,19 @@ const Index = () => {
 
         <section className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="relative border border-border/40 rounded-2xl px-6 py-10 md:px-12 md:py-14 bg-card overflow-hidden">
+            <div className="relative border border-[rgba(0,0,0,0.06)] rounded-2xl px-6 py-10 md:px-12 md:py-14 bg-card overflow-hidden">
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-              <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-primary/70 mb-4">
+              <p className="text-xs uppercase tracking-[0.15em] font-semibold text-primary/70 mb-4">
                 For Professionals
               </p>
-              <h3 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-3">
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
                 Are you a real estate agent?
               </h3>
               <p className="text-sm text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
                 Join ValoraCasa and get qualified leads, a professional profile page, and AI-powered tools to grow your business.
               </p>
               <Link to="/pro">
-                <Button className="rounded-full px-10 py-3 text-base font-semibold shadow-md hover:shadow-lg transition-all">
+                <Button className="px-10 py-3 text-base font-semibold shadow-md hover:shadow-lg transition-all">
                   List Your Agency
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
