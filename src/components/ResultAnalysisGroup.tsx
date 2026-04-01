@@ -240,7 +240,7 @@ export const AreaComparisonSection: React.FC<{
                 </span>
               </div>
               <div className="relative h-3 bg-muted rounded-full overflow-hidden">
-                <div className="h-full rounded-full bg-gold transition-all duration-700" style={{ width: `${Math.min(bar.pct / 1.5, 100)}%` }} />
+                <div className="h-full rounded-full bg-accent transition-all duration-700" style={{ width: `${Math.min(bar.pct / 1.5, 100)}%` }} />
               </div>
               <div className="flex justify-between mt-1.5">
                 <span className="text-xs text-foreground font-medium">Yours: {bar.userValue}</span>
