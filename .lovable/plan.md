@@ -1,39 +1,85 @@
 
 
-# Hero/Cover Image for Agent Profiles
+# Three Features: Social Sharing, PDF Report, Merit Score Algorithm
 
-## What This Does
-Lets agents upload a hero/cover image for their profile page. The AI onboarding tries to extract an image from Firecrawl (e.g. og:image), but agents can upload their own in both onboarding Step 3 and the Dashboard Profile section. The `cover_photo_url` column already exists on `professionals`.
+## Feature 1: Social Sharing with Reference Code
 
-## Changes
+### Current State
+- `handleShare` on SellResult/RentResult uses `navigator.share` with basic text, no ref code or WhatsApp deeplink
+- Reference code already exists via `formatRefCode(lead.id)`
 
-### 1. Onboard Edge Function — Extract cover photo from Firecrawl
-In `supabase/functions/onboard-agency/index.ts`, the `cover_photo_url` is already initialized to `null` (line 37). Add logic to set it from Firecrawl metadata — use `ogImage` or a large image from the scraped content as the cover photo candidate (separate from logo). Return `cover_photo_url` in the response.
+### Changes
 
-### 2. ProOnboard.tsx — Add cover photo state + UI in Step 3
-- Add `coverPhotoUrl` state (populated from AI scan result)
-- In Step 3 review UI (after the Logo section, ~line 636), add a "Cover Photo" section with:
-  - Preview of current cover image (or a gradient placeholder)
-  - Upload button using `<input type="file">` with `URL.createObjectURL` for preview
-  - Helper text: "This appears as the hero banner on your profile"
-- Pass `cover_photo_url` to `publish-agent-profile` edge function
+**SellResult.tsx** — Replace `handleShare` with a share menu offering:
+- **WhatsApp**: `https://wa.me/?text={encoded message}` with ref code + valuation link
+- **Email**: `mailto:?subject=...&body=...` with ref code + valuation link  
+- **Copy link**: Current clipboard behavior
 
-### 3. Publish Edge Function — Accept cover_photo_url
-In `supabase/functions/publish-agent-profile/index.ts`, add `cover_photo_url` to the destructured request body and include it in `profileData`.
+Pre-generated message template:
+```
+I valued my property on ValoraCasa (Ref: VC-A3B7) and received an estimate of €850,000.
+See the full report: https://valoracasa.es/sell/result/abc123
+```
 
-### 4. ProDashboard ProfileSection — Add cover photo upload
-In the `ProfileSection` component (~line 448), add a cover photo upload section (after the logo upload):
-- Show current cover image preview (wide aspect ratio, ~16:9)
-- Upload button using the existing `agent-logos` storage bucket (path: `{agent.id}/cover.{ext}`)
-- Save `cover_photo_url` to `professionals` table immediately on upload (same pattern as logo)
-- Include in the `handleSave` payload
+UI: Replace single share button with a Popover containing 3 options (WhatsApp, Email, Copy).
 
-### 5. Storage bucket
-The `agent-logos` bucket already exists and is used for logo uploads. We'll reuse it for cover photos too (different file path).
+**RentResult.tsx** — Same pattern adapted for rental estimates.
 
-## Files Modified
-- `supabase/functions/onboard-agency/index.ts` — extract cover photo from Firecrawl metadata
-- `supabase/functions/publish-agent-profile/index.ts` — accept and save cover_photo_url
-- `src/pages/ProOnboard.tsx` — add cover photo state, AI population, upload UI in Step 3
-- `src/pages/ProDashboard.tsx` — add cover photo upload to ProfileSection
+### Files: `SellResult.tsx`, `RentResult.tsx`
+
+---
+
+## Feature 2: PDF Valuation Report
+
+### Current State
+- "Download PDF" button shows "Coming Soon" toast
+
+### Changes
+
+**Create edge function `generate-valuation-pdf`** that:
+- Accepts `lead_id` and `lead_type` (sell/rent)
+- Fetches lead data from `leads_sell` or `leads_rent`
+- Generates PDF using a server-side approach (build HTML, convert or use a PDF lib available in Deno)
+- Returns PDF as downloadable response
+
+**Alternative (simpler)**: Generate PDF client-side using `jspdf` + `html2canvas`:
+- Add `jspdf` and `html2canvas` as dependencies
+- Capture the result card and key sections as images
+- Compose into a branded PDF with logo, ref code, and all valuation data
+- Trigger browser download
+
+**SellResult.tsx / RentResult.tsx** — Replace "Coming Soon" toast with actual PDF generation call.
+
+### Files: `SellResult.tsx`, `RentResult.tsx`, possibly new edge function
+
+---
+
+## Feature 3: Merit Score Algorithm Improvement
+
+### Current State
+- Simple inline calculation in ProDashboard (line 275-279): profile fields count * 30% + rating * 20% + hardcoded 50/40/80 for response/conversion/profile
+- No real response time or conversion tracking
+
+### Changes
+
+**Improve the merit score calculation** to use real data:
+- Profile completeness (10%): bio, logo, description, phone, website, tagline, cover_photo_url, languages
+- Rating (25%): `avg_rating / 5 * 100`
+- Zone coverage (15%): whether agent has active zones
+- Lead responsiveness (20%): calculate from `agent_contact_requests` — time between `created_at` and status change to 'contacted'
+- Review count (15%): normalize `total_reviews` (cap at 20 for 100%)
+- Conversion rate (15%): leads marked 'converted' / total leads
+
+Since response time tracking doesn't exist yet, use a proxy: leads with status != 'new' within 24h = responsive. This avoids schema changes.
+
+**ProDashboard.tsx** — Update the merit score computation to use the real data already loaded (leads, reviews, zones).
+
+### Files: `src/pages/ProDashboard.tsx`
+
+---
+
+## Implementation Order
+1. Social sharing (SellResult + RentResult)
+2. Merit score algorithm improvement (ProDashboard)
+3. PDF report generation
 
