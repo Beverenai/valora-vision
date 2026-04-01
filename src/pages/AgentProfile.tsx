@@ -329,12 +329,7 @@ export default function AgentProfile() {
         {/* Header content */}
         <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-12 relative z-10">
           {/* Logo */}
-          <div className="w-20 h-20 rounded-full border-4 border-background bg-card shadow-lg flex items-center justify-center overflow-hidden mb-4">
-            {professional.logo_url ? (
-              <img src={professional.logo_url} alt={professional.company_name} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-xl font-bold text-primary">{getInitials(professional.company_name)}</span>
-            )}
+          <LogoWithFallback logoUrl={professional.logo_url} name={professional.company_name} size="lg" />
           </div>
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
