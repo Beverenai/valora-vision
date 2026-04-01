@@ -729,7 +729,7 @@ const Index = () => {
                 { name: "Golden Mile", slug: "golden-mile", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200&h=200&fit=crop" },
                 { name: "Benahavís", slug: "benahavis", img: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200&h=200&fit=crop" },
                 { name: "Estepona", slug: "estepona", img: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=200&h=200&fit=crop" },
-                { name: "Mijas", slug: "mijas", img: "https://images.unsplash.com/photo-1523217553380-36b6e5e0f6d2?w=200&h=200&fit=crop" },
+                { name: "Mijas", slug: "mijas", img: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=200&h=200&fit=crop" },
                 { name: "Fuengirola", slug: "fuengirola", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop" },
               ].map((area) => (
                 <Link key={area.slug} to={`/sone/${area.slug}`} className="flex flex-col items-center gap-2 shrink-0">

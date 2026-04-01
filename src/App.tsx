@@ -84,6 +84,8 @@ const App = () => {
               <Route path="/pro/login" element={<ProLogin />} />
               <Route path="/pro/dashboard" element={<ProDashboard />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/vender" element={<Navigate to="/sell/valuation" replace />} />
+              <Route path="/alquilar" element={<ComingSoon />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

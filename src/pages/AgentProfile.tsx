@@ -67,7 +67,7 @@ interface Review {
 
 // ── Helpers ──
 function getInitials(name: string) {
-  return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  return name.split(/\s+/).filter(Boolean).map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
 function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
@@ -77,9 +77,30 @@ function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
         <Star
           key={i}
           size={size}
-          className={i <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}
+          className={i <= Math.round(rating) ? "fill-primary text-primary" : "text-muted-foreground/30"}
         />
       ))}
+    </div>
+  );
+}
+
+function LogoWithFallback({ logoUrl, name, size = "md" }: { logoUrl: string | null; name: string; size?: "md" | "lg" }) {
+  const [failed, setFailed] = useState(false);
+  const initials = getInitials(name) || "A";
+  const sizeClass = size === "lg"
+    ? "w-20 h-20 rounded-full border-4 border-background bg-card shadow-lg flex items-center justify-center overflow-hidden mb-4"
+    : "w-12 h-12 rounded-full flex items-center justify-center overflow-hidden";
+
+  if (logoUrl && !failed) {
+    return (
+      <div className={sizeClass}>
+        <img src={logoUrl} alt={name} className="w-full h-full object-cover" onError={() => setFailed(true)} />
+      </div>
+    );
+  }
+  return (
+    <div className={`${sizeClass} bg-primary`}>
+      <span className={`font-bold text-primary-foreground ${size === "lg" ? "text-xl" : "text-sm"}`}>{initials}</span>
     </div>
   );
 }
