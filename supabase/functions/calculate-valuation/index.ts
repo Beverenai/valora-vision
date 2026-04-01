@@ -172,8 +172,8 @@ serve(async (req) => {
     if (isSell) {
       if (comparables.length > 0) {
         const pricesPerSqm = comparables
-          .filter((c: any) => c.price_per_sqm && c.price_per_sqm > 0)
-          .map((c: any) => Number(c.price_per_sqm));
+          .filter((c: any) => c.price_per_m2 && c.price_per_m2 > 0)
+          .map((c: any) => Number(c.price_per_m2));
 
         const filtered = filterOutliers(pricesPerSqm);
         const medianPricePerSqm = filtered.length > 0 ? median(filtered) : 3500;
