@@ -110,12 +110,13 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const modeParam = searchParams.get("mode");
-  const [valuationType, setValuationType] = useState<"sell" | "buy">(
-    modeParam === "buy" ? "buy" : "sell"
+  const [valuationType, setValuationType] = useState<"sell" | "rent" | "buy">(
+    modeParam === "buy" ? "buy" : modeParam === "rent" ? "rent" : "sell"
   );
 
   useEffect(() => {
     if (modeParam === "buy") setValuationType("buy");
+    else if (modeParam === "rent") setValuationType("rent");
     else if (modeParam === "sell") setValuationType("sell");
   }, [modeParam]);
   const [listingUrl, setListingUrl] = useState("");
