@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const serviceLinks = [
@@ -25,6 +25,10 @@ function detectContext(pathname: string): string | null {
   if (pathname.startsWith("/rent")) return "rent";
   if (pathname.startsWith("/buy")) return "buy";
   return null;
+}
+
+function isProRoute(pathname: string): boolean {
+  return pathname.startsWith("/pro");
 }
 
 const Navbar = () => {
