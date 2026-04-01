@@ -7,8 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Feature adjustment multipliers
-const FEATURE_ADJUSTMENTS: Record<string, number> = {
+// Hardcoded fallbacks — used only when zone_stats has insufficient data (<5 listings with feature)
+const FALLBACK_ADJUSTMENTS: Record<string, number> = {
   pool: 0.10,
   sea_views: 0.20,
   garage: 0.05,
@@ -40,8 +40,26 @@ function filterOutliers(values: number[]): number[] {
   const deviations = values.map((v) => Math.abs(v - med));
   const madRaw = median(deviations);
   const mad = madRaw === 0 ? 1 : madRaw;
-  // Keep values within ~2.5 MAD of median
   return values.filter((v) => Math.abs(v - med) / mad <= 3.5);
+}
+
+/** Calculate dynamic feature premium from zone_stats, fallback to hardcoded */
+function dynamicPremium(
+  medianWith: number | null,
+  medianWithout: number | null,
+  countWith: number | null,
+  fallbackKey: string,
+): number {
+  const MIN_SAMPLE = 5;
+  if (
+    countWith && countWith >= MIN_SAMPLE &&
+    medianWith && medianWithout && medianWithout > 0
+  ) {
+    const premium = (medianWith - medianWithout) / medianWithout;
+    // Clamp to reasonable range: -5% to +50%
+    return Math.max(-0.05, Math.min(0.50, premium));
+  }
+  return FALLBACK_ADJUSTMENTS[fallbackKey] ?? 0;
 }
 
 serve(async (req) => {
@@ -52,21 +70,15 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const {
-      valuation_type, // 'sell' | 'rent'
-      // Contact
+      valuation_type,
       full_name, email, phone,
-      // Address
       address, city, latitude, longitude,
-      // Property
       property_type, built_size_sqm, plot_size_sqm, terrace_size_sqm,
       bedrooms, bathrooms, condition, orientation, views,
       year_built, energy_certificate, features_text,
-      // Features (booleans)
       has_pool, has_garage, has_sea_views, has_terrace, has_garden,
       has_lift, has_ac, has_balcony,
-      // Rent-specific
       is_furnished, property_features, rental_preference,
-      // Sell-specific
       wants_to_sell, selling_timeline, interested_in_refinancing,
     } = body;
 
@@ -77,10 +89,9 @@ serve(async (req) => {
     const isSell = valuation_type === "sell";
     const table = isSell ? "leads_sell" : "leads_rent";
 
-    // 1. Insert lead with status='processing'
+    // 1. Insert lead
     const leadData: Record<string, unknown> = {
-      full_name,
-      email,
+      full_name, email,
       phone: phone || null,
       address: address || city || "Unknown",
       city: city || null,
@@ -123,33 +134,50 @@ serve(async (req) => {
     const sizeM2 = built_size_sqm ? Math.round(Number(built_size_sqm)) : 150;
     const roomsCount = bedrooms ? Number(bedrooms) : 3;
 
-    // 2. Find comparables via RPC
+    // 2. Find comparables + zone stats in parallel
     let comparables: any[] = [];
-    let estimatedValue = 0;
-    let priceLow = 0;
-    let priceHigh = 0;
-    let pricePerSqm = 0;
-    let monthlyRent = 0;
-    let annualRent = 0;
+    let zoneStats: any = null;
 
     if (latitude && longitude) {
-      const { data: comps, error: compError } = await supabase.rpc("find_comparables_with_fallback", {
-        p_lat: Number(latitude),
-        p_lng: Number(longitude),
-        p_operation: isSell ? "sale" : "rent",
-        p_property_type: property_type || "apartment",
-        p_size_m2: sizeM2,
-        p_rooms: roomsCount,
-        p_min_results: 8,
-        p_limit: 30,
-      });
+      const [compResult, zoneResult] = await Promise.all([
+        supabase.rpc("find_comparables_with_fallback", {
+          p_lat: Number(latitude),
+          p_lng: Number(longitude),
+          p_operation: isSell ? "sale" : "rent",
+          p_property_type: property_type || "apartment",
+          p_size_m2: sizeM2,
+          p_rooms: roomsCount,
+          p_min_results: 8,
+          p_limit: 30,
+        }),
+        // Try to find zone and get stats
+        supabase
+          .from("properties")
+          .select("zone_id")
+          .not("zone_id", "is", null)
+          .order("location_point", { ascending: true }) // closest
+          .limit(1)
+          .then(async (propRes) => {
+            if (propRes.data?.[0]?.zone_id) {
+              return supabase.rpc("get_zone_stats", {
+                p_zone_id: propRes.data[0].zone_id,
+                p_operation: isSell ? "sale" : "rent",
+                p_property_type: property_type || "apartment",
+              });
+            }
+            return { data: null, error: null };
+          }),
+      ]);
 
-      if (!compError && comps && comps.length > 0) {
-        comparables = comps;
+      if (!compResult.error && compResult.data?.length > 0) {
+        comparables = compResult.data;
+      }
+      if (zoneResult?.data?.[0]) {
+        zoneStats = zoneResult.data[0];
       }
     }
 
-    // 2b. Find STR comparables for rent valuations
+    // 2b. STR comparables for rent
     let strComparables: any[] = [];
     if (!isSell && latitude && longitude) {
       try {
@@ -159,16 +187,37 @@ serve(async (req) => {
           .gte("scraped_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
           .eq("city", city || "")
           .limit(15);
-
-        if (!strError && strData && strData.length > 0) {
-          strComparables = strData;
-        }
+        if (!strError && strData?.length) strComparables = strData;
       } catch (e) {
         console.error("STR query error:", e);
       }
     }
 
-    // 3. Calculate valuation
+    // 3. Build dynamic feature adjustments from zone_stats
+    const featureAdjustments: Record<string, number> = {};
+    if (zoneStats) {
+      featureAdjustments.pool = dynamicPremium(zoneStats.median_m2_with_pool, zoneStats.median_m2_without_pool, zoneStats.count_with_pool, "pool");
+      featureAdjustments.sea_views = dynamicPremium(zoneStats.median_m2_with_sea_views, zoneStats.median_m2_without_sea_views, zoneStats.count_with_sea_views, "sea_views");
+      featureAdjustments.garage = dynamicPremium(zoneStats.median_m2_with_garage, zoneStats.median_m2_without_garage, zoneStats.count_with_garage, "garage");
+      featureAdjustments.terrace = dynamicPremium(zoneStats.median_m2_with_terrace, zoneStats.median_m2_without_terrace, zoneStats.count_with_terrace, "terrace");
+      featureAdjustments.lift = dynamicPremium(zoneStats.median_m2_with_lift, zoneStats.median_m2_without_lift, zoneStats.count_with_lift, "lift");
+      featureAdjustments.garden = FALLBACK_ADJUSTMENTS.garden; // no zone data for garden
+      featureAdjustments.ac = FALLBACK_ADJUSTMENTS.ac;
+      featureAdjustments.balcony = FALLBACK_ADJUSTMENTS.balcony;
+    } else {
+      Object.assign(featureAdjustments, FALLBACK_ADJUSTMENTS);
+    }
+
+    console.log("Feature adjustments:", zoneStats ? "dynamic from zone_stats" : "hardcoded fallback", featureAdjustments);
+
+    // 4. Calculate valuation
+    let estimatedValue = 0;
+    let priceLow = 0;
+    let priceHigh = 0;
+    let pricePerSqm = 0;
+    let monthlyRent = 0;
+    let annualRent = 0;
+
     if (isSell) {
       if (comparables.length > 0) {
         const pricesPerSqm = comparables
@@ -178,18 +227,16 @@ serve(async (req) => {
         const filtered = filterOutliers(pricesPerSqm);
         const medianPricePerSqm = filtered.length > 0 ? median(filtered) : 3500;
 
-        // Apply feature adjustments
         let multiplier = 1.0;
-        if (has_pool) multiplier += FEATURE_ADJUSTMENTS.pool;
-        if (has_sea_views || (views && views.toLowerCase().includes("sea"))) multiplier += FEATURE_ADJUSTMENTS.sea_views;
-        if (has_garage) multiplier += FEATURE_ADJUSTMENTS.garage;
-        if (has_terrace || (terrace_size_sqm && Number(terrace_size_sqm) > 0)) multiplier += FEATURE_ADJUSTMENTS.terrace;
-        if (has_garden) multiplier += FEATURE_ADJUSTMENTS.garden;
-        if (has_lift) multiplier += FEATURE_ADJUSTMENTS.lift;
-        if (has_ac) multiplier += FEATURE_ADJUSTMENTS.ac;
-        if (has_balcony) multiplier += FEATURE_ADJUSTMENTS.balcony;
+        if (has_pool) multiplier += featureAdjustments.pool;
+        if (has_sea_views || (views && views.toLowerCase().includes("sea"))) multiplier += featureAdjustments.sea_views;
+        if (has_garage) multiplier += featureAdjustments.garage;
+        if (has_terrace || (terrace_size_sqm && Number(terrace_size_sqm) > 0)) multiplier += featureAdjustments.terrace;
+        if (has_garden) multiplier += featureAdjustments.garden;
+        if (has_lift) multiplier += featureAdjustments.lift;
+        if (has_ac) multiplier += featureAdjustments.ac;
+        if (has_balcony) multiplier += featureAdjustments.balcony;
 
-        // Condition adjustment
         if (condition && CONDITION_ADJUSTMENTS[condition] !== undefined) {
           multiplier += CONDITION_ADJUSTMENTS[condition];
         }
@@ -198,13 +245,10 @@ serve(async (req) => {
         estimatedValue = Math.round(pricePerSqm * sizeM2);
         priceLow = Math.round(estimatedValue * 0.85);
         priceHigh = Math.round(estimatedValue * 1.15);
-
-        // Rental estimate (roughly 0.4% of value per month)
         monthlyRent = Math.round(estimatedValue * 0.004);
         annualRent = monthlyRent * 12;
       } else {
-        // Fallback when no comparables
-        pricePerSqm = 3500;
+        pricePerSqm = zoneStats?.median_price_m2 || 3500;
         estimatedValue = pricePerSqm * sizeM2;
         priceLow = Math.round(estimatedValue * 0.85);
         priceHigh = Math.round(estimatedValue * 1.15);
@@ -237,7 +281,7 @@ serve(async (req) => {
         } else if (monthlyRents.length > 0) {
           monthlyRent = Math.round(median(filterOutliers(monthlyRents)));
         } else {
-          monthlyRent = Math.round(sizeM2 * 12); // Fallback €12/m²
+          monthlyRent = Math.round(sizeM2 * 12);
         }
       } else {
         monthlyRent = Math.round(sizeM2 * 12);
@@ -245,22 +289,16 @@ serve(async (req) => {
       annualRent = monthlyRent * 12;
     }
 
-    // 3b. Calculate STR estimates for rent valuations
+    // 4b. STR estimates
     let weeklyHighSeason = 0;
     let weeklyLowSeason = 0;
     let occupancyEstimate = 0;
     let seasonalBreakdown: any = null;
 
     if (!isSell && strComparables.length > 0) {
-      const highRates = strComparables
-        .filter((s: any) => s.high_season_daily_rate > 0)
-        .map((s: any) => Number(s.high_season_daily_rate));
-      const lowRates = strComparables
-        .filter((s: any) => s.low_season_daily_rate > 0)
-        .map((s: any) => Number(s.low_season_daily_rate));
-      const occupancies = strComparables
-        .filter((s: any) => s.occupancy_rate > 0)
-        .map((s: any) => Number(s.occupancy_rate));
+      const highRates = strComparables.filter((s: any) => s.high_season_daily_rate > 0).map((s: any) => Number(s.high_season_daily_rate));
+      const lowRates = strComparables.filter((s: any) => s.low_season_daily_rate > 0).map((s: any) => Number(s.low_season_daily_rate));
+      const occupancies = strComparables.filter((s: any) => s.occupancy_rate > 0).map((s: any) => Number(s.occupancy_rate));
 
       const medianHigh = highRates.length > 0 ? median(highRates) : 0;
       const medianLow = lowRates.length > 0 ? median(lowRates) : 0;
@@ -270,7 +308,6 @@ serve(async (req) => {
       weeklyLowSeason = Math.round(medianLow * 7);
       occupancyEstimate = Math.round(medianOcc * 100) / 100;
 
-      // Seasonal breakdown: 4 months high, 4 mid, 4 low
       const midRate = (medianHigh + medianLow) / 2;
       seasonalBreakdown = {
         high_season: { months: ["Jun", "Jul", "Aug", "Sep"], daily_rate: Math.round(medianHigh), weekly_rate: weeklyHighSeason },
@@ -280,16 +317,11 @@ serve(async (req) => {
         str_comparables_count: strComparables.length,
       };
 
-      // Estimate annual STR income
-      const annualSTR = Math.round(
-        (medianHigh * 120 + midRate * 120 + medianLow * 120) * occupancyEstimate
-      );
-      if (annualSTR > annualRent) {
-        annualRent = annualSTR; // Use higher of LTR vs STR
-      }
+      const annualSTR = Math.round((medianHigh * 120 + midRate * 120 + medianLow * 120) * occupancyEstimate);
+      if (annualSTR > annualRent) annualRent = annualSTR;
     }
 
-    // 4. Generate AI analysis
+    // 5. AI analysis with zone context
     let analysisText = "";
     let marketTrendsText = "";
 
@@ -311,7 +343,7 @@ serve(async (req) => {
 
         const systemPrompt = `You are a professional property analyst for ValoraCasa, a Spanish property valuation service. Write in English. Be specific, data-driven, and professional. Do not use markdown formatting.`;
 
-        // Build comparable context for data-driven analysis
+        // Build comparable context
         const compPrices = comparables.filter((c: any) => c.price && c.price > 0).map((c: any) => Number(c.price));
         const compPricesPerSqm = comparables.filter((c: any) => c.price_per_m2 > 0).map((c: any) => Number(c.price_per_m2));
         const minCompPrice = compPrices.length > 0 ? Math.min(...compPrices) : 0;
@@ -324,13 +356,17 @@ serve(async (req) => {
           ? `Based on ${comparables.length} comparable properties within 5km. Comparable price range: €${minCompPrice.toLocaleString()}–€${maxCompPrice.toLocaleString()}. Area median price/m²: €${Math.round(medianCompPriceSqm).toLocaleString()}. The property's price/m² of €${pricePerSqm.toLocaleString()} is ${Math.abs(userVsMedianPct)}% ${userVsMedianDir} the area median.`
           : `Limited comparable data available in this area.`;
 
+        // Zone intelligence context for AI
+        const zoneContext = zoneStats
+          ? `Zone market data: ${zoneStats.listing_count} active listings, median €${zoneStats.median_price_m2}/m², range €${zoneStats.min_price_m2}–€${zoneStats.max_price_m2}/m². ${zoneStats.pct_with_pool}% have pools, ${zoneStats.pct_with_sea_views}% have sea views. Average size: ${zoneStats.avg_size_m2}m².`
+          : "";
+
         const analysisPrompt = isSell
-          ? `Write a 3-paragraph property analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated value: €${estimatedValue.toLocaleString()}. ${compContext} Discuss the property's strengths, how features affect value, and market positioning. Reference the real comparable data. Keep it concise (150-200 words).`
-          : `Write a 3-paragraph rental income analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated monthly rent: €${monthlyRent.toLocaleString()}. ${compContext} Discuss rental demand, seasonal factors, and income potential. Reference the real comparable data. Keep it concise (150-200 words).`;
+          ? `Write a 3-paragraph property analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated value: €${estimatedValue.toLocaleString()}. ${compContext} ${zoneContext} Discuss the property's strengths, how features affect value, and market positioning. Reference the real comparable data. Keep it concise (150-200 words).`
+          : `Write a 3-paragraph rental income analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated monthly rent: €${monthlyRent.toLocaleString()}. ${compContext} ${zoneContext} Discuss rental demand, seasonal factors, and income potential. Reference the real comparable data. Keep it concise (150-200 words).`;
 
         const trendsPrompt = `Write a 2-paragraph market trends summary for ${city || "Costa del Sol"}, Spain as of March 2026. Cover price trends, demand drivers, and outlook. Reference real market dynamics (international buyers, Golden Visa, supply constraints). Keep it concise (120-150 words). Do not use markdown.`;
 
-        // Call AI for analysis and trends in parallel
         const [analysisRes, trendsRes] = await Promise.all([
           fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
@@ -372,11 +408,10 @@ serve(async (req) => {
         }
       } catch (aiError) {
         console.error("AI generation error:", aiError);
-        // Continue without AI text - the frontend has fallbacks
       }
     }
 
-    // 5. Prepare comparable data for storage
+    // 6. Prepare comparable data
     const comparableData = comparables.slice(0, 10).map((c: any) => ({
       id: c.id,
       price: c.price,
@@ -392,10 +427,8 @@ serve(async (req) => {
       listing_url: c.idealista_url,
     }));
 
-    // 6. Update lead with results
-    const updateData: Record<string, unknown> = {
-      status: "ready",
-    };
+    // 7. Update lead with results
+    const updateData: Record<string, unknown> = { status: "ready" };
 
     if (isSell) {
       updateData.estimated_value = estimatedValue;
@@ -424,7 +457,6 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("Update error:", updateError);
-      // Still return the ID - frontend can poll
     }
 
     return new Response(
@@ -432,19 +464,15 @@ serve(async (req) => {
         lead_id: leadId,
         status: updateError ? "processing" : "ready",
         comparable_count: comparables.length,
+        zone_stats_used: !!zoneStats,
       }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("calculate-valuation error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
