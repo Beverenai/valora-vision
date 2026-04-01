@@ -55,6 +55,9 @@ interface TeamMember {
   name: string;
   role: string;
   photo_url?: string;
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
 }
 
 interface AiStep {
@@ -384,6 +387,9 @@ const ProOnboard = () => {
               name: m.name,
               role: m.role || null,
               photo_url: m.photo_url || null,
+              email: m.email || null,
+              phone: m.phone || null,
+              whatsapp: m.whatsapp || null,
             })),
             type: registrationType,
             agency_role: registrationType === "agency" ? "owner" : null,
@@ -740,29 +746,44 @@ const ProOnboard = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setTeam([...team, { name: "", role: "" }])}
+                    onClick={() => setTeam([...team, { name: "", role: "", email: "", phone: "" }])}
                   >
                     <Plus className="w-3 h-3 mr-1" /> Add
                   </Button>
                 </div>
                 {team.length === 0 && <p className="text-sm text-muted-foreground">No team members yet. Add them above.</p>}
                 {team.map((m, i) => (
-                  <div key={i} className="flex items-center gap-2 mb-2">
-                    <Input
-                      placeholder="Name"
-                      value={m.name}
-                      onChange={(e) => { const t = [...team]; t[i].name = e.target.value; setTeam(t); }}
-                      className="flex-1"
-                    />
-                    <Input
-                      placeholder="Role"
-                      value={m.role}
-                      onChange={(e) => { const t = [...team]; t[i].role = e.target.value; setTeam(t); }}
-                      className="flex-1"
-                    />
-                    <Button variant="ghost" size="icon" onClick={() => setTeam(team.filter((_, j) => j !== i))}>
-                      <X className="w-3 h-3" />
-                    </Button>
+                  <div key={i} className="p-3 border rounded-xl mb-2 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Name"
+                        value={m.name}
+                        onChange={(e) => { const t = [...team]; t[i] = { ...t[i], name: e.target.value }; setTeam(t); }}
+                        className="flex-1"
+                      />
+                      <Input
+                        placeholder="Role"
+                        value={m.role}
+                        onChange={(e) => { const t = [...team]; t[i] = { ...t[i], role: e.target.value }; setTeam(t); }}
+                        className="flex-1"
+                      />
+                      <Button variant="ghost" size="icon" onClick={() => setTeam(team.filter((_, j) => j !== i))}>
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Email"
+                        type="email"
+                        value={m.email || ""}
+                        onChange={(e) => { const t = [...team]; t[i] = { ...t[i], email: e.target.value }; setTeam(t); }}
+                      />
+                      <Input
+                        placeholder="Phone"
+                        value={m.phone || ""}
+                        onChange={(e) => { const t = [...team]; t[i] = { ...t[i], phone: e.target.value }; setTeam(t); }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

@@ -531,6 +531,9 @@ function MyProfileTab({ agent, onSave, saving }: { agent: Professional; onSave: 
 function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ name: "", email: "", phone: "", role: "" });
+  const [inviting, setInviting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -539,54 +542,66 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
 
   const loadTeam = async () => {
     setLoading(true);
-    // If this is an agency, load professionals linked to it
-    if (agent.type === "agency") {
-      const { data } = await supabase
-        .from("professionals")
-        .select("id, contact_name, email, phone, photo_url, agency_role, slug, languages, avg_rating, total_reviews")
-        .eq("agency_id", agent.id)
-        .order("agency_role");
-      // Include the agency owner (self) at the top
-      const ownerEntry = {
-        id: agent.id,
-        contact_name: agent.contact_name,
-        email: agent.email,
-        phone: agent.phone,
-        photo_url: agent.photo_url,
-        agency_role: "owner" as const,
-        slug: agent.slug,
-        languages: agent.languages,
-        avg_rating: agent.avg_rating,
-        total_reviews: agent.total_reviews,
-      };
-      setTeamMembers([ownerEntry, ...(data || [])]);
-    } else {
-      // For solo agents or team members, load from agent_team_members (legacy)
-      const { data } = await supabase
-        .from("agent_team_members")
-        .select("*")
-        .eq("professional_id", agent.agency_id || agent.id)
-        .order("sort_order");
-      setTeamMembers(data || []);
-    }
+    const { data } = await supabase
+      .from("agent_team_members")
+      .select("*")
+      .eq("professional_id", agent.id)
+      .order("sort_order");
+    // Sort: active first, then by sort_order
+    const sorted = (data || []).sort((a: any, b: any) => {
+      if (a.is_active !== false && b.is_active === false) return -1;
+      if (a.is_active === false && b.is_active !== false) return 1;
+      return (a.sort_order || 0) - (b.sort_order || 0);
+    });
+    setTeamMembers(sorted);
     setLoading(false);
   };
 
-  const handleRemoveMember = async (memberId: string, isRealAgent: boolean) => {
+  const handleToggleActive = async (memberId: string, currentActive: boolean, memberRole: string) => {
     if (!isAdmin) return;
-    if (memberId === agent.id) {
-      toast({ title: "Cannot remove yourself", description: "The agency owner cannot be removed from the team.", variant: "destructive" });
+    if (memberRole?.toLowerCase() === "owner") {
+      toast({ title: "Cannot deactivate owner", variant: "destructive" });
       return;
     }
-    if (isRealAgent) {
-      // Unlink agent from agency
-      const { error } = await supabase.from("professionals").update({ agency_id: null, agency_role: null }).eq("id", memberId);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    } else {
-      const { error } = await supabase.from("agent_team_members").delete().eq("id", memberId);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    const { error } = await supabase.from("agent_team_members").update({ is_active: !currentActive }).eq("id", memberId);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: !currentActive ? "Member activated" : "Member deactivated" });
+    loadTeam();
+  };
+
+  const handleRemoveMember = async (memberId: string, memberRole: string) => {
+    if (!isAdmin) return;
+    if (memberRole?.toLowerCase() === "owner") {
+      toast({ title: "Cannot remove the owner", variant: "destructive" });
+      return;
     }
+    const { error } = await supabase.from("agent_team_members").delete().eq("id", memberId);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Team member removed" });
+    loadTeam();
+  };
+
+  const handleInvite = async () => {
+    if (!inviteForm.name.trim()) {
+      toast({ title: "Name required", variant: "destructive" });
+      return;
+    }
+    setInviting(true);
+    const maxSort = teamMembers.reduce((max: number, m: any) => Math.max(max, m.sort_order || 0), 0);
+    const { error } = await supabase.from("agent_team_members").insert({
+      professional_id: agent.id,
+      name: inviteForm.name.trim(),
+      email: inviteForm.email.trim() || null,
+      phone: inviteForm.phone.trim() || null,
+      role: inviteForm.role.trim() || null,
+      sort_order: maxSort + 1,
+      is_active: true,
+    });
+    setInviting(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Team member added!" });
+    setInviteForm({ name: "", email: "", phone: "", role: "" });
+    setShowInvite(false);
     loadTeam();
   };
 
@@ -594,19 +609,38 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
     return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
-  const isRealAgents = agent.type === "agency";
-
   return (
     <div className="space-y-4 pt-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{teamMembers.length} team member{teamMembers.length !== 1 ? "s" : ""}</p>
         {isAdmin && (
-          <Button variant="outline" size="sm" className="rounded-full" disabled>
-            <Plus className="h-4 w-4 mr-1" /> Invite Agent
-            <Badge variant="secondary" className="ml-2 text-[0.6rem]">Coming soon</Badge>
+          <Button variant="outline" size="sm" className="rounded-full" onClick={() => setShowInvite(!showInvite)}>
+            <Plus className="h-4 w-4 mr-1" /> Add Team Member
           </Button>
         )}
       </div>
+
+      {/* Invite Form */}
+      {showInvite && isAdmin && (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <p className="font-medium text-sm">Add a new team member</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input placeholder="Name *" value={inviteForm.name} onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })} />
+              <Input placeholder="Role (e.g. Agent)" value={inviteForm.role} onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })} />
+              <Input placeholder="Email" type="email" value={inviteForm.email} onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })} />
+              <Input placeholder="Phone" value={inviteForm.phone} onChange={(e) => setInviteForm({ ...inviteForm, phone: e.target.value })} />
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleInvite} disabled={inviting} className="rounded-full">
+                {inviting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+                Add member
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowInvite(false)} className="rounded-full">Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {!isAdmin && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
@@ -620,42 +654,48 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
           <CardContent className="py-8 text-center text-muted-foreground">
             <Users className="h-8 w-8 mx-auto mb-2 opacity-40" />
             <p className="text-sm">No team members yet.</p>
-            {isAdmin && <p className="text-xs mt-1">Invite agents to join your agency.</p>}
+            {isAdmin && <p className="text-xs mt-1">Add team members using the button above.</p>}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-2">
           {teamMembers.map((m) => {
-            const name = isRealAgents ? m.contact_name : m.name;
-            const initials = name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "??";
-            const photo = m.photo_url;
+            const isOwner = m.role?.toLowerCase() === "owner";
+            const isActive = m.is_active !== false;
+            const initials = m.name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "??";
 
             return (
-              <Card key={m.id}>
+              <Card key={m.id} className={cn(!isActive && "opacity-50")}>
                 <CardContent className="p-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
-                    {photo ? (
-                      <img src={photo} alt={name} className="w-full h-full object-cover" />
+                    {m.photo_url ? (
+                      <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-xs font-bold text-muted-foreground">{initials}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm truncate">{m.name}</p>
+                      {isOwner && <Badge variant="secondary" className="text-[0.6rem]">Owner</Badge>}
+                      {!isActive && <Badge variant="outline" className="text-[0.6rem]">Inactive</Badge>}
+                    </div>
                     <p className="text-xs text-muted-foreground truncate">
-                      {isRealAgents ? (m.agency_role || "agent") : (m.role || "Team member")}
+                      {m.role || "Team member"}
                       {m.email && ` · ${m.email}`}
+                      {m.phone && ` · ${m.phone}`}
                     </p>
                   </div>
-                  {isRealAgents && m.slug && (
-                    <Button variant="ghost" size="sm" asChild>
-                      <a href={`/agentes/${m.slug}`} target="_blank"><ExternalLink className="h-3.5 w-3.5" /></a>
-                    </Button>
-                  )}
-                  {isAdmin && m.agency_role !== "owner" && (
-                    <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(m.id, isRealAgents)} className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                  {isAdmin && !isOwner && (
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Switch
+                        checked={isActive}
+                        onCheckedChange={() => handleToggleActive(m.id, isActive, m.role)}
+                      />
+                      <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(m.id, m.role)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>

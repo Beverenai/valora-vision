@@ -108,6 +108,7 @@ export type Database = {
           created_at: string | null
           email: string | null
           id: string
+          is_active: boolean | null
           languages: string[] | null
           name: string
           phone: string | null
@@ -116,12 +117,14 @@ export type Database = {
           role: string | null
           sort_order: number | null
           total_reviews: number | null
+          whatsapp: string | null
         }
         Insert: {
           avg_rating?: number | null
           created_at?: string | null
           email?: string | null
           id?: string
+          is_active?: boolean | null
           languages?: string[] | null
           name: string
           phone?: string | null
@@ -130,12 +133,14 @@ export type Database = {
           role?: string | null
           sort_order?: number | null
           total_reviews?: number | null
+          whatsapp?: string | null
         }
         Update: {
           avg_rating?: number | null
           created_at?: string | null
           email?: string | null
           id?: string
+          is_active?: boolean | null
           languages?: string[] | null
           name?: string
           phone?: string | null
@@ -144,6 +149,7 @@ export type Database = {
           role?: string | null
           sort_order?: number | null
           total_reviews?: number | null
+          whatsapp?: string | null
         }
         Relationships: [
           {
