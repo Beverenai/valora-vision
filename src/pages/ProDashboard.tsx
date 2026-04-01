@@ -502,7 +502,7 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
   };
 
   const handleSave = () => {
-    onSave({ ...form, languages, logo_url: logoUrl || null });
+    onSave({ ...form, languages, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null });
   };
 
   const initials = agent.company_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
