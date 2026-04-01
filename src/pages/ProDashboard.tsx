@@ -84,13 +84,16 @@ const navGroups = [
     label: "Business",
     items: [
       { key: "leads" as Section, label: "Leads", icon: MessageSquare },
-      { key: "analytics" as Section, label: "Analytics", icon: BarChart3 },
+      { key: "zones" as Section, label: "My Zones", icon: MapPin },
+      { key: "reviews" as Section, label: "Reviews", icon: Star },
+      { key: "analytics" as Section, label: "Performance", icon: BarChart3 },
     ],
   },
   {
     label: "Account",
     items: [
       { key: "subscription" as Section, label: "Subscription", icon: CreditCard },
+      { key: "settings" as Section, label: "Settings", icon: Settings },
     ],
   },
 ];
