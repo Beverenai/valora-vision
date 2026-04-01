@@ -1,49 +1,60 @@
 
 
-## Plan: Design Improvements — SectionLabel, Serif Subtitles, Breakpoints, Visual Hierarchy
+## Plan: SectionSkeleton, Sticky Agent Button, Typewriter Hero
 
-### 1. Create `SectionLabel` component
+### 1. Create `SectionSkeleton` component
 
-**New file: `src/components/ui/SectionLabel.tsx`**
+**New file: `src/components/ui/SectionSkeleton.tsx`**
 
-Reusable uppercase label with `text-xs tracking-[0.15em] uppercase text-muted-foreground font-medium mb-3`. Uses `cn()` for className merging.
+Animated pulse skeleton with configurable row count — label placeholder, heading placeholder, and content rows with decreasing widths. Replace the current `SectionFallback` spinner in `SellResult.tsx` with this component.
 
-### 2. Add extended breakpoints to Tailwind
+### 2. Replace Suspense fallbacks in SellResult
 
-**Modified: `tailwind.config.ts`**
+**Modified: `src/pages/SellResult.tsx`**
 
-Add `xs: '400px'` and `tablet: '900px'` to `theme.extend.screens` (keeping default sm/md/lg/xl/2xl intact).
+Replace the inline `SectionFallback` spinner component with `<SectionSkeleton rows={4} />` for both lazy bundle Suspense boundaries.
 
-### 3. Replace inline section labels across result components
+### 3. Create Sticky "Find Agent" button
 
-**Modified: `src/components/ResultAnalysisGroup.tsx`**
-- Import `SectionLabel` from `@/components/ui/SectionLabel`
-- Replace all inline `<p className="text-[0.65rem] uppercase tracking-[0.15em]...">` patterns with `<SectionLabel>`
-- Sections: PropertyFeaturesSection, ComparablePropertiesSection, AreaComparisonSection, MarketTrendsSection
+**New file: `src/components/shared/StickyAgentButton.tsx`**
+
+Fixed bottom-right floating button with `Users` icon and "Find your agent" text (hidden on mobile, icon-only). Uses `animate-in fade-in slide-in-from-bottom-4`. On click, scrolls to the matched agents section (`[data-section="matched-agents"]` or similar ID).
+
+**Modified: `src/pages/SellResult.tsx`**
+- Import and render `StickyAgentButton` inside the result view (after CardRevealWrapper content).
 
 **Modified: `src/components/ResultAgentGroup.tsx`**
-- Same replacement for MatchedAgentsSection and ValuationPredictionGame labels
+- Add `id="matched-agents"` to the MatchedAgentsSection wrapper so the sticky button can scroll to it.
 
-### 4. Replace inline section label in Index.tsx
+### 4. Typewriter effect in hero
+
+**New file: `src/components/shared/TypewriterText.tsx`**
+
+Rotates through an array of phrases with a typing/deleting animation:
+- Types character by character (50ms interval)
+- Pauses 2s at full phrase
+- Deletes character by character (30ms interval)
+- Moves to next phrase
+
+Props: `phrases: string[]`, `className?: string`
 
 **Modified: `src/pages/Index.tsx`**
-- Replace the local `SectionLabel` component (lines 59-63) with import from `@/components/ui/SectionLabel`
-- Add italic serif subtitle under the hero heading: `<p className="font-serif italic text-muted-foreground text-base sm:text-lg mt-2">`
-- Use new breakpoints for hero heading: `text-2xl xs:text-3xl sm:text-4xl tablet:text-5xl lg:text-6xl`
-
-### 5. Add section visual hierarchy on result pages
-
-**Modified: `src/components/ResultAnalysisGroup.tsx`** and **`src/components/ResultAgentGroup.tsx`**
-- Each section gets `border-b border-border/50` bottom border
-- Add serif `<h2>` headings under the SectionLabel where appropriate (e.g. "Estimated Value", "Comparable Properties", "Area Comparison", "Market Trends")
+- Import `TypewriterText`
+- In the SELL hero, replace the static `h1` text with the typewriter cycling through:
+  - "What is your apartment worth?"
+  - "What can your villa sell for?"
+  - "Find the value of your property"
+  - "Free valuation in 2 minutes"
+- Keep the BUY hero text static (it's already distinct)
 
 ### Files
 
 | Action | File |
 |--------|------|
-| New | `src/components/ui/SectionLabel.tsx` |
-| Modified | `tailwind.config.ts` |
-| Modified | `src/components/ResultAnalysisGroup.tsx` |
-| Modified | `src/components/ResultAgentGroup.tsx` |
-| Modified | `src/pages/Index.tsx` |
+| New | `src/components/ui/SectionSkeleton.tsx` |
+| New | `src/components/shared/StickyAgentButton.tsx` |
+| New | `src/components/shared/TypewriterText.tsx` |
+| Modified | `src/pages/SellResult.tsx` — use SectionSkeleton, add StickyAgentButton |
+| Modified | `src/components/ResultAgentGroup.tsx` — add scroll target ID |
+| Modified | `src/pages/Index.tsx` — add TypewriterText to sell hero |
 
