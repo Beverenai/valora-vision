@@ -285,7 +285,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* ═══════════ HOW IT WORKS — 4 Steps Grid ═══════════ */}
+        {/* ═══════════ HOW IT WORKS — Vertical Timeline ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
           <div className="max-w-5xl mx-auto">
             <motion.div
@@ -293,13 +293,13 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-12 md:mb-16"
+              className="mb-12 md:mb-16"
             >
-              <SectionLabel className="flex flex-col items-center">How It Works</SectionLabel>
+              <SectionLabel>How It Works</SectionLabel>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-                Four Simple Steps
+                {isRent ? "Three Steps to Your Rental Estimate" : isSell ? "Three Steps to Your Valuation" : "Three Steps to Your Price Analysis"}
               </h2>
-              <p className="text-lg text-muted-foreground mt-4">
+              <p className="text-lg text-muted-foreground mt-4 max-w-xl">
                 {isRent
                   ? "From address to rental estimate in under two minutes"
                   : isSell
@@ -308,49 +308,122 @@ const Index = () => {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {[
-                {
-                  num: "01",
-                  icon: isBuy ? Link2 : MapPin,
-                  title: isBuy ? "Paste a listing link" : "Enter your address",
-                  desc: isBuy ? "Copy any property URL from Idealista, Fotocasa or similar." : "Start typing and select your property from the suggestions.",
-                },
-                {
-                  num: "02",
-                  icon: isBuy ? Search : SlidersHorizontal,
-                  title: isBuy ? "We analyze the market" : "Tell us about your property",
-                  desc: isBuy ? "We compare against similar listings in the area." : "Add bedrooms, bathrooms, size and key features.",
-                },
-                {
-                  num: "03",
-                  icon: isBuy ? ShieldCheck : Sparkles,
-                  title: isRent ? "Get your rental estimate" : isSell ? "Get your valuation" : "Get your price score",
-                  desc: isRent ? "A detailed rental estimate with seasonal breakdown." : isSell ? "A detailed valuation card with all the data." : "See if the asking price is fair or overpriced.",
-                },
-                {
-                  num: "04",
-                  icon: Users,
-                  title: "Connect with top agents",
-                  desc: "Get matched with verified local agents ready to help.",
-                },
-              ].map((step, i) => (
-                <motion.div
-                  key={step.num}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="text-center"
-                >
-                  <span className="text-[3rem] font-bold text-primary/30 leading-none block mb-3">{step.num}</span>
-                  <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
-                    <step.icon className="h-5 w-5 text-muted-foreground" />
+            {/* Timeline */}
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-[39px] md:left-[47px] top-0 bottom-0 w-px bg-border hidden md:block" />
+
+              {/* Step 1 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="flex gap-6 md:gap-10 mb-12 md:mb-16"
+              >
+                <div className="flex flex-col items-center shrink-0">
+                  <span className="text-[3rem] md:text-[4rem] font-bold text-primary/20 leading-none">01</span>
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center mt-2">
+                    {isBuy ? <Link2 className="h-5 w-5 text-primary" /> : <MapPin className="h-5 w-5 text-primary" />}
                   </div>
-                  <h3 className="text-base font-bold text-foreground mb-1">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.desc}</p>
-                </motion.div>
-              ))}
+                </div>
+                <div className="flex-1 pt-2">
+                  <h3 className="text-sm uppercase tracking-[0.1em] font-bold text-foreground mb-2">
+                    {isBuy ? "Paste a listing link" : "Enter your address"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4 max-w-md">
+                    {isBuy
+                      ? "Copy any property URL from Idealista, Fotocasa or similar portals."
+                      : "Start typing your address and select from suggestions. We'll pinpoint your property on the map."}
+                  </p>
+                  {/* Visual: Address input mock */}
+                  <div className="border border-[rgba(0,0,0,0.06)] rounded-2xl p-4 bg-card max-w-sm">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <MapPin className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex-1 h-3 bg-muted rounded-full" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <div className="h-2.5 bg-muted rounded-full w-2/3" />
+                        <div className="h-2.5 bg-muted rounded-full w-1/3" />
+                      </div>
+                      <div className="h-2.5 bg-primary/20 rounded-full w-1/2" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Step 2 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="flex gap-6 md:gap-10 mb-12 md:mb-16"
+              >
+                <div className="flex flex-col items-center shrink-0">
+                  <span className="text-[3rem] md:text-[4rem] font-bold text-primary/20 leading-none">02</span>
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center mt-2">
+                    {isBuy ? <Search className="h-5 w-5 text-primary" /> : <SlidersHorizontal className="h-5 w-5 text-primary" />}
+                  </div>
+                </div>
+                <div className="flex-1 pt-2">
+                  <h3 className="text-sm uppercase tracking-[0.1em] font-bold text-foreground mb-2">
+                    {isBuy ? "We analyze the market" : "Tell us about your property"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4 max-w-md">
+                    {isBuy
+                      ? "We compare against similar listings in the area to determine fair value."
+                      : "Add bedrooms, bathrooms, size and key features. It takes less than a minute."}
+                  </p>
+                  {/* Visual: Property pills */}
+                  <div className="flex flex-wrap gap-2 max-w-sm">
+                    {[
+                      { icon: BedDouble, label: "4 Beds" },
+                      { icon: Bath, label: "3 Baths" },
+                      { icon: Maximize, label: "350 m²" },
+                    ].map((pill) => (
+                      <div
+                        key={pill.label}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-[rgba(0,0,0,0.06)] text-sm text-foreground"
+                      >
+                        <pill.icon className="h-3.5 w-3.5 text-primary" />
+                        {pill.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Step 3 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex gap-6 md:gap-10"
+              >
+                <div className="flex flex-col items-center shrink-0">
+                  <span className="text-[3rem] md:text-[4rem] font-bold text-primary/20 leading-none">03</span>
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center mt-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="flex-1 pt-2">
+                  <h3 className="text-sm uppercase tracking-[0.1em] font-bold text-foreground mb-2">
+                    {isRent ? "Get your rental estimate" : isSell ? "See what you'll receive" : "Get your price score"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-md">
+                    {isRent
+                      ? "A detailed rental estimate with seasonal breakdown and comparable data."
+                      : isSell
+                      ? "A full valuation card with price range, comparable properties, and AI analysis."
+                      : "See if the asking price is fair or overpriced with our detailed price score."}
+                  </p>
+                </div>
+              </motion.div>
             </div>
 
             {/* Flippable showcase card */}
@@ -392,7 +465,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* ═══════════ SERVICE GRID ═══════════ */}
+        {/* ═══════════ EVERYTHING IN YOUR REPORT — Bento Grid ═══════════ */}
         <section className="w-full py-8 md:py-20 bg-background-alt">
           <div className="max-w-5xl mx-auto px-5 md:px-8">
             <motion.div
@@ -400,34 +473,157 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-12"
+              className="mb-12 md:mb-16"
             >
-              <SectionLabel className="flex flex-col items-center">What You Get</SectionLabel>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 max-w-2xl mx-auto">
+              <SectionLabel>Included Free</SectionLabel>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
                 Everything In Your Report
               </h2>
-              <p className="text-lg text-muted-foreground mt-4">
-                All the data you need to make informed decisions
-              </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {SERVICES.map((svc, i) => (
-                <motion.div
-                  key={svc.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.08 }}
-                  className="bg-card rounded-xl border border-[rgba(0,0,0,0.06)] p-6 transition-all hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
-                    <svc.icon className="h-5 w-5 text-primary" />
+            {/* Bento grid */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+              {/* Card 1 - Price Estimate (wide) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="md:col-span-7 border border-[rgba(0,0,0,0.06)] rounded-2xl p-6 bg-card hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all"
+              >
+                <h3 className="text-xs uppercase tracking-[0.15em] font-bold text-foreground mb-2">Price Estimate</h3>
+                <p className="text-sm text-muted-foreground mb-4">A data-driven price range based on comparable properties in your area.</p>
+                {/* Visual: price bar */}
+                <div className="flex items-end gap-1 h-12">
+                  {[40, 55, 70, 85, 100, 90, 75, 60, 45].map((h, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "w-full rounded-t-sm transition-all",
+                        i === 4 ? "bg-primary" : "bg-primary/20"
+                      )}
+                      style={{ height: `${h}%` }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Card 2 - Price per m² (narrow) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.08 }}
+                className="md:col-span-5 border border-[rgba(0,0,0,0.06)] rounded-2xl p-6 bg-card hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all"
+              >
+                <h3 className="text-xs uppercase tracking-[0.15em] font-bold text-foreground mb-2">Price Per M²</h3>
+                <p className="text-sm text-muted-foreground mb-4">Compare your property's €/m² against the local average.</p>
+                {/* Visual: sqm color blocks */}
+                <div className="grid grid-cols-4 gap-1.5">
+                  {["bg-primary/10", "bg-primary/20", "bg-primary/40", "bg-primary", "bg-primary/30", "bg-primary/15", "bg-primary/50", "bg-primary/25"].map((c, i) => (
+                    <div key={i} className={cn("h-6 rounded-md", c)} />
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Card 3 - Comparable Properties (full width) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.16 }}
+                className="md:col-span-12 border border-[rgba(0,0,0,0.06)] rounded-2xl p-6 bg-card hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all"
+              >
+                <h3 className="text-xs uppercase tracking-[0.15em] font-bold text-foreground mb-2">Comparable Properties</h3>
+                <p className="text-sm text-muted-foreground mb-4">See recently listed and sold properties similar to yours, with distance and price data.</p>
+                {/* Visual: mini property thumbnails */}
+                <div className="flex gap-3 overflow-hidden">
+                  {[1, 2, 3, 4].map((n) => (
+                    <div key={n} className="w-20 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center">
+                      <Home className="h-5 w-5 text-muted-foreground/30" />
+                    </div>
+                  ))}
+                  <div className="w-20 h-14 rounded-lg bg-primary/10 shrink-0 flex items-center justify-center text-xs font-medium text-primary">
+                    +12
                   </div>
-                  <h3 className="font-bold text-foreground text-sm mb-1">{svc.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{svc.desc}</p>
-                </motion.div>
-              ))}
+                </div>
+              </motion.div>
+
+              {/* Card 4 - Confidence Score */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.24 }}
+                className="md:col-span-4 border border-[rgba(0,0,0,0.06)] rounded-2xl p-6 bg-card hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all"
+              >
+                <h3 className="text-xs uppercase tracking-[0.15em] font-bold text-foreground mb-2">Confidence Score</h3>
+                <p className="text-sm text-muted-foreground mb-4">How reliable is the estimate.</p>
+                {/* Visual: dot rating */}
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map((d) => (
+                    <div key={d} className={cn("w-4 h-4 rounded-full", d <= 4 ? "bg-primary" : "bg-primary/20")} />
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Card 5 - Market Trends */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.32 }}
+                className="md:col-span-4 border border-[rgba(0,0,0,0.06)] rounded-2xl p-6 bg-card hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all"
+              >
+                <h3 className="text-xs uppercase tracking-[0.15em] font-bold text-foreground mb-2">Market Trends</h3>
+                <p className="text-sm text-muted-foreground mb-4">Price direction in your zone.</p>
+                {/* Visual: trend line */}
+                <svg viewBox="0 0 120 40" className="w-full h-10">
+                  <polyline
+                    points="0,35 20,30 40,28 60,22 80,18 100,12 120,8"
+                    fill="none"
+                    stroke="hsl(328 100% 39%)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <polyline
+                    points="0,35 20,30 40,28 60,22 80,18 100,12 120,8"
+                    fill="url(#trendGrad)"
+                    stroke="none"
+                    opacity="0.15"
+                  />
+                  <defs>
+                    <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(328 100% 39%)" />
+                      <stop offset="100%" stopColor="hsl(328 100% 39%)" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </motion.div>
+
+              {/* Card 6 - Agent Matching */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="md:col-span-4 border border-[rgba(0,0,0,0.06)] rounded-2xl p-6 bg-card hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all"
+              >
+                <h3 className="text-xs uppercase tracking-[0.15em] font-bold text-foreground mb-2">Agent Matching</h3>
+                <p className="text-sm text-muted-foreground mb-4">Local experts matched to your area.</p>
+                {/* Visual: agent avatars */}
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((a) => (
+                    <div key={a} className="w-9 h-9 rounded-full bg-primary/15 border-2 border-card flex items-center justify-center">
+                      <Users className="h-3.5 w-3.5 text-primary/60" />
+                    </div>
+                  ))}
+                  <div className="w-9 h-9 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[10px] font-bold text-white">
+                    +8
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
         </section>
