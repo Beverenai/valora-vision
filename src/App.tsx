@@ -28,6 +28,7 @@ const ProOnboardSuccess = lazy(() => lazyRetry(() => import("./pages/ProOnboardS
 const ProLogin = lazy(() => lazyRetry(() => import("./pages/ProLogin.tsx")));
 const ProDashboard = lazy(() => lazyRetry(() => import("./pages/ProDashboard.tsx")));
 const ResetPassword = lazy(() => lazyRetry(() => import("./pages/ResetPassword.tsx")));
+const ComingSoon = lazy(() => lazyRetry(() => import("./pages/ComingSoon.tsx")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
