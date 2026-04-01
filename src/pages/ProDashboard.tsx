@@ -1204,7 +1204,7 @@ const ProDashboard = () => {
       </div>
 
       {section === "overview" && (
-        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} />
+        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} />
       )}
       {section === "profile" && (
         <ProfileSection agent={agent} onSave={handleSaveProfile} saving={saving} />
