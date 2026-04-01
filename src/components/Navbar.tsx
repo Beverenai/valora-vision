@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const serviceLinks = [
@@ -27,10 +27,16 @@ function detectContext(pathname: string): string | null {
   return null;
 }
 
+function isProRoute(pathname: string): boolean {
+  return pathname.startsWith("/pro");
+}
+
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const context = detectContext(location.pathname);
+
+  const onPro = isProRoute(location.pathname);
 
   const visibleServiceLinks = context
     ? serviceLinks.filter((l) => l.id !== context)
@@ -64,12 +70,23 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <Link
-            to={cta.href}
-            className="bg-primary text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
-          >
-            {cta.label}
-          </Link>
+          {onPro && (
+            <Link
+              to="/pro/login"
+              className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
+          )}
+          {!onPro && (
+            <Link
+              to={cta.href}
+              className="bg-primary text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+            >
+              {cta.label}
+            </Link>
+          )}
         </nav>
 
         {/* Mobile toggle */}
@@ -94,13 +111,24 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to={cta.href}
-              onClick={() => setMobileOpen(false)}
-              className="block mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
-            >
-              {cta.label}
-            </Link>
+            {onPro ? (
+              <Link
+                to="/pro/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-1.5 mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
+              >
+                <LogIn className="h-4 w-4" />
+                Login
+              </Link>
+            ) : (
+              <Link
+                to={cta.href}
+                onClick={() => setMobileOpen(false)}
+                className="block mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
+              >
+                {cta.label}
+              </Link>
+            )}
           </div>
         )}
       </div>
