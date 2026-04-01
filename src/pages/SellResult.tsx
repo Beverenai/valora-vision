@@ -343,19 +343,18 @@ const SellResult: React.FC = () => {
       referenceCode={formatRefCode(id!)}
       onShare={handleShare}
       onDownload={async () => {
-        toast({ title: "Generating PDF…", description: "Your report is being prepared." });
+        toast({ title: "Generating report…", description: "Your valuation report is being prepared." });
         try {
           const res = await supabase.functions.invoke("generate-valuation-pdf", {
             body: { lead_id: id, lead_type: "sell" },
           });
           if (res.error) throw res.error;
-          const blob = new Blob([res.data], { type: "application/pdf" });
+          // Response is HTML — open in new tab for print-to-PDF
+          const html = typeof res.data === "string" ? res.data : await new Response(res.data).text();
+          const blob = new Blob([html], { type: "text/html" });
           const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `ValoraCasa-Valuation-${refCode}.pdf`;
-          a.click();
-          URL.revokeObjectURL(url);
+          window.open(url, "_blank");
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
         } catch {
           toast({ title: "Coming Soon", description: "PDF download will be available shortly." });
         }
