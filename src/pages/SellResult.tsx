@@ -188,12 +188,12 @@ const ValuationResultCard: React.FC<{
             <span className="text-xs text-muted-foreground">{fmt(estimatedHigh)}</span>
           </div>
           <div className="relative h-3 bg-muted rounded-full">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gold/20 via-gold/40 to-gold/20" />
-            <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gold border-2 border-background shadow-md" style={{ left: `calc(${estimatePosition}% - 8px)` }} />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent/20 via-accent/40 to-accent/20" />
+            <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-accent border-2 border-background shadow-md" style={{ left: `calc(${estimatePosition}% - 8px)` }} />
           </div>
           <div className="flex justify-between mt-1">
             <span className="text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground/60">Low</span>
-            <span className="text-[0.55rem] uppercase tracking-[0.1em] text-gold font-semibold">Est.</span>
+            <span className="text-[0.55rem] uppercase tracking-[0.1em] text-accent font-semibold">Est.</span>
             <span className="text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground/60">High</span>
           </div>
         </div>
