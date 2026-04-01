@@ -459,11 +459,11 @@ const ProOnboard = () => {
                 </Button>
                 <Button
                   onClick={async () => {
-                    const hasRequiredFields = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim();
-                    if (!hasRequiredFields) {
-                      toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
-                      return;
-                    }
+                    if (!companyName.trim()) { toast({ title: "Missing field", description: "Please enter your agency name.", variant: "destructive" }); return; }
+                    if (!contactName.trim()) { toast({ title: "Missing field", description: "Please enter your name.", variant: "destructive" }); return; }
+                    if (!email.trim()) { toast({ title: "Missing field", description: "Please enter your email.", variant: "destructive" }); return; }
+                    if (!phone.trim()) { toast({ title: "Missing field", description: "Please enter your phone number.", variant: "destructive" }); return; }
+                    if (!hasConfirmedAddress) { toast({ title: "Address required", description: "Please search and confirm your office address on the map.", variant: "destructive" }); return; }
                     // Run email uniqueness check if not yet validated
                     if (!emailValid && !emailError) {
                       const isUnique = await checkEmailUniqueness(email);
