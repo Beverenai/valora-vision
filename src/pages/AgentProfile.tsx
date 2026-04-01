@@ -596,6 +596,14 @@ export default function AgentProfile() {
                     </Button>
                   )}
                 </>
+              ) : professional.total_reviews > 0 ? (
+                <Card className="border-border/40">
+                  <CardContent className="p-8 text-center">
+                    <Star size={32} fill="hsl(var(--primary))" className="mx-auto text-primary mb-3 opacity-30" strokeWidth={0} />
+                    <p className="text-sm text-foreground/70">Reviews coming soon</p>
+                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews imported — display coming shortly.</p>
+                  </CardContent>
+                </Card>
               ) : (
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
