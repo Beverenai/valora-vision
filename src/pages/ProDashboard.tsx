@@ -28,6 +28,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -534,6 +535,9 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
   const [showInvite, setShowInvite] = useState(false);
   const [inviteForm, setInviteForm] = useState({ name: "", email: "", phone: "", role: "" });
   const [inviting, setInviting] = useState(false);
+  const [editingMember, setEditingMember] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", role: "", email: "", phone: "", whatsapp: "", photo_url: "", languages: "" });
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -609,6 +613,38 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
     const { error } = await supabase.from("agent_team_members").delete().eq("id", memberId);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Team member removed" });
+    loadTeam();
+  };
+
+  const openEditDialog = (member: any) => {
+    setEditingMember(member);
+    setEditForm({
+      name: member.name || "",
+      role: member.role || "",
+      email: member.email || "",
+      phone: member.phone || "",
+      whatsapp: member.whatsapp || "",
+      photo_url: member.photo_url || "",
+      languages: (member.languages || []).join(", "),
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMember) return;
+    setSaving(true);
+    const { error } = await supabase.from("agent_team_members").update({
+      name: editForm.name.trim(),
+      role: editForm.role.trim() || null,
+      email: editForm.email.trim() || null,
+      phone: editForm.phone.trim() || null,
+      whatsapp: editForm.whatsapp.trim() || null,
+      photo_url: editForm.photo_url.trim() || null,
+      languages: editForm.languages ? editForm.languages.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
+    }).eq("id", editingMember.id);
+    setSaving(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Team member updated" });
+    setEditingMember(null);
     loadTeam();
   };
 
@@ -717,15 +753,22 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
                       {m.phone && ` · ${m.phone}`}
                     </p>
                   </div>
-                  {isAdmin && !isOwner && (
+                  {isAdmin && (
                     <div className="flex items-center gap-2 shrink-0">
-                      <Switch
-                        checked={isActive}
-                        onCheckedChange={() => handleToggleActive(m.id, isActive, m.role)}
-                      />
-                      <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(m.id, m.role)} className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(m)}>
+                        <Edit2 className="h-3.5 w-3.5" />
                       </Button>
+                      {!isOwner && (
+                        <>
+                          <Switch
+                            checked={isActive}
+                            onCheckedChange={() => handleToggleActive(m.id, isActive, m.role)}
+                          />
+                          <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(m.id, m.role)} className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -734,6 +777,51 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
           })}
         </div>
       )}
+
+      {/* Edit Member Dialog */}
+      <Dialog open={!!editingMember} onOpenChange={(open) => !open && setEditingMember(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Team Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Name</Label>
+              <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+            </div>
+            <div>
+              <Label className="text-xs">Role</Label>
+              <Input value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} placeholder="e.g. Agent, Manager" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Email</Label>
+                <Input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Phone</Label>
+                <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">WhatsApp</Label>
+              <Input value={editForm.whatsapp} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} placeholder="+34 600 000 000" />
+            </div>
+            <div>
+              <Label className="text-xs">Photo URL</Label>
+              <Input value={editForm.photo_url} onChange={(e) => setEditForm({ ...editForm, photo_url: e.target.value })} placeholder="https://..." />
+            </div>
+            <div>
+              <Label className="text-xs">Languages (comma-separated)</Label>
+              <Input value={editForm.languages} onChange={(e) => setEditForm({ ...editForm, languages: e.target.value })} placeholder="English, Spanish" />
+            </div>
+            <Button onClick={handleSaveEdit} disabled={saving} className="w-full rounded-full">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
