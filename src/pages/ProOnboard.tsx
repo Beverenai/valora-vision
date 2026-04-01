@@ -459,7 +459,13 @@ const ProOnboard = () => {
                   <a href="/pro/login">Already have an account? Sign in</a>
                 </Button>
                 <Button
-                  onClick={() => { if (canProceedStep1) setStep(1); else toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" }); }}
+                  onClick={async () => {
+                    if (!emailValid && email.trim() && !emailError) {
+                      await checkEmailUniqueness(email);
+                    }
+                    if (canProceedStep1) setStep(1);
+                    else toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
+                  }}
                   className="rounded-full px-8"
                 >
                   Continue
