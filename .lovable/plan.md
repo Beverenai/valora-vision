@@ -1,78 +1,32 @@
 
 
-# BUY: Link vs Link — Property Comparison Feature
+# Fix Agent Onboarding & Profile Issues
 
 ## Overview
-
-Add the ability for users to paste two listing URLs and get a side-by-side comparison with AI-generated insights on which property offers better value.
+Three fixes for the agent onboarding flow: improve profile lookup resilience, fix logo display, and ensure the Step 2 AI animation plays fully. Also remove the skip button from Step 2.
 
 ## Changes
 
-### 1. Database: New `buy_comparisons` table
+### Fix 1: AgentProfile.tsx — Better "not found" handling
+The code already uses `.ilike('slug', slug)` and has a decent fallback UI (lines 271-293). The existing implementation looks correct. Minor improvements:
+- Add a "Search the directory" CTA linking to `/agentes`
+- Add a hint about checking the URL
 
-```sql
-CREATE TABLE buy_comparisons (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  analysis_a_id UUID REFERENCES buy_analyses(id),
-  analysis_b_id UUID REFERENCES buy_analyses(id),
-  ai_comparison TEXT,           -- AI narrative comparing both
-  ai_winner TEXT,               -- "a", "b", or "tie"
-  ai_comparison_points JSONB,   -- structured comparison bullets
-  status TEXT DEFAULT 'processing',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+No slug generation changes needed — the `handlePublish` function (line 353-361) already normalizes correctly with diacritic stripping, lowercase, and hyphenation.
 
-RLS: public read (no auth required, matches existing buy_analyses pattern).
+### Fix 2: ProOnboard.tsx — Logo display in Step 3
+The logo handling (lines 618-643) already has `logoFailed` state and initials fallback. Issues to fix:
+- Ensure the initials fallback circle uses terracotta color (`bg-[#D4713B]`) instead of `bg-primary` for consistency with the brand
+- The code already handles `onError` and file upload correctly
+- No changes needed for logo_url passing — it's set at line 196
 
-### 2. New edge function: `compare-listings/index.ts`
+### Fix 3: ProOnboard.tsx — Step 2 animation must play fully
+The animation code (lines 158-287) has a 4-second minimum timer and sequential 800ms delays. Issues:
+1. **Remove the skip button** (line 597-599) — user explicitly says no skip button
+2. **Remove auto-advance** (lines 296-301) — the `useEffect` that auto-advances when `aiDone` fires after only 500ms. Instead, show a "Continue" button after animation completes so the agent feels in control
+3. **Fix useEffect deps** — `runAiOnboarding` is missing from the dependency array of the step-trigger effect (line 290-294), which could cause stale closures
 
-Accepts `{ url_a, url_b }`. Flow:
-1. Call `analyze-listing` internally for both URLs in parallel (reuses all existing logic — scrape/cache, comparables, valuation, AI)
-2. Wait for both to reach `ready` status (poll if needed)
-3. Build a comparison data package with both properties' results
-4. Call AI with a `generate_comparison_analysis` tool:
-   - `winner`: which property is better value ("a", "b", or "tie")
-   - `summary`: 2-3 sentence comparison overview
-   - `comparison_points[]`: 4-6 structured bullet comparisons (price, value/m², features, location)
-   - `recommendation`: neutral recommendation text
-5. Store in `buy_comparisons`, return `comparison_id`
-
-### 3. Update `BuyAnalysis.tsx` — Add compare mode
-
-Add a toggle or tab: "Analyze One" vs "Compare Two". In compare mode:
-- Show two URL input fields side by side (Property A / Property B)
-- Both get platform detection badges
-- Single "Compare Properties" button
-- Loading overlay with comparison-specific messages
-- On success, navigate to `/buy/compare/:id`
-
-### 4. New page: `BuyCompare.tsx` (`/buy/compare/:id`)
-
-Side-by-side comparison result page:
-- **Header**: "Property A vs Property B" with winner badge
-- **Split view**: Two property cards with thumbnail, address, asking price, estimated value, price score
-- **Comparison table**: Size, rooms, price/m², deviation %, features — with visual indicators showing which is better per metric
-- **AI comparison section**: Structured comparison points + recommendation
-- **Individual reports**: Link to each property's full `/buy/result/:id` page
-- Share button for the comparison
-
-### 5. Route registration in `App.tsx`
-
-Add `/buy/compare/:id` route with lazy-loaded `BuyCompare` page.
-
-## Files Modified/Created
-
-- New migration SQL (`buy_comparisons` table + RLS)
-- `supabase/functions/compare-listings/index.ts` (new edge function)
-- `src/pages/BuyAnalysis.tsx` — add compare mode toggle + dual URL inputs
-- `src/pages/BuyCompare.tsx` (new page)
-- `src/App.tsx` — add route
-
-## Technical Notes
-
-- The compare function reuses `analyze-listing` for each URL, so all existing scraping, valuation, and AI logic is inherited
-- Both analyses run in parallel for speed
-- The AI comparison call only fires after both individual analyses are complete
-- Comparables may overlap if properties are in the same zone — this is expected and useful context for the AI
+### Files Modified
+- `src/pages/AgentProfile.tsx` — minor fallback UI improvement
+- `src/pages/ProOnboard.tsx` — remove skip button, remove auto-advance, add manual continue after animation, fix terracotta color on logo fallback
 
