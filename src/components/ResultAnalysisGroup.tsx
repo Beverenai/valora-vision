@@ -142,7 +142,7 @@ const ComparableCard: React.FC<{
             <span className="text-[0.6rem] uppercase tracking-[0.15em] text-muted-foreground">Similarity</span>
             <span className="text-xs font-semibold text-foreground">{similarity}%</span>
           </div>
-          <Progress value={similarity} className="h-1.5" />
+          <Progress value={similarity} className="h-1.5 [&>div]:bg-accent" />
         </div>
       </div>
     </div>

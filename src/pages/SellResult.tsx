@@ -167,7 +167,7 @@ const ValuationResultCard: React.FC<{
   monthlyRental: number; comparableCount: number; city?: string;
 }> = ({ estimatedValue, estimatedLow, estimatedHigh, monthlyRental, comparableCount, city }) => {
   const confidenceLevel = comparableCount >= 15 ? "HIGH" : comparableCount >= 8 ? "MEDIUM" : "LOW";
-  const confidenceColor = confidenceLevel === "HIGH" ? "text-emerald-600 bg-emerald-50" : confidenceLevel === "MEDIUM" ? "text-amber-600 bg-amber-50" : "text-red-500 bg-red-50";
+  const confidenceColor = confidenceLevel === "HIGH" ? "text-green-700 bg-green-100 border border-green-200" : confidenceLevel === "MEDIUM" ? "text-amber-700 bg-amber-100 border border-amber-200" : "text-red-700 bg-red-100 border border-red-200";
   const confidenceText = confidenceLevel === "HIGH"
     ? `Based on ${comparableCount} comparable properties within 5km`
     : confidenceLevel === "MEDIUM"

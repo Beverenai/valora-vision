@@ -71,6 +71,7 @@ const AgentCard: React.FC<{ agent: MatchedAgent; onContact: (agent: MatchedAgent
         </Link>
       </div>
     </div>
+    </div>
   );
 };
 
