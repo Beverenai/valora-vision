@@ -70,7 +70,16 @@ function transformResalesProperty(property: any, operation: string) {
   };
 }
 
-async function fetchResalesOnDemand(supabase: any, operation: string) {
+function mapPropertyTypeToResales(internalType: string): string {
+  const map: Record<string, string> = {
+    apartment: "Apartments", penthouse: "Apartments", duplex: "Apartments",
+    studio: "Apartments", villa: "Villas", townhouse: "Town Houses",
+    finca: "Country Houses", plot: "Plots", commercial: "Commercial",
+  };
+  return map[internalType?.toLowerCase()] || "";
+}
+
+async function fetchResalesOnDemand(supabase: any, operation: string, city?: string, propertyType?: string) {
   const contactId = Deno.env.get("RESALES_CONTACT_ID");
   const apiKey = Deno.env.get("RESALES_API_KEY");
   if (!contactId || !apiKey) {
@@ -92,23 +101,54 @@ async function fetchResalesOnDemand(supabase: any, operation: string) {
     P_Currency: "EUR",
   });
 
-  try {
-    const res = await fetch(`${RESALES_BASE_URL}/SearchProperties?${params}`);
+  // Add location filter
+  if (city) {
+    params.set("P_Area", city);
+  }
+  // Add property type filter
+  const resalesType = propertyType ? mapPropertyTypeToResales(propertyType) : "";
+  if (resalesType) {
+    params.set("P_PropertyType", resalesType);
+  }
+
+  const doFetch = async (searchParams: URLSearchParams): Promise<any[]> => {
+    const res = await fetch(`${RESALES_BASE_URL}/SearchProperties?${searchParams}`);
     if (!res.ok) {
       console.error("Resales API error:", res.status);
-      return 0;
+      return [];
     }
     const result = await res.json();
     if (result.transaction?.status === "error") {
       console.error("Resales API error:", result.transaction.errordescription);
-      return 0;
+      return [];
+    }
+    const properties = result.Property || result.Properties?.Property || [];
+    return Array.isArray(properties) ? properties : [properties];
+  };
+
+  try {
+    let list = await doFetch(params);
+    console.log(`Resales on-demand: ${list.length} results for area="${city}", type="${resalesType}"`);
+
+    // Fallback: if city filter returned 0, retry without area
+    if (list.length === 0 && city) {
+      console.log("No results with area filter, retrying without P_Area...");
+      const fallbackParams = new URLSearchParams(params);
+      fallbackParams.delete("P_Area");
+      list = await doFetch(fallbackParams);
+      console.log(`Resales fallback: ${list.length} results without area filter`);
     }
 
-    const properties = result.Property || result.Properties?.Property || [];
-    const list = Array.isArray(properties) ? properties : [properties];
     const batch = list
       .filter((p: any) => p.Reference)
-      .map((p: any) => transformResalesProperty(p, operation));
+      .map((p: any) => {
+        const transformed = transformResalesProperty(p, operation);
+        // Set location_point from GPS coordinates for PostGIS queries
+        if (transformed.latitude && transformed.longitude) {
+          (transformed as any).location_point = `SRID=4326;POINT(${transformed.longitude} ${transformed.latitude})`;
+        }
+        return transformed;
+      });
 
     if (batch.length > 0) {
       const { error } = await supabase
@@ -122,7 +162,7 @@ async function fetchResalesOnDemand(supabase: any, operation: string) {
       try { await supabase.rpc("refresh_materialized_views"); } catch { /* ok */ }
     }
 
-    console.log(`Resales on-demand: fetched ${batch.length} properties for ${operation}`);
+    console.log(`Resales on-demand: upserted ${batch.length} properties for ${operation}`);
     return batch.length;
   } catch (e) {
     console.error("Resales on-demand fetch error:", e);
