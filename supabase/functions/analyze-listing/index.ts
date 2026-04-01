@@ -141,17 +141,17 @@ serve(async (req) => {
       if (existing) {
         propertyData = {
           address: existing.address,
-          city: existing.city,
+          city: existing.municipality,
           latitude: existing.latitude ? Number(existing.latitude) : null,
           longitude: existing.longitude ? Number(existing.longitude) : null,
           property_type: existing.property_type,
-          size_m2: existing.built_size_sqm ? Number(existing.built_size_sqm) : null,
-          rooms: existing.bedrooms,
+          size_m2: existing.size_m2 ? Number(existing.size_m2) : null,
+          rooms: existing.rooms,
           bathrooms: existing.bathrooms,
           asking_price: Number(existing.price),
-          features: existing.features,
-          image_urls: existing.image_urls,
-          thumbnail_url: existing.image_urls?.[0] || null,
+          features: existing.images || [],
+          image_urls: existing.images ? (Array.isArray(existing.images) ? existing.images : []) : [],
+          thumbnail_url: existing.thumbnail_url || null,
         };
       }
     }
