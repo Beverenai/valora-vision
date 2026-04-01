@@ -187,13 +187,58 @@ async function fetchAirbnbListings(
   return allListings;
 }
 
+// ─── Deactivate stale properties ─────────────────────────
+async function deactivateStaleProperties(
+  supabase: any,
+  freshCodes: string[],
+  zoneId: string,
+  operation: string
+): Promise<number> {
+  if (freshCodes.length === 0 || !zoneId) return 0;
+
+  const { data: existing, error: fetchErr } = await supabase
+    .from("properties")
+    .select("id, property_code")
+    .eq("zone_id", zoneId)
+    .eq("operation", operation)
+    .eq("is_active", true);
+
+  if (fetchErr || !existing) {
+    console.error("Deactivation fetch error:", fetchErr?.message);
+    return 0;
+  }
+
+  const freshSet = new Set(freshCodes);
+  const staleIds = existing
+    .filter((p: any) => !freshSet.has(p.property_code))
+    .map((p: any) => p.id);
+
+  if (staleIds.length === 0) return 0;
+
+  let deactivated = 0;
+  for (let i = 0; i < staleIds.length; i += 100) {
+    const chunk = staleIds.slice(i, i + 100);
+    const { error } = await supabase
+      .from("properties")
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .in("id", chunk);
+    if (!error) deactivated += chunk.length;
+    else console.error("Deactivation batch error:", error.message);
+  }
+
+  console.log(`Deactivated ${deactivated} stale ${operation} properties in zone ${zoneId}`);
+  return deactivated;
+}
+
 // ─── Upsert sale listings into unified properties ────────
 async function upsertSaleListings(supabase: any, listings: any[], city: string, zoneId: string | null) {
   let count = 0;
+  const freshCodes: string[] = [];
   for (const item of listings) {
     try {
       const externalId = String(item.propertyCode || item.adid || item.id || "");
       if (!externalId) continue;
+      freshCodes.push(externalId);
       const price = Number(item.price || 0);
       if (price <= 0) continue;
       const builtSize = Number(item.size || item.constructedArea || 0) || null;
@@ -202,6 +247,7 @@ async function upsertSaleListings(supabase: any, listings: any[], city: string, 
         property_code: externalId,
         operation: "sale",
         source: "idealista",
+        is_active: true,
         price,
         price_per_m2: builtSize && builtSize > 0 ? Math.round(price / builtSize) : null,
         property_type: mapPropertyType(item.typology || item.propertyType || ""),
@@ -233,7 +279,7 @@ async function upsertSaleListings(supabase: any, listings: any[], city: string, 
       console.error("Sale listing parse error:", e);
     }
   }
-  return count;
+  return { count, freshCodes };
 }
 
 // ─── Upsert rental listings into unified properties ──────
