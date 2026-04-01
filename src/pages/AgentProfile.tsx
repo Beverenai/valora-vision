@@ -22,6 +22,7 @@ import {
 interface Professional {
   id: string;
   company_name: string;
+  contact_name: string;
   slug: string;
   logo_url: string | null;
   cover_photo_url: string | null;
