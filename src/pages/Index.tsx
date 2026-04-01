@@ -285,9 +285,9 @@ const Index = () => {
           </div>
         </section>
 
-        {/* ═══════════ HOW IT WORKS — Centered 3-Column Grid ═══════════ */}
+        {/* ═══════════ HOW IT WORKS — Vertical Timeline ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -297,139 +297,221 @@ const Index = () => {
             >
               <SectionLabel>How It Works</SectionLabel>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-                {isRent ? "Three Steps to Your Rental Estimate" : isSell ? "Three Steps to Your Valuation" : "Three Steps to Your Price Analysis"}
+                {isRent ? "Four Steps to Your Rental Estimate" : isSell ? "Four Steps to Your Valuation" : "Four Steps to Your Price Analysis"}
               </h2>
               <p className="text-lg text-muted-foreground mt-4 max-w-xl mx-auto">
                 {isRent
-                  ? "From address to rental estimate in under two minutes"
+                  ? "From address to rental estimate — and the best agents in your area"
                   : isSell
-                  ? "From address to valuation in under two minutes"
-                  : "From listing link to price analysis in seconds"}
+                  ? "From address to valuation — and the best agents in your area"
+                  : "From listing link to price analysis — and the best agents nearby"}
               </p>
             </motion.div>
 
-            {/* 3-Column Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+            {/* Vertical Timeline */}
+            <div className="relative">
+              {/* Connecting line */}
+              <div className="absolute left-6 md:left-8 top-0 bottom-0 w-px bg-primary/15" />
+
               {/* Step 1 */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
-                className="flex flex-col items-center text-center"
+                className="relative flex gap-5 md:gap-8 mb-10 md:mb-14"
               >
-                <span className="text-[3.5rem] md:text-[4.5rem] font-bold text-primary/15 leading-none">01</span>
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center mt-1 mb-4">
-                  {isBuy ? <Link2 className="h-5 w-5 text-primary" /> : <MapPin className="h-5 w-5 text-primary" />}
+                <div className="relative z-10 flex flex-col items-center shrink-0">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                    <span className="text-lg md:text-xl font-bold text-primary">01</span>
+                  </div>
                 </div>
-                <h3 className="text-base uppercase tracking-[0.1em] font-bold text-foreground mb-2">
-                  {isBuy ? "Paste a listing link" : "Enter your address"}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-xs mx-auto">
-                  {isBuy
-                    ? "Copy any property URL from Idealista, Fotocasa, Habitaclia or similar portals. We extract all the details automatically."
-                    : "Start typing and select from Google-powered suggestions. We'll pinpoint your property on the map for accurate comparisons."}
-                </p>
-                {/* Visual: Address input mock */}
-                <div className="border border-[rgba(0,0,0,0.06)] rounded-2xl p-4 bg-card w-full max-w-xs">
-                  <div className="flex items-center gap-3 mb-3">
+                <div className="pt-1 md:pt-2 flex-1">
+                  <div className="flex items-center gap-3 mb-2">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                       {isBuy ? <Link2 className="h-4 w-4 text-primary" /> : <MapPin className="h-4 w-4 text-primary" />}
                     </div>
-                    <div className="flex-1 h-3 bg-muted rounded-full" />
+                    <h3 className="text-base md:text-lg uppercase tracking-[0.08em] font-bold text-foreground">
+                      {isBuy ? "Paste a listing link" : "Enter your address"}
+                    </h3>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <div className="h-2.5 bg-muted rounded-full w-2/3" />
-                      <div className="h-2.5 bg-muted rounded-full w-1/3" />
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                    {isBuy
+                      ? "Copy any property URL from Idealista, Fotocasa, Habitaclia or similar portals. We extract all the details automatically — price, size, features, photos and location."
+                      : "Start typing and select from Google-powered suggestions. We'll pinpoint your property on the map for accurate comparisons against nearby listings."}
+                  </p>
+                  <div className="border border-[rgba(0,0,0,0.06)] rounded-2xl p-4 bg-card max-w-sm">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        {isBuy ? <Link2 className="h-4 w-4 text-primary" /> : <MapPin className="h-4 w-4 text-primary" />}
+                      </div>
+                      <div className="flex-1 h-3 bg-muted rounded-full" />
                     </div>
-                    <div className="h-2.5 bg-primary/20 rounded-full w-1/2" />
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <div className="h-2.5 bg-muted rounded-full w-2/3" />
+                        <div className="h-2.5 bg-muted rounded-full w-1/3" />
+                      </div>
+                      <div className="h-2.5 bg-primary/20 rounded-full w-1/2" />
+                    </div>
                   </div>
                 </div>
               </motion.div>
 
               {/* Step 2 */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="flex flex-col items-center text-center"
+                className="relative flex gap-5 md:gap-8 mb-10 md:mb-14"
               >
-                <span className="text-[3.5rem] md:text-[4.5rem] font-bold text-primary/15 leading-none">02</span>
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center mt-1 mb-4">
-                  {isBuy ? <Search className="h-5 w-5 text-primary" /> : <SlidersHorizontal className="h-5 w-5 text-primary" />}
+                <div className="relative z-10 flex flex-col items-center shrink-0">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                    <span className="text-lg md:text-xl font-bold text-primary">02</span>
+                  </div>
                 </div>
-                <h3 className="text-base uppercase tracking-[0.1em] font-bold text-foreground mb-2">
-                  {isBuy ? "We analyze the market" : "Tell us about your property"}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-xs mx-auto">
-                  {isBuy
-                    ? "Our AI compares against hundreds of active and recently sold listings in the area to determine fair market value."
-                    : "Bedrooms, bathrooms, pool, terrace, parking — every detail that affects value. It takes less than a minute to complete."}
-                </p>
-                {/* Visual: Property pills */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {(isBuy ? [
-                    { icon: Search, label: "Comparables" },
-                    { icon: TrendingUp, label: "Market Data" },
-                    { icon: Sparkles, label: "AI Analysis" },
-                  ] : [
-                    { icon: BedDouble, label: "4 Beds" },
-                    { icon: Bath, label: "3 Baths" },
-                    { icon: Maximize, label: "350 m²" },
-                    { icon: Sparkles, label: "Pool" },
-                    { icon: SlidersHorizontal, label: "Terrace" },
-                    { icon: Home, label: "Garage" },
-                  ]).map((pill) => (
-                    <div
-                      key={pill.label}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-[rgba(0,0,0,0.06)] text-sm text-foreground"
-                    >
-                      <pill.icon className="h-3.5 w-3.5 text-primary" />
-                      {pill.label}
+                <div className="pt-1 md:pt-2 flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      {isBuy ? <Search className="h-4 w-4 text-primary" /> : <SlidersHorizontal className="h-4 w-4 text-primary" />}
                     </div>
-                  ))}
+                    <h3 className="text-base md:text-lg uppercase tracking-[0.08em] font-bold text-foreground">
+                      {isBuy ? "We analyze the market" : "Tell us about your property"}
+                    </h3>
+                  </div>
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                    {isBuy
+                      ? "Our AI compares against hundreds of active and recently sold listings in the area. We factor in size, condition, features and location to determine fair market value."
+                      : "Bedrooms, bathrooms, pool, terrace, parking, condition, year built — every detail that affects value. It takes less than a minute to complete."}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {(isBuy ? [
+                      { icon: Search, label: "Comparables" },
+                      { icon: TrendingUp, label: "Market Data" },
+                      { icon: Sparkles, label: "AI Analysis" },
+                    ] : [
+                      { icon: BedDouble, label: "4 Beds" },
+                      { icon: Bath, label: "3 Baths" },
+                      { icon: Maximize, label: "350 m²" },
+                      { icon: Sparkles, label: "Pool" },
+                      { icon: SlidersHorizontal, label: "Terrace" },
+                      { icon: Home, label: "Garage" },
+                    ]).map((pill) => (
+                      <div
+                        key={pill.label}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-[rgba(0,0,0,0.06)] text-sm text-foreground"
+                      >
+                        <pill.icon className="h-3.5 w-3.5 text-primary" />
+                        {pill.label}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
 
               {/* Step 3 */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-col items-center text-center"
+                className="relative flex gap-5 md:gap-8 mb-10 md:mb-14"
               >
-                <span className="text-[3.5rem] md:text-[4.5rem] font-bold text-primary/15 leading-none">03</span>
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center mt-1 mb-4">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                <div className="relative z-10 flex flex-col items-center shrink-0">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                    <span className="text-lg md:text-xl font-bold text-primary">03</span>
+                  </div>
                 </div>
-                <h3 className="text-base uppercase tracking-[0.1em] font-bold text-foreground mb-2">
-                  {isRent ? "Get your rental estimate" : isSell ? "See what you'll receive" : "Get your price score"}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-xs mx-auto">
-                  {isRent
-                    ? "A detailed rental report with seasonal breakdown, comparable properties, and income projections. Download or share instantly."
-                    : isSell
-                    ? "Instant PDF report with price range, confidence score, comparable properties, and AI market summary. Share or download."
-                    : "See if the asking price is fair or overpriced. Get negotiation insights, comparable data, and a detailed AI verdict."}
-                </p>
-                {/* Visual: Result preview pills */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {[
-                    { icon: FileText, label: "PDF Report" },
-                    { icon: TrendingUp, label: "Price Range" },
-                    { icon: Sparkles, label: "AI Summary" },
-                  ].map((pill) => (
-                    <div
-                      key={pill.label}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-[rgba(0,0,0,0.06)] text-sm text-foreground"
-                    >
-                      <pill.icon className="h-3.5 w-3.5 text-primary" />
-                      {pill.label}
+                <div className="pt-1 md:pt-2 flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="h-4 w-4 text-primary" />
                     </div>
-                  ))}
+                    <h3 className="text-base md:text-lg uppercase tracking-[0.08em] font-bold text-foreground">
+                      {isRent ? "Get your rental estimate" : isSell ? "See your valuation" : "Get your price score"}
+                    </h3>
+                  </div>
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                    {isRent
+                      ? "A detailed rental report with seasonal breakdown, comparable properties, and income projections. Download as PDF or share it with anyone instantly."
+                      : isSell
+                      ? "Instant PDF report with price range, confidence score, comparable properties, and AI market summary. Share it or download — it's yours to keep."
+                      : "See if the asking price is fair or overpriced. Get negotiation insights, comparable data, and a detailed AI verdict to make an informed offer."}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { icon: FileText, label: "PDF Report" },
+                      { icon: TrendingUp, label: "Price Range" },
+                      { icon: Sparkles, label: "AI Summary" },
+                    ].map((pill) => (
+                      <div
+                        key={pill.label}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-[rgba(0,0,0,0.06)] text-sm text-foreground"
+                      >
+                        <pill.icon className="h-3.5 w-3.5 text-primary" />
+                        {pill.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Step 4 — Agent Matching */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="relative flex gap-5 md:gap-8"
+              >
+                <div className="relative z-10 flex flex-col items-center shrink-0">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                    <span className="text-lg md:text-xl font-bold text-primary">04</span>
+                  </div>
+                </div>
+                <div className="pt-1 md:pt-2 flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Users className="h-4 w-4 text-primary" />
+                    </div>
+                    <h3 className="text-base md:text-lg uppercase tracking-[0.08em] font-bold text-foreground">
+                      Get the best agents in your area
+                    </h3>
+                  </div>
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                    We match you with top-rated, verified local agents so you get a complete picture — from valuation to sale. Compare agents, read reviews, and choose with confidence.
+                  </p>
+                  {/* Visual: Agent avatars */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex -space-x-3">
+                      {[
+                        "bg-primary/20",
+                        "bg-accent/60",
+                        "bg-primary/30",
+                      ].map((bg, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            "w-10 h-10 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold text-primary",
+                            bg
+                          )}
+                        >
+                          {["EV", "SP", "DM"][i]}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                        <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                        <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                        <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                        <Star className="h-3.5 w-3.5 fill-primary/40 text-primary/40" />
+                      </div>
+                      <span className="text-xs text-muted-foreground">Matched in your area</span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             </div>
