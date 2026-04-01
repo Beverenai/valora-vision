@@ -1,39 +1,28 @@
 
 
-# Keep Sell/Buy Focus + Add Rent as Secondary + Dynamic Navbar
+# Route Sell & Buy Nav Links to Homepage
 
-## Approach
-
-Keep the current Sell/Buy `SkyToggle` on the homepage exactly as-is. Rent is a secondary SEO play — it gets its own route (`/rent/valuation`) but does NOT appear on the homepage toggle.
-
-The navbar becomes context-aware: it shows the two *other* services based on which page you're on.
+## Problem
+Clicking "Sell" or "Buy" in the navbar navigates to `/sell/valuation` or `/buy` — separate pages. The user wants these to always start on the homepage, where the SkyToggle already handles both modes.
 
 ## Changes
 
-### 1. Dynamic Navbar (`src/components/Navbar.tsx`)
+### 1. Update Navbar links (`src/components/Navbar.tsx`)
 
-Detect current context from `location.pathname`:
-- `/sell/*` or `/` → show **Rent** and **Buy** links
-- `/rent/*` → show **Sell** and **Buy** links
-- `/buy/*` → show **Sell** and **Rent** links
-- Any other page → show **Sell**, **Rent**, **Buy**
+Change the service link hrefs so Sell and Buy both point to `/` with state to set the toggle mode:
 
-Keep "Find an Agent" and "For Agents" always visible. CTA button adapts:
-- Sell context → "Get Valuation" → `/sell/valuation`
-- Rent context → "Estimate Rent" → `/rent/valuation`
-- Buy context → "Analyze Price" → `/buy`
-- Default → "Get Valuation" → `/sell/valuation`
+- **Sell** → `/?mode=sell` (or navigate with state)
+- **Buy** → `/?mode=buy`
+- **Rent** stays at `/rent/valuation` (separate flow)
+- CTA buttons follow the same pattern: Sell CTA → `/`, Buy CTA → `/`
 
-### 2. Add `/rent` route as alias (`src/App.tsx`)
+Since `<Link>` doesn't easily pass state for mode switching, use query params (`?mode=sell`, `?mode=buy`) which Index.tsx can read.
 
-Add `<Route path="/rent" element={<Navigate to="/rent/valuation" replace />} />` for cleaner URLs, matching the existing `/vender` → `/sell/valuation` pattern.
+### 2. Read mode from URL in Index.tsx (`src/pages/Index.tsx`)
 
-### 3. No changes to Index.tsx
-
-The homepage stays Sell/Buy toggle. Rent traffic comes organically via direct links, navbar links from other pages, and SEO.
+On mount, check `searchParams.get("mode")` — if `"buy"`, set `valuationType` to `"buy"`. This way clicking "Buy" in the nav lands on the homepage with the buy toggle active.
 
 ### Files Modified
-
-- `src/components/Navbar.tsx` — context-aware link filtering + adaptive CTA
-- `src/App.tsx` — add `/rent` redirect route
+- `src/components/Navbar.tsx` — update Sell/Buy hrefs to `/?mode=sell` / `/?mode=buy`
+- `src/pages/Index.tsx` — read `mode` query param to set initial toggle state
 
