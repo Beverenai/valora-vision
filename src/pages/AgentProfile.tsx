@@ -77,7 +77,9 @@ function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
         <Star
           key={i}
           size={size}
-          className={i <= Math.round(rating) ? "fill-primary text-primary" : "text-muted-foreground/30"}
+          fill={i <= Math.round(rating) ? "hsl(var(--primary))" : "none"}
+          className={i <= Math.round(rating) ? "text-primary" : "text-muted-foreground/30"}
+          strokeWidth={i <= Math.round(rating) ? 0 : 1.5}
         />
       ))}
     </div>
