@@ -1001,12 +1001,49 @@ const ProDashboard = () => {
     const [leadsRes, impressionsRes] = await Promise.all([
       supabase.from("agent_contact_requests").select("*").eq("professional_id", prof.id).order("created_at", { ascending: false }),
       supabase.from("professional_impressions").select("created_at").eq("professional_id", prof.id),
+      supabase.from("professional_zones").select("*, zones(*)").eq("professional_id", prof.id).eq("is_active", true),
+      supabase.from("agent_reviews").select("*").eq("professional_id", prof.id).order("created_at", { ascending: false }),
+      supabase.from("zones").select("id, name, tier, is_active, municipality, region").eq("is_active", true),
     ]);
 
     if (leadsRes.data) setLeads(leadsRes.data as unknown as Lead[]);
 
     const imps = impressionsRes.data || [];
     setImpressionsCount(imps.length);
+
+    // Process zones
+    const agentZoneIds = new Set<string>();
+    if (zonesRes.data) {
+      const mapped = zonesRes.data.map((pz: any) => {
+        agentZoneIds.add(pz.zone_id);
+        const z = pz.zones;
+        return {
+          id: pz.zone_id,
+          name: z?.name || "Unknown",
+          tier: pz.tier,
+          is_active: pz.is_active,
+          municipality: z?.municipality || null,
+          region: z?.region || "",
+        } as ZoneWithDetails;
+      });
+      setActiveZones(mapped);
+    }
+
+    if (allZonesRes.data) {
+      const available = (allZonesRes.data as any[])
+        .filter((z) => !agentZoneIds.has(z.id))
+        .map((z) => ({
+          id: z.id,
+          name: z.name,
+          tier: z.tier || "warm",
+          is_active: true,
+          municipality: z.municipality,
+          region: z.region,
+        } as ZoneWithDetails));
+      setAvailableZones(available);
+    }
+
+    if (reviewsRes.data) setReviews(reviewsRes.data as unknown as Review[]);
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
