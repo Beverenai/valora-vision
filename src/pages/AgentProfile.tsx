@@ -358,10 +358,14 @@ export default function AgentProfile() {
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">{professional.company_name}</h1>
               <div className="flex items-center gap-3 mt-2 flex-wrap">
-                <StarRating rating={professional.avg_rating} />
-                <span className="text-sm text-muted-foreground">
-                  {professional.avg_rating.toFixed(1)} ({professional.total_reviews} reviews)
-                </span>
+                {professional.avg_rating > 0 && professional.total_reviews > 0 && (
+                  <>
+                    <StarRating rating={professional.avg_rating} />
+                    <span className="text-sm text-muted-foreground">
+                      {professional.avg_rating.toFixed(1)} ({professional.total_reviews} reviews)
+                    </span>
+                  </>
+                )}
                 {professional.is_verified && (
                   <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[0.65rem] uppercase tracking-wider">
                     <CheckCircle2 size={12} className="mr-1" /> Verified
@@ -592,6 +596,14 @@ export default function AgentProfile() {
                     </Button>
                   )}
                 </>
+              ) : professional.total_reviews > 0 ? (
+                <Card className="border-border/40">
+                  <CardContent className="p-8 text-center">
+                    <Star size={32} fill="hsl(var(--primary))" className="mx-auto text-primary mb-3 opacity-30" strokeWidth={0} />
+                    <p className="text-sm text-foreground/70">Reviews coming soon</p>
+                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews imported — display coming shortly.</p>
+                  </CardContent>
+                </Card>
               ) : (
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
