@@ -331,7 +331,7 @@ const ProOnboard = () => {
             email,
             phone,
             website: website || null,
-            office_address: address,
+            office_address: derivedAddress,
             slug,
             description: description || null,
             logo_url: logoUrl,
