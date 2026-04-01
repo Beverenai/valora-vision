@@ -12,11 +12,11 @@ export default {
         "2xl": "1400px",
       },
     },
-    screens: {
-      'xs': '400px',
-      'tablet': '900px',
-    },
     extend: {
+      screens: {
+        'xs': '400px',
+        'tablet': '900px',
+      },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         heading: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
