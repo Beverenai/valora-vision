@@ -75,6 +75,7 @@ const App = () => {
               <Route path="/rent/result/:id" element={<RentResult />} />
               <Route path="/buy" element={<BuyAnalysis />} />
               <Route path="/buy/result/:id" element={<BuyResult />} />
+              <Route path="/buy/compare/:id" element={<BuyCompare />} />
               <Route path="/lookup" element={<ValuationLookup />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/agentes" element={<AgentDirectory />} />
