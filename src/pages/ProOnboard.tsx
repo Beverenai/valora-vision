@@ -286,19 +286,12 @@ const ProOnboard = () => {
     setAiDone(true);
   }, [companyName, contactName, email, phone, website, derivedAddress]);
 
-  // Auto-advance from step 2
+  // Trigger AI onboarding when entering step 2
   useEffect(() => {
     if (step === 1) {
       runAiOnboarding();
     }
-  }, [step]);
-
-  useEffect(() => {
-    if (aiDone && step === 1) {
-      const t = setTimeout(() => setStep(2), 500);
-      return () => clearTimeout(t);
-    }
-  }, [aiDone, step]);
+  }, [step, runAiOnboarding]);
 
   // Publish
   const handlePublish = async () => {
