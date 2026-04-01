@@ -717,10 +717,10 @@ const Index = () => {
               </div>
               <SectionLabel>Market Data</SectionLabel>
               <h2 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground mt-3">
-                {valuationType === "sell" ? "Recent Valuations" : "Recent Price Analyses"}
+                {isRent ? "Recent Rental Estimates" : isSell ? "Recent Valuations" : "Recent Price Analyses"}
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
-                {valuationType === "sell" ? "238 property valuations completed this week" : "185 price analyses completed this week"}
+                {isRent ? "124 rental estimates completed this week" : isSell ? "238 property valuations completed this week" : "185 price analyses completed this week"}
               </p>
             </div>
           </div>
