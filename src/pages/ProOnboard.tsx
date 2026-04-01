@@ -582,14 +582,13 @@ const ProOnboard = () => {
               </div>
 
               {aiDone && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 text-sm text-primary font-medium">
-                  Almost ready — reviewing your profile...
-                </motion.p>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 flex flex-col items-center gap-2">
+                  <p className="text-sm text-primary font-medium">Your profile is ready!</p>
+                  <Button onClick={() => setStep(2)} size="lg" className="mt-2">
+                    Continue to review
+                  </Button>
+                </motion.div>
               )}
-
-              <button onClick={() => setStep(2)} className="mt-8 text-xs text-muted-foreground hover:text-foreground underline">
-                Skip <SkipForward className="inline w-3 h-3" />
-              </button>
             </motion.div>
           )}
 
