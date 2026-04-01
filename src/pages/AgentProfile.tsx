@@ -42,6 +42,9 @@ interface Professional {
   is_verified: boolean;
   languages: string[] | null;
   service_zones: string[] | null;
+  type: string;
+  agency_id: string | null;
+  agency_role: string | null;
 }
 
 interface TeamMember {
