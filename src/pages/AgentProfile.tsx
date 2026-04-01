@@ -351,7 +351,6 @@ export default function AgentProfile() {
         <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-12 relative z-10">
           {/* Logo */}
           <LogoWithFallback logoUrl={professional.logo_url} name={professional.company_name} size="lg" />
-          </div>
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
