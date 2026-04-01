@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Feature adjustment multipliers (same as SELL)
+// Hardcoded fallback feature adjustments
 const FEATURE_ADJUSTMENTS: Record<string, number> = {
   pool: 0.10, sea_views: 0.20, garage: 0.05, terrace: 0.04,
   garden: 0.03, lift: 0.03, ac: 0.02, balcony: 0.01,
@@ -29,12 +29,10 @@ function filterOutliers(values: number[]): number[] {
   return values.filter((v) => Math.abs(v - med) / mad <= 3.5);
 }
 
-// URL parsing
 function parseListingUrl(url: string): { platform: string; propertyCode: string | null } {
   try {
     const u = new URL(url);
     const host = u.hostname.toLowerCase();
-
     if (host.includes("idealista")) {
       const match = url.match(/\/inmueble\/(\d+)/);
       return { platform: "idealista", propertyCode: match?.[1] || null };
@@ -72,15 +70,14 @@ function getPriceScore(deviation: number): string {
   return "above_market";
 }
 
-// Detect features from text/array and calculate adjustments
 function calculateFeatureAdjustments(features: any, baseValue: number): { multiplier: number; adjustments: Record<string, number> } {
   const adjustments: Record<string, number> = {};
   let multiplier = 1.0;
-  
-  const featureText = Array.isArray(features) 
-    ? features.join(" ").toLowerCase() 
-    : typeof features === "string" 
-      ? features.toLowerCase() 
+
+  const featureText = Array.isArray(features)
+    ? features.join(" ").toLowerCase()
+    : typeof features === "string"
+      ? features.toLowerCase()
       : "";
 
   const checks: [string, string[]][] = [
@@ -104,6 +101,27 @@ function calculateFeatureAdjustments(features: any, baseValue: number): { multip
 
   return { multiplier, adjustments };
 }
+
+// Tool calling schema for BUY analysis
+const BUY_ANALYSIS_TOOL = {
+  type: "function",
+  function: {
+    name: "generate_buy_analysis",
+    description: "Generate a structured buy analysis that is neutral and data-driven.",
+    parameters: {
+      type: "object",
+      properties: {
+        verdict: { type: "string", enum: ["below_market", "good_value", "fair_price", "slightly_above", "above_market"], description: "Overall price assessment" },
+        summary: { type: "string", description: "2-3 sentence neutral overview of price vs market value" },
+        price_context: { type: "string", description: "How this price compares to comparable properties in the area" },
+        worth_noting: { type: "array", items: { type: "string" }, description: "3-5 neutral, factual observations about the property and its price position" },
+        negotiation_context: { type: "string", description: "Neutral context about typical negotiation margins in the area" },
+      },
+      required: ["verdict", "summary", "price_context", "worth_noting", "negotiation_context"],
+      additionalProperties: false,
+    },
+  },
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -152,6 +170,7 @@ serve(async (req) => {
           features: existing.images || [],
           image_urls: existing.images ? (Array.isArray(existing.images) ? existing.images : []) : [],
           thumbnail_url: existing.thumbnail_url || null,
+          zone_id: existing.zone_id || null,
         };
       }
     }
@@ -161,16 +180,12 @@ serve(async (req) => {
       const APIFY_API_TOKEN = Deno.env.get("APIFY_API_TOKEN");
       if (APIFY_API_TOKEN) {
         try {
-          // Start Apify actor run for single property
           const runRes = await fetch(
             `https://api.apify.com/v2/acts/maxcopell~idealista-scraper/runs?token=${APIFY_API_TOKEN}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                propertyCodes: [propertyCode],
-                maxItems: 1,
-              }),
+              body: JSON.stringify({ propertyCodes: [propertyCode], maxItems: 1 }),
             }
           );
 
@@ -179,7 +194,6 @@ serve(async (req) => {
             const datasetId = runData.data?.defaultDatasetId;
 
             if (datasetId) {
-              // Wait for results (poll up to 30 seconds)
               let attempts = 0;
               while (attempts < 10) {
                 await new Promise(r => setTimeout(r, 3000));
@@ -203,6 +217,7 @@ serve(async (req) => {
                       features: item.features || [],
                       image_urls: item.images?.map((img: any) => img.url || img) || [],
                       thumbnail_url: item.thumbnail || item.images?.[0]?.url || null,
+                      zone_id: null,
                     };
                     break;
                   }
@@ -217,9 +232,8 @@ serve(async (req) => {
       }
     }
 
-    // If still no data, create a minimal entry with just the URL
+    // If still no data, return error
     if (!propertyData) {
-      // Insert as pending - user would need to provide more data
       const { data: analysis, error: insertError } = await supabase
         .from("buy_analyses")
         .insert({
@@ -278,54 +292,66 @@ serve(async (req) => {
     if (insertError) throw new Error(insertError.message);
     const analysisId = analysis.id;
 
-    // 5. Find comparables
+    // 5. Find comparables + zone stats in parallel
     let comparables: any[] = [];
+    let zoneStats: any = null;
+
     if (propertyData.latitude && propertyData.longitude) {
-      const { data: comps, error: compError } = await supabase.rpc("find_comparables_with_fallback", {
-        p_lat: Number(propertyData.latitude),
-        p_lng: Number(propertyData.longitude),
-        p_operation: "sale",
-        p_property_type: propertyData.property_type || "apartment",
-        p_size_m2: sizeM2,
-        p_rooms: propertyData.rooms || 2,
-        p_min_results: 8,
-        p_limit: 30,
-      });
-      if (!compError && comps?.length > 0) {
-        comparables = comps;
+      const promises: Promise<any>[] = [
+        supabase.rpc("find_comparables_with_fallback", {
+          p_lat: Number(propertyData.latitude),
+          p_lng: Number(propertyData.longitude),
+          p_operation: "sale",
+          p_property_type: propertyData.property_type || "apartment",
+          p_size_m2: sizeM2,
+          p_rooms: propertyData.rooms || 2,
+          p_min_results: 8,
+          p_limit: 30,
+        }),
+      ];
+
+      // Get zone stats if we have zone_id
+      if (propertyData.zone_id) {
+        promises.push(
+          supabase.rpc("get_zone_stats", {
+            p_zone_id: propertyData.zone_id,
+            p_operation: "sale",
+            p_property_type: propertyData.property_type || "apartment",
+          })
+        );
+      }
+
+      const results = await Promise.all(promises);
+
+      if (!results[0].error && results[0].data?.length > 0) {
+        comparables = results[0].data;
+      }
+      if (results[1]?.data?.[0]) {
+        zoneStats = results[1].data[0];
       }
     }
 
     // 6. Calculate valuation
-    let estimatedValue = 0;
-    let estimatedLow = 0;
-    let estimatedHigh = 0;
-    let estimatedPricePerM2 = 0;
-    let areaMedianPricePerM2 = 0;
-
     if (comparables.length >= 3) {
       const pricesPerSqm = comparables
         .filter((c: any) => c.price_per_m2 && c.price_per_m2 > 0)
         .map((c: any) => Number(c.price_per_m2));
 
       const filtered = filterOutliers(pricesPerSqm);
-      areaMedianPricePerM2 = filtered.length > 0 ? Math.round(median(filtered)) : 3500;
+      const areaMedianPricePerM2 = filtered.length > 0 ? Math.round(median(filtered)) : 3500;
 
-      // Apply feature adjustments
       const baseValue = areaMedianPricePerM2 * sizeM2;
       const { multiplier, adjustments } = calculateFeatureAdjustments(propertyData.features, baseValue);
 
-      estimatedPricePerM2 = Math.round(areaMedianPricePerM2 * multiplier);
-      estimatedValue = Math.round(estimatedPricePerM2 * sizeM2);
-      estimatedLow = Math.round(estimatedValue * 0.85);
-      estimatedHigh = Math.round(estimatedValue * 1.15);
+      const estimatedPricePerM2 = Math.round(areaMedianPricePerM2 * multiplier);
+      const estimatedValue = Math.round(estimatedPricePerM2 * sizeM2);
+      const estimatedLow = Math.round(estimatedValue * 0.85);
+      const estimatedHigh = Math.round(estimatedValue * 1.15);
 
-      // Calculate price deviation
       const priceDeviation = ((askingPrice - estimatedValue) / estimatedValue) * 100;
       const priceScore = getPriceScore(priceDeviation);
       const confidenceLevel = getConfidenceLevel(comparables.length);
 
-      // Prepare comparable data for storage
       const comparableData = comparables.slice(0, 15).map((c: any) => ({
         id: c.id, price: c.price, price_per_sqm: c.price_per_m2,
         built_size_sqm: c.size_m2, bedrooms: c.rooms, bathrooms: c.bathrooms,
@@ -333,22 +359,61 @@ serve(async (req) => {
         distance_km: c.distance_km, image_urls: [], listing_url: c.idealista_url,
       }));
 
-      // 7. Generate AI analysis
+      // 7. AI analysis with structured tool calling
       let analysisText = "";
       let marketTrendsText = "";
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      let aiStructured: any = null;
 
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
       if (LOVABLE_API_KEY) {
         try {
-          const propertyDesc = `${propertyData.property_type || "property"}, ${sizeM2}m², ${propertyData.rooms || "unknown"} bedrooms, in ${propertyData.city || "Spain"}`;
           const scoreLabel = priceScore.replace(/_/g, " ");
           const devDir = priceDeviation > 0 ? "above" : priceDeviation < 0 ? "below" : "in line with";
 
-          const systemPrompt = `You are a neutral property market analyst for ValoraCasa. Write in English. Be data-driven and objective. NEVER say a property is "too expensive" or "a bad deal". Present facts neutrally. Do not use markdown formatting.`;
+          // Build structured data package
+          const dataPackage = {
+            type: "buy",
+            property: {
+              address: propertyData.address || propertyData.city || "Unknown",
+              type: propertyData.property_type || "property",
+              size_m2: sizeM2,
+              rooms: propertyData.rooms || "unknown",
+              bathrooms: propertyData.bathrooms || "unknown",
+              features: Object.keys(adjustments).join(", ") || "none detected",
+            },
+            pricing: {
+              asking_price: askingPrice,
+              estimated_market_value: estimatedValue,
+              estimated_low: estimatedLow,
+              estimated_high: estimatedHigh,
+              price_deviation_percent: Math.round(priceDeviation * 10) / 10,
+              deviation_direction: devDir,
+              price_score: scoreLabel,
+              asking_price_per_m2: askingPricePerM2,
+              estimated_price_per_m2: estimatedPricePerM2,
+              area_median_per_m2: areaMedianPricePerM2,
+            },
+            comparables: {
+              count: comparables.length,
+              confidence: confidenceLevel,
+              prices_below_asking: comparables.filter((c: any) => Number(c.price) < askingPrice).length,
+              prices_similar: comparables.filter((c: any) => Math.abs(Number(c.price) - askingPrice) / askingPrice < 0.05).length,
+              prices_above_asking: comparables.filter((c: any) => Number(c.price) > askingPrice).length,
+            },
+            zone_stats: zoneStats ? {
+              listing_count: zoneStats.listing_count,
+              median_price_m2: zoneStats.median_price_m2,
+              pct_with_pool: zoneStats.pct_with_pool,
+              pct_with_sea_views: zoneStats.pct_with_sea_views,
+            } : null,
+            feature_impacts: Object.keys(adjustments).length > 0
+              ? Object.entries(adjustments).reduce((acc, [k, v]) => { acc[k] = { amount: v, premium_pct: Math.round((FEATURE_ADJUSTMENTS[k] || 0) * 100) }; return acc; }, {} as Record<string, any>)
+              : null,
+          };
 
-          const analysisPrompt = `Write a 3-paragraph price analysis for a buyer considering: ${propertyDesc}. Asking price: €${askingPrice.toLocaleString()}. Estimated market value: €${estimatedValue.toLocaleString()} (based on ${comparables.length} comparable properties). The asking price is ${Math.abs(Math.round(priceDeviation))}% ${devDir} market value. Price score: ${scoreLabel}. Area median: €${areaMedianPricePerM2}/m².
+          const systemPrompt = `You are a neutral property market analyst for ValoraCasa. You receive pre-computed data and INTERPRET it — you do not calculate. Write in English. Be data-driven and objective. NEVER say a property is "too expensive" or "a bad deal". Present price positions as "Above Market", "Fair Price", "Good Value" etc. Provide factual context that helps buyers make informed decisions. Do not use markdown formatting.`;
 
-Be neutral and factual. Explain what the data shows, note any features that justify premiums, and give context about the local market. Keep it to 150-200 words.`;
+          const userPrompt = `Analyze this property listing based on the following pre-computed data:\n\n${JSON.stringify(dataPackage, null, 2)}`;
 
           const trendsPrompt = `Write a 2-paragraph market context for ${propertyData.city || "Costa del Sol"}, Spain as of March 2026. Cover recent price movements and buyer demand. Keep it to 100-130 words. Do not use markdown.`;
 
@@ -357,8 +422,11 @@ Be neutral and factual. Explain what the data shows, note any features that just
               method: "POST",
               headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash-lite",
-                messages: [{ role: "system", content: systemPrompt }, { role: "user", content: analysisPrompt }],
+                model: "google/gemini-3-flash-preview",
+                temperature: 0.3,
+                messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
+                tools: [BUY_ANALYSIS_TOOL],
+                tool_choice: { type: "function", function: { name: "generate_buy_analysis" } },
               }),
             }),
             fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -366,15 +434,33 @@ Be neutral and factual. Explain what the data shows, note any features that just
               headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
               body: JSON.stringify({
                 model: "google/gemini-2.5-flash-lite",
-                messages: [{ role: "system", content: systemPrompt }, { role: "user", content: trendsPrompt }],
+                messages: [
+                  { role: "system", content: "You are a property market analyst for ValoraCasa. Write in English. Be neutral. Do not use markdown." },
+                  { role: "user", content: trendsPrompt },
+                ],
               }),
             }),
           ]);
 
           if (analysisRes.ok) {
             const data = await analysisRes.json();
-            analysisText = data.choices?.[0]?.message?.content || "";
+            const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+            if (toolCall?.function?.arguments) {
+              try {
+                aiStructured = JSON.parse(toolCall.function.arguments);
+                analysisText = [aiStructured.summary, aiStructured.price_context].filter(Boolean).join("\n\n");
+              } catch (parseErr) {
+                console.error("Failed to parse tool call response:", parseErr);
+                analysisText = data.choices?.[0]?.message?.content || "";
+              }
+            } else {
+              analysisText = data.choices?.[0]?.message?.content || "";
+            }
+          } else {
+            const errText = await analysisRes.text();
+            console.error("AI analysis error:", analysisRes.status, errText);
           }
+
           if (trendsRes.ok) {
             const data = await trendsRes.json();
             marketTrendsText = data.choices?.[0]?.message?.content || "";
@@ -385,7 +471,7 @@ Be neutral and factual. Explain what the data shows, note any features that just
       }
 
       // 8. Update analysis with results
-      await supabase.from("buy_analyses").update({
+      const updatePayload: Record<string, unknown> = {
         estimated_value: estimatedValue,
         estimated_low: estimatedLow,
         estimated_high: estimatedHigh,
@@ -400,7 +486,17 @@ Be neutral and factual. Explain what the data shows, note any features that just
         analysis: analysisText || null,
         market_trends: marketTrendsText || null,
         status: "ready",
-      }).eq("id", analysisId);
+      };
+
+      // Add structured AI fields
+      if (aiStructured) {
+        updatePayload.ai_verdict = aiStructured.verdict || null;
+        updatePayload.ai_price_context = aiStructured.price_context || null;
+        updatePayload.ai_worth_noting = aiStructured.worth_noting || null;
+        updatePayload.ai_negotiation_context = aiStructured.negotiation_context || null;
+      }
+
+      await supabase.from("buy_analyses").update(updatePayload).eq("id", analysisId);
 
       return new Response(
         JSON.stringify({ analysis_id: analysisId, status: "ready", comparables_count: comparables.length }),
