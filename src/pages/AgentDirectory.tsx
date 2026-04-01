@@ -54,6 +54,9 @@ interface Professional {
   service_zones: string[] | null;
   office_address: string | null;
   created_at: string | null;
+  type: string;
+  agency_id: string | null;
+  contact_name: string | null;
 }
 
 interface ProfessionalZone {

@@ -541,7 +541,52 @@ export default function AgentProfile() {
               </section>
             )}
 
-            {/* Service Areas */}
+            {/* Agency context — if this agent belongs to an agency */}
+            {agency && (
+              <section>
+                <p className={SECTION_LABEL}>AGENCY</p>
+                <Link to={`/agentes/${agency.slug}`}>
+                  <Card className="border-border/60 hover:shadow-md transition-shadow">
+                    <CardContent className="p-5 flex items-center gap-4">
+                      <LogoWithFallback logoUrl={agency.logo_url} name={agency.company_name} />
+                      <div>
+                        <p className="font-semibold text-foreground">{agency.company_name}</p>
+                        {agency.tagline && <p className="text-xs text-muted-foreground">{agency.tagline}</p>}
+                      </div>
+                      <ChevronRight size={16} className="ml-auto text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              </section>
+            )}
+
+            {/* Agency agents — if this is an agency profile */}
+            {agencyAgents.length > 0 && (
+              <section>
+                <p className={SECTION_LABEL}>OUR AGENTS</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {agencyAgents.map(agent => (
+                    <Link key={agent.id} to={`/agentes/${agent.slug}`}>
+                      <Card className="border-border/60 hover:shadow-md transition-shadow">
+                        <CardContent className="p-5 flex items-start gap-4">
+                          <LogoWithFallback logoUrl={agent.logo_url} name={agent.company_name} />
+                          <div className="min-w-0">
+                            <p className="font-semibold text-sm text-foreground">{agent.contact_name || agent.company_name}</p>
+                            {agent.tagline && <p className="text-xs text-muted-foreground">{agent.tagline}</p>}
+                            {agent.avg_rating > 0 && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <StarRating rating={agent.avg_rating} size={12} />
+                                <span className="text-[0.65rem] text-muted-foreground">({agent.total_reviews})</span>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
             <section>
               <p className={SECTION_LABEL}>SERVICE AREAS</p>
               {zones.length > 0 ? (
