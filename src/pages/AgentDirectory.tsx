@@ -247,6 +247,13 @@ export default function AgentDirectory() {
     return s;
   }, [profZones]);
 
+  // Map agency_id -> company_name for badge display
+  const agencyNameMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    agents.filter(a => a.type === "agency").forEach(a => { m[a.id] = a.company_name; });
+    return m;
+  }, [agents]);
+
   const filtered = useMemo(() => {
     let list = [...agents];
 
