@@ -153,7 +153,7 @@ const ProLanding = () => {
           <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-3">
             Simple, transparent pricing
           </h2>
-          <p className="text-center text-muted-foreground mb-12">Start free — upgrade when you're ready. No credit card required.</p>
+          <p className="text-center text-foreground/60 mb-12">Start free — upgrade when you're ready. No credit card required.</p>
 
           <div className="grid md:grid-cols-3 gap-6">
             {tiers.map((tier) => (
