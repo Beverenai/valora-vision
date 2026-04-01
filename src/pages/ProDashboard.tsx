@@ -266,10 +266,22 @@ function MobileDropdownNav({ active, onNav, badges }: { active: Section; onNav: 
 }
 
 /* ─── Overview Section ─── */
-function OverviewSection({ agent, leads, impressionsCount, onViewLeads }: {
-  agent: Professional; leads: Lead[]; impressionsCount: number; onViewLeads: () => void;
+function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSection }: {
+  agent: Professional; leads: Lead[]; impressionsCount: number; onViewLeads: () => void; setSection: (s: Section) => void;
 }) {
   const recentLeads = leads.slice(0, 5);
+
+  // Compute a simple merit score based on profile completeness
+  const profileScore = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline]
+    .filter(Boolean).length;
+  const profileMerit = Math.round((profileScore / 6) * 100);
+  const ratingMerit = agent.avg_rating ? Math.round((agent.avg_rating / 5) * 100) : 0;
+  const meritScore = Math.round((profileMerit * 0.3 + ratingMerit * 0.2 + 50 * 0.2 + 40 * 0.15 + 80 * 0.15));
+
+  const actionItems: { icon: React.ElementType; label: string; desc: string; section: Section; color: string }[] = [];
+  if (!agent.bio && !agent.description) actionItems.push({ icon: Edit2, label: "Add a company description", desc: "+15 merit points", section: "profile", color: "text-amber-600" });
+  if (!agent.logo_url) actionItems.push({ icon: Eye, label: "Upload your logo", desc: "+20 merit points", section: "profile", color: "text-amber-600" });
+  actionItems.push({ icon: MapPin, label: "Select your service zones", desc: "Required to appear in valuation results", section: "zones", color: "text-blue-600" });
 
   return (
     <div className="space-y-6">
@@ -277,6 +289,58 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads }: {
         <h1 className="font-serif text-2xl font-bold">Welcome back, {agent.company_name}</h1>
         {agent.is_verified && <Shield size={18} className="text-primary" />}
       </div>
+
+      {/* Merit Score */}
+      <Card className="bg-gradient-to-r from-primary/5 to-transparent border-primary/20">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Merit Score</p>
+              <p className="text-3xl font-bold mt-1">{meritScore}</p>
+              <p className="text-xs text-muted-foreground mt-1">Profile completeness & engagement</p>
+            </div>
+            <div className="w-16 h-16">
+              <svg viewBox="0 0 36 36" className="w-full h-full">
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none" stroke="hsl(var(--primary))" strokeWidth="3"
+                  strokeDasharray={`${meritScore}, 100`} strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+          <div className="grid grid-cols-5 gap-2 mt-4 text-center">
+            <div><p className="text-xs text-muted-foreground">Proximity</p><p className="text-sm font-medium">80</p></div>
+            <div><p className="text-xs text-muted-foreground">Rating</p><p className="text-sm font-medium">{ratingMerit}</p></div>
+            <div><p className="text-xs text-muted-foreground">Response</p><p className="text-sm font-medium">50</p></div>
+            <div><p className="text-xs text-muted-foreground">Conversion</p><p className="text-sm font-medium">40</p></div>
+            <div><p className="text-xs text-muted-foreground">Profile</p><p className="text-sm font-medium">{profileMerit}</p></div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Action Items */}
+      {actionItems.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-serif">Action Items</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {actionItems.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                <item.icon className={`h-4 w-4 ${item.color} shrink-0`} />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setSection(item.section)}>
+                  {item.section === "zones" ? "Set up" : "Edit"}
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader className="pb-3">
@@ -1140,7 +1204,7 @@ const ProDashboard = () => {
       </div>
 
       {section === "overview" && (
-        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} />
+        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} />
       )}
       {section === "profile" && (
         <ProfileSection agent={agent} onSave={handleSaveProfile} saving={saving} />
