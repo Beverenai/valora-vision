@@ -1,34 +1,49 @@
 
 
-## Plan: Fix Map Overflow on Mobile
+## Plan: Fix Step 1 Validation Blocking Progression
 
 ### Problem
-The Google Map in verify phase overflows horizontally on mobile because:
-1. The card uses `overflow-visible` when in input mode with map expanded
-2. The map container div has no `max-width` constraint relative to its parent
 
-### Fix
+Two issues prevent advancing from Step 1 despite all fields being filled:
 
-**Modified: `src/components/ValuationTicketCard.tsx`**
+1. **`emailValid` race condition**: `onChange` (line 407) resets `emailValid = false` on every keystroke. It only becomes `true` after `onBlur` triggers `checkEmailUniqueness` which is async. If the user fills email and moves on without explicitly blurring the email field, or if the async check is slow, `canProceedStep1` stays false.
 
-1. Change `overflow-visible` to `overflow-hidden` when `mapExpanded` is true — the map doesn't need to overflow the card boundaries
-2. Keep `overflow-visible` only for the search phase (dropdown suggestions need it)
+2. **Login not persisting** (separate issue): After onboarding, `supabase.auth.signUp` creates the user but doesn't automatically log them in if email confirmation is required. When the user later visits `/pro/login`, they need to confirm their email first.
 
-Line 263: Change the overflow logic:
+### Fix in `src/pages/ProOnboard.tsx`
+
+**A. Make email validation synchronous for format, async check as bonus**
+
+Change `canProceedStep1` (line 153) to not require `emailValid` — only require no error:
+```typescript
+const canProceedStep1 = companyName.trim() && contactName.trim() && 
+  email.trim() && phone.trim() && address.trim() && 
+  !emailError && !emailChecking;
 ```
-mapExpanded ? "overflow-hidden" : "overflow-visible"
+
+Remove `emailValid` from the gate. The uniqueness check still runs on blur and sets `emailError` if duplicate — that's sufficient.
+
+**B. Run email check on Continue click if not yet validated**
+
+In the Continue button handler (line 462), before checking `canProceedStep1`, trigger the email uniqueness check if it hasn't been validated yet. Make the handler async:
+```typescript
+onClick={async () => {
+  // Run email check if not already validated
+  if (!emailValid && email.trim()) {
+    await checkEmailUniqueness(email);
+  }
+  if (canProceedStep1) setStep(1);
+  else toast({ ... });
+}}
 ```
 
-Line 271: Same for the inner flex container — use `overflow-hidden` when map is expanded instead of `overflow-visible`.
+**C. Fix `onChange` not clearing `emailValid` too aggressively**
 
-**Modified: `src/components/shared/GoogleAddressInput.tsx`**
-
-3. Add `max-w-full overflow-hidden` to the verify phase wrapper (line 392) to ensure the map respects parent width
-4. Change the map container from `w-full` with fixed `height: "220px"` to also include `max-w-full` to prevent any overflow
+Line 407: Stop resetting `emailValid = false` on every keystroke. Instead, only invalidate when format changes. Move the `setEmailValid(false)` into `validateEmail` (only when format is invalid).
 
 ### Files
+
 | Action | File |
 |--------|------|
-| Modified | `src/components/ValuationTicketCard.tsx` — fix overflow logic for map phase |
-| Modified | `src/components/shared/GoogleAddressInput.tsx` — add max-w-full constraints |
+| Modified | `src/pages/ProOnboard.tsx` — fix validation gate and email check timing |
 
