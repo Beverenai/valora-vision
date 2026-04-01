@@ -420,39 +420,7 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
   );
 }
 
-/* ─── Profile Section (Tabbed) ─── */
-function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave: (data: Partial<Professional>) => void; saving: boolean }) {
-  const isAdmin = !agent.agency_id || agent.agency_role === "owner" || agent.agency_role === "admin";
-
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h2 className="font-serif text-xl font-bold">Edit Profile</h2>
-        <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")} className="rounded-full">
-          <ExternalLink className="h-4 w-4 mr-1" /> Preview
-        </Button>
-      </div>
-
-      <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="personal" className="gap-1.5"><User className="h-3.5 w-3.5" /> My Profile</TabsTrigger>
-          <TabsTrigger value="team" className="gap-1.5"><Users className="h-3.5 w-3.5" /> Team</TabsTrigger>
-          <TabsTrigger value="company" className="gap-1.5"><Building2 className="h-3.5 w-3.5" /> Company</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="personal">
-          <MyProfileTab agent={agent} onSave={onSave} saving={saving} />
-        </TabsContent>
-        <TabsContent value="team">
-          <TeamTab agent={agent} isAdmin={isAdmin} />
-        </TabsContent>
-        <TabsContent value="company">
-          <CompanyProfileTab agent={agent} onSave={onSave} saving={saving} isAdmin={isAdmin} />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+/* ─── Profile Section (Personal Only) ─── */
 
 /* ─── My Profile Tab ─── */
 function MyProfileTab({ agent, onSave, saving }: { agent: Professional; onSave: (data: Partial<Professional>) => void; saving: boolean }) {
