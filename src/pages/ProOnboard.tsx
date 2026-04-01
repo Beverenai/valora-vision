@@ -150,7 +150,7 @@ const ProOnboard = () => {
   };
 
   // Step 1 validation
-  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && emailValid;
+  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && !emailChecking;
 
   // Ref to hold API result so animation can read it asynchronously
   const apiResultRef = useRef<any>(null);
