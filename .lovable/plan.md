@@ -1,36 +1,37 @@
 
 
-# Improve Agent Directory Page
+# Result Page Upgrade — Implementation Plan
 
-## Current State
-The page and route already exist at `/agentes` with lazy loading, search, filters, skeleton loading, JSON-LD, and a "load more" pagination pattern. The core functionality requested is largely implemented.
+## Current State Assessment
 
-## Changes Needed
+After reviewing `SellResult.tsx`, `ResultAnalysisGroup.tsx`, and `ResultAgentGroup.tsx`, **most of the requested features already exist**:
 
-### 1. Enhanced hero subtitle
-Update the subtitle to match the requested copy: "Verified agents across Costa del Sol — matched by proximity, reviews, and expertise"
+- **DEL 1** (Price range + confidence): Already implemented in `ValuationResultCard` (lines 165-219) with gradient bar, low/high labels, and confidence badge
+- **DEL 2** (Comparables): Already implemented via `ComparablePropertiesSection` in `ResultAnalysisGroup.tsx`
+- **DEL 3** (Market comparison): Already implemented via `AreaComparisonSection` in `ResultAnalysisGroup.tsx`
+- **DEL 4** (Matched agents): Already implemented via `MatchedAgentsSection` in `ResultAgentGroup.tsx` using `match_agents_by_location` RPC
+- **DEL 5** (Contact modal): Already implemented via `ContactAgentModal` in `ResultAgentGroup.tsx`
 
-### 2. Add missing municipalities to filter
-Add "Nueva Andalucía", "Puerto Banús", "San Pedro" to `MUNICIPALITIES` array.
+## What Actually Needs Changing
 
-### 3. Add "Recently joined" sort option
-Extend `sort` state type to include `"newest"` and add the option to the sort dropdown. Sort by `created_at` is not currently fetched — add it to the select query.
+The differences between the current implementation and the spec are mostly cosmetic/minor. Here's what I'd suggest splitting into:
 
-### 4. Agent card improvements
-- Use terracotta (`bg-[#D4713B]`) for the initials fallback circle instead of `bg-primary`
-- Make the entire card a clickable `Link` to the agent profile
-- Show "New on ValoraCasa" when agent has no rating instead of "0.0 (0)"
-- Display languages as uppercase badge chips instead of dot-separated text
+### Batch 1: Styling refinements to ValuationResultCard
+- Change gold accent to terracotta (`#D4713B`) on the price range bar
+- Update confidence badge to use green/amber/red pill styling as specified
+- Minor label text changes
 
-### 5. Empty state improvement
-Add a "Clear all filters" button that resets search, location, language, and sort state.
+### Batch 2: ComparableCard improvements
+- Add similarity score progress bar to each card (currently missing)
+- Ensure terracotta accent colors on price diff badges
 
-### 6. CTA banner for agents at bottom
-Add a section before `Footer` encouraging agents to join, with links to `/pro` and `/pro#pricing`.
+### Batch 3: Agent card tier badges
+- Add "Elite Partner" / "Featured" banner on agent cards for premium/elite tiers
+- Update initials fallback to terracotta background
 
-### 7. Mobile filter improvements
-Add `overflow-x-auto flex-nowrap` to the filter bar for horizontal scroll on small screens. Wrap language badges in a scrollable container.
+### Recommendation
 
-## Files Modified
-- `src/pages/AgentDirectory.tsx` — all changes in this single file
+Given that the core functionality is already built and working, the changes are purely visual polish. I'd suggest telling me which specific visual improvements you want prioritized, or I can proceed with all three batches as one implementation since they're small CSS/styling changes across 3 files.
+
+Want me to proceed with all styling refinements in one go, or pick specific batches?
 
