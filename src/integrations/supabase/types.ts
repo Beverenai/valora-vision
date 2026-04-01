@@ -275,6 +275,54 @@ export type Database = {
         }
         Relationships: []
       }
+      buy_comparisons: {
+        Row: {
+          ai_comparison: string | null
+          ai_comparison_points: Json | null
+          ai_winner: string | null
+          analysis_a_id: string | null
+          analysis_b_id: string | null
+          created_at: string | null
+          id: string
+          status: string | null
+        }
+        Insert: {
+          ai_comparison?: string | null
+          ai_comparison_points?: Json | null
+          ai_winner?: string | null
+          analysis_a_id?: string | null
+          analysis_b_id?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          ai_comparison?: string | null
+          ai_comparison_points?: Json | null
+          ai_winner?: string | null
+          analysis_a_id?: string | null
+          analysis_b_id?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buy_comparisons_analysis_a_id_fkey"
+            columns: ["analysis_a_id"]
+            isOneToOne: false
+            referencedRelation: "buy_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buy_comparisons_analysis_b_id_fkey"
+            columns: ["analysis_b_id"]
+            isOneToOne: false
+            referencedRelation: "buy_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads_rent: {
         Row: {
           address: string
