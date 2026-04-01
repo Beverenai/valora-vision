@@ -358,10 +358,14 @@ export default function AgentProfile() {
             <div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">{professional.company_name}</h1>
               <div className="flex items-center gap-3 mt-2 flex-wrap">
-                <StarRating rating={professional.avg_rating} />
-                <span className="text-sm text-muted-foreground">
-                  {professional.avg_rating.toFixed(1)} ({professional.total_reviews} reviews)
-                </span>
+                {professional.avg_rating > 0 && professional.total_reviews > 0 && (
+                  <>
+                    <StarRating rating={professional.avg_rating} />
+                    <span className="text-sm text-muted-foreground">
+                      {professional.avg_rating.toFixed(1)} ({professional.total_reviews} reviews)
+                    </span>
+                  </>
+                )}
                 {professional.is_verified && (
                   <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[0.65rem] uppercase tracking-wider">
                     <CheckCircle2 size={12} className="mr-1" /> Verified
