@@ -634,6 +634,272 @@ function AnalyticsSection({ impressions, leads }: { impressions: { date: string;
   );
 }
 
+/* ─── Zones Section ─── */
+interface ZoneWithDetails {
+  id: string;
+  name: string;
+  tier: string;
+  is_active: boolean;
+  municipality: string | null;
+  region: string;
+}
+
+function ZonesSection({ agent, activeZones, availableZones }: {
+  agent: Professional;
+  activeZones: ZoneWithDetails[];
+  availableZones: ZoneWithDetails[];
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="font-serif text-xl font-bold">My Active Zones</h2>
+        <Badge variant="outline">{activeZones.length} zones</Badge>
+      </div>
+
+      {activeZones.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <MapPin className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+            <p className="text-sm text-muted-foreground mb-4">
+              You haven't selected any zones yet.<br />
+              Zones determine where you appear on valuation result pages.
+            </p>
+            <Button className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-primary-foreground" asChild>
+              <a href="mailto:hello@valoracasa.com?subject=Zone inquiry">Browse available zones</a>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {activeZones.map((zone) => (
+            <Card key={zone.id}>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium">{zone.name}</h3>
+                  <Badge className="bg-primary/10 text-primary border-primary/20">Active</Badge>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tier</span>
+                    <span className="font-medium capitalize">{zone.tier}</span>
+                  </div>
+                  {zone.municipality && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Municipality</span>
+                      <span className="font-medium">{zone.municipality}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Region</span>
+                    <span className="font-medium">{zone.region}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {availableZones.length > 0 && (
+        <div>
+          <h3 className="font-serif text-lg font-semibold mt-8 mb-3">Available Zones</h3>
+          <p className="text-sm text-muted-foreground mb-4">Expand your coverage to appear in more valuation results</p>
+          <div className="grid md:grid-cols-3 gap-3">
+            {availableZones.slice(0, 9).map((zone) => (
+              <Card key={zone.id} className="cursor-pointer hover:border-primary transition-colors">
+                <CardContent className="py-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">{zone.name}</p>
+                    <p className="text-xs text-muted-foreground">{zone.municipality || zone.region}</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="text-xs" asChild>
+                    <a href={`mailto:hello@valoracasa.com?subject=Add zone: ${zone.name}`}>
+                      <Plus className="h-3 w-3 mr-1" /> Add
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Reviews Section ─── */
+interface Review {
+  id: string;
+  reviewer_name: string;
+  reviewer_role: string | null;
+  rating: number;
+  comment: string | null;
+  created_at: string | null;
+  is_verified: boolean | null;
+}
+
+function ReviewsSection({ reviews, avgRating }: { reviews: Review[]; avgRating: number | null }) {
+  const ratingDistribution = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => r.rating === star).length,
+  }));
+  const maxCount = Math.max(...ratingDistribution.map((d) => d.count), 1);
+
+  return (
+    <div className="space-y-6">
+      <h2 className="font-serif text-xl font-bold">Reviews</h2>
+
+      {reviews.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Star className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+            <p className="text-sm text-muted-foreground">No reviews yet. Reviews from clients will appear here.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Summary */}
+          <Card>
+            <CardContent className="p-6 flex flex-col md:flex-row gap-6 items-center">
+              <div className="text-center">
+                <p className="text-4xl font-bold font-serif">{avgRating ? Number(avgRating).toFixed(1) : "—"}</p>
+                <div className="flex gap-0.5 justify-center mt-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} size={14} className={s <= Math.round(avgRating || 0) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"} />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</p>
+              </div>
+              <div className="flex-1 space-y-1.5 w-full max-w-sm">
+                {ratingDistribution.map(({ star, count }) => (
+                  <div key={star} className="flex items-center gap-2 text-sm">
+                    <span className="w-3 text-right">{star}</span>
+                    <Star size={12} className="text-amber-400 shrink-0" />
+                    <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                      <div className="bg-amber-400 h-full rounded-full transition-all" style={{ width: `${(count / maxCount) * 100}%` }} />
+                    </div>
+                    <span className="w-6 text-right text-muted-foreground">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Review list */}
+          <div className="space-y-3">
+            {reviews.map((r) => (
+              <Card key={r.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-medium text-sm">{r.reviewer_name}</p>
+                      {r.reviewer_role && <Badge variant="secondary" className="text-[0.6rem] mt-0.5">{r.reviewer_role}</Badge>}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} size={12} className={s <= r.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"} />
+                        ))}
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {r.created_at ? format(new Date(r.created_at), "dd MMM yyyy") : ""}
+                      </span>
+                    </div>
+                  </div>
+                  {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── Settings Section ─── */
+function SettingsSection({ agent }: { agent: Professional }) {
+  const [emailLeads, setEmailLeads] = useState(true);
+  const [emailWeekly, setEmailWeekly] = useState(false);
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <h2 className="font-serif text-xl font-bold">Settings</h2>
+
+      {/* Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-serif flex items-center gap-2"><Bell size={16} /> Notifications</CardTitle>
+          <CardDescription>Choose what emails you receive</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">New lead notifications</p>
+              <p className="text-xs text-muted-foreground">Get an email when someone sends you an enquiry</p>
+            </div>
+            <Switch checked={emailLeads} onCheckedChange={setEmailLeads} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Weekly performance digest</p>
+              <p className="text-xs text-muted-foreground">Summary of views, leads, and analytics every Monday</p>
+            </div>
+            <Switch checked={emailWeekly} onCheckedChange={setEmailWeekly} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Public profile link */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-serif">Public Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3">
+            <Input value={`valoracasa.com/agentes/${agent.slug}`} readOnly className="text-sm" />
+            <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")}>
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Danger zone */}
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-base font-serif text-destructive">Danger Zone</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/5">
+                <Trash2 className="h-4 w-4 mr-2" /> Delete my profile
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. Please contact hello@valoracasa.com to request profile deletion.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <a href="mailto:hello@valoracasa.com?subject=Delete my agent profile&body=Please delete my agent profile: ${agent.company_name}">
+                    Contact support
+                  </a>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 /* ─── Subscription Section ─── */
 function SubscriptionSection() {
   return (
