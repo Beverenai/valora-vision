@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatRefCode } from "@/utils/referenceCode";
 import { Copy, Check as CheckIcon } from "lucide-react";
+import { ShareMenu } from "@/components/shared/ShareMenu";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
