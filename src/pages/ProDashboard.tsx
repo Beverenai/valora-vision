@@ -50,6 +50,7 @@ interface Professional {
   description: string | null;
   tagline: string | null;
   logo_url: string | null;
+  photo_url: string | null;
   cover_photo_url: string | null;
   slug: string;
   languages: string[] | null;
