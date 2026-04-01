@@ -100,7 +100,7 @@ const ProLanding = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mt-5 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
+            className="mt-5 text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto"
           >
             ValoraCasa connects you with qualified sellers in your area.
             No activation fees. No transaction limits.
