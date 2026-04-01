@@ -161,6 +161,9 @@ const ProOnboard = () => {
     apiResultRef.current = null;
     apiDoneRef.current = false;
 
+    // Minimum display time guarantee
+    const minDisplayPromise = new Promise<void>((resolve) => setTimeout(resolve, 4000));
+
     // Define the checklist steps based on whether website was provided
     const hasWebsite = !!website.trim();
     const stepDefs = hasWebsite
@@ -267,12 +270,15 @@ const ProOnboard = () => {
       await animateStep(stepDefs[i], i);
     }
 
-    // Wait for API if it hasn't finished
+    // Wait for API if it hasn't finished — show "Almost ready..." with pulse
     if (!apiDoneRef.current) {
       setAiSteps((prev) => [...prev, { key: "finalizing", status: "loading", label: "Almost ready..." }]);
       await apiPromise;
       setAiSteps((prev) => prev.filter((s) => s.key !== "finalizing"));
     }
+
+    // Ensure minimum display time has elapsed
+    await minDisplayPromise;
 
     // Add final "complete" step
     setAiSteps((prev) => [...prev, { key: "complete", status: "done", label: "Profile ready!" }]);
