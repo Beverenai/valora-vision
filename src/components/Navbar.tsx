@@ -15,9 +15,9 @@ const permanentLinks = [
 ];
 
 const ctaConfig: Record<string, { label: string; href: string }> = {
-  sell: { label: "Get Valuation", href: "/sell/valuation" },
+  sell: { label: "Get Valuation", href: "/?mode=sell" },
   rent: { label: "Estimate Rent", href: "/rent/valuation" },
-  buy: { label: "Analyze Price", href: "/buy" },
+  buy: { label: "Analyze Price", href: "/?mode=buy" },
 };
 
 function detectContext(pathname: string): string | null {
