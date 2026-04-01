@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +28,7 @@ const ProOnboardSuccess = lazy(() => lazyRetry(() => import("./pages/ProOnboardS
 const ProLogin = lazy(() => lazyRetry(() => import("./pages/ProLogin.tsx")));
 const ProDashboard = lazy(() => lazyRetry(() => import("./pages/ProDashboard.tsx")));
 const ResetPassword = lazy(() => lazyRetry(() => import("./pages/ResetPassword.tsx")));
+const ComingSoon = lazy(() => lazyRetry(() => import("./pages/ComingSoon.tsx")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,6 +84,8 @@ const App = () => {
               <Route path="/pro/login" element={<ProLogin />} />
               <Route path="/pro/dashboard" element={<ProDashboard />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/vender" element={<Navigate to="/sell/valuation" replace />} />
+              <Route path="/alquilar" element={<ComingSoon />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

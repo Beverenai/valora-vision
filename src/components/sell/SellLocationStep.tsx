@@ -24,7 +24,6 @@ const SellLocationStep: React.FC<SellLocationStepProps> = ({ formData, onChange,
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-heading font-bold text-foreground">Property Location</h3>
         <p className="text-muted-foreground mt-1">Search for your address or use your current location</p>
       </div>
 
