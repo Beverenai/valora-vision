@@ -285,10 +285,12 @@ async function upsertSaleListings(supabase: any, listings: any[], city: string, 
 // ─── Upsert rental listings into unified properties ──────
 async function upsertRentListings(supabase: any, listings: any[], city: string, zoneId: string | null) {
   let count = 0;
+  const freshCodes: string[] = [];
   for (const item of listings) {
     try {
       const externalId = String(item.propertyCode || item.adid || item.id || "");
       if (!externalId) continue;
+      freshCodes.push(externalId);
       const monthlyRent = Number(item.price || item.priceByArea || 0);
       if (monthlyRent <= 0) continue;
       const builtSize = Number(item.size || item.constructedArea || 0) || null;
@@ -297,6 +299,7 @@ async function upsertRentListings(supabase: any, listings: any[], city: string, 
         property_code: externalId,
         operation: "rent",
         source: "idealista",
+        is_active: true,
         price: monthlyRent,
         price_per_m2: builtSize && builtSize > 0 ? Math.round((monthlyRent / builtSize) * 100) / 100 : null,
         property_type: mapPropertyType(item.typology || item.propertyType || ""),
@@ -328,7 +331,7 @@ async function upsertRentListings(supabase: any, listings: any[], city: string, 
       console.error("Rent listing parse error:", e);
     }
   }
-  return count;
+  return { count, freshCodes };
 }
 
 // ─── Upsert short-term rental listings ───────────────────
