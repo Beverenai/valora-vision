@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { lazyRetry } from "@/lib/lazyRetry";
 import { formatRefCode } from "@/utils/referenceCode";
+import { SectionSkeleton } from "@/components/ui/SectionSkeleton";
+import { StickyAgentButton } from "@/components/shared/StickyAgentButton";
 import { Copy, Check as CheckIcon } from "lucide-react";
 import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
