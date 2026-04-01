@@ -17,21 +17,39 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Check for recovery token in URL hash
+    // Check for recovery token in URL hash (implicit flow)
     const hash = window.location.hash;
     if (hash.includes("type=recovery")) {
       setIsRecovery(true);
+      setIsChecking(false);
+    }
+
+    // Check for code query parameter (PKCE flow)
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("code")) {
+      setIsRecovery(true);
+      setIsChecking(false);
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setIsRecovery(true);
+        setIsChecking(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Timeout fallback — if no recovery signal after 4s, show invalid message
+    const timeout = setTimeout(() => {
+      setIsChecking(false);
+    }, 4000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,6 +75,18 @@ const ResetPassword = () => {
       setIsLoading(false);
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-[400px] mx-auto px-6 py-24 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+          <p className="text-muted-foreground mt-4 text-sm">Verifying reset link...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isRecovery && !isSuccess) {
     return (
