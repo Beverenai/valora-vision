@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Italianno&family=Playfair+Display:ital,wght@0,900;1,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,47 +6,54 @@
 
 @layer base {
   :root {
-    --background: 40 9% 97%;
-    --foreground: 0 0% 10%;
+    --background: 0 0% 100%;
+    --background-alt: 245 30% 97%;
+    --foreground: 0 0% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 0 0% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 0 0% 20%;
 
-    --primary: 21 62% 53%;
+    --primary: 328 100% 39%;
     --primary-foreground: 0 0% 100%;
+    --primary-light: 335 100% 66%;
+    --primary-hover: 328 100% 33%;
 
-    --secondary: 30 20% 96%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 245 30% 97%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 36 9% 94%;
-    --muted-foreground: 0 0% 35%;
+    --muted: 245 20% 95%;
+    --muted-foreground: 0 0% 46%;
 
-    --accent: 21 62% 53%;
+    --accent: 328 100% 39%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 34 16% 89%;
-    --input: 34 16% 89%;
-    --ring: 21 62% 53%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 328 100% 39%;
 
-    --radius: 0.75rem;
+    --radius: 10px;
+
+    /* Brand tokens */
+    --brand: 243 96% 28%;
+    --brand-light: 310 52% 50%;
 
     /* ValoraCasa custom tokens */
-    --terracotta: 21 62% 53%;
-    --terracotta-light: 24 100% 95%;
-    --success: 122 39% 49%;
+    --terracotta: 328 100% 39%;
+    --terracotta-light: 328 60% 95%;
+    --success: 152 55% 42%;
     --rent: 152 55% 42%;
     --rent-light: 152 40% 93%;
     --rent-foreground: 152 55% 28%;
-    --text-primary: 0 0% 10%;
+    --text-primary: 0 0% 20%;
     --text-secondary: 0 0% 38%;
     --text-muted: 0 0% 58%;
-    --surface: 40 9% 97%;
+    --surface: 0 0% 100%;
     --buy: 210 60% 45%;
     --buy-light: 210 50% 93%;
     --buy-foreground: 210 60% 30%;
@@ -69,7 +76,7 @@
   }
 
   html, body, #root {
-    background-color: #FAFAF7;
+    background-color: #FFFFFF;
     overflow-x: hidden;
   }
 
@@ -79,7 +86,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 }
 

@@ -16,7 +16,7 @@ const content = {
   "rent-to-sell": {
     label: "Property Value",
     title: "Want to know your property's sale value?",
-    subtitle: "Get a free AI-powered property valuation based on real market data.",
+    subtitle: "Get a free property valuation based on real market data.",
     buttonText: "Get Sale Valuation",
     href: "/sell/valuation",
   },
@@ -25,20 +25,20 @@ const content = {
 const CrossSellBanner = ({ variant }: CrossSellBannerProps) => {
   const c = content[variant];
   return (
-    <section className="border border-border">
-      <div className="bg-gradient-to-br from-primary to-navy-deep p-10 md:p-14">
-        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-gold mb-3">
+    <section>
+      <div className="bg-gradient-to-br from-brand to-brand-light p-10 md:p-14 rounded-2xl">
+        <p className="text-xs uppercase tracking-[0.15em] font-semibold text-primary-light mb-3">
           {c.label}
         </p>
-        <h2 className="font-heading text-2xl md:text-3xl font-bold text-primary-foreground mb-2">
+        <h2 className="font-sans text-2xl md:text-3xl font-bold text-white mb-2">
           {c.title}
         </h2>
-        <p className="text-primary-foreground/60 max-w-lg text-sm mb-6">
+        <p className="text-white/60 max-w-lg text-sm mb-6">
           {c.subtitle}
         </p>
         <Link
           to={c.href}
-          className="inline-flex items-center gap-2 bg-gold text-primary px-8 py-3.5 text-base font-semibold rounded-full hover:bg-gold-dark transition-colors shadow-md"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3.5 text-base font-semibold rounded-[10px] hover:bg-primary-hover transition-all hover:-translate-y-[1px] hover:shadow-lg"
         >
           {c.buttonText}
           <ArrowRight className="h-4 w-4" />
