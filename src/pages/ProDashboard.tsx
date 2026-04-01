@@ -503,6 +503,26 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
         </div>
       </div>
 
+      </div>
+
+      {/* Cover Photo */}
+      <div>
+        <Label className="mb-2 block">Cover Photo</Label>
+        <p className="text-xs text-muted-foreground mb-2">This appears as the hero banner on your public profile</p>
+        {coverPhotoUrl && !coverFailed ? (
+          <img src={coverPhotoUrl} alt="Cover" className="w-full h-36 rounded-xl object-cover border mb-2" onError={() => setCoverFailed(true)} />
+        ) : (
+          <div className="w-full h-36 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-dashed border-border flex items-center justify-center mb-2">
+            <span className="text-sm text-muted-foreground">No cover photo</span>
+          </div>
+        )}
+        <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+        <Button variant="outline" size="sm" className="rounded-full" onClick={() => coverInputRef.current?.click()} disabled={uploadingCover}>
+          {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+          {uploadingCover ? "Uploading…" : coverPhotoUrl ? "Change cover photo" : "Upload cover photo"}
+        </Button>
+      </div>
+
       <div className="space-y-4">
         <div><Label>Company Name</Label><Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} /></div>
         <div><Label>Tagline</Label><Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} placeholder="Your elevator pitch" /></div>
