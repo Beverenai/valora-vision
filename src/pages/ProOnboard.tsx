@@ -385,6 +385,8 @@ const ProOnboard = () => {
               role: m.role || null,
               photo_url: m.photo_url || null,
             })),
+            type: registrationType,
+            agency_role: registrationType === "agency" ? "owner" : null,
           },
         }
       );
