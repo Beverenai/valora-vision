@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import {
   Waves, Car, ParkingCircle, Fence, TreePine, Dumbbell, ArrowUpDown, Wind, Flame,
