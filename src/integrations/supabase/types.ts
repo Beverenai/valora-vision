@@ -158,6 +158,10 @@ export type Database = {
       buy_analyses: {
         Row: {
           address: string | null
+          ai_negotiation_context: string | null
+          ai_price_context: string | null
+          ai_verdict: string | null
+          ai_worth_noting: Json | null
           analysis: string | null
           area_median_price_per_m2: number | null
           asking_price: number
@@ -193,6 +197,10 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          ai_negotiation_context?: string | null
+          ai_price_context?: string | null
+          ai_verdict?: string | null
+          ai_worth_noting?: Json | null
           analysis?: string | null
           area_median_price_per_m2?: number | null
           asking_price: number
@@ -228,6 +236,10 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          ai_negotiation_context?: string | null
+          ai_price_context?: string | null
+          ai_verdict?: string | null
+          ai_worth_noting?: Json | null
           analysis?: string | null
           area_median_price_per_m2?: number | null
           asking_price?: number
@@ -266,6 +278,8 @@ export type Database = {
       leads_rent: {
         Row: {
           address: string
+          ai_considerations: Json | null
+          ai_strengths: Json | null
           analysis: string | null
           annual_income_estimate: number | null
           availability_date: string | null
@@ -297,6 +311,8 @@ export type Database = {
         }
         Insert: {
           address: string
+          ai_considerations?: Json | null
+          ai_strengths?: Json | null
           analysis?: string | null
           annual_income_estimate?: number | null
           availability_date?: string | null
@@ -328,6 +344,8 @@ export type Database = {
         }
         Update: {
           address?: string
+          ai_considerations?: Json | null
+          ai_strengths?: Json | null
           analysis?: string | null
           annual_income_estimate?: number | null
           availability_date?: string | null
@@ -370,6 +388,8 @@ export type Database = {
       leads_sell: {
         Row: {
           address: string
+          ai_considerations: Json | null
+          ai_strengths: Json | null
           analysis: string | null
           bathrooms: number | null
           bedrooms: number | null
@@ -395,6 +415,8 @@ export type Database = {
           price_range_high: number | null
           price_range_low: number | null
           property_type: string | null
+          quick_sale_price: number | null
+          recommended_listing_price: number | null
           status: string | null
           terrace_size_sqm: number | null
           views: string | null
@@ -403,6 +425,8 @@ export type Database = {
         }
         Insert: {
           address: string
+          ai_considerations?: Json | null
+          ai_strengths?: Json | null
           analysis?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -428,6 +452,8 @@ export type Database = {
           price_range_high?: number | null
           price_range_low?: number | null
           property_type?: string | null
+          quick_sale_price?: number | null
+          recommended_listing_price?: number | null
           status?: string | null
           terrace_size_sqm?: number | null
           views?: string | null
@@ -436,6 +462,8 @@ export type Database = {
         }
         Update: {
           address?: string
+          ai_considerations?: Json | null
+          ai_strengths?: Json | null
           analysis?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -461,6 +489,8 @@ export type Database = {
           price_range_high?: number | null
           price_range_low?: number | null
           property_type?: string | null
+          quick_sale_price?: number | null
+          recommended_listing_price?: number | null
           status?: string | null
           terrace_size_sqm?: number | null
           views?: string | null
