@@ -699,33 +699,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* ═══════════ EXPLORE AREAS ═══════════ */}
-        <section className="py-8 sm:py-12">
-          <div className="max-w-[1400px] mx-auto px-5 md:px-8">
-            <SectionLabel>Popular Areas</SectionLabel>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6">Explore Costa del Sol</h2>
-            <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
-              {[
-                { name: "Marbella", slug: "marbella", img: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200&h=200&fit=crop" },
-                { name: "Nueva Andalucía", slug: "nueva-andalucia", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200&h=200&fit=crop" },
-                { name: "Puerto Banús", slug: "puerto-banus", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&h=200&fit=crop" },
-                { name: "Golden Mile", slug: "golden-mile", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200&h=200&fit=crop" },
-                { name: "Benahavís", slug: "benahavis", img: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200&h=200&fit=crop" },
-                { name: "Estepona", slug: "estepona", img: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=200&h=200&fit=crop" },
-                { name: "Mijas", slug: "mijas", img: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=200&h=200&fit=crop" },
-                { name: "Fuengirola", slug: "fuengirola", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop" },
-              ].map((area) => (
-                <Link key={area.slug} to={`/sone/${area.slug}`} className="flex flex-col items-center gap-2 shrink-0">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-primary/20 hover:border-primary transition-colors">
-                    <img src={area.img} alt={area.name} className="w-full h-full object-cover" loading="lazy" />
-                  </div>
-                  <span className="text-sm font-medium text-center">{area.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ═══════════ FINAL CTA ═══════════ */}
         <section
           className="w-full py-12 md:py-20 px-5 md:px-8 pb-32"
