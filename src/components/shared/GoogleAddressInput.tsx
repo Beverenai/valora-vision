@@ -389,7 +389,7 @@ const GoogleAddressInput: React.FC<GoogleAddressInputProps> = ({
     ].filter(Boolean).join(", ") || query;
 
     return (
-      <div ref={containerRef} className="space-y-3">
+      <div ref={containerRef} className="space-y-3 max-w-full overflow-hidden">
         <div className="flex items-center gap-2">
           <button
             type="button"
