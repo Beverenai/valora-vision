@@ -1,67 +1,88 @@
 
 
-# Agent Login Flow + Dashboard Feature Improvements
+# Unified Properties Table + Valuations Schema
 
-## Overview
+## What This Does
 
-Add a "Login" link for agents in the Navbar and ProLanding page, protect the dashboard route with an auth guard, add logout, and improve the dashboard's profile editing, leads management, and subscription sections.
+Consolidates the two separate property tables (`properties_for_sale`, `properties_for_rent`) into a single `properties` table with an `operation` column (`sale` / `rent`). Adds `valuations` and `valuation_comparables` tables. Replaces the two separate RPC functions with one unified `find_comparables`.
 
-## Changes
+## Why
 
-### 1. Add "Agent Login" link to Navbar and ProLanding
+- Simpler schema — one table to query, scrape into, and maintain
+- Unified `find_comparables` RPC eliminates duplicated logic
+- `valuations` table provides a clean history of all user valuations (currently spread across `leads_sell` / `leads_rent`)
+- `valuation_comparables` links each valuation to the actual properties used
 
-**Navbar** (`src/components/Navbar.tsx`):
-- When on `/pro` or `/pro/*` routes, show a "Login" link in the nav that goes to `/pro/login`
-- Detect `/pro` context and add login link to `permanentLinks` or conditionally render it
+## Migration Plan
 
-**ProLanding** (`src/pages/ProLanding.tsx`):
-- Add a "Sign in" link in the hero area next to "Get Started Free" (or in the top section)
-- Add login link to the final CTA section as well
+### 1. Create `properties` table + indexes + trigger
 
-### 2. Auth guard + Logout (`src/pages/ProDashboard.tsx`)
+Create the unified table with all columns from the user's spec: `operation`, location fields, price, specs, boolean features, metadata, agency info, timestamps. Add the PostGIS trigger to auto-populate `location_point`, plus indexes on operation, type, rooms, municipality, scraped_at, and GIST on location_point.
 
-- The dashboard already redirects to `/pro` if no session exists — this is the auth guard
-- Add a **Logout** button in the sidebar footer and mobile header
-- On logout, call `supabase.auth.signOut()` and navigate to `/pro/login`
-- Add a "Sign out" nav item in the Account group or as a footer action
+**Important**: Keep `properties_for_sale` and `properties_for_rent` alive (no DROP) so existing data and edge functions keep working during transition. The new table is additive.
 
-### 3. Profile editing improvements (`src/pages/ProDashboard.tsx` — `ProfileSection`)
+### 2. Create `valuations` + `valuation_comparables` tables
 
-Current state: basic text fields (name, tagline, description, phone, website, address, socials).
+- `valuations`: stores the user's property details, valuation results, rental estimates, market context, contact info, and status
+- `valuation_comparables`: FK to both `valuations` and `properties`, with `similarity_score` and `distance_km`
+- RLS: public INSERT + SELECT (same pattern as leads tables), service role UPDATE
 
-Add:
-- **Logo upload**: Show current logo with an "Upload" button. Use Supabase Storage bucket for agent logos. Display preview of uploaded image.
-- **Languages editor**: Multi-select chips for languages (English, Spanish, etc.) from the existing `languages` column
-- **Service zones display**: Show current zones as read-only badges (zones require admin assignment per business model)
+### 3. Create unified `find_comparables` RPC
 
-### 4. Leads management improvements (`src/pages/ProDashboard.tsx` — `LeadsSection`)
+Single function with `p_operation` parameter. Queries the new `properties` table. Same similarity scoring logic. This replaces `find_sale_comparables` and `find_rent_comparables` (kept for backward compatibility but the new code will use the unified one).
 
-Current state: filter by status, expand for details, export CSV, mark as contacted/converted.
+### 4. Migrate data from old tables → `properties`
 
-Add:
-- **Property address** in lead details — pull from the `interest` field or related data
-- **Quick reply via email link**: `mailto:` link with pre-filled subject when expanding a lead
-- **"Archive"** status option alongside contacted/converted
-- **Sort options**: by date (newest/oldest) toggle
+SQL migration copies rows from `properties_for_sale` (operation='sale') and `properties_for_rent` (operation='rent') into the new `properties` table, mapping column names (e.g., `external_id` → `property_code`, `price` stays, `monthly_rent` → `price` for rent rows, `built_size_sqm` → `size_m2`).
 
-### 5. Subscription section (`src/pages/ProDashboard.tsx` — `SubscriptionSection`)
+### 5. Update Edge Functions
 
-Current state: placeholder text only.
+- **`calculate-valuation/index.ts`**: Call `find_comparables` (unified) instead of `find_sale_comparables` / `find_rent_comparables`. Optionally write to `valuations` table alongside existing `leads_*` tables (backward compatible).
+- **`analyze-listing/index.ts`**: Query `properties` instead of `properties_for_sale`.
+- **`process-scrape-job/index.ts`**: Upsert into `properties` instead of `properties_for_sale` / `properties_for_rent`.
+- **`scrape-properties/index.ts`**: Same — upsert into `properties`.
 
-Replace with:
-- Show current plan status (Free tier by default since no billing is connected yet)
-- Display the 3 tier cards (Basic/Premium/Elite) from ProLanding with a "Current Plan" badge on the active one
-- "Upgrade" buttons that link to `/pro` pricing section or trigger a contact/interest flow
-- Note: actual Stripe billing can be added later; for now show plan info and upgrade interest
+### 6. No frontend changes needed
+
+The frontend calls edge functions, not tables directly. The edge functions return the same shape. Existing `leads_sell` and `leads_rent` tables remain untouched — result pages still work.
+
+## Technical Details
+
+### Column mapping (old → new)
+
+```text
+properties_for_sale              →  properties
+─────────────────────────────────────────────
+external_id                      →  property_code
+price                            →  price
+price_per_sqm                    →  price_per_m2
+built_size_sqm                   →  size_m2
+bedrooms                         →  rooms
+listing_url                      →  idealista_url
+image_urls (array)               →  images (jsonb)
+city                             →  municipality
+(new)                            →  operation = 'sale'
+
+properties_for_rent              →  properties
+─────────────────────────────────────────────
+external_id                      →  property_code
+monthly_rent                     →  price
+rent_per_sqm                     →  price_per_m2
+built_size_sqm                   →  size_m2
+bedrooms                         →  rooms
+listing_url                      →  idealista_url
+(new)                            →  operation = 'rent'
+```
 
 ### Files Modified
+- New migration SQL (schema + data migration + RPC)
+- `supabase/functions/calculate-valuation/index.ts`
+- `supabase/functions/analyze-listing/index.ts`
+- `supabase/functions/process-scrape-job/index.ts`
+- `supabase/functions/scrape-properties/index.ts`
 
-- `src/components/Navbar.tsx` — add Login link when on /pro routes
-- `src/pages/ProLanding.tsx` — add Sign in links
-- `src/pages/ProDashboard.tsx` — logout button, profile improvements (logo upload, languages, zones), leads improvements (mailto, archive, sort), subscription section with tier display
-
-### Database
-
-- Create a Supabase Storage bucket `agent-logos` for logo uploads (if not already existing)
-- No schema changes needed — all columns already exist
+### Risk Mitigation
+- Old tables are NOT dropped — they remain as-is
+- Old RPC functions are NOT dropped — backward compatible
+- Migration is additive, not destructive
 
