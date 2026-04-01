@@ -189,7 +189,14 @@ const Index = () => {
                 </span>
                 <h1 className="font-serif text-4xl md:text-7xl font-black uppercase tracking-tight text-foreground leading-[1.05]">
                   {isSell ? (
-                    <>What is your property<br />in Spain <span className="font-['DM_Serif_Display'] italic normal-case">really</span> worth?</>
+                    <TypewriterText
+                      phrases={[
+                        "What is your apartment worth?",
+                        "What can your villa sell for?",
+                        "Find the value of your property",
+                        "Free valuation in 2 minutes",
+                      ]}
+                    />
                   ) : (
                     <>Is this property<br /><span className="font-['DM_Serif_Display'] italic normal-case">worth the price</span>?</>
                   )}

@@ -170,7 +170,7 @@ export const MatchedAgentsSection: React.FC<{ latitude: number | null; longitude
   }
 
   return (
-    <section className="py-8 sm:py-12 border-b border-border/50">
+    <section id="matched-agents" className="py-8 sm:py-12 border-b border-border/50">
       <div className="max-w-[1000px] mx-auto px-6">
         <div className="w-10 h-px bg-gold mb-8" />
         <SectionLabel className="mb-2">Recommended Local Experts</SectionLabel>
