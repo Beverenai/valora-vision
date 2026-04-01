@@ -56,11 +56,51 @@ function dynamicPremium(
     medianWith && medianWithout && medianWithout > 0
   ) {
     const premium = (medianWith - medianWithout) / medianWithout;
-    // Clamp to reasonable range: -5% to +50%
     return Math.max(-0.05, Math.min(0.50, premium));
   }
   return FALLBACK_ADJUSTMENTS[fallbackKey] ?? 0;
 }
+
+// Tool calling schemas
+const SELL_ANALYSIS_TOOL = {
+  type: "function",
+  function: {
+    name: "generate_sell_analysis",
+    description: "Generate a structured property sale analysis with strengths, considerations, and pricing recommendations.",
+    parameters: {
+      type: "object",
+      properties: {
+        summary: { type: "string", description: "2-3 sentence overview of the valuation result and market position" },
+        detailed_analysis: { type: "string", description: "3-paragraph detailed analysis (150-200 words)" },
+        strengths: { type: "array", items: { type: "string" }, description: "3-5 bullet points about property strengths that add value" },
+        considerations: { type: "array", items: { type: "string" }, description: "2-4 bullet points about market context or things to be aware of" },
+        recommended_listing_price: { type: "integer", description: "Recommended listing price in euros" },
+        quick_sale_price: { type: "integer", description: "Price for a faster sale (typically 5-8% below estimated value)" },
+      },
+      required: ["summary", "detailed_analysis", "strengths", "considerations", "recommended_listing_price", "quick_sale_price"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const RENT_ANALYSIS_TOOL = {
+  type: "function",
+  function: {
+    name: "generate_rent_analysis",
+    description: "Generate a structured rental income analysis with strengths and considerations.",
+    parameters: {
+      type: "object",
+      properties: {
+        summary: { type: "string", description: "2-3 sentence overview of rental income potential" },
+        detailed_analysis: { type: "string", description: "3-paragraph detailed analysis (150-200 words)" },
+        strengths: { type: "array", items: { type: "string" }, description: "3-5 bullet points about rental income strengths" },
+        considerations: { type: "array", items: { type: "string" }, description: "2-4 bullet points about rental market context" },
+      },
+      required: ["summary", "detailed_analysis", "strengths", "considerations"],
+      additionalProperties: false,
+    },
+  },
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -150,12 +190,11 @@ serve(async (req) => {
           p_min_results: 8,
           p_limit: 30,
         }),
-        // Try to find zone and get stats
         supabase
           .from("properties")
           .select("zone_id")
           .not("zone_id", "is", null)
-          .order("location_point", { ascending: true }) // closest
+          .order("location_point", { ascending: true })
           .limit(1)
           .then(async (propRes) => {
             if (propRes.data?.[0]?.zone_id) {
@@ -201,7 +240,7 @@ serve(async (req) => {
       featureAdjustments.garage = dynamicPremium(zoneStats.median_m2_with_garage, zoneStats.median_m2_without_garage, zoneStats.count_with_garage, "garage");
       featureAdjustments.terrace = dynamicPremium(zoneStats.median_m2_with_terrace, zoneStats.median_m2_without_terrace, zoneStats.count_with_terrace, "terrace");
       featureAdjustments.lift = dynamicPremium(zoneStats.median_m2_with_lift, zoneStats.median_m2_without_lift, zoneStats.count_with_lift, "lift");
-      featureAdjustments.garden = FALLBACK_ADJUSTMENTS.garden; // no zone data for garden
+      featureAdjustments.garden = FALLBACK_ADJUSTMENTS.garden;
       featureAdjustments.ac = FALLBACK_ADJUSTMENTS.ac;
       featureAdjustments.balcony = FALLBACK_ADJUSTMENTS.balcony;
     } else {
@@ -218,6 +257,9 @@ serve(async (req) => {
     let monthlyRent = 0;
     let annualRent = 0;
 
+    // Track which features are active and their impact amounts
+    const activeFeatures: Record<string, { premium_pct: number; amount: number }> = {};
+
     if (isSell) {
       if (comparables.length > 0) {
         const pricesPerSqm = comparables
@@ -226,16 +268,25 @@ serve(async (req) => {
 
         const filtered = filterOutliers(pricesPerSqm);
         const medianPricePerSqm = filtered.length > 0 ? median(filtered) : 3500;
+        const baseValue = medianPricePerSqm * sizeM2;
 
         let multiplier = 1.0;
-        if (has_pool) multiplier += featureAdjustments.pool;
-        if (has_sea_views || (views && views.toLowerCase().includes("sea"))) multiplier += featureAdjustments.sea_views;
-        if (has_garage) multiplier += featureAdjustments.garage;
-        if (has_terrace || (terrace_size_sqm && Number(terrace_size_sqm) > 0)) multiplier += featureAdjustments.terrace;
-        if (has_garden) multiplier += featureAdjustments.garden;
-        if (has_lift) multiplier += featureAdjustments.lift;
-        if (has_ac) multiplier += featureAdjustments.ac;
-        if (has_balcony) multiplier += featureAdjustments.balcony;
+        const applyFeature = (key: string, active: boolean) => {
+          if (active) {
+            const adj = featureAdjustments[key] || 0;
+            multiplier += adj;
+            activeFeatures[key] = { premium_pct: Math.round(adj * 100), amount: Math.round(baseValue * adj) };
+          }
+        };
+
+        applyFeature("pool", !!has_pool);
+        applyFeature("sea_views", !!(has_sea_views || (views && views.toLowerCase().includes("sea"))));
+        applyFeature("garage", !!has_garage);
+        applyFeature("terrace", !!(has_terrace || (terrace_size_sqm && Number(terrace_size_sqm) > 0)));
+        applyFeature("garden", !!has_garden);
+        applyFeature("lift", !!has_lift);
+        applyFeature("ac", !!has_ac);
+        applyFeature("balcony", !!has_balcony);
 
         if (condition && CONDITION_ADJUSTMENTS[condition] !== undefined) {
           multiplier += CONDITION_ADJUSTMENTS[condition];
@@ -321,14 +372,21 @@ serve(async (req) => {
       if (annualSTR > annualRent) annualRent = annualSTR;
     }
 
-    // 5. AI analysis with zone context
+    // 5. AI analysis with structured tool calling
     let analysisText = "";
     let marketTrendsText = "";
+    let aiStructured: any = null;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (LOVABLE_API_KEY) {
       try {
-        const propertyDesc = `${property_type || "property"}, ${sizeM2}m², ${roomsCount} bedrooms, ${bathrooms || "unknown"} bathrooms, in ${city || address || "Spain"}`;
+        // Build structured data package for AI
+        const compPrices = comparables.filter((c: any) => c.price && c.price > 0).map((c: any) => Number(c.price));
+        const compPricesPerSqm = comparables.filter((c: any) => c.price_per_m2 > 0).map((c: any) => Number(c.price_per_m2));
+        const minCompPrice = compPrices.length > 0 ? Math.min(...compPrices) : 0;
+        const maxCompPrice = compPrices.length > 0 ? Math.max(...compPrices) : 0;
+        const medianCompPriceSqm = compPricesPerSqm.length > 0 ? median(compPricesPerSqm) : 0;
+
         const featuresList = [
           has_pool ? "swimming pool" : "",
           has_sea_views || (views && views.toLowerCase().includes("sea")) ? "sea views" : "",
@@ -338,32 +396,44 @@ serve(async (req) => {
           has_lift ? "lift" : "",
           has_ac ? "air conditioning" : "",
           condition ? `condition: ${condition}` : "",
-          orientation ? `orientation: ${orientation}` : "",
         ].filter(Boolean).join(", ");
 
-        const systemPrompt = `You are a professional property analyst for ValoraCasa, a Spanish property valuation service. Write in English. Be specific, data-driven, and professional. Do not use markdown formatting.`;
+        const dataPackage = {
+          type: isSell ? "sell" : "rent",
+          property: {
+            address: address || city || "Unknown",
+            type: property_type || "property",
+            size_m2: sizeM2,
+            rooms: roomsCount,
+            bathrooms: bathrooms || "unknown",
+            features: featuresList || "none specified",
+            condition: condition || "not specified",
+            floor: body.floor || "not specified",
+          },
+          valuation: isSell
+            ? { estimated_value: estimatedValue, estimated_low: priceLow, estimated_high: priceHigh, price_per_m2: pricePerSqm, confidence: comparables.length >= 15 ? "high" : comparables.length >= 8 ? "medium" : "low" }
+            : { monthly_rent: monthlyRent, annual_income: annualRent, weekly_high_season: weeklyHighSeason, weekly_low_season: weeklyLowSeason },
+          comparables: {
+            count: comparables.length,
+            price_range: `€${minCompPrice.toLocaleString()}–€${maxCompPrice.toLocaleString()}`,
+            median_price_per_m2: Math.round(medianCompPriceSqm),
+          },
+          zone_stats: zoneStats ? {
+            listing_count: zoneStats.listing_count,
+            median_price_m2: zoneStats.median_price_m2,
+            pct_with_pool: zoneStats.pct_with_pool,
+            pct_with_sea_views: zoneStats.pct_with_sea_views,
+            avg_size_m2: zoneStats.avg_size_m2,
+          } : null,
+          feature_impacts: Object.keys(activeFeatures).length > 0 ? activeFeatures : null,
+        };
 
-        // Build comparable context
-        const compPrices = comparables.filter((c: any) => c.price && c.price > 0).map((c: any) => Number(c.price));
-        const compPricesPerSqm = comparables.filter((c: any) => c.price_per_m2 > 0).map((c: any) => Number(c.price_per_m2));
-        const minCompPrice = compPrices.length > 0 ? Math.min(...compPrices) : 0;
-        const maxCompPrice = compPrices.length > 0 ? Math.max(...compPrices) : 0;
-        const medianCompPriceSqm = compPricesPerSqm.length > 0 ? median(compPricesPerSqm) : 0;
-        const userVsMedianPct = medianCompPriceSqm > 0 ? Math.round(((pricePerSqm - medianCompPriceSqm) / medianCompPriceSqm) * 100) : 0;
-        const userVsMedianDir = userVsMedianPct >= 0 ? "above" : "below";
+        const systemPrompt = `You are a professional property analyst for ValoraCasa, a Spanish property valuation service. You receive pre-computed data and INTERPRET it — you do not calculate. Be neutral, data-driven, and professional. Never say a property is "too expensive" or a "bad deal". Present facts objectively. Write in English. Do not use markdown formatting. Reference the real data provided.`;
 
-        const compContext = comparables.length > 0
-          ? `Based on ${comparables.length} comparable properties within 5km. Comparable price range: €${minCompPrice.toLocaleString()}–€${maxCompPrice.toLocaleString()}. Area median price/m²: €${Math.round(medianCompPriceSqm).toLocaleString()}. The property's price/m² of €${pricePerSqm.toLocaleString()} is ${Math.abs(userVsMedianPct)}% ${userVsMedianDir} the area median.`
-          : `Limited comparable data available in this area.`;
+        const userPrompt = `Analyze this property based on the following pre-computed data:\n\n${JSON.stringify(dataPackage, null, 2)}`;
 
-        // Zone intelligence context for AI
-        const zoneContext = zoneStats
-          ? `Zone market data: ${zoneStats.listing_count} active listings, median €${zoneStats.median_price_m2}/m², range €${zoneStats.min_price_m2}–€${zoneStats.max_price_m2}/m². ${zoneStats.pct_with_pool}% have pools, ${zoneStats.pct_with_sea_views}% have sea views. Average size: ${zoneStats.avg_size_m2}m².`
-          : "";
-
-        const analysisPrompt = isSell
-          ? `Write a 3-paragraph property analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated value: €${estimatedValue.toLocaleString()}. ${compContext} ${zoneContext} Discuss the property's strengths, how features affect value, and market positioning. Reference the real comparable data. Keep it concise (150-200 words).`
-          : `Write a 3-paragraph rental income analysis for: ${propertyDesc}. Features: ${featuresList || "none specified"}. Estimated monthly rent: €${monthlyRent.toLocaleString()}. ${compContext} ${zoneContext} Discuss rental demand, seasonal factors, and income potential. Reference the real comparable data. Keep it concise (150-200 words).`;
+        const tool = isSell ? SELL_ANALYSIS_TOOL : RENT_ANALYSIS_TOOL;
+        const toolName = isSell ? "generate_sell_analysis" : "generate_rent_analysis";
 
         const trendsPrompt = `Write a 2-paragraph market trends summary for ${city || "Costa del Sol"}, Spain as of March 2026. Cover price trends, demand drivers, and outlook. Reference real market dynamics (international buyers, Golden Visa, supply constraints). Keep it concise (120-150 words). Do not use markdown.`;
 
@@ -375,11 +445,14 @@ serve(async (req) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "google/gemini-2.5-flash-lite",
+              model: "google/gemini-3-flash-preview",
+              temperature: 0.3,
               messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: analysisPrompt },
+                { role: "user", content: userPrompt },
               ],
+              tools: [tool],
+              tool_choice: { type: "function", function: { name: toolName } },
             }),
           }),
           fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -391,7 +464,7 @@ serve(async (req) => {
             body: JSON.stringify({
               model: "google/gemini-2.5-flash-lite",
               messages: [
-                { role: "system", content: systemPrompt },
+                { role: "system", content: "You are a property market analyst for ValoraCasa. Write in English. Be data-driven. Do not use markdown." },
                 { role: "user", content: trendsPrompt },
               ],
             }),
@@ -400,8 +473,25 @@ serve(async (req) => {
 
         if (analysisRes.ok) {
           const data = await analysisRes.json();
-          analysisText = data.choices?.[0]?.message?.content || "";
+          const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+          if (toolCall?.function?.arguments) {
+            try {
+              aiStructured = JSON.parse(toolCall.function.arguments);
+              // Backward compatibility: populate analysis text
+              analysisText = [aiStructured.summary, aiStructured.detailed_analysis].filter(Boolean).join("\n\n");
+            } catch (parseErr) {
+              console.error("Failed to parse tool call response:", parseErr);
+              // Fallback to content if tool calling failed
+              analysisText = data.choices?.[0]?.message?.content || "";
+            }
+          } else {
+            analysisText = data.choices?.[0]?.message?.content || "";
+          }
+        } else {
+          const errText = await analysisRes.text();
+          console.error("AI analysis error:", analysisRes.status, errText);
         }
+
         if (trendsRes.ok) {
           const data = await trendsRes.json();
           marketTrendsText = data.choices?.[0]?.message?.content || "";
@@ -439,6 +529,13 @@ serve(async (req) => {
       updateData.comparable_properties = comparableData;
       updateData.analysis = analysisText || null;
       updateData.market_trends = marketTrendsText || null;
+      // Structured AI fields
+      if (aiStructured) {
+        updateData.ai_strengths = aiStructured.strengths || null;
+        updateData.ai_considerations = aiStructured.considerations || null;
+        updateData.recommended_listing_price = aiStructured.recommended_listing_price || null;
+        updateData.quick_sale_price = aiStructured.quick_sale_price || null;
+      }
     } else {
       updateData.monthly_long_term_estimate = monthlyRent;
       updateData.annual_income_estimate = annualRent;
@@ -448,6 +545,11 @@ serve(async (req) => {
       updateData.weekly_low_season_estimate = weeklyLowSeason || null;
       updateData.occupancy_estimate = occupancyEstimate || null;
       updateData.seasonal_breakdown = seasonalBreakdown || null;
+      // Structured AI fields
+      if (aiStructured) {
+        updateData.ai_strengths = aiStructured.strengths || null;
+        updateData.ai_considerations = aiStructured.considerations || null;
+      }
     }
 
     const { error: updateError } = await supabase
