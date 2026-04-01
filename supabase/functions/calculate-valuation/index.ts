@@ -337,6 +337,28 @@ serve(async (req) => {
       if (zoneResult?.data?.[0]) {
         zoneStats = zoneResult.data[0];
       }
+
+      // 2a. On-demand Resales Online fetch if insufficient comparables
+      if (comparables.length < 5) {
+        console.log(`Only ${comparables.length} comparables found, triggering Resales Online on-demand fetch...`);
+        const fetched = await fetchResalesOnDemand(supabase, isSell ? "sale" : "rent");
+        if (fetched > 0) {
+          const { data: newComps, error: reErr } = await supabase.rpc("find_comparables_with_fallback", {
+            p_lat: Number(latitude),
+            p_lng: Number(longitude),
+            p_operation: isSell ? "sale" : "rent",
+            p_property_type: property_type || "apartment",
+            p_size_m2: sizeM2,
+            p_rooms: roomsCount,
+            p_min_results: 8,
+            p_limit: 30,
+          });
+          if (!reErr && newComps?.length > 0) {
+            comparables = newComps;
+            console.log(`After Resales fetch: ${comparables.length} comparables available`);
+          }
+        }
+      }
     }
 
     // 2b. STR comparables for rent
