@@ -182,7 +182,7 @@ const ProOnboard = () => {
     const apiPromise = (async () => {
       try {
         const res = await supabase.functions.invoke("onboard-agency", {
-          body: { company_name: companyName, contact_name: contactName, email, phone, website, address },
+          body: { company_name: companyName, contact_name: contactName, email, phone, website, address: derivedAddress },
         });
         if (res.error) throw new Error(res.error.message);
         const data = res.data;
