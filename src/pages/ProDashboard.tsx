@@ -6,7 +6,7 @@ import {
   LayoutDashboard, User, MessageSquare, BarChart3, CreditCard, Settings,
   Star, Eye, TrendingUp, Loader2, ExternalLink, ChevronDown, Check, X,
   Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus, Shield,
-  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2
+  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2, Building2, Users, Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ import {
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -49,6 +50,7 @@ interface Professional {
   description: string | null;
   tagline: string | null;
   logo_url: string | null;
+  photo_url: string | null;
   cover_photo_url: string | null;
   slug: string;
   languages: string[] | null;
@@ -416,96 +418,9 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
   );
 }
 
-/* ─── Profile Section ─── */
+/* ─── Profile Section (Tabbed) ─── */
 function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave: (data: Partial<Professional>) => void; saving: boolean }) {
-  const [form, setForm] = useState({
-    company_name: agent.company_name,
-    tagline: agent.tagline || "",
-    description: agent.description || "",
-    phone: agent.phone || "",
-    website: agent.website || "",
-    office_address: agent.office_address || "",
-    instagram_url: agent.instagram_url || "",
-    facebook_url: agent.facebook_url || "",
-    linkedin_url: agent.linkedin_url || "",
-  });
-  const [languages, setLanguages] = useState<string[]>(agent.languages || []);
-  const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState(agent.cover_photo_url || "");
-  const [uploading, setUploading] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
-  const [coverFailed, setCoverFailed] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-
-  const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
-
-  const toggleLanguage = (lang: string) => {
-    setLanguages((prev) =>
-      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]
-    );
-  };
-
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${agent.id}/logo.${ext}`;
-
-    const { error: uploadError } = await supabase.storage.from("agent-logos").upload(path, file, { upsert: true });
-    if (uploadError) {
-      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
-      setUploading(false);
-      return;
-    }
-
-    const { data: publicData } = supabase.storage.from("agent-logos").getPublicUrl(path);
-    const newUrl = publicData.publicUrl + `?t=${Date.now()}`;
-    setLogoUrl(newUrl);
-    setLogoFailed(false);
-    setUploading(false);
-
-    // Save logo_url immediately
-    const { error } = await supabase.from("professionals").update({ logo_url: newUrl }).eq("id", agent.id);
-    if (!error) {
-      toast({ title: "Logo updated!" });
-    }
-  };
-
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingCover(true);
-    const ext = file.name.split(".").pop();
-    const path = `${agent.id}/cover.${ext}`;
-
-    const { error: uploadError } = await supabase.storage.from("agent-logos").upload(path, file, { upsert: true });
-    if (uploadError) {
-      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
-      setUploadingCover(false);
-      return;
-    }
-
-    const { data: publicData } = supabase.storage.from("agent-logos").getPublicUrl(path);
-    const newUrl = publicData.publicUrl + `?t=${Date.now()}`;
-    setCoverPhotoUrl(newUrl);
-    setCoverFailed(false);
-    setUploadingCover(false);
-
-    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl }).eq("id", agent.id);
-    if (!error) {
-      toast({ title: "Cover photo updated!" });
-    }
-  };
-
-  const handleSave = () => {
-    onSave({ ...form, languages, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null });
-  };
-
-  const initials = agent.company_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const isAdmin = !agent.agency_id || agent.agency_role === "owner" || agent.agency_role === "admin";
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -516,52 +431,100 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
         </Button>
       </div>
 
-      {/* Logo */}
+      <Tabs defaultValue="personal" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="personal" className="gap-1.5"><User className="h-3.5 w-3.5" /> My Profile</TabsTrigger>
+          <TabsTrigger value="team" className="gap-1.5"><Users className="h-3.5 w-3.5" /> Team</TabsTrigger>
+          <TabsTrigger value="company" className="gap-1.5"><Building2 className="h-3.5 w-3.5" /> Company</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="personal">
+          <MyProfileTab agent={agent} onSave={onSave} saving={saving} />
+        </TabsContent>
+        <TabsContent value="team">
+          <TeamTab agent={agent} isAdmin={isAdmin} />
+        </TabsContent>
+        <TabsContent value="company">
+          <CompanyProfileTab agent={agent} onSave={onSave} saving={saving} isAdmin={isAdmin} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+/* ─── My Profile Tab ─── */
+function MyProfileTab({ agent, onSave, saving }: { agent: Professional; onSave: (data: Partial<Professional>) => void; saving: boolean }) {
+  const [form, setForm] = useState({
+    contact_name: agent.contact_name,
+    bio: agent.bio || "",
+    phone: agent.phone || "",
+  });
+  const [languages, setLanguages] = useState<string[]>(agent.languages || []);
+  const [photoUrl, setPhotoUrl] = useState(agent.photo_url || "");
+  const [uploading, setUploading] = useState(false);
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const toggleLanguage = (lang: string) => {
+    setLanguages((prev) => prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${agent.id}/photo.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("agent-logos").upload(path, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+    const { data: publicData } = supabase.storage.from("agent-logos").getPublicUrl(path);
+    const newUrl = publicData.publicUrl + `?t=${Date.now()}`;
+    setPhotoUrl(newUrl);
+    setPhotoFailed(false);
+    setUploading(false);
+    const { error } = await supabase.from("professionals").update({ photo_url: newUrl }).eq("id", agent.id);
+    if (!error) toast({ title: "Photo updated!" });
+  };
+
+  const handleSave = () => {
+    onSave({ ...form, languages, photo_url: photoUrl || null });
+  };
+
+  const initials = agent.contact_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+
+  return (
+    <div className="space-y-6 pt-4">
+      {/* Personal Photo */}
       <div className="flex items-center gap-4">
-        <div className="w-20 h-20 rounded-xl border-2 border-dashed border-border overflow-hidden flex items-center justify-center bg-muted/30">
-          {logoUrl && !logoFailed ? (
-            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" onError={() => setLogoFailed(true)} />
+        <div className="w-20 h-20 rounded-full border-2 border-dashed border-border overflow-hidden flex items-center justify-center bg-muted/30">
+          {photoUrl && !photoFailed ? (
+            <img src={photoUrl} alt="Photo" className="w-full h-full object-cover" onError={() => setPhotoFailed(true)} />
           ) : (
             <span className="text-xl font-bold text-primary/60">{initials}</span>
           )}
         </div>
         <div>
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-          <Button variant="outline" size="sm" className="rounded-full" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+          <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+          <Button variant="outline" size="sm" className="rounded-full" onClick={() => photoInputRef.current?.click()} disabled={uploading}>
             {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
-            {uploading ? "Uploading…" : "Upload logo"}
+            {uploading ? "Uploading…" : "Upload photo"}
           </Button>
-          <p className="text-xs text-muted-foreground mt-1">JPG or PNG, max 2MB</p>
+          <p className="text-xs text-muted-foreground mt-1">Your personal profile photo</p>
         </div>
-      </div>
-
-      {/* Cover Photo */}
-      <div>
-        <Label className="mb-2 block">Cover Photo</Label>
-        <p className="text-xs text-muted-foreground mb-2">This appears as the hero banner on your public profile</p>
-        {coverPhotoUrl && !coverFailed ? (
-          <img src={coverPhotoUrl} alt="Cover" className="w-full h-36 rounded-xl object-cover border mb-2" onError={() => setCoverFailed(true)} />
-        ) : (
-          <div className="w-full h-36 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-dashed border-border flex items-center justify-center mb-2">
-            <span className="text-sm text-muted-foreground">No cover photo</span>
-          </div>
-        )}
-        <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
-        <Button variant="outline" size="sm" className="rounded-full" onClick={() => coverInputRef.current?.click()} disabled={uploadingCover}>
-          {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
-          {uploadingCover ? "Uploading…" : coverPhotoUrl ? "Change cover photo" : "Upload cover photo"}
-        </Button>
       </div>
 
       <div className="space-y-4">
-        <div><Label>Company Name</Label><Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} /></div>
-        <div><Label>Tagline</Label><Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} placeholder="Your elevator pitch" /></div>
-        <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} /></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></div>
-          <div><Label>Website</Label><Input value={form.website} onChange={(e) => set("website", e.target.value)} /></div>
-        </div>
-        <div><Label>Office Address</Label><Input value={form.office_address} onChange={(e) => set("office_address", e.target.value)} /></div>
+        <div><Label>Full Name</Label><Input value={form.contact_name} onChange={(e) => set("contact_name", e.target.value)} /></div>
+        <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3} placeholder="Tell clients about yourself…" /></div>
+        <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+        <div><Label>Email</Label><Input value={agent.email} disabled className="opacity-60" /><p className="text-xs text-muted-foreground mt-1">Email can't be changed</p></div>
 
         {/* Languages */}
         <div>
@@ -584,31 +547,279 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
             ))}
           </div>
         </div>
-
-        {/* Service Zones (read-only) */}
-        {agent.service_zones && agent.service_zones.length > 0 && (
-          <div>
-            <Label className="mb-2 block">Service Zones</Label>
-            <div className="flex flex-wrap gap-2">
-              {agent.service_zones.map((zoneId) => (
-                <Badge key={zoneId} variant="secondary" className="text-xs">{zoneId.slice(0, 8)}…</Badge>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Zones are managed by your subscription plan</p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div><Label>Instagram</Label><Input value={form.instagram_url} onChange={(e) => set("instagram_url", e.target.value)} placeholder="https://instagram.com/..." /></div>
-          <div><Label>Facebook</Label><Input value={form.facebook_url} onChange={(e) => set("facebook_url", e.target.value)} placeholder="https://facebook.com/..." /></div>
-          <div><Label>LinkedIn</Label><Input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/..." /></div>
-        </div>
       </div>
 
       <Button onClick={handleSave} disabled={saving} className="rounded-full">
         {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
         Save changes
       </Button>
+    </div>
+  );
+}
+
+/* ─── Team Tab ─── */
+function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) {
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadTeam();
+  }, [agent.id]);
+
+  const loadTeam = async () => {
+    setLoading(true);
+    // If this is an agency, load professionals linked to it
+    if (agent.type === "agency") {
+      const { data } = await supabase
+        .from("professionals")
+        .select("id, contact_name, email, phone, photo_url, agency_role, slug, languages, avg_rating, total_reviews")
+        .eq("agency_id", agent.id)
+        .order("agency_role");
+      setTeamMembers(data || []);
+    } else {
+      // For solo agents or team members, load from agent_team_members (legacy)
+      const { data } = await supabase
+        .from("agent_team_members")
+        .select("*")
+        .eq("professional_id", agent.agency_id || agent.id)
+        .order("sort_order");
+      setTeamMembers(data || []);
+    }
+    setLoading(false);
+  };
+
+  const handleRemoveMember = async (memberId: string, isRealAgent: boolean) => {
+    if (!isAdmin) return;
+    if (isRealAgent) {
+      // Unlink agent from agency
+      const { error } = await supabase.from("professionals").update({ agency_id: null, agency_role: null }).eq("id", memberId);
+      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    } else {
+      const { error } = await supabase.from("agent_team_members").delete().eq("id", memberId);
+      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    }
+    toast({ title: "Team member removed" });
+    loadTeam();
+  };
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  }
+
+  const isRealAgents = agent.type === "agency";
+
+  return (
+    <div className="space-y-4 pt-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{teamMembers.length} team member{teamMembers.length !== 1 ? "s" : ""}</p>
+        {isAdmin && (
+          <Button variant="outline" size="sm" className="rounded-full" disabled>
+            <Plus className="h-4 w-4 mr-1" /> Invite Agent
+            <Badge variant="secondary" className="ml-2 text-[0.6rem]">Coming soon</Badge>
+          </Button>
+        )}
+      </div>
+
+      {!isAdmin && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Contact your agency admin to manage the team.</span>
+        </div>
+      )}
+
+      {teamMembers.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            <Users className="h-8 w-8 mx-auto mb-2 opacity-40" />
+            <p className="text-sm">No team members yet.</p>
+            {isAdmin && <p className="text-xs mt-1">Invite agents to join your agency.</p>}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {teamMembers.map((m) => {
+            const name = isRealAgents ? m.contact_name : m.name;
+            const initials = name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "??";
+            const photo = m.photo_url;
+
+            return (
+              <Card key={m.id}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                    {photo ? (
+                      <img src={photo} alt={name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs font-bold text-muted-foreground">{initials}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{name}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {isRealAgents ? (m.agency_role || "agent") : (m.role || "Team member")}
+                      {m.email && ` · ${m.email}`}
+                    </p>
+                  </div>
+                  {isRealAgents && m.slug && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <a href={`/agentes/${m.slug}`} target="_blank"><ExternalLink className="h-3.5 w-3.5" /></a>
+                    </Button>
+                  )}
+                  {isAdmin && m.agency_role !== "owner" && (
+                    <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(m.id, isRealAgents)} className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Company Profile Tab ─── */
+function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professional; onSave: (data: Partial<Professional>) => void; saving: boolean; isAdmin: boolean }) {
+  const [form, setForm] = useState({
+    company_name: agent.company_name,
+    tagline: agent.tagline || "",
+    description: agent.description || "",
+    website: agent.website || "",
+    office_address: agent.office_address || "",
+    instagram_url: agent.instagram_url || "",
+    facebook_url: agent.facebook_url || "",
+    linkedin_url: agent.linkedin_url || "",
+  });
+  const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState(agent.cover_photo_url || "");
+  const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const [coverFailed, setCoverFailed] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAdmin) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${agent.id}/logo.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("agent-logos").upload(path, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+    const { data: publicData } = supabase.storage.from("agent-logos").getPublicUrl(path);
+    const newUrl = publicData.publicUrl + `?t=${Date.now()}`;
+    setLogoUrl(newUrl);
+    setLogoFailed(false);
+    setUploading(false);
+    const { error } = await supabase.from("professionals").update({ logo_url: newUrl }).eq("id", agent.id);
+    if (!error) toast({ title: "Logo updated!" });
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAdmin) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    const ext = file.name.split(".").pop();
+    const path = `${agent.id}/cover.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("agent-logos").upload(path, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+      setUploadingCover(false);
+      return;
+    }
+    const { data: publicData } = supabase.storage.from("agent-logos").getPublicUrl(path);
+    const newUrl = publicData.publicUrl + `?t=${Date.now()}`;
+    setCoverPhotoUrl(newUrl);
+    setCoverFailed(false);
+    setUploadingCover(false);
+    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl }).eq("id", agent.id);
+    if (!error) toast({ title: "Cover photo updated!" });
+  };
+
+  const handleSave = () => {
+    onSave({ ...form, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null });
+  };
+
+  const initials = agent.company_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+
+  return (
+    <div className="space-y-6 pt-4">
+      {!isAdmin && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Only agency owners and admins can edit company details.</span>
+        </div>
+      )}
+
+      {/* Logo */}
+      <div className="flex items-center gap-4">
+        <div className="w-20 h-20 rounded-xl border-2 border-dashed border-border overflow-hidden flex items-center justify-center bg-muted/30">
+          {logoUrl && !logoFailed ? (
+            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" onError={() => setLogoFailed(true)} />
+          ) : (
+            <span className="text-xl font-bold text-primary/60">{initials}</span>
+          )}
+        </div>
+        <div>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+          <Button variant="outline" size="sm" className="rounded-full" onClick={() => fileInputRef.current?.click()} disabled={uploading || !isAdmin}>
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+            {uploading ? "Uploading…" : "Upload logo"}
+          </Button>
+          <p className="text-xs text-muted-foreground mt-1">JPG or PNG, max 2MB</p>
+        </div>
+      </div>
+
+      {/* Cover Photo */}
+      <div>
+        <Label className="mb-2 block">Cover Photo</Label>
+        <p className="text-xs text-muted-foreground mb-2">This appears as the hero banner on your public profile</p>
+        {coverPhotoUrl && !coverFailed ? (
+          <img src={coverPhotoUrl} alt="Cover" className="w-full h-36 rounded-xl object-cover border mb-2" onError={() => setCoverFailed(true)} />
+        ) : (
+          <div className="w-full h-36 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-dashed border-border flex items-center justify-center mb-2">
+            <span className="text-sm text-muted-foreground">No cover photo</span>
+          </div>
+        )}
+        <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+        <Button variant="outline" size="sm" className="rounded-full" onClick={() => coverInputRef.current?.click()} disabled={uploadingCover || !isAdmin}>
+          {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+          {uploadingCover ? "Uploading…" : coverPhotoUrl ? "Change cover photo" : "Upload cover photo"}
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        <div><Label>Company Name</Label><Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} disabled={!isAdmin} /></div>
+        <div><Label>Tagline</Label><Input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} placeholder="Your elevator pitch" disabled={!isAdmin} /></div>
+        <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={4} disabled={!isAdmin} /></div>
+        <div><Label>Website</Label><Input value={form.website} onChange={(e) => set("website", e.target.value)} disabled={!isAdmin} /></div>
+        <div><Label>Office Address</Label><Input value={form.office_address} onChange={(e) => set("office_address", e.target.value)} disabled={!isAdmin} /></div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div><Label>Instagram</Label><Input value={form.instagram_url} onChange={(e) => set("instagram_url", e.target.value)} placeholder="https://instagram.com/..." disabled={!isAdmin} /></div>
+          <div><Label>Facebook</Label><Input value={form.facebook_url} onChange={(e) => set("facebook_url", e.target.value)} placeholder="https://facebook.com/..." disabled={!isAdmin} /></div>
+          <div><Label>LinkedIn</Label><Input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/..." disabled={!isAdmin} /></div>
+        </div>
+      </div>
+
+      {isAdmin && (
+        <Button onClick={handleSave} disabled={saving} className="rounded-full">
+          {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          Save changes
+        </Button>
+      )}
     </div>
   );
 }
