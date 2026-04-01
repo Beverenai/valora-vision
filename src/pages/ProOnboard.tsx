@@ -312,6 +312,13 @@ const ProOnboard = () => {
       const userId = authData.user?.id;
       if (!userId) throw new Error("Failed to create account");
 
+      // Detect repeated signup (user already exists) — identities will be empty
+      if (!authData.user?.identities?.length) {
+        toast({ title: "Account already exists", description: "This email is already registered. Please sign in instead.", variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+      }
+
       // 2. Generate slug
       const slug = companyName
         .toLowerCase()
