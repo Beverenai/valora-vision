@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, CheckCircle, MapPin, Globe, ChevronRight, Sparkles, Users } from "lucide-react";
+import { Search, Star, CheckCircle, MapPin, Globe, ChevronRight, Sparkles, Users, Building2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
