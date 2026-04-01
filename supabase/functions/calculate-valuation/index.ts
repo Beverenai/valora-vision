@@ -381,7 +381,7 @@ serve(async (req) => {
       // 2a. On-demand Resales Online fetch if insufficient comparables
       if (comparables.length < 5) {
         console.log(`Only ${comparables.length} comparables found, triggering Resales Online on-demand fetch...`);
-        const fetched = await fetchResalesOnDemand(supabase, isSell ? "sale" : "rent");
+        const fetched = await fetchResalesOnDemand(supabase, isSell ? "sale" : "rent", city || "", property_type || "");
         if (fetched > 0) {
           const { data: newComps, error: reErr } = await supabase.rpc("find_comparables_with_fallback", {
             p_lat: Number(latitude),
