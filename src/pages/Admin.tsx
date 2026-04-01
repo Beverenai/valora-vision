@@ -12,7 +12,7 @@ import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 
-const ADMIN_PASSWORD = "valoracasa2024";
+const ADMIN_PASSWORD = "1234";
 
 // ─── Types ───────────────────────────────────────────────
 interface LeadRow {
