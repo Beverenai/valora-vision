@@ -1,59 +1,100 @@
 
 
-# Layer 3: Zone Intelligence — zone_stats Materialized View
+# Layer 4: AI Reasoning — Structured Data Package + Structured Output
 
 ## What This Does
 
-Creates a `zone_stats` materialized view that pre-computes per-zone market statistics (median/avg prices, feature prevalence, feature premiums) from `active_listings`. This eliminates aggregate queries at valuation time. Updates `calculate-valuation` to use dynamic feature premiums from `zone_stats` instead of hardcoded multipliers.
+Upgrades the AI calls in both `calculate-valuation` and `analyze-listing` to use **tool calling** for structured JSON output instead of free-text prompts. The AI receives a complete pre-computed data package (property, valuation, comparables, zone_stats, feature_impacts) and returns structured analysis with specific fields for sell vs buy flows.
 
 ## Current State
 
-- `zones` table already exists with all needed columns (name, municipality, province, tier, center_lat/lng, etc.)
-- `active_listings` materialized view exists (Layer 2) with zone_id, features, prices
-- `calculate-valuation` uses hardcoded `FEATURE_ADJUSTMENTS` (pool: +10%, sea_views: +20%, etc.)
-- `refresh_active_listings()` function exists, called after scrape runs
-- No `polygon` column on zones yet (low priority, can add later)
+- Both edge functions already call Lovable AI (gemini-2.5-flash-lite) with simple text prompts
+- Output is unstructured free-text stored in `analysis` and `market_trends` columns
+- No structured fields like `strengths`, `considerations`, `recommended_listing_price`, `verdict`, etc.
+- The AI prompt doesn't receive the full data package — it gets a loose text description
 
 ## Changes
 
-### 1. Migration: Create `zone_stats` materialized view
+### 1. Migration: Add structured AI output columns
 
-Aggregates from `active_listings` grouped by `(zone_id, operation, property_type)`:
+Add new JSON columns to `leads_sell`, `leads_rent`, and `buy_analyses` to store the structured AI output:
 
-- **Price stats**: listing_count, median/avg/min/max/stddev price_per_m2, median/avg absolute price
-- **Size stats**: avg/median size_m2, median rooms
-- **Feature prevalence**: % with pool, garage, sea_views, terrace, lift
-- **Feature premiums**: median price_per_m2 WITH feature vs WITHOUT feature (for pool, sea_views, garage, terrace, lift) — enables dynamic premium calculation
-- **Freshness**: last data update timestamp
+```sql
+-- leads_sell
+ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS ai_strengths JSONB;
+ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS ai_considerations JSONB;
+ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS recommended_listing_price INTEGER;
+ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS quick_sale_price INTEGER;
 
-Unique index on `(zone_id, operation, property_type)` for concurrent refresh. Additional index on `zone_id`.
+-- leads_rent  
+ALTER TABLE leads_rent ADD COLUMN IF NOT EXISTS ai_strengths JSONB;
+ALTER TABLE leads_rent ADD COLUMN IF NOT EXISTS ai_considerations JSONB;
 
-### 2. Create `refresh_zone_stats()` function
-
-Simple `SECURITY DEFINER` function that refreshes `zone_stats` concurrently.
-
-### 3. Update `refresh_active_listings()` to also refresh `zone_stats`
-
-Chain the refresh: after `active_listings` refreshes, automatically refresh `zone_stats` too. Single RPC call from the scrape pipeline refreshes both.
-
-### 4. Create `get_zone_stats` RPC function
-
-Takes `p_zone_id`, `p_operation`, `p_property_type` and returns the pre-computed stats row. Used by `calculate-valuation` to get instant zone context.
-
-### 5. Update `calculate-valuation` edge function
-
-Replace hardcoded `FEATURE_ADJUSTMENTS` with dynamic premiums from `zone_stats`:
-
-```text
-Before: pool premium = hardcoded 0.10 (10%)
-After:  pool premium = (median_m2_with_pool - median_m2_without_pool) / median_m2_without_pool
-        Fallback to hardcoded if zone has < 5 properties with that feature
+-- buy_analyses
+ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_verdict TEXT;
+ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_price_context TEXT;
+ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_worth_noting JSONB;
+ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_negotiation_context TEXT;
 ```
 
-Also enrich the AI analysis prompt with zone context (median price, listing count, feature prevalence) for more data-driven text.
+### 2. Update `calculate-valuation/index.ts` — Structured AI calls
 
-### Files Modified
+Replace the current free-text AI prompts with:
 
-- New migration SQL (zone_stats view, indexes, refresh function, get_zone_stats RPC)
-- `supabase/functions/calculate-valuation/index.ts` — use dynamic premiums + zone context
+1. **Build a structured data package** containing property details, computed valuation, comparable summary stats, zone_stats, and feature impacts — matching the user's spec
+2. **Use tool calling** to get structured output:
+   - For SELL: `generate_sell_analysis` tool returning `{ summary, detailed_analysis, strengths[], considerations[], recommended_listing_price, quick_sale_price }`
+   - For RENT: `generate_rent_analysis` tool returning `{ summary, detailed_analysis, strengths[], considerations[] }`
+3. **Upgrade model** from `gemini-2.5-flash-lite` to `google/gemini-3-flash-preview` for better reasoning quality
+4. **Set temperature to 0.3** for consistent, non-creative output
+5. **System prompt**: Neutral, data-driven tone; never say "too expensive"; reference real data
+6. Store structured fields in new columns, keep `analysis` column populated with `summary + detailed_analysis` for backward compatibility
+
+### 3. Update `analyze-listing/index.ts` — Structured BUY analysis
+
+Same approach for buy flow:
+
+1. **Build data package** with asking price, estimated value, deviation, comparables, zone context
+2. **Use tool calling**: `generate_buy_analysis` tool returning `{ verdict, summary, price_context, worth_noting[], negotiation_context }`
+3. **System prompt**: Explicitly neutral — "never say too expensive", present as "Above Market" / "Fair Price"
+4. Store in new columns (`ai_verdict`, `ai_price_context`, `ai_worth_noting`, `ai_negotiation_context`)
+
+### 4. Market trends — kept as free text
+
+The trends call stays as-is (free text in `market_trends` column) since it doesn't need structured output.
+
+## Technical Details
+
+**Tool calling schema example (sell):**
+```json
+{
+  "name": "generate_sell_analysis",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "summary": { "type": "string" },
+      "detailed_analysis": { "type": "string" },
+      "strengths": { "type": "array", "items": { "type": "string" } },
+      "considerations": { "type": "array", "items": { "type": "string" } },
+      "recommended_listing_price": { "type": "integer" },
+      "quick_sale_price": { "type": "integer" }
+    },
+    "required": ["summary", "detailed_analysis", "strengths", "considerations", "recommended_listing_price", "quick_sale_price"]
+  }
+}
+```
+
+**Data package sent to AI** includes all pre-computed values from Layers 2+3 — the AI interprets, it does not calculate.
+
+## Files Modified
+
+- New migration SQL (add structured columns)
+- `supabase/functions/calculate-valuation/index.ts` — structured data package + tool calling for sell/rent
+- `supabase/functions/analyze-listing/index.ts` — structured data package + tool calling for buy
+
+## Backward Compatibility
+
+- `analysis` column still populated (summary + detailed_analysis concatenated)
+- `market_trends` column unchanged
+- Frontend can progressively adopt new structured fields
 
