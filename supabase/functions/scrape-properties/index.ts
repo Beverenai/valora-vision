@@ -236,51 +236,42 @@ async function upsertSaleListings(supabase: any, listings: any[], city: string, 
   return count;
 }
 
-// ─── Upsert rental listings ──────────────────────────────
+// ─── Upsert rental listings into unified properties ──────
 async function upsertRentListings(supabase: any, listings: any[], city: string, zoneId: string | null) {
   let count = 0;
   for (const item of listings) {
     try {
       const externalId = String(item.propertyCode || item.adid || item.id || "");
       if (!externalId) continue;
-
       const monthlyRent = Number(item.price || item.priceByArea || 0);
       if (monthlyRent <= 0) continue;
-
       const builtSize = Number(item.size || item.constructedArea || 0) || null;
-      const rentPerSqm = builtSize && builtSize > 0 ? Math.round((monthlyRent / builtSize) * 100) / 100 : null;
 
       const record = {
-        external_id: externalId,
+        property_code: externalId,
+        operation: "rent",
         source: "idealista",
-        title: item.suggestedTexts?.title || item.title || null,
+        price: monthlyRent,
+        price_per_m2: builtSize && builtSize > 0 ? Math.round((monthlyRent / builtSize) * 100) / 100 : null,
         property_type: mapPropertyType(item.typology || item.propertyType || ""),
-        monthly_rent: monthlyRent,
-        rent_per_sqm: rentPerSqm,
-        built_size_sqm: builtSize,
-        plot_size_sqm: Number(item.plotSize || 0) || null,
-        terrace_size_sqm: Number(item.terraceSize || 0) || null,
-        bedrooms: Number(item.rooms || item.bedrooms || 0) || null,
+        size_m2: builtSize,
+        rooms: Number(item.rooms || item.bedrooms || 0) || null,
         bathrooms: Number(item.bathrooms || 0) || null,
         address: item.address || item.street || null,
-        city: city,
+        municipality: city,
         latitude: Number(item.latitude || 0) || null,
         longitude: Number(item.longitude || 0) || null,
         description: item.description || null,
-        features: item.features ? Object.keys(item.features).filter((k: string) => item.features[k]) : null,
-        image_urls: item.multimedia?.images?.map((img: any) => img.url || img.src) || item.images || null,
-        listing_url: item.url ? `https://www.idealista.com${item.url}` : null,
-        listed_date: item.listingDate || null,
-        is_furnished: item.furnished ? "fully" : null,
-        rental_type: "long_term",
+        thumbnail_url: item.thumbnail || item.multimedia?.images?.[0]?.url || null,
+        images: item.multimedia?.images?.map((img: any) => img.url || img.src) || null,
+        idealista_url: item.url ? `https://www.idealista.com${item.url}` : null,
         zone_id: zoneId,
-        is_active: true,
         scraped_at: new Date().toISOString(),
       };
 
       const { error } = await supabase
-        .from("properties_for_rent")
-        .upsert(record, { onConflict: "external_id,source" });
+        .from("properties")
+        .upsert(record, { onConflict: "property_code,source" });
 
       if (error) {
         console.error(`Upsert rent error for ${externalId}:`, error.message);

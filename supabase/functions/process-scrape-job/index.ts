@@ -25,6 +25,23 @@ function mapPropertyType(type: string): string {
   return map[type] || type || "apartment";
 }
 
+function extractBooleanFeatures(item: any): Record<string, boolean> {
+  const features = item.features || {};
+  const desc = (item.description || "").toLowerCase();
+  return {
+    has_pool: !!features.hasSwimmingPool || desc.includes("piscina") || desc.includes("pool"),
+    has_garage: !!features.hasGarage || !!features.hasParkingSpace || desc.includes("garaje") || desc.includes("garage"),
+    has_terrace: !!features.hasTerrace || desc.includes("terraza") || desc.includes("terrace"),
+    has_garden: !!features.hasGarden || desc.includes("jardín") || desc.includes("garden"),
+    has_lift: !!features.hasLift || desc.includes("ascensor") || desc.includes("elevator"),
+    has_ac: !!features.hasAirConditioning || desc.includes("aire acondicionado") || desc.includes("air conditioning"),
+    has_sea_views: !!features.hasSeaViews || desc.includes("vista al mar") || desc.includes("sea view"),
+    has_balcony: !!features.hasBalcony || desc.includes("balcón") || desc.includes("balcony"),
+    has_storage: !!features.hasStorageRoom || desc.includes("trastero") || desc.includes("storage"),
+    is_exterior: !!features.isExterior || !!item.exterior,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -44,19 +61,16 @@ Deno.serve(async (req) => {
   );
 
   try {
-    // Check if a specific zone_id was passed (manual trigger from admin)
     let manualZoneId: string | null = null;
     try {
       const body = await req.json();
       if (body?.zone_id) manualZoneId = body.zone_id;
-    } catch (_) { /* no body or invalid JSON — that's fine */ }
+    } catch (_) { /* no body */ }
 
-    // If manual zone_id, create a pending job for it first
     if (manualZoneId) {
       await supabase.from("scrape_jobs").insert({ zone_id: manualZoneId, status: "pending" });
     }
 
-    // 1. Pick the oldest pending job
     const { data: job, error: jobError } = await supabase
       .from("scrape_jobs")
       .select("*, zones(*)")
@@ -72,7 +86,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Mark as running
     await supabase
       .from("scrape_jobs")
       .update({ status: "running", started_at: new Date().toISOString() })
@@ -91,7 +104,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 3. Start Apify run
     const operation = zone.idealista_operation || "sale";
     const maxItems = zone.max_items || 500;
 
@@ -125,7 +137,6 @@ Deno.serve(async (req) => {
 
     await supabase.from("scrape_jobs").update({ apify_run_id: runId }).eq("id", job.id);
 
-    // 4. Poll for completion (max 5 min)
     let status = "RUNNING";
     for (let i = 0; i < 60; i++) {
       await delay(5000);
@@ -146,15 +157,13 @@ Deno.serve(async (req) => {
       throw new Error(`Apify run ended with status: ${status}`);
     }
 
-    // 5. Fetch results
     const itemsRes = await fetch(
       `https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_TOKEN}&format=json`
     );
     if (!itemsRes.ok) throw new Error(`Failed to fetch dataset: ${itemsRes.status}`);
     const items = await itemsRes.json();
 
-    // 6. Upsert into properties table
-    const tableName = operation === "rent" ? "properties_for_rent" : "properties_for_sale";
+    // Upsert into unified properties table
     let upsertCount = 0;
     const batchSize = 50;
 
@@ -166,69 +175,49 @@ Deno.serve(async (req) => {
           const price = Number(item.price || 0);
           if (price <= 0) return null;
           const builtSize = Number(item.size || item.constructedArea || 0) || null;
+          const boolFeatures = extractBooleanFeatures(item);
 
-          if (operation === "rent") {
-            return {
-              external_id: externalId,
-              source: "idealista",
-              title: item.suggestedTexts?.title || item.title || null,
-              property_type: mapPropertyType(item.typology || item.propertyType || ""),
-              monthly_rent: price,
-              rent_per_sqm: builtSize && builtSize > 0 ? Math.round((price / builtSize) * 100) / 100 : null,
-              built_size_sqm: builtSize,
-              bedrooms: Number(item.rooms || item.bedrooms || 0) || null,
-              bathrooms: Number(item.bathrooms || 0) || null,
-              address: item.address || item.street || null,
-              city: zone.name,
-              latitude: Number(item.latitude || 0) || null,
-              longitude: Number(item.longitude || 0) || null,
-              description: item.description || null,
-              features: item.features ? Object.keys(item.features).filter((k: string) => item.features[k]) : null,
-              image_urls: item.multimedia?.images?.map((img: any) => img.url || img.src) || null,
-              listing_url: item.url ? `https://www.idealista.com${item.url}` : null,
-              zone_id: zone.id,
-              is_active: true,
-              scraped_at: new Date().toISOString(),
-            };
-          } else {
-            return {
-              external_id: externalId,
-              source: "idealista",
-              title: item.suggestedTexts?.title || item.title || null,
-              property_type: mapPropertyType(item.typology || item.propertyType || ""),
-              price,
-              price_per_sqm: builtSize && builtSize > 0 ? Math.round(price / builtSize) : null,
-              built_size_sqm: builtSize,
-              plot_size_sqm: Number(item.plotSize || 0) || null,
-              terrace_size_sqm: Number(item.terraceSize || 0) || null,
-              bedrooms: Number(item.rooms || item.bedrooms || 0) || null,
-              bathrooms: Number(item.bathrooms || 0) || null,
-              address: item.address || item.street || null,
-              city: zone.name,
-              latitude: Number(item.latitude || 0) || null,
-              longitude: Number(item.longitude || 0) || null,
-              description: item.description || null,
-              features: item.features ? Object.keys(item.features).filter((k: string) => item.features[k]) : null,
-              image_urls: item.multimedia?.images?.map((img: any) => img.url || img.src) || null,
-              listing_url: item.url ? `https://www.idealista.com${item.url}` : null,
-              zone_id: zone.id,
-              is_active: true,
-              scraped_at: new Date().toISOString(),
-            };
-          }
+          return {
+            property_code: externalId,
+            operation,
+            source: "idealista",
+            price,
+            price_per_m2: builtSize && builtSize > 0 ? Math.round(price / builtSize) : null,
+            property_type: mapPropertyType(item.typology || item.propertyType || ""),
+            size_m2: builtSize,
+            rooms: Number(item.rooms || item.bedrooms || 0) || null,
+            bathrooms: Number(item.bathrooms || 0) || null,
+            floor: item.floor || null,
+            condition: item.condition || null,
+            address: item.address || item.street || null,
+            municipality: zone.name,
+            province: zone.province || null,
+            district: item.district || null,
+            location_id: zone.idealista_location,
+            latitude: Number(item.latitude || 0) || null,
+            longitude: Number(item.longitude || 0) || null,
+            description: item.description || null,
+            thumbnail_url: item.thumbnail || item.multimedia?.images?.[0]?.url || null,
+            images: item.multimedia?.images?.map((img: any) => img.url || img.src) || null,
+            idealista_url: item.url ? `https://www.idealista.com${item.url}` : null,
+            agency_name: item.agencyName || null,
+            agency_logo: item.agencyLogo || null,
+            zone_id: zone.id,
+            scraped_at: new Date().toISOString(),
+            ...boolFeatures,
+          };
         })
         .filter(Boolean);
 
       if (batch.length > 0) {
         const { error } = await supabase
-          .from(tableName)
-          .upsert(batch, { onConflict: "external_id,source" });
+          .from("properties")
+          .upsert(batch, { onConflict: "property_code,source" });
         if (!error) upsertCount += batch.length;
         else console.error(`Upsert batch error:`, error.message);
       }
     }
 
-    // 7. Update job and zone
     await supabase.from("scrape_jobs").update({
       status: "completed",
       items_found: items.length,
@@ -256,14 +245,11 @@ Deno.serve(async (req) => {
   } catch (error: any) {
     console.error("process-scrape-job error:", error);
 
-    // Try to update the job as failed
     try {
       const supabase2 = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
-      // We can't easily get job.id here if it failed before assignment,
-      // but the running job will be the one that failed
       await supabase2.from("scrape_jobs").update({
         status: "failed",
         error_message: error.message,
