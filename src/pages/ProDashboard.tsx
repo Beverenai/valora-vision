@@ -503,8 +503,6 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
         </div>
       </div>
 
-      </div>
-
       {/* Cover Photo */}
       <div>
         <Label className="mb-2 block">Cover Photo</Label>
