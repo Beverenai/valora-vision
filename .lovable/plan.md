@@ -1,32 +1,61 @@
 
 
-# Fix Agent Onboarding & Profile Issues
+# Expand ProDashboard — Add Zones, Reviews, Settings Sections
 
-## Overview
-Three fixes for the agent onboarding flow: improve profile lookup resilience, fix logo display, and ensure the Step 2 AI animation plays fully. Also remove the skip button from Step 2.
+## What This Does
+
+Adds 3 new sections to the agent dashboard (My Zones, Reviews, Settings) and updates the navigation to match the requested structure with 3 groups (Main, Business, Account).
 
 ## Changes
 
-### Fix 1: AgentProfile.tsx — Better "not found" handling
-The code already uses `.ilike('slug', slug)` and has a decent fallback UI (lines 271-293). The existing implementation looks correct. Minor improvements:
-- Add a "Search the directory" CTA linking to `/agentes`
-- Add a hint about checking the URL
+### 1. Update Section type and navGroups
 
-No slug generation changes needed — the `handlePublish` function (line 353-361) already normalizes correctly with diacritic stripping, lowercase, and hyphenation.
+Expand `type Section` to include `"zones" | "reviews" | "settings"`. Update `navGroups` to add Zones and Reviews under Business, and Settings under Account. Analytics label changes to "Performance".
 
-### Fix 2: ProOnboard.tsx — Logo display in Step 3
-The logo handling (lines 618-643) already has `logoFailed` state and initials fallback. Issues to fix:
-- Ensure the initials fallback circle uses terracotta color (`bg-[#D4713B]`) instead of `bg-primary` for consistency with the brand
-- The code already handles `onError` and file upload correctly
-- No changes needed for logo_url passing — it's set at line 196
+### 2. New ZonesSection component
 
-### Fix 3: ProOnboard.tsx — Step 2 animation must play fully
-The animation code (lines 158-287) has a 4-second minimum timer and sequential 800ms delays. Issues:
-1. **Remove the skip button** (line 597-599) — user explicitly says no skip button
-2. **Remove auto-advance** (lines 296-301) — the `useEffect` that auto-advances when `aiDone` fires after only 500ms. Instead, show a "Continue" button after animation completes so the agent feels in control
-3. **Fix useEffect deps** — `runAiOnboarding` is missing from the dependency array of the step-trigger effect (line 290-294), which could cause stale closures
+Fetches the agent's active zones from `professional_zones` joined with `zones` table. Displays:
+- Active zones as cards showing zone name, tier badge, leads this month (counted from `agent_contact_requests`)
+- Empty state with terracotta CTA
+- Available zones grid fetched from `zones` table (excluding already-claimed zones), each with an "Add" button (mailto for now, since zone purchasing isn't wired up yet)
 
-### Files Modified
-- `src/pages/AgentProfile.tsx` — minor fallback UI improvement
-- `src/pages/ProOnboard.tsx` — remove skip button, remove auto-advance, add manual continue after animation, fix terracotta color on logo fallback
+Data flow: `professional_zones` (where `professional_id = agent.id` and `is_active = true`) joined with `zones` for names.
+
+### 3. New ReviewsSection component
+
+Fetches from `agent_reviews` where `professional_id = agent.id`. Displays:
+- Summary card: average rating, total count, star distribution bar
+- List of reviews with reviewer name, role badge, rating stars, comment, date
+- Empty state if no reviews
+
+### 4. New SettingsSection component
+
+Simple settings page with:
+- Email notification preferences (placeholder toggles using Switch component)
+- Danger zone: "Delete my profile" button (shows confirmation, doesn't implement actual deletion yet)
+- Link to public profile
+
+### 5. Wire sections into content renderer
+
+Add the 3 new section conditionals in the `content` JSX block (lines 821-841) and load zone/review data in `checkAuthAndLoad`.
+
+### 6. Load additional data on mount
+
+In `checkAuthAndLoad`, add parallel fetches for:
+- `professional_zones` + `zones` (for ZonesSection)
+- `agent_reviews` (for ReviewsSection)
+- All `zones` (for available zones list)
+
+Store in new state variables.
+
+## Technical Details
+
+- All new sections follow existing patterns: `font-serif` headings, Card-based layouts, terracotta accents
+- Zone data comes from existing `professional_zones` and `zones` tables — no schema changes needed
+- Reviews data comes from existing `agent_reviews` table — no schema changes needed
+- Components stay inline in ProDashboard.tsx to match the existing pattern (all sections are defined in the same file)
+
+## Files Modified
+
+- `src/pages/ProDashboard.tsx` — expand Section type, update navGroups, add 3 section components, wire data loading and rendering
 
