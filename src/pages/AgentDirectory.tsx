@@ -424,7 +424,7 @@ export default function AgentDirectory() {
             <p className="text-sm text-muted-foreground mb-6">{filtered.length} agent{filtered.length !== 1 ? "s" : ""} found</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {visible.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} zone={getPrimaryZone(agent)} isFeatured={featuredSet.has(agent.id)} />
+                <AgentCard key={agent.id} agent={agent} zone={getPrimaryZone(agent)} isFeatured={featuredSet.has(agent.id)} agencyName={agent.agency_id ? agencyNameMap[agent.agency_id] : null} />
               ))}
             </div>
 
