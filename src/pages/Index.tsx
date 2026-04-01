@@ -353,7 +353,9 @@ const Index = () => {
                 Three Simple Steps
               </h2>
               <p className="font-['DM_Serif_Display'] italic text-lg text-muted-foreground mt-4">
-                {isSell
+                {isRent
+                  ? "From address to rental estimate in under two minutes"
+                  : isSell
                   ? "From address to valuation in under two minutes"
                   : "From listing link to price analysis in seconds"}
               </p>
@@ -372,38 +374,35 @@ const Index = () => {
                 transition={{ duration: 0.5 }}
                 className="relative flex gap-5 md:gap-8 pb-8 md:pb-14"
               >
-                {/* Number + icon */}
                 <div className="flex flex-col items-center shrink-0 z-10">
                   <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">01</span>
                   <div className={cn(
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
+                    accent.bg
                   )}>
-                    {isSell
-                      ? <MapPin className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-                      : <Link2 className="h-5 w-5 md:h-6 md:w-6 text-[hsl(var(--buy-foreground))]" />}
+                    {isBuy
+                      ? <Link2 className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />
+                      : <MapPin className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />}
                   </div>
                 </div>
-                {/* Content */}
                 <div className="flex-1 pt-1">
                   <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    {isSell ? "Enter your address" : "Paste a listing link"}
+                    {isBuy ? "Paste a listing link" : "Enter your address"}
                   </h3>
                   <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    {isSell
-                      ? "Start typing and select your property from the suggestions."
-                      : "Copy any property URL from Idealista, Fotocasa, Kyero or similar portals."}
+                    {isBuy
+                      ? "Copy any property URL from Idealista, Fotocasa, Kyero or similar portals."
+                      : "Start typing and select your property from the suggestions."}
                   </p>
-                  {/* Mini preview */}
                   <div className="mt-4 rounded-xl border border-border bg-card p-3 md:p-4 max-w-sm">
                     <div className="flex items-center gap-2.5 rounded-lg bg-secondary/70 px-3 py-2.5">
-                      {isSell
-                        ? <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                        : <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />}
+                      {isBuy
+                        ? <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                        : <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />}
                       <span className="text-sm text-muted-foreground/60 truncate">
-                        {isSell
-                          ? "Calle Sierra Blanca 12, Marbella…"
-                          : "idealista.com/inmueble/1234567…"}
+                        {isBuy
+                          ? "idealista.com/inmueble/1234567…"
+                          : "Calle Sierra Blanca 12, Marbella…"}
                       </span>
                     </div>
                   </div>
@@ -422,25 +421,35 @@ const Index = () => {
                   <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">02</span>
                   <div className={cn(
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
+                    accent.bg
                   )}>
-                    {isSell
-                      ? <SlidersHorizontal className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-                      : <Search className="h-5 w-5 md:h-6 md:w-6 text-[hsl(var(--buy-foreground))]" />}
+                    {isBuy
+                      ? <Search className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />
+                      : <SlidersHorizontal className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />}
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
                   <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    {isSell ? "Tell us about your property" : "We analyze the market"}
+                    {isBuy ? "We analyze the market" : "Tell us about your property"}
                   </h3>
                   <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    {isSell
-                      ? "Add bedrooms, bathrooms, size and key features."
-                      : "We scrape real data and compare against similar listings in the area."}
+                    {isBuy
+                      ? "We scrape real data and compare against similar listings in the area."
+                      : "Add bedrooms, bathrooms, size and key features."}
                   </p>
-                  {/* Mini preview */}
                   <div className="mt-4 rounded-xl border border-border bg-card p-3 md:p-4 max-w-sm">
-                    {isSell ? (
+                    {isBuy ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <BarChart3 className={cn("h-4 w-4", accent.text)} />
+                          <span className="text-sm font-medium text-foreground">Comparable analysis</span>
+                        </div>
+                        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold w-fit", accent.bg, accent.text)}>
+                          <Users className="h-3 w-3" />
+                          18 comparable properties found
+                        </span>
+                      </div>
+                    ) : (
                       <div className="flex flex-wrap gap-2">
                         {[
                           { icon: BedDouble, label: "3 Beds" },
@@ -449,30 +458,19 @@ const Index = () => {
                         ].map((pill) => (
                           <span
                             key={pill.label}
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium bg-[hsl(var(--terracotta-light))] text-primary"
+                            className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium", accent.bg, accent.text)}
                           >
                             <pill.icon className="h-3.5 w-3.5" />
                             {pill.label}
                           </span>
                         ))}
                       </div>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4 text-[hsl(var(--buy-foreground))]" />
-                          <span className="text-sm font-medium text-foreground">Comparable analysis</span>
-                        </div>
-                        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))] w-fit">
-                          <Users className="h-3 w-3" />
-                          18 comparable properties found
-                        </span>
-                      </div>
                     )}
                   </div>
                 </div>
               </motion.div>
 
-              {/* Step 03 — Valuation Card */}
+              {/* Step 03 */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -484,19 +482,21 @@ const Index = () => {
                   <span className="text-4xl md:text-6xl font-extrabold text-border leading-none">03</span>
                   <div className={cn(
                     "w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center mt-3 shadow-sm",
-                    isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]"
+                    accent.bg
                   )}>
-                    {isSell
-                      ? <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-                      : <ShieldCheck className="h-5 w-5 md:h-6 md:w-6 text-[hsl(var(--buy-foreground))]" />}
+                    {isBuy
+                      ? <ShieldCheck className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />
+                      : <Sparkles className={cn("h-5 w-5 md:h-6 md:w-6", accent.text)} />}
                   </div>
                 </div>
                 <div className="flex-1 pt-1">
                   <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight">
-                    {isSell ? "See what you'll receive" : "Get your price score"}
+                    {isRent ? "Get your rental estimate" : isSell ? "See what you'll receive" : "Get your price score"}
                   </h3>
                   <p className="text-muted-foreground mt-1.5 text-base md:text-lg leading-relaxed">
-                    {isSell
+                    {isRent
+                      ? "A detailed rental estimate with seasonal breakdown, comparable rents, and agent recommendations."
+                      : isSell
                       ? "A beautifully detailed valuation card with all the key data — ready to share."
                       : "See if the asking price is fair, overpriced or a bargain — with comparable data and negotiation tips."}
                   </p>
