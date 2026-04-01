@@ -36,6 +36,8 @@ const Navbar = () => {
   const location = useLocation();
   const context = detectContext(location.pathname);
 
+  const onPro = isProRoute(location.pathname);
+
   const visibleServiceLinks = context
     ? serviceLinks.filter((l) => l.id !== context)
     : serviceLinks;
