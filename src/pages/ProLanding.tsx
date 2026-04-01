@@ -109,12 +109,14 @@ const ProLanding = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mt-8 flex flex-col sm:flex-row gap-3 justify-center"
+            className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Button asChild size="lg" className="rounded-full text-base px-8 shadow-md">
-              <Link to="/pro/onboard">Get started — it's free</Link>
+            <Button asChild size="lg" className="rounded-full text-lg px-12 py-7 shadow-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-wide">
+              <Link to="/pro/onboard">
+                Get Started Free <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-full text-base px-8">
+            <Button asChild variant="outline" size="lg" className="rounded-full text-base px-8 border-foreground/20 text-foreground hover:bg-foreground/5">
               <a href="#how-it-works">See how it works</a>
             </Button>
           </motion.div>
