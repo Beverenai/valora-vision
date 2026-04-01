@@ -137,19 +137,19 @@ const ProOnboard = () => {
 
   const handleAddressChange = (field: keyof AddressData, value: string | number | undefined) => {
     setAddressData(prev => ({ ...prev, [field]: value }));
-    if (field === "latitude" || field === "longitude") {
-      if (field === "latitude") setLat(value as number);
-      if (field === "longitude") setLng(value as number);
+    if (field === "latitude") setLat(value as number);
+    if (field === "longitude") setLng(value as number);
+    // Reset confirmation when address fields change (user went back to search)
+    if (field !== "latitude" && field !== "longitude") {
+      setAddressConfirmed(false);
     }
-    // Reconstruct address string
-    const updated = { ...addressData, [field]: value };
-    const parts = [updated.streetAddress, updated.city, updated.province].filter(Boolean);
-    setAddress(parts.join(", ") || "");
-    setAddressConfirmed(false);
   };
 
-  // Step 1 validation
-  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && !emailChecking;
+  // Derive address string from addressData for API calls
+  const derivedAddress = [addressData.streetAddress, addressData.urbanization, addressData.city, addressData.province, addressData.country].filter(Boolean).join(", ");
+
+  // Derive confirmed address validity
+  const hasConfirmedAddress = addressConfirmed && !!addressData.streetAddress?.trim() && typeof addressData.latitude === "number" && typeof addressData.longitude === "number";
 
   // Ref to hold API result so animation can read it asynchronously
   const apiResultRef = useRef<any>(null);
