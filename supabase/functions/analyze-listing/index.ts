@@ -327,10 +327,10 @@ serve(async (req) => {
 
       // Prepare comparable data for storage
       const comparableData = comparables.slice(0, 15).map((c: any) => ({
-        id: c.id, price: c.price, price_per_sqm: c.price_per_sqm,
-        built_size_sqm: c.built_size_sqm, bedrooms: c.bedrooms, bathrooms: c.bathrooms,
-        property_type: c.property_type, address: c.address, city: c.city,
-        distance_km: c.distance_km, image_urls: c.image_urls, listing_url: c.listing_url,
+        id: c.id, price: c.price, price_per_sqm: c.price_per_m2,
+        built_size_sqm: c.size_m2, bedrooms: c.rooms, bathrooms: c.bathrooms,
+        property_type: c.property_type, address: c.address, city: c.municipality,
+        distance_km: c.distance_km, image_urls: [], listing_url: c.idealista_url,
       }));
 
       // 7. Generate AI analysis
