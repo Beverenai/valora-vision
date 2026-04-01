@@ -47,6 +47,15 @@ const REPORT_FEATURES_BUY = [
   { title: "Agent Recommendations", desc: "Matched local agents to help you buy.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
 ];
 
+const REPORT_FEATURES_RENT = [
+  { title: "Monthly Rental Estimate", desc: "Calculated rent based on comparable rental data in your area.", accent: true, visual: "hero" as const, gridClass: "col-span-2 md:col-span-2 md:row-span-2" },
+  { title: "Rent Per Square Metre", desc: "See how your rental rate compares per m² in your area.", accent: false, visual: "metric" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Rental Analysis", desc: "Detailed analysis of your property's rental potential.", accent: false, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Seasonal Breakdown", desc: "High season vs low season rates and occupancy estimates.", accent: true, visual: "chart" as const, gridClass: "col-span-2 md:col-span-4" },
+  { title: "Comparable Rentals", desc: "Similar properties currently rented near you.", accent: false, visual: "cards" as const, gridClass: "col-span-1 md:col-span-2" },
+  { title: "Agent Recommendations", desc: "Matched local agents to help you rent.", accent: true, visual: "icon" as const, gridClass: "col-span-1 md:col-span-2" },
+];
+
 const TESTIMONIALS_SELL = [
   { quote: "We sold our villa in Marbella for 12% above the initial asking price thanks to the accurate valuation.", name: "James & Sarah T.", location: "Marbella" },
   { quote: "Fast, free, and surprisingly accurate. Best property tool I've found for Spain.", name: "Anna K.", location: "Fuengirola" },
@@ -57,6 +66,12 @@ const TESTIMONIALS_BUY = [
   { quote: "I was about to overpay by €45,000. ValoraCasa showed me the property was 12% above market value.", name: "Stefan R.", location: "Marbella" },
   { quote: "The price analysis confirmed the asking price was fair. Gave me confidence to make an offer immediately.", name: "Emma & David K.", location: "Estepona" },
   { quote: "Used it on every property we viewed. Saved us thousands in negotiations.", name: "Linda M.", location: "Fuengirola" },
+];
+
+const TESTIMONIALS_RENT = [
+  { quote: "Found out our apartment could earn 40% more as a holiday rental. The seasonal breakdown was eye-opening.", name: "Maria & Carlos S.", location: "Marbella" },
+  { quote: "The rental estimate was spot-on. We listed at the recommended price and had tenants within a week.", name: "Henrik L.", location: "Estepona" },
+  { quote: "Great tool for comparing long-term vs short-term rental income. Helped us decide our strategy.", name: "Sophie W.", location: "Fuengirola" },
 ];
 
 /* ─── SECTION LABEL ─── imported from @/components/ui/SectionLabel */
