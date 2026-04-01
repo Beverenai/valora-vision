@@ -85,7 +85,8 @@ const App = () => {
               <Route path="/pro/dashboard" element={<ProDashboard />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/vender" element={<Navigate to="/sell/valuation" replace />} />
-              <Route path="/alquilar" element={<ComingSoon />} />
+              <Route path="/rent" element={<Navigate to="/rent/valuation" replace />} />
+              <Route path="/alquilar" element={<Navigate to="/rent/valuation" replace />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
