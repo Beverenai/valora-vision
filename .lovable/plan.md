@@ -1,36 +1,28 @@
 
+# Add Edit Team Member Dialog for Admins
 
-# Auto-Seed Owner as Team Member
+## What Changes
+Add an "Edit" button on each team member card (admin only) that opens a dialog with all editable fields: name, role, email, phone, whatsapp, photo_url, languages. On save, update `agent_team_members` and reload.
 
-## Problem
-August created his profile before the "insert owner as team member" logic was added to `publish-agent-profile`. The `loadTeam` function only queries `agent_team_members`, so he doesn't appear. Even going forward, if publish fails or is retried, the owner might not be seeded.
+## Changes in `src/pages/ProDashboard.tsx`
 
-## Solution
-Add a self-seeding check in `TeamTab.loadTeam()`: after fetching team members, if the current agent (owner) is not found in the results, automatically insert them into `agent_team_members` and reload.
+### 1. Add edit state to TeamTab
+- `editingMember` state (the member being edited, or null)
+- `editForm` state with all fields: name, role, email, phone, whatsapp, photo_url, languages
 
-### Changes in `src/pages/ProDashboard.tsx`
+### 2. Add Edit Dialog
+A `Dialog` component that opens when clicking the Edit button on a member card. Contains:
+- Name, Role, Email, Phone, WhatsApp inputs
+- Photo URL input
+- Languages (comma-separated text input, stored as array)
+- Save button that calls `supabase.from("agent_team_members").update({...}).eq("id", member.id)`
 
-In `loadTeam()`, after fetching data:
-1. Check if any row has `name === agent.contact_name` and `role === "Owner"` (or matches by email)
-2. If not found, insert the owner as a team member:
-   ```typescript
-   await supabase.from("agent_team_members").insert({
-     professional_id: agent.id,
-     name: agent.contact_name,
-     email: agent.email,
-     phone: agent.phone || null,
-     role: "Owner",
-     sort_order: 0,
-     is_active: true,
-   });
-   ```
-3. Re-fetch the team after seeding
+### 3. Add Edit button to member cards
+- Place a `Pencil`/`Edit2` icon button next to the active toggle and delete button (admin only)
+- Owner can also be edited (just not deactivated/removed)
 
-This is idempotent — runs once, then the owner exists for all future loads.
-
-### Owner protection
-The existing `handleToggleActive` and `handleRemoveMember` already protect members with role "Owner" from deactivation/removal — no change needed there.
+### 4. Import Dialog components
+Add `Dialog, DialogContent, DialogHeader, DialogTitle` imports (check if already imported).
 
 ## Files Modified
-- `src/pages/ProDashboard.tsx` — add owner auto-seed in `loadTeam()`
-
+- `src/pages/ProDashboard.tsx` — add edit dialog and button to TeamTab
