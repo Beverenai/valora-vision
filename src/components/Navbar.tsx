@@ -70,12 +70,23 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <Link
-            to={cta.href}
-            className="bg-primary text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
-          >
-            {cta.label}
-          </Link>
+          {onPro && (
+            <Link
+              to="/pro/login"
+              className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
+          )}
+          {!onPro && (
+            <Link
+              to={cta.href}
+              className="bg-primary text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+            >
+              {cta.label}
+            </Link>
+          )}
         </nav>
 
         {/* Mobile toggle */}
