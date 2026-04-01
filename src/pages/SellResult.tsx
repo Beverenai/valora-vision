@@ -83,11 +83,6 @@ const LazyAgentBundle = lazy(() =>
   )
 );
 
-const SectionFallback = () => (
-  <div className="py-16 flex justify-center">
-    <div className="w-6 h-6 border-2 border-muted-foreground/20 border-t-primary rounded-full animate-spin" />
-  </div>
-);
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [
