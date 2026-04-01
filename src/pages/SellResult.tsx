@@ -367,7 +367,7 @@ const SellResult: React.FC = () => {
           <div className="w-full h-px bg-border" />
 
           {/* Group 2: Lazy — features, comparables, area comparison, market trends */}
-          <Suspense fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionSkeleton rows={4} />}>
             <LazyAnalysisBundle
               features={lead?.features || null}
               comparables={lead?.comparable_properties as any[] || null}
