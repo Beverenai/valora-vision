@@ -91,7 +91,7 @@ const StatsBar = () => (
 /* ─── MAIN PAGE ─── */
 
 const Index = () => {
-  useSEO({ title: "ValoraCasa — Free Property Valuations in Costa del Sol", description: "Get a free, instant property valuation for Costa del Sol. Compare agents, analyze listings, and make informed real estate decisions." });
+  useSEO({ title: "ValoraCasa — Free Property Valuations in Costa del Sol", description: "Get a free, instant property valuation for your home in Spain. Based on real market data from Costa del Sol.", path: "/" });
   const navigate = useNavigate();
   const [valuationType, setValuationType] = useState<"sell" | "buy">("sell");
   const [listingUrl, setListingUrl] = useState("");
