@@ -850,7 +850,7 @@ const Index = () => {
             mapExpanded={mapExpandedBottom}
             onMapPhaseChange={(phase) => setMapExpandedBottom(phase === "verify")}
             valuationType={valuationType}
-            onValuationTypeChange={(t) => setValuationType(t as "sell" | "buy")}
+            onValuationTypeChange={isRent ? undefined : (t) => setValuationType(t as "sell" | "rent" | "buy")}
             listingUrl={listingUrl}
             onListingUrlChange={setListingUrl}
           />
