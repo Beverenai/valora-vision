@@ -343,12 +343,15 @@ const ProOnboard = () => {
 
       if (!userId) throw new Error("Failed to get user account");
 
-      // 2. Generate slug
+      // 2. Generate slug — normalize accents, lowercase, hyphenate
       const slug = companyName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // strip diacritics (á→a, ñ→n, etc.)
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") // trim leading/trailing hyphens
         .slice(0, 60);
 
       // 3. Publish profile via edge function
