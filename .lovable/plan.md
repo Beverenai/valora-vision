@@ -1,58 +1,46 @@
 
+# Fix Navbar Full-Width and Verify Hero Card Layout
 
-# Fix Desktop Layout: Navbar, Card Sizing, and Footer
+## Problem
 
-## Root Cause
+1. **Navbar border doesn't span full width**: The `<header>` has `max-w-[1400px] mx-auto` which constrains the entire element including the bottom border. The border line should go edge-to-edge across the viewport.
 
-The `tailwind.config.ts` has custom `screens` defined at the **top level** of `theme` (not inside `extend`), which **completely replaces** all default Tailwind breakpoints (`sm`, `md`, `lg`, `xl`, `2xl`). This means every `md:`, `lg:`, `xl:` class across the entire codebase is broken and has no effect. Only `xs:` and `tablet:` exist.
+2. **Hero card appears narrow**: With the tailwind breakpoint fix already deployed, the hero card's `lg:max-w-[960px]` should be active at your 1064px viewport. If it still looks narrow, the card's width settings need adjusting for desktop.
 
-## Plan
+## Changes
 
-### 1. Fix Tailwind breakpoints in `tailwind.config.ts`
+### 1. Fix Navbar to span full width (`src/components/Navbar.tsx`)
 
-Move the custom `screens` (`xs`, `tablet`) from `theme.screens` into `theme.extend.screens` so the default Tailwind breakpoints (`sm: 640px`, `md: 768px`, `lg: 1024px`, `xl: 1280px`, `2xl: 1536px`) are preserved alongside custom ones.
+Wrap the navbar in a full-width outer container for the border, and keep the inner content constrained:
 
-**Before:**
-```ts
-theme: {
-  screens: {
-    'xs': '400px',
-    'tablet': '900px',
-  },
-  extend: { ... }
+```tsx
+<header className="w-full border-b-2 border-primary">
+  <div className="max-w-[1400px] mx-auto flex items-center justify-between py-4 px-6 relative">
+    {/* ... all existing content unchanged ... */}
+  </div>
+</header>
+```
+
+This makes the border span 100% width while content stays centered at max 1400px.
+
+### 2. Widen the hero card for desktop (`src/components/ValuationTicketCard.tsx`)
+
+The hero `outerMaxWidth` is `max-w-[360px] md:max-w-[720px] lg:max-w-[960px]`. On a 1064px screen with padding, 960px is nearly edge-to-edge but may still look tight. Adjust to use more available space:
+
+```
+hero: {
+  outerMaxWidth: "max-w-[360px] md:max-w-[540px] lg:max-w-[680px] xl:max-w-[780px]",
 }
 ```
 
-**After:**
-```ts
-theme: {
-  extend: {
-    screens: {
-      'xs': '400px',
-      'tablet': '900px',
-    },
-    ...
-  }
-}
-```
+This provides better proportions — the card shouldn't dominate the full width but should feel substantial on desktop without being cramped.
 
-### 2. Fix Footer for desktop layout (already has `md:grid-cols-4`)
+### 3. Verify Index.tsx hero wrapper
 
-The footer already uses `md:grid-cols-4` which will work once breakpoints are restored. No changes needed.
-
-### 3. Fix Navbar desktop nav (already uses `md:flex` / `md:hidden`)
-
-The navbar already has `hidden md:flex` for desktop nav and `md:hidden` for hamburger. Will work once breakpoints are restored. No changes needed.
-
-### 4. Verify ValuationTicketCard sizing
-
-The hero card uses `max-w-[360px] md:max-w-[720px] lg:max-w-[960px]` which will properly expand on desktop once breakpoints are restored.
-
-### 5. Remove App.css cruft
-
-The `App.css` has a `#root { max-width: 1280px }` leftover from the Vite template that constrains the root container. Remove it to let the full-width layout work properly.
+The hero section in `Index.tsx` (line 168) has `max-w-[1400px]` wrapper — this is fine as it constrains the content area. The hero `flex items-center justify-center` properly centers the card within it.
 
 ## Impact
 
-This is a one-line config fix (+ App.css cleanup) that will immediately fix the desktop layout across **every page** in the app, since all `md:`, `lg:`, `xl:` responsive classes will start working.
-
+- Navbar border will span the full viewport width on all screen sizes
+- Hero card will be proportionally wider on desktop/tablet
+- No changes to mobile layout
