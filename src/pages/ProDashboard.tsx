@@ -546,7 +546,20 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
         .select("id, contact_name, email, phone, photo_url, agency_role, slug, languages, avg_rating, total_reviews")
         .eq("agency_id", agent.id)
         .order("agency_role");
-      setTeamMembers(data || []);
+      // Include the agency owner (self) at the top
+      const ownerEntry = {
+        id: agent.id,
+        contact_name: agent.contact_name,
+        email: agent.email,
+        phone: agent.phone,
+        photo_url: agent.photo_url,
+        agency_role: "owner" as const,
+        slug: agent.slug,
+        languages: agent.languages,
+        avg_rating: agent.avg_rating,
+        total_reviews: agent.total_reviews,
+      };
+      setTeamMembers([ownerEntry, ...(data || [])]);
     } else {
       // For solo agents or team members, load from agent_team_members (legacy)
       const { data } = await supabase
