@@ -1,37 +1,39 @@
 
 
-# Result Page Upgrade — Implementation Plan
+# Hero/Cover Image for Agent Profiles
 
-## Current State Assessment
+## What This Does
+Lets agents upload a hero/cover image for their profile page. The AI onboarding tries to extract an image from Firecrawl (e.g. og:image), but agents can upload their own in both onboarding Step 3 and the Dashboard Profile section. The `cover_photo_url` column already exists on `professionals`.
 
-After reviewing `SellResult.tsx`, `ResultAnalysisGroup.tsx`, and `ResultAgentGroup.tsx`, **most of the requested features already exist**:
+## Changes
 
-- **DEL 1** (Price range + confidence): Already implemented in `ValuationResultCard` (lines 165-219) with gradient bar, low/high labels, and confidence badge
-- **DEL 2** (Comparables): Already implemented via `ComparablePropertiesSection` in `ResultAnalysisGroup.tsx`
-- **DEL 3** (Market comparison): Already implemented via `AreaComparisonSection` in `ResultAnalysisGroup.tsx`
-- **DEL 4** (Matched agents): Already implemented via `MatchedAgentsSection` in `ResultAgentGroup.tsx` using `match_agents_by_location` RPC
-- **DEL 5** (Contact modal): Already implemented via `ContactAgentModal` in `ResultAgentGroup.tsx`
+### 1. Onboard Edge Function — Extract cover photo from Firecrawl
+In `supabase/functions/onboard-agency/index.ts`, the `cover_photo_url` is already initialized to `null` (line 37). Add logic to set it from Firecrawl metadata — use `ogImage` or a large image from the scraped content as the cover photo candidate (separate from logo). Return `cover_photo_url` in the response.
 
-## What Actually Needs Changing
+### 2. ProOnboard.tsx — Add cover photo state + UI in Step 3
+- Add `coverPhotoUrl` state (populated from AI scan result)
+- In Step 3 review UI (after the Logo section, ~line 636), add a "Cover Photo" section with:
+  - Preview of current cover image (or a gradient placeholder)
+  - Upload button using `<input type="file">` with `URL.createObjectURL` for preview
+  - Helper text: "This appears as the hero banner on your profile"
+- Pass `cover_photo_url` to `publish-agent-profile` edge function
 
-The differences between the current implementation and the spec are mostly cosmetic/minor. Here's what I'd suggest splitting into:
+### 3. Publish Edge Function — Accept cover_photo_url
+In `supabase/functions/publish-agent-profile/index.ts`, add `cover_photo_url` to the destructured request body and include it in `profileData`.
 
-### Batch 1: Styling refinements to ValuationResultCard
-- Change gold accent to terracotta (`#D4713B`) on the price range bar
-- Update confidence badge to use green/amber/red pill styling as specified
-- Minor label text changes
+### 4. ProDashboard ProfileSection — Add cover photo upload
+In the `ProfileSection` component (~line 448), add a cover photo upload section (after the logo upload):
+- Show current cover image preview (wide aspect ratio, ~16:9)
+- Upload button using the existing `agent-logos` storage bucket (path: `{agent.id}/cover.{ext}`)
+- Save `cover_photo_url` to `professionals` table immediately on upload (same pattern as logo)
+- Include in the `handleSave` payload
 
-### Batch 2: ComparableCard improvements
-- Add similarity score progress bar to each card (currently missing)
-- Ensure terracotta accent colors on price diff badges
+### 5. Storage bucket
+The `agent-logos` bucket already exists and is used for logo uploads. We'll reuse it for cover photos too (different file path).
 
-### Batch 3: Agent card tier badges
-- Add "Elite Partner" / "Featured" banner on agent cards for premium/elite tiers
-- Update initials fallback to terracotta background
-
-### Recommendation
-
-Given that the core functionality is already built and working, the changes are purely visual polish. I'd suggest telling me which specific visual improvements you want prioritized, or I can proceed with all three batches as one implementation since they're small CSS/styling changes across 3 files.
-
-Want me to proceed with all styling refinements in one go, or pick specific batches?
+## Files Modified
+- `supabase/functions/onboard-agency/index.ts` — extract cover photo from Firecrawl metadata
+- `supabase/functions/publish-agent-profile/index.ts` — accept and save cover_photo_url
+- `src/pages/ProOnboard.tsx` — add cover photo state, AI population, upload UI in Step 3
+- `src/pages/ProDashboard.tsx` — add cover photo upload to ProfileSection
 
