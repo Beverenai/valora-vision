@@ -394,6 +394,7 @@ const SellResult: React.FC = () => {
           </Suspense>
         </div>
       </CardRevealWrapper>
+      <StickyAgentButton />
     </div>
     </ErrorBoundary>
   );

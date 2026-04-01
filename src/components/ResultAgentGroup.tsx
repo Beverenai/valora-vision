@@ -158,7 +158,7 @@ export const MatchedAgentsSection: React.FC<{ latitude: number | null; longitude
 
   if (agents.length === 0) {
     return (
-      <section className="py-8 sm:py-12 border-b border-border/50">
+      <section id="matched-agents" className="py-8 sm:py-12 border-b border-border/50">
         <div className="max-w-[1000px] mx-auto px-6 text-center">
           <div className="w-10 h-px bg-gold mx-auto mb-8" />
           <SectionLabel>Recommended Local Experts</SectionLabel>
