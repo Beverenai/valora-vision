@@ -186,7 +186,15 @@ const Index = () => {
   }, [addressData, navigate, valuationType, listingUrl]);
 
   // Showcase card data based on mode
-  const showcaseData = isSell
+  const showcaseData = isRent
+    ? {
+        estimatedValue: "€1,800/mo",
+        secondaryValue: "€14/m²",
+        headline: "ESTIMATED",
+        subtitle: "Your Rental Estimate",
+        summaryText: "Your property's rental potential has been analysed using comparable rental data, seasonal demand, and location scoring.",
+      }
+    : isSell
     ? {
         estimatedValue: "€1,250,000",
         secondaryValue: "€4,200/m²",
