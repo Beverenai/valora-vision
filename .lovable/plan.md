@@ -1,63 +1,59 @@
 
 
-# Agent vs Agency Architecture + Cover Photo Fix
+# Restructure Profile into Tabs: My Profile, Team, Company
 
-## What This Does
+## Problem
+The current "My Profile" section shows company details mixed with personal details. We need three distinct tabs and proper role-based access control.
 
-1. **Fixes cover photo saving** — adds `cover_photo_url` to the Professional interface so it's properly typed and included in data flow
-2. **Introduces Agency/Agent separation** — agencies (companies) and agents (individuals) coexist in the `professionals` table, linked by a new `agency_id` column. An agency can have 10-15+ agents. Each agent gets their own profile page AND appears on the agency page.
+## Architecture
 
-## Database Changes (1 migration)
+**Profile section gets 3 tabs:**
+1. **My Profile** — personal agent info (contact_name, bio, phone, photo, languages, personal social links)
+2. **Team Members** — list of agents belonging to this agency, with ability for admin/owner to invite or remove. Solo agents see this too (just themselves + ability to add team)
+3. **Company Profile** — company-level data (company_name, logo, cover_photo, description, office_address, website, tagline, social links). Only editable by owner/admin roles.
 
-Add two columns to `professionals`:
-```sql
-ALTER TABLE professionals ADD COLUMN agency_id uuid REFERENCES professionals(id) ON DELETE SET NULL;
-ALTER TABLE professionals ADD COLUMN agency_role text DEFAULT NULL; -- 'owner', 'admin', 'agent'
-```
+**Role-based access:**
+- `agency_role = 'owner'` or `'admin'`: can edit all 3 tabs
+- `agency_role = 'agent'` (team member): can only edit "My Profile" tab. Company Profile and Team tabs are read-only
+- Solo agents (no agency_id, type='agent'): can edit all tabs (they are effectively owner of their own profile)
 
-- `agency_id`: nullable FK pointing to the agency record (type='agency') this agent belongs to
-- `agency_role`: 'owner' (created the agency), 'admin' (can manage agency profile), 'agent' (member only)
-- Existing records remain type='agent' with no agency_id (solo agents)
+## Changes
 
-Update RLS: agents with `agency_role` in ('owner','admin') can update the agency row.
+### `src/pages/ProDashboard.tsx`
 
-## Code Changes
+1. **Add `Tabs, TabsList, TabsTrigger, TabsContent`** imports from `@/components/ui/tabs`
 
-### 1. Fix cover_photo_url in Professional interface
-Add `cover_photo_url: string | null` to the interface in ProDashboard.tsx, ProOnboard.tsx, and AgentProfile.tsx. Remove all `(agent as any).cover_photo_url` casts.
+2. **Split `ProfileSection` into 3 sub-components:**
+   - `MyProfileTab` — contact_name, bio, phone, personal photo (new field using `photo_url`), languages, email display
+   - `TeamTab` — fetches `professionals` where `agency_id = agent.id` (if agent is agency) or `agent_team_members` for legacy. Shows list with name, role, photo. Owner/admin can remove members. Shows invite placeholder.
+   - `CompanyProfileTab` — company_name, tagline, description, logo upload, cover photo upload, office_address, website, social links (instagram, facebook, linkedin). Read-only badge shown for non-admin team members.
 
-### 2. ProDashboard — Agency Profile section
-- Load the agency record if `agent.agency_id` is set (or if `agent.type === 'agency'`)
-- Add a new "Company Profile" section (or integrate into existing Profile section) where owners/admins can edit company-level fields: company_name, logo, cover_photo, description, office_address, website, social links
-- The existing "My Profile" becomes the personal agent profile: contact_name, bio, photo, phone, languages, personal slug
+3. **Wrap in Tabs component** inside `ProfileSection`:
+   ```
+   <Tabs defaultValue="personal">
+     <TabsList>
+       <TabsTrigger value="personal">My Profile</TabsTrigger>
+       <TabsTrigger value="team">Team</TabsTrigger>
+       <TabsTrigger value="company">Company</TabsTrigger>
+     </TabsList>
+     <TabsContent value="personal"><MyProfileTab /></TabsContent>
+     <TabsContent value="team"><TeamTab /></TabsContent>
+     <TabsContent value="company"><CompanyProfileTab /></TabsContent>
+   </Tabs>
+   ```
 
-### 3. ProOnboard — Agency awareness
-- After Step 1, ask: "Are you registering as an agency or as an individual agent?"
-- If agency: create a professionals row with type='agency', agency_role='owner'
-- If individual: create with type='agent' (current behavior)
-- Agency owners can later invite agents from the dashboard
+4. **Determine editability**: 
+   - `const isAdmin = !agent.agency_id || agent.agency_role === 'owner' || agent.agency_role === 'admin'`
+   - Pass `isAdmin` to CompanyProfileTab and TeamTab
+   - Non-admins see company/team info but inputs are disabled with a "Contact your agency admin to make changes" note
 
-### 4. AgentProfile page — Show agency context
-- If viewing an agent who has an `agency_id`, show the agency name/logo as context
-- If viewing an agency, show all agents belonging to it as the "team"
+5. **Team tab data**: For agencies, query `professionals` table where `agency_id = agent.id`. For solo agents or team members, query `agent_team_members` by professional_id.
 
-### 5. AgentDirectory — Show both
-- Show agencies with their agent count
-- Show individual agents with their agency badge (if applicable)
+6. **Add `photo_url` to Professional interface** for personal agent photo (column already exists in DB)
 
-## Implementation Order
-1. Migration: add `agency_id` + `agency_role` columns
-2. Fix `cover_photo_url` in all interfaces (quick fix)
-3. Update ProDashboard with agency profile editing
-4. Update ProOnboard with agency/agent choice
-5. Update AgentProfile to show agency context + team from real agents
-6. Update AgentDirectory
+### No database changes needed
+All columns (`agency_id`, `agency_role`, `photo_url`, `cover_photo_url`) already exist.
 
 ## Files Modified
-- `src/pages/ProDashboard.tsx` — fix interface, add agency profile section
-- `src/pages/ProOnboard.tsx` — fix interface, add agency/individual choice
-- `src/pages/AgentProfile.tsx` — fix interface, show agency context
-- `src/pages/AgentDirectory.tsx` — show agency badge
-- `supabase/functions/publish-agent-profile/index.ts` — accept agency_role/agency_id
-- 1 new migration for the schema changes
+- `src/pages/ProDashboard.tsx` — restructure ProfileSection into tabbed layout with role-based access
 
