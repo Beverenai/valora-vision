@@ -220,6 +220,7 @@ const Admin = () => {
             {section === "leads" && <LeadsTab navigate={navigate} dark={dark} />}
             {section === "zones" && <ZonesTab dark={dark} />}
             {section === "jobs" && <JobsTab dark={dark} />}
+            {section === "resales" && <ResalesTab dark={dark} />}
             {section === "health" && <HealthTab dark={dark} onHealthScore={setHealthScore} />}
           </div>
         </div>
