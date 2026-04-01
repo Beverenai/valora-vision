@@ -132,9 +132,10 @@ serve(async (req) => {
 
     if (propertyCode) {
       const { data: existing } = await supabase
-        .from("properties_for_sale")
+        .from("properties")
         .select("*")
-        .eq("external_id", propertyCode)
+        .eq("property_code", propertyCode)
+        .eq("operation", "sale")
         .maybeSingle();
 
       if (existing) {
