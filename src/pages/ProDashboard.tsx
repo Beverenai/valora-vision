@@ -6,7 +6,7 @@ import {
   LayoutDashboard, User, MessageSquare, BarChart3, CreditCard, Settings,
   Star, Eye, TrendingUp, Loader2, ExternalLink, ChevronDown, Check, X,
   Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus, Shield,
-  LogOut, Upload, ArrowUpDown, Archive, ArrowRight
+  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,11 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +36,7 @@ import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-type Section = "overview" | "profile" | "leads" | "analytics" | "subscription";
+type Section = "overview" | "profile" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
 
 interface Professional {
   id: string;
