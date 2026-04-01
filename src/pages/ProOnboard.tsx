@@ -527,7 +527,7 @@ const ProOnboard = () => {
               <p className="text-muted-foreground mb-10">Our AI is scanning your information to create your profile.</p>
 
               <div className="max-w-sm mx-auto space-y-3 text-left">
-                {aiSteps.map((s, i) => (
+                {aiSteps.map((s) => (
                   <motion.div
                     key={s.key}
                     initial={{ opacity: 0, y: 10 }}
@@ -535,17 +535,48 @@ const ProOnboard = () => {
                     transition={{ duration: 0.3 }}
                     className="flex items-center gap-3"
                   >
-                    {s.status === "loading" ? (
-                      <Loader2 className="w-5 h-5 text-primary animate-spin shrink-0" />
-                    ) : s.status === "done" ? (
-                      <Check className="w-5 h-5 text-green-600 shrink-0" />
-                    ) : s.status === "skip" ? (
-                      <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center shrink-0">
-                        <span className="text-[10px] text-muted-foreground">—</span>
-                      </div>
-                    ) : (
-                      <X className="w-5 h-5 text-destructive shrink-0" />
-                    )}
+                    <AnimatePresence mode="wait">
+                      {s.status === "loading" ? (
+                        <motion.div
+                          key="loading"
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Loader2 className="w-5 h-5 text-primary animate-spin shrink-0" />
+                        </motion.div>
+                      ) : s.status === "done" ? (
+                        <motion.div
+                          key="done"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        >
+                          <Check className="w-5 h-5 text-green-600 shrink-0" />
+                        </motion.div>
+                      ) : s.status === "skip" ? (
+                        <motion.div
+                          key="skip"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        >
+                          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <span className="text-[10px] text-muted-foreground">—</span>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="error"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        >
+                          <X className="w-5 h-5 text-destructive shrink-0" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                     <span className="text-sm">{s.label}</span>
                   </motion.div>
                 ))}
