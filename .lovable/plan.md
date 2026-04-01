@@ -1,52 +1,49 @@
 
 
-# Layer 1: Raw Property Data — Enhance Existing `properties` Table
+# Layer 2: Search & Match — Materialized View + Optimized RPC
 
-## Current State
+## What This Does
 
-The `properties` table already exists with all the core columns (property_code, operation, price, size_m2, rooms, bathrooms, features, lat/lng, location_point, zone_id, scraped_at, etc.) and a PostGIS trigger + GIST index.
-
-## What's Missing
-
-1. **`is_active` column** — doesn't exist yet. Needed to soft-delete properties removed from Idealista instead of hard-deleting.
-2. **Foreign key on `zone_id`** — currently no FK constraint to `zones(id)`.
-3. **Additional indexes** — `idx_prop_zone` and `idx_prop_active` don't exist yet.
+Creates a pre-filtered materialized view (`active_listings`) of only active, recent properties with heavy indexes paid at refresh time, not query time. Adds `find_comparables_v2` (uses the view) and `find_comparables_with_fallback` (expanding search). Updates edge functions to use the new RPC.
 
 ## Changes
 
-### 1. Migration: Add `is_active` + FK + indexes
+### 1. Migration: Materialized view + indexes + RPC functions
 
-```sql
--- Add is_active column
-ALTER TABLE properties ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+**`active_listings` materialized view**: Filters `properties` to `is_active = TRUE`, `scraped_at > NOW() - 90 days`, `price > 0`, `size_m2 > 0`. Includes a `feature_bits` integer for fast bitwise matching. Drops the `contact_info` column from the user's spec (doesn't exist on the table).
 
--- Add FK to zones
-ALTER TABLE properties 
-  ADD CONSTRAINT fk_properties_zone 
-  FOREIGN KEY (zone_id) REFERENCES zones(id);
+**Indexes on the view**: GIST on `location_point`, plus B-tree on `(property_type, operation)`, `rooms`, `size_m2`, `price_per_m2`, `zone_id`.
 
--- New indexes for the layer architecture
-CREATE INDEX IF NOT EXISTS idx_prop_zone ON properties(zone_id);
-CREATE INDEX IF NOT EXISTS idx_prop_active ON properties(is_active, operation);
-```
+**Unique index** on `id` (required for `REFRESH MATERIALIZED VIEW CONCURRENTLY`).
 
-### 2. Update `scrape-properties` edge function
+**`find_comparables_v2`**: Queries `active_listings` instead of `properties`. Same signature as existing `find_comparables` but with improved similarity scoring (normalized size diff + room penalty).
 
-Add logic to mark properties as inactive when they're no longer found in a scrape run:
-- After upserting new listings for a zone, query existing active properties for that zone
-- Any property_code not in the fresh scrape batch → set `is_active = false`
-- This preserves historical data while keeping the active set clean
+**`find_comparables_with_fallback`**: 4-stage expanding search — 2km strict → 5km → 10km with relaxed rooms/size → municipality-wide fallback. Uses temp tables internally to accumulate results.
 
-### 3. No partitioning (yet)
+### 2. Update edge functions to use new RPC
 
-Partitioning requires recreating the table and is complex with existing data + FKs. At current scale (<100K rows), indexes are sufficient. Partitioning can be added later when data grows significantly.
+**`calculate-valuation/index.ts`**: Change `supabase.rpc("find_comparables", ...)` → `supabase.rpc("find_comparables_with_fallback", ...)` so valuations automatically get expanded search when comparables are sparse.
+
+**`analyze-listing/index.ts`**: Same change — use `find_comparables_with_fallback` for buy analyses.
+
+### 3. Refresh strategy
+
+Add a `refresh_active_listings()` SQL function that the scrape pipeline can call. The `scrape-properties` edge function will call this after completing a scrape batch.
+
+## Note on `contact_info`
+
+The user's spec includes `contact_info` in the view but this column doesn't exist on `properties`. The view will omit it — agency info (`agency_name`, `agency_phone`, `agency_logo`) is already available as separate columns.
 
 ## Files Modified
-- New migration SQL (add column, FK, indexes)
-- `supabase/functions/scrape-properties/index.ts` — add is_active deactivation logic
+
+- New migration SQL (materialized view, indexes, unique index, 3 functions)
+- `supabase/functions/calculate-valuation/index.ts` — use `find_comparables_with_fallback`
+- `supabase/functions/analyze-listing/index.ts` — use `find_comparables_with_fallback`
+- `supabase/functions/scrape-properties/index.ts` — call `refresh_active_listings()` after scrape
 
 ## What This Enables
-- Layer 2 (Search & Match) can filter on `is_active = true` for fresh comparables
-- Layer 3 (Zone Intelligence) materialized views will use `is_active` to exclude stale listings
-- Historical data preserved for trend analysis
+
+- Sub-100ms comparable searches via pre-indexed materialized view
+- Automatic fallback ensures every valuation gets enough comparables
+- Layer 3 (Zone Intelligence) will build on top of this view
 
