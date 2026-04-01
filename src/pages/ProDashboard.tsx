@@ -6,7 +6,7 @@ import {
   LayoutDashboard, User, MessageSquare, BarChart3, CreditCard, Settings,
   Star, Eye, TrendingUp, Loader2, ExternalLink, ChevronDown, Check, X,
   Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus, Shield,
-  LogOut, Upload, ArrowUpDown, Archive, ArrowRight
+  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,11 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +36,7 @@ import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-type Section = "overview" | "profile" | "leads" | "analytics" | "subscription";
+type Section = "overview" | "profile" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
 
 interface Professional {
   id: string;
@@ -79,13 +84,16 @@ const navGroups = [
     label: "Business",
     items: [
       { key: "leads" as Section, label: "Leads", icon: MessageSquare },
-      { key: "analytics" as Section, label: "Analytics", icon: BarChart3 },
+      { key: "zones" as Section, label: "My Zones", icon: MapPin },
+      { key: "reviews" as Section, label: "Reviews", icon: Star },
+      { key: "analytics" as Section, label: "Performance", icon: BarChart3 },
     ],
   },
   {
     label: "Account",
     items: [
       { key: "subscription" as Section, label: "Subscription", icon: CreditCard },
+      { key: "settings" as Section, label: "Settings", icon: Settings },
     ],
   },
 ];
@@ -626,6 +634,272 @@ function AnalyticsSection({ impressions, leads }: { impressions: { date: string;
   );
 }
 
+/* ─── Zones Section ─── */
+interface ZoneWithDetails {
+  id: string;
+  name: string;
+  tier: string;
+  is_active: boolean;
+  municipality: string | null;
+  region: string;
+}
+
+function ZonesSection({ agent, activeZones, availableZones }: {
+  agent: Professional;
+  activeZones: ZoneWithDetails[];
+  availableZones: ZoneWithDetails[];
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="font-serif text-xl font-bold">My Active Zones</h2>
+        <Badge variant="outline">{activeZones.length} zones</Badge>
+      </div>
+
+      {activeZones.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <MapPin className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+            <p className="text-sm text-muted-foreground mb-4">
+              You haven't selected any zones yet.<br />
+              Zones determine where you appear on valuation result pages.
+            </p>
+            <Button className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-primary-foreground" asChild>
+              <a href="mailto:hello@valoracasa.com?subject=Zone inquiry">Browse available zones</a>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {activeZones.map((zone) => (
+            <Card key={zone.id}>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium">{zone.name}</h3>
+                  <Badge className="bg-primary/10 text-primary border-primary/20">Active</Badge>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tier</span>
+                    <span className="font-medium capitalize">{zone.tier}</span>
+                  </div>
+                  {zone.municipality && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Municipality</span>
+                      <span className="font-medium">{zone.municipality}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Region</span>
+                    <span className="font-medium">{zone.region}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {availableZones.length > 0 && (
+        <div>
+          <h3 className="font-serif text-lg font-semibold mt-8 mb-3">Available Zones</h3>
+          <p className="text-sm text-muted-foreground mb-4">Expand your coverage to appear in more valuation results</p>
+          <div className="grid md:grid-cols-3 gap-3">
+            {availableZones.slice(0, 9).map((zone) => (
+              <Card key={zone.id} className="cursor-pointer hover:border-primary transition-colors">
+                <CardContent className="py-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">{zone.name}</p>
+                    <p className="text-xs text-muted-foreground">{zone.municipality || zone.region}</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="text-xs" asChild>
+                    <a href={`mailto:hello@valoracasa.com?subject=Add zone: ${zone.name}`}>
+                      <Plus className="h-3 w-3 mr-1" /> Add
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Reviews Section ─── */
+interface Review {
+  id: string;
+  reviewer_name: string;
+  reviewer_role: string | null;
+  rating: number;
+  comment: string | null;
+  created_at: string | null;
+  is_verified: boolean | null;
+}
+
+function ReviewsSection({ reviews, avgRating }: { reviews: Review[]; avgRating: number | null }) {
+  const ratingDistribution = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => r.rating === star).length,
+  }));
+  const maxCount = Math.max(...ratingDistribution.map((d) => d.count), 1);
+
+  return (
+    <div className="space-y-6">
+      <h2 className="font-serif text-xl font-bold">Reviews</h2>
+
+      {reviews.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Star className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+            <p className="text-sm text-muted-foreground">No reviews yet. Reviews from clients will appear here.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Summary */}
+          <Card>
+            <CardContent className="p-6 flex flex-col md:flex-row gap-6 items-center">
+              <div className="text-center">
+                <p className="text-4xl font-bold font-serif">{avgRating ? Number(avgRating).toFixed(1) : "—"}</p>
+                <div className="flex gap-0.5 justify-center mt-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} size={14} className={s <= Math.round(avgRating || 0) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"} />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</p>
+              </div>
+              <div className="flex-1 space-y-1.5 w-full max-w-sm">
+                {ratingDistribution.map(({ star, count }) => (
+                  <div key={star} className="flex items-center gap-2 text-sm">
+                    <span className="w-3 text-right">{star}</span>
+                    <Star size={12} className="text-amber-400 shrink-0" />
+                    <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                      <div className="bg-amber-400 h-full rounded-full transition-all" style={{ width: `${(count / maxCount) * 100}%` }} />
+                    </div>
+                    <span className="w-6 text-right text-muted-foreground">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Review list */}
+          <div className="space-y-3">
+            {reviews.map((r) => (
+              <Card key={r.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-medium text-sm">{r.reviewer_name}</p>
+                      {r.reviewer_role && <Badge variant="secondary" className="text-[0.6rem] mt-0.5">{r.reviewer_role}</Badge>}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} size={12} className={s <= r.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"} />
+                        ))}
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {r.created_at ? format(new Date(r.created_at), "dd MMM yyyy") : ""}
+                      </span>
+                    </div>
+                  </div>
+                  {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── Settings Section ─── */
+function SettingsSection({ agent }: { agent: Professional }) {
+  const [emailLeads, setEmailLeads] = useState(true);
+  const [emailWeekly, setEmailWeekly] = useState(false);
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <h2 className="font-serif text-xl font-bold">Settings</h2>
+
+      {/* Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-serif flex items-center gap-2"><Bell size={16} /> Notifications</CardTitle>
+          <CardDescription>Choose what emails you receive</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">New lead notifications</p>
+              <p className="text-xs text-muted-foreground">Get an email when someone sends you an enquiry</p>
+            </div>
+            <Switch checked={emailLeads} onCheckedChange={setEmailLeads} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Weekly performance digest</p>
+              <p className="text-xs text-muted-foreground">Summary of views, leads, and analytics every Monday</p>
+            </div>
+            <Switch checked={emailWeekly} onCheckedChange={setEmailWeekly} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Public profile link */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-serif">Public Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3">
+            <Input value={`valoracasa.com/agentes/${agent.slug}`} readOnly className="text-sm" />
+            <Button variant="outline" size="sm" onClick={() => window.open(`/agentes/${agent.slug}`, "_blank")}>
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Danger zone */}
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-base font-serif text-destructive">Danger Zone</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/5">
+                <Trash2 className="h-4 w-4 mr-2" /> Delete my profile
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. Please contact hello@valoracasa.com to request profile deletion.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <a href="mailto:hello@valoracasa.com?subject=Delete my agent profile&body=Please delete my agent profile: ${agent.company_name}">
+                    Contact support
+                  </a>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 /* ─── Subscription Section ─── */
 function SubscriptionSection() {
   return (
@@ -705,6 +979,9 @@ const ProDashboard = () => {
   const [impressionsByDay, setImpressionsByDay] = useState<{ date: string; count: number }[]>([]);
   const [leadsByDay, setLeadsByDay] = useState<{ date: string; count: number }[]>([]);
   const [section, setSection] = useState<Section>("overview");
+  const [activeZones, setActiveZones] = useState<ZoneWithDetails[]>([]);
+  const [availableZones, setAvailableZones] = useState<ZoneWithDetails[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   useSEO({ title: "Agent Dashboard | ValoraCasa", description: "Manage your profile, leads, and analytics." });
   const [saving, setSaving] = useState(false);
 
@@ -721,15 +998,52 @@ const ProDashboard = () => {
 
     setAgent(prof as unknown as Professional);
 
-    const [leadsRes, impressionsRes] = await Promise.all([
+    const [leadsRes, impressionsRes, zonesRes, reviewsRes, allZonesRes] = await Promise.all([
       supabase.from("agent_contact_requests").select("*").eq("professional_id", prof.id).order("created_at", { ascending: false }),
       supabase.from("professional_impressions").select("created_at").eq("professional_id", prof.id),
+      supabase.from("professional_zones").select("*, zones(*)").eq("professional_id", prof.id).eq("is_active", true),
+      supabase.from("agent_reviews").select("*").eq("professional_id", prof.id).order("created_at", { ascending: false }),
+      supabase.from("zones").select("id, name, tier, is_active, municipality, region").eq("is_active", true),
     ]);
 
     if (leadsRes.data) setLeads(leadsRes.data as unknown as Lead[]);
 
     const imps = impressionsRes.data || [];
     setImpressionsCount(imps.length);
+
+    // Process zones
+    const agentZoneIds = new Set<string>();
+    if (zonesRes.data) {
+      const mapped = zonesRes.data.map((pz: any) => {
+        agentZoneIds.add(pz.zone_id);
+        const z = pz.zones;
+        return {
+          id: pz.zone_id,
+          name: z?.name || "Unknown",
+          tier: pz.tier,
+          is_active: pz.is_active,
+          municipality: z?.municipality || null,
+          region: z?.region || "",
+        } as ZoneWithDetails;
+      });
+      setActiveZones(mapped);
+    }
+
+    if (allZonesRes.data) {
+      const available = (allZonesRes.data as any[])
+        .filter((z) => !agentZoneIds.has(z.id))
+        .map((z) => ({
+          id: z.id,
+          name: z.name,
+          tier: z.tier || "warm",
+          is_active: true,
+          municipality: z.municipality,
+          region: z.region,
+        } as ZoneWithDetails));
+      setAvailableZones(available);
+    }
+
+    if (reviewsRes.data) setReviews(reviewsRes.data as unknown as Review[]);
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -834,10 +1148,17 @@ const ProDashboard = () => {
       {section === "leads" && (
         <LeadsSection leads={leads} onUpdateStatus={handleUpdateLeadStatus} />
       )}
+      {section === "zones" && (
+        <ZonesSection agent={agent} activeZones={activeZones} availableZones={availableZones} />
+      )}
+      {section === "reviews" && (
+        <ReviewsSection reviews={reviews} avgRating={agent.avg_rating} />
+      )}
       {section === "analytics" && (
         <AnalyticsSection impressions={impressionsByDay} leads={leadsByDay} />
       )}
       {section === "subscription" && <SubscriptionSection />}
+      {section === "settings" && <SettingsSection agent={agent} />}
     </div>
   );
 
