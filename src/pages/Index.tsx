@@ -146,7 +146,13 @@ const Index = () => {
   const testimonials = isRent ? TESTIMONIALS_RENT : isBuy ? TESTIMONIALS_BUY : TESTIMONIALS_SELL;
   const reportFeatures = isRent ? REPORT_FEATURES_RENT : isBuy ? REPORT_FEATURES_BUY : REPORT_FEATURES_SELL;
 
-  // Reset testimonial index when switching type
+  // Accent color config per mode
+  const accent = isRent
+    ? { bg: "bg-[hsl(var(--rent-light))]", text: "text-[hsl(var(--rent-foreground))]", fill: "bg-[hsl(var(--rent))]", fillAlpha: "bg-[hsl(var(--rent)/0.3)]", stroke: "hsl(var(--rent))", strokeAlpha: "hsl(var(--rent) / 0.08)" }
+    : isBuy
+    ? { bg: "bg-[hsl(var(--buy-light))]", text: "text-[hsl(var(--buy-foreground))]", fill: "bg-[hsl(var(--buy))]", fillAlpha: "bg-[hsl(var(--buy)/0.3)]", stroke: "hsl(var(--buy))", strokeAlpha: "hsl(var(--buy) / 0.08)" }
+    : { bg: "bg-[hsl(var(--terracotta-light))]", text: "text-primary", fill: "bg-primary", fillAlpha: "bg-primary/30", stroke: "hsl(var(--primary))", strokeAlpha: "hsl(var(--primary) / 0.08)" };
+
   useEffect(() => {
     setTestimonialIdx(0);
   }, [valuationType]);
