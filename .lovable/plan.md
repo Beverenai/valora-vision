@@ -1,48 +1,36 @@
 
 
-# Add Merit Score and Action Items to Dashboard Overview
+# Improve Agent Directory Page
 
-## What This Does
+## Current State
+The page and route already exist at `/agentes` with lazy loading, search, filters, skeleton loading, JSON-LD, and a "load more" pagination pattern. The core functionality requested is largely implemented.
 
-Enhances the `OverviewSection` in `ProDashboard.tsx` by adding a Merit Score card with circular progress visualization and breakdown metrics, plus contextual Action Items that guide agents to complete their profile — both placed above the existing "Recent Leads" card.
+## Changes Needed
 
-## Changes
+### 1. Enhanced hero subtitle
+Update the subtitle to match the requested copy: "Verified agents across Costa del Sol — matched by proximity, reviews, and expertise"
 
-### 1. Update OverviewSection props
+### 2. Add missing municipalities to filter
+Add "Nueva Andalucía", "Puerto Banús", "San Pedro" to `MUNICIPALITIES` array.
 
-Add `setSection` callback so action item buttons can navigate to other sections (profile, zones).
+### 3. Add "Recently joined" sort option
+Extend `sort` state type to include `"newest"` and add the option to the sort dropdown. Sort by `created_at` is not currently fetched — add it to the select query.
 
-```typescript
-function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSection }: {
-  agent: Professional; leads: Lead[]; impressionsCount: number; 
-  onViewLeads: () => void; setSection: (s: Section) => void;
-})
-```
+### 4. Agent card improvements
+- Use terracotta (`bg-[#D4713B]`) for the initials fallback circle instead of `bg-primary`
+- Make the entire card a clickable `Link` to the agent profile
+- Show "New on ValoraCasa" when agent has no rating instead of "0.0 (0)"
+- Display languages as uppercase badge chips instead of dot-separated text
 
-### 2. Add Merit Score card
+### 5. Empty state improvement
+Add a "Clear all filters" button that resets search, location, language, and sort state.
 
-Insert above the "Recent Leads" card:
-- Gradient card with terracotta accent border
-- Left side: score label, large number (62), percentile text
-- Right side: SVG circular progress ring (strokeDasharray based on score)
-- Bottom: 5-column grid showing sub-scores (Proximity, Rating, Response, Conversion, Profile)
+### 6. CTA banner for agents at bottom
+Add a section before `Footer` encouraging agents to join, with links to `/pro` and `/pro#pricing`.
 
-Static values for now — will be computed from real data in a future iteration.
-
-### 3. Add Action Items card
-
-Contextual prompts based on agent profile completeness:
-- Missing bio → "Add a company description" (+15 merit points)
-- Missing logo → "Upload your logo" (+20 merit points)  
-- Always show → "Select your service zones" (required for visibility)
-
-Each item has an icon, description, merit point incentive, and a button that navigates to the relevant section.
-
-### 4. Wire setSection in render
-
-Pass `setSection` prop to `OverviewSection` at line 1143.
+### 7. Mobile filter improvements
+Add `overflow-x-auto flex-nowrap` to the filter bar for horizontal scroll on small screens. Wrap language badges in a scrollable container.
 
 ## Files Modified
-
-- `src/pages/ProDashboard.tsx` — expand OverviewSection with Merit Score + Action Items, update caller to pass `setSection`
+- `src/pages/AgentDirectory.tsx` — all changes in this single file
 
