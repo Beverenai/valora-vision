@@ -260,7 +260,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px]",
     flippable ? "" : shadowClasses,
     hasInput
-      ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
+      ? cn("relative", mapExpanded ? "overflow-hidden min-h-[85vh] md:min-h-[70vh]" : "overflow-visible min-h-[440px] md:min-h-[480px]")
       : "overflow-hidden h-full"
   );
 
