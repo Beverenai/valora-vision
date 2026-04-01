@@ -1,49 +1,53 @@
 
+Fix `/pro/onboard` Step 1 by removing the broken dependency on the separate `address` string and validating against the real address state the UI already uses.
 
-## Plan: Fix Step 1 Validation Blocking Progression
+1. Root cause to fix
+- The screen shows a confirmed address, but the Continue button checks `address.trim()`.
+- That `address` value is rebuilt inside `handleAddressChange` from stale `addressData`, so later updates can wipe it back to empty.
+- Result: the UI looks valid, but the submit gate still thinks a required field is missing.
 
-### Problem
+2. Update Step 1 validation in `src/pages/ProOnboard.tsx`
+- Replace `address.trim()` checks with a derived `hasConfirmedAddress` boolean based on:
+  - `addressConfirmed`
+  - `addressData.streetAddress`
+  - `addressData.latitude` and `addressData.longitude`
+- Use this same boolean everywhere for consistency:
+  - `canProceedStep1`
+  - the Continue button handler
+  - the address validation icon if needed
 
-Two issues prevent advancing from Step 1 despite all fields being filled:
+3. Stop storing duplicated address truth
+- Remove the fragile “reconstruct address on every field change” logic as the source of validation truth.
+- Instead derive a final address string only when needed for API calls:
+  - for `onboard-agency`
+  - for `publish-agent-profile`
+- Build it from `addressData` at send time so the backend always gets the confirmed location shown in the UI.
 
-1. **`emailValid` race condition**: `onChange` (line 407) resets `emailValid = false` on every keystroke. It only becomes `true` after `onBlur` triggers `checkEmailUniqueness` which is async. If the user fills email and moves on without explicitly blurring the email field, or if the async check is slow, `canProceedStep1` stays false.
+4. Improve the Continue button UX
+- Replace the generic “Please fill in all required fields” toast with a more precise message.
+- Validate fields in order and show the first real blocker, for example:
+  - agency name missing
+  - contact name missing
+  - invalid/duplicate email
+  - phone missing
+  - address not confirmed on map
+- This makes the failure understandable instead of looking broken.
 
-2. **Login not persisting** (separate issue): After onboarding, `supabase.auth.signUp` creates the user but doesn't automatically log them in if email confirmation is required. When the user later visits `/pro/login`, they need to confirm their email first.
+5. Make address confirmation harder to desync
+- When the user returns from verify to search or clears the address, ensure `addressConfirmed` is reset.
+- When location is confirmed, use the confirmed address state as the single source of truth.
+- Optionally show a small inline error/help text under the address field when the map pin has not been confirmed yet.
 
-### Fix in `src/pages/ProOnboard.tsx`
+6. Keep Step 2 trigger intact
+- After the validation fix, Continue should reliably call `setStep(1)`.
+- The existing `useEffect` that runs `runAiOnboarding()` on Step 2 can stay as-is.
 
-**A. Make email validation synchronous for format, async check as bonus**
+Files
+- `src/pages/ProOnboard.tsx` — fix validation source of truth, derive request address correctly, improve toast/error UX
 
-Change `canProceedStep1` (line 153) to not require `emailValid` — only require no error:
-```typescript
-const canProceedStep1 = companyName.trim() && contactName.trim() && 
-  email.trim() && phone.trim() && address.trim() && 
-  !emailError && !emailChecking;
-```
-
-Remove `emailValid` from the gate. The uniqueness check still runs on blur and sets `emailError` if duplicate — that's sufficient.
-
-**B. Run email check on Continue click if not yet validated**
-
-In the Continue button handler (line 462), before checking `canProceedStep1`, trigger the email uniqueness check if it hasn't been validated yet. Make the handler async:
-```typescript
-onClick={async () => {
-  // Run email check if not already validated
-  if (!emailValid && email.trim()) {
-    await checkEmailUniqueness(email);
-  }
-  if (canProceedStep1) setStep(1);
-  else toast({ ... });
-}}
-```
-
-**C. Fix `onChange` not clearing `emailValid` too aggressively**
-
-Line 407: Stop resetting `emailValid = false` on every keystroke. Instead, only invalidate when format changes. Move the `setEmailValid(false)` into `validateEmail` (only when format is invalid).
-
-### Files
-
-| Action | File |
-|--------|------|
-| Modified | `src/pages/ProOnboard.tsx` — fix validation gate and email check timing |
-
+Technical notes
+- Best derived field for validation:
+  - `const hasConfirmedAddress = addressConfirmed && !!addressData.streetAddress?.trim() && typeof addressData.latitude === "number" && typeof addressData.longitude === "number"`
+- Best derived field for API payload:
+  - join `streetAddress`, `urbanization`, `city`, `province`, `country` with commas only at request time
+- `canProceedStep1` is currently unused as a real gate outside Step 1 and should either be updated to the new logic or removed to avoid future drift
