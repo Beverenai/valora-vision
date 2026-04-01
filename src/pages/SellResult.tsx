@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { lazyRetry } from "@/lib/lazyRetry";
 import { formatRefCode } from "@/utils/referenceCode";
+import { SectionSkeleton } from "@/components/ui/SectionSkeleton";
+import { StickyAgentButton } from "@/components/shared/StickyAgentButton";
 import { Copy, Check as CheckIcon } from "lucide-react";
 import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
@@ -81,11 +83,6 @@ const LazyAgentBundle = lazy(() =>
   )
 );
 
-const SectionFallback = () => (
-  <div className="py-16 flex justify-center">
-    <div className="w-6 h-6 border-2 border-muted-foreground/20 border-t-primary rounded-full animate-spin" />
-  </div>
-);
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [
@@ -370,7 +367,7 @@ const SellResult: React.FC = () => {
           <div className="w-full h-px bg-border" />
 
           {/* Group 2: Lazy — features, comparables, area comparison, market trends */}
-          <Suspense fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionSkeleton rows={4} />}>
             <LazyAnalysisBundle
               features={lead?.features || null}
               comparables={lead?.comparable_properties as any[] || null}
@@ -386,7 +383,7 @@ const SellResult: React.FC = () => {
           <div className="w-full h-px bg-border" />
 
           {/* Group 3: Lazy — prediction game, matched agents, disclaimer */}
-          <Suspense fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionSkeleton rows={3} />}>
             <LazyAgentBundle
               leadId={id!}
               latitude={lead?.latitude || null}
@@ -397,6 +394,7 @@ const SellResult: React.FC = () => {
           </Suspense>
         </div>
       </CardRevealWrapper>
+      <StickyAgentButton />
     </div>
     </ErrorBoundary>
   );
