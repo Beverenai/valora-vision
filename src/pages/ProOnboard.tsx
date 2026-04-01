@@ -420,7 +420,42 @@ const ProOnboard = () => {
           {step === 0 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
               <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">Let's get started</h1>
-              <p className="text-muted-foreground mb-8">Tell us about your agency. We'll use AI to build your profile.</p>
+              <p className="text-muted-foreground mb-6">Tell us about your business. We'll use AI to build your profile.</p>
+
+              {/* Registration type choice */}
+              <div className="mb-6">
+                <Label className="mb-2 block">What are you registering?</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRegistrationType("agency")}
+                    className={cn(
+                      "p-4 rounded-xl border-2 text-left transition-all",
+                      registrationType === "agency"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-foreground/30"
+                    )}
+                  >
+                    <Building2 className="h-5 w-5 mb-2 text-primary" />
+                    <p className="font-medium text-sm">Agency</p>
+                    <p className="text-xs text-muted-foreground mt-1">A company with multiple agents</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRegistrationType("agent")}
+                    className={cn(
+                      "p-4 rounded-xl border-2 text-left transition-all",
+                      registrationType === "agent"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-foreground/30"
+                    )}
+                  >
+                    <User className="h-5 w-5 mb-2 text-primary" />
+                    <p className="font-medium text-sm">Individual Agent</p>
+                    <p className="text-xs text-muted-foreground mt-1">A solo real estate professional</p>
+                  </button>
+                </div>
+              </div>
 
               <div className="space-y-5">
                 <div>
