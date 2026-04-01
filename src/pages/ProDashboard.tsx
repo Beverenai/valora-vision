@@ -647,6 +647,8 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
     setEditingMember(null);
     loadTeam();
   };
+
+  const handleInvite = async () => {
     if (!inviteForm.name.trim()) {
       toast({ title: "Name required", variant: "destructive" });
       return;
