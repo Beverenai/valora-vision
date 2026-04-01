@@ -1148,10 +1148,17 @@ const ProDashboard = () => {
       {section === "leads" && (
         <LeadsSection leads={leads} onUpdateStatus={handleUpdateLeadStatus} />
       )}
+      {section === "zones" && (
+        <ZonesSection agent={agent} activeZones={activeZones} availableZones={availableZones} />
+      )}
+      {section === "reviews" && (
+        <ReviewsSection reviews={reviews} avgRating={agent.avg_rating} />
+      )}
       {section === "analytics" && (
         <AnalyticsSection impressions={impressionsByDay} leads={leadsByDay} />
       )}
       {section === "subscription" && <SubscriptionSection />}
+      {section === "settings" && <SettingsSection agent={agent} />}
     </div>
   );
 
