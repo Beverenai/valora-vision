@@ -133,34 +133,19 @@ serve(async (req) => {
     let annualRent = 0;
 
     if (latitude && longitude) {
-      if (isSell) {
-        const { data: comps, error: compError } = await supabase.rpc("find_sale_comparables", {
-          p_lat: Number(latitude),
-          p_lng: Number(longitude),
-          p_property_type: property_type || "apartment",
-          p_size_m2: sizeM2,
-          p_rooms: roomsCount,
-          p_radius_km: 5.0,
-          p_limit: 20,
-        });
+      const { data: comps, error: compError } = await supabase.rpc("find_comparables", {
+        p_lat: Number(latitude),
+        p_lng: Number(longitude),
+        p_operation: isSell ? "sale" : "rent",
+        p_property_type: property_type || "apartment",
+        p_size_m2: sizeM2,
+        p_rooms: roomsCount,
+        p_radius_km: 5.0,
+        p_limit: 20,
+      });
 
-        if (!compError && comps && comps.length > 0) {
-          comparables = comps;
-        }
-      } else {
-        const { data: comps, error: compError } = await supabase.rpc("find_rent_comparables", {
-          p_lat: Number(latitude),
-          p_lng: Number(longitude),
-          p_property_type: property_type || "apartment",
-          p_size_m2: sizeM2,
-          p_rooms: roomsCount,
-          p_radius_km: 5.0,
-          p_limit: 20,
-        });
-
-        if (!compError && comps && comps.length > 0) {
-          comparables = comps;
-        }
+      if (!compError && comps && comps.length > 0) {
+        comparables = comps;
       }
     }
 
