@@ -57,7 +57,7 @@ const RentValuation: React.FC = () => {
       }
     : INITIAL_RENT_DATA;
 
-  useSEO({ title: "Free Rental Estimate | ValoraCasa", description: "Find out what your property could rent for in Costa del Sol." });
+  useSEO({ title: "Free Rental Estimate | ValoraCasa", description: "Find out what your property could rent for in Costa del Sol. Free estimate based on comparable rental data.", path: "/rent/valuation" });
 
   const {
     currentStep,
