@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Sell", href: "/sell/valuation" },
+  { label: "Rent", href: "/rent/valuation" },
   { label: "Buy Analysis", href: "/buy" },
-  { label: "Lookup", href: "/lookup" },
+  { label: "Find an Agent", href: "/agentes" },
   { label: "For Agents", href: "/pro" },
 ];
 
@@ -15,7 +16,7 @@ const Navbar = () => {
   const location = useLocation();
 
   return (
-    <header className="max-w-[1400px] mx-auto flex items-center justify-between py-4 px-6 border-b-2 border-primary">
+    <header className="max-w-[1400px] mx-auto flex items-center justify-between py-4 px-6 border-b-2 border-primary relative">
       <Link to="/" className="flex items-center gap-1">
         <span className="font-heading text-xl font-bold text-foreground">
           Valora<span className="text-gold">Casa</span>
@@ -50,13 +51,14 @@ const Navbar = () => {
       <button
         className="md:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label="Toggle navigation menu"
       >
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="absolute top-14 left-0 right-0 z-50 border-b border-border bg-card px-6 pb-4 md:hidden">
+        <div className="absolute top-full left-0 right-0 z-50 border-b border-border bg-card px-6 pb-4 md:hidden">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -67,6 +69,13 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          <Link
+            to="/sell/valuation"
+            onClick={() => setMobileOpen(false)}
+            className="block mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
+          >
+            Get Valuation
+          </Link>
         </div>
       )}
     </header>
