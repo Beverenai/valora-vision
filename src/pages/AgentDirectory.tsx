@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, CheckCircle, MapPin, Globe, ChevronRight, Sparkles, Users } from "lucide-react";
+import { Search, Star, CheckCircle, MapPin, Globe, ChevronRight, Sparkles, Users, Building2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -54,6 +54,9 @@ interface Professional {
   service_zones: string[] | null;
   office_address: string | null;
   created_at: string | null;
+  type: string;
+  agency_id: string | null;
+  contact_name: string | null;
 }
 
 interface ProfessionalZone {
@@ -76,21 +79,30 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-function AgentCard({ agent, zone, isFeatured }: { agent: Professional; zone: string | null; isFeatured: boolean }) {
+function AgentCard({ agent, zone, isFeatured, agencyName }: { agent: Professional; zone: string | null; isFeatured: boolean; agencyName?: string | null }) {
   const [logoFailed, setLogoFailed] = useState(false);
   const displayLocation = zone || agent.office_address;
   const hasRating = agent.avg_rating != null && agent.avg_rating > 0;
+  const isAgency = agent.type === "agency";
 
   return (
     <Link to={`/agentes/${agent.slug}`} className="block group">
       <Card className={`hover:shadow-md transition-shadow h-full ${isFeatured ? "ring-1 ring-primary/30 shadow-sm" : ""}`}>
         <CardContent className="p-5">
-          {isFeatured && (
-            <div className="flex items-center gap-1 mb-3">
-              <Badge className="bg-primary/10 text-primary border-0 text-[0.6rem] uppercase tracking-wider font-semibold">
-                <Sparkles className="h-3 w-3 mr-1" />
-                Featured
-              </Badge>
+          {(isFeatured || isAgency) && (
+            <div className="flex items-center gap-1.5 mb-3">
+              {isFeatured && (
+                <Badge className="bg-primary/10 text-primary border-0 text-[0.6rem] uppercase tracking-wider font-semibold">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Featured
+                </Badge>
+              )}
+              {isAgency && (
+                <Badge variant="outline" className="text-[0.6rem] uppercase tracking-wider font-semibold">
+                  <Users className="h-3 w-3 mr-1" />
+                  Agency
+                </Badge>
+              )}
             </div>
           )}
           <div className="flex items-start gap-3 mb-3">
@@ -130,6 +142,13 @@ function AgentCard({ agent, zone, isFeatured }: { agent: Professional; zone: str
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
             {agent.tagline || agent.description || "Real estate professional"}
           </p>
+
+          {agencyName && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+              <Building2 className="h-3 w-3 shrink-0" />
+              <span className="truncate">{agencyName}</span>
+            </div>
+          )}
 
           {displayLocation && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
@@ -203,7 +222,7 @@ export default function AgentDirectory() {
     const [agentsRes, zonesRes, pzRes] = await Promise.all([
       supabase
         .from("professionals")
-        .select("id, company_name, slug, logo_url, description, tagline, avg_rating, total_reviews, is_verified, languages, service_zones, office_address, created_at")
+        .select("id, company_name, slug, logo_url, description, tagline, avg_rating, total_reviews, is_verified, languages, service_zones, office_address, created_at, type, agency_id, contact_name")
         .eq("is_active", true),
       supabase.from("zones").select("id, name"),
       supabase.from("professional_zones").select("professional_id, tier, is_active").eq("is_active", true),
@@ -227,6 +246,13 @@ export default function AgentDirectory() {
     });
     return s;
   }, [profZones]);
+
+  // Map agency_id -> company_name for badge display
+  const agencyNameMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    agents.filter(a => a.type === "agency").forEach(a => { m[a.id] = a.company_name; });
+    return m;
+  }, [agents]);
 
   const filtered = useMemo(() => {
     let list = [...agents];
@@ -398,7 +424,7 @@ export default function AgentDirectory() {
             <p className="text-sm text-muted-foreground mb-6">{filtered.length} agent{filtered.length !== 1 ? "s" : ""} found</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {visible.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} zone={getPrimaryZone(agent)} isFeatured={featuredSet.has(agent.id)} />
+                <AgentCard key={agent.id} agent={agent} zone={getPrimaryZone(agent)} isFeatured={featuredSet.has(agent.id)} agencyName={agent.agency_id ? agencyNameMap[agent.agency_id] : null} />
               ))}
             </div>
 

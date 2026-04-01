@@ -33,6 +33,9 @@ Deno.serve(async (req) => {
       team_size,
       team,
       cover_photo_url,
+      type,
+      agency_role,
+      agency_id,
     } = await req.json();
 
     console.log("[publish-agent-profile] Received:", { user_id, company_name, contact_name, email, slug });
@@ -58,7 +61,7 @@ Deno.serve(async (req) => {
       website: website || null,
       office_address: office_address || null,
       slug,
-      type: "agent",
+      type: type || "agent",
       description: description || null,
       logo_url: logo_url || null,
       languages: languages || [],
@@ -69,6 +72,8 @@ Deno.serve(async (req) => {
       total_reviews: total_reviews || 0,
       team_size: team_size || null,
       cover_photo_url: cover_photo_url || null,
+      agency_role: agency_role || null,
+      agency_id: agency_id || null,
       is_active: true,
       is_verified: false,
     };

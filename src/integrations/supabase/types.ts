@@ -650,6 +650,8 @@ export type Database = {
       }
       professionals: {
         Row: {
+          agency_id: string | null
+          agency_role: string | null
           avg_rating: number | null
           bio: string | null
           company_name: string
@@ -680,6 +682,8 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          agency_id?: string | null
+          agency_role?: string | null
           avg_rating?: number | null
           bio?: string | null
           company_name: string
@@ -710,6 +714,8 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          agency_id?: string | null
+          agency_role?: string | null
           avg_rating?: number | null
           bio?: string | null
           company_name?: string
@@ -739,7 +745,15 @@ export type Database = {
           user_id?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "professionals_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       properties: {
         Row: {

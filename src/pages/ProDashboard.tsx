@@ -49,6 +49,7 @@ interface Professional {
   description: string | null;
   tagline: string | null;
   logo_url: string | null;
+  cover_photo_url: string | null;
   slug: string;
   languages: string[] | null;
   service_zones: string[] | null;
@@ -59,6 +60,9 @@ interface Professional {
   facebook_url: string | null;
   linkedin_url: string | null;
   office_address: string | null;
+  type: string;
+  agency_id: string | null;
+  agency_role: string | null;
 }
 
 interface Lead {
@@ -274,7 +278,7 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
 
   // ── Improved Merit Score Algorithm ──
   // Profile completeness (10%): 8 key fields
-  const profileFields = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline, (agent as any).cover_photo_url, agent.languages?.length];
+  const profileFields = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline, agent.cover_photo_url, agent.languages?.length];
   const profileMerit = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
   // Rating (25%): avg_rating out of 5
@@ -427,7 +431,7 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
   });
   const [languages, setLanguages] = useState<string[]>(agent.languages || []);
   const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState((agent as any).cover_photo_url || "");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState(agent.cover_photo_url || "");
   const [uploading, setUploading] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
@@ -498,7 +502,7 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
   };
 
   const handleSave = () => {
-    onSave({ ...form, languages, logo_url: logoUrl || null });
+    onSave({ ...form, languages, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null });
   };
 
   const initials = agent.company_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
