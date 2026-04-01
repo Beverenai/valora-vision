@@ -416,8 +416,14 @@ serve(async (req) => {
         console.log(`=== Scraping Idealista SALES for ${zone_name} (${location_id}) via Apify ===`);
         const saleListings = await fetchIdealistaViaApify(APIFY_TOKEN, location_id, "sale", 50);
         console.log(`Found ${saleListings.length} sale listings`);
-        results.sale_count = await upsertSaleListings(supabase, saleListings, zone_name, zone_id || null);
+        const saleResult = await upsertSaleListings(supabase, saleListings, zone_name, zone_id || null);
+        results.sale_count = saleResult.count;
         console.log(`Upserted ${results.sale_count} sale properties`);
+
+        // Deactivate properties no longer in the fresh batch
+        if (zone_id && saleResult.freshCodes.length > 0) {
+          results.sale_deactivated = await deactivateStaleProperties(supabase, saleResult.freshCodes, zone_id, "sale");
+        }
       } catch (e) {
         console.error("Sale scrape failed:", e);
         results.sale_error = String(e);
@@ -430,8 +436,14 @@ serve(async (req) => {
         console.log(`=== Scraping Idealista RENTALS for ${zone_name} (${location_id}) via Apify ===`);
         const rentListings = await fetchIdealistaViaApify(APIFY_TOKEN, location_id, "rent", 50);
         console.log(`Found ${rentListings.length} rental listings`);
-        results.rent_count = await upsertRentListings(supabase, rentListings, zone_name, zone_id || null);
+        const rentResult = await upsertRentListings(supabase, rentListings, zone_name, zone_id || null);
+        results.rent_count = rentResult.count;
         console.log(`Upserted ${results.rent_count} rental properties`);
+
+        // Deactivate properties no longer in the fresh batch
+        if (zone_id && rentResult.freshCodes.length > 0) {
+          results.rent_deactivated = await deactivateStaleProperties(supabase, rentResult.freshCodes, zone_id, "rent");
+        }
       } catch (e) {
         console.error("Rent scrape failed:", e);
         results.rent_error = String(e);
