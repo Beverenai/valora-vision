@@ -278,7 +278,7 @@ const ProOnboard = () => {
     setAiSteps((prev) => [...prev, { key: "complete", status: "done", label: "Profile ready!" }]);
     await delay(800);
     setAiDone(true);
-  }, [companyName, contactName, email, phone, website, address]);
+  }, [companyName, contactName, email, phone, website, derivedAddress]);
 
   // Auto-advance from step 2
   useEffect(() => {
