@@ -260,7 +260,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
     "flex w-full bg-[hsl(36_9%_88%)] rounded-[24px] md:rounded-[32px]",
     flippable ? "" : shadowClasses,
     hasInput
-      ? cn("relative overflow-visible", mapExpanded ? "min-h-[85vh] md:min-h-[70vh]" : "min-h-[440px] md:min-h-[480px]")
+      ? cn("relative", mapExpanded ? "overflow-hidden min-h-[85vh] md:min-h-[70vh]" : "overflow-visible min-h-[440px] md:min-h-[480px]")
       : "overflow-hidden h-full"
   );
 
@@ -268,7 +268,7 @@ const ValuationTicketCard: React.FC<ValuationTicketCardProps> = ({
   const frontFace = (
     <div className={cardClasses}>
       {/* Main Section */}
-      <div className={cn("flex-1 flex flex-col relative border-r-2 border-dashed border-foreground/15", mainPadding, (mapExpanded || hasBuyInput) ? "overflow-visible" : "overflow-hidden")}>
+      <div className={cn("flex-1 flex flex-col relative border-r-2 border-dashed border-foreground/15", mainPadding, mapExpanded ? "overflow-hidden" : (hasBuyInput ? "overflow-visible" : "overflow-hidden"))}>
         {/* Hero Image */}
         <div className={cn(
           "relative w-full min-h-[120px] rounded-[16px] md:rounded-[20px] overflow-hidden mb-3 md:mb-4 shrink transition-all duration-500",
