@@ -37,7 +37,7 @@ import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-type Section = "overview" | "profile" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
+type Section = "overview" | "profile" | "team" | "company" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
 
 interface Professional {
   id: string;
