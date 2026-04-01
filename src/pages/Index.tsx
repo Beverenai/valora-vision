@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 /* ─── DATA ─── */
 
@@ -89,7 +91,7 @@ const StatsBar = () => (
 /* ─── MAIN PAGE ─── */
 
 const Index = () => {
-  useSEO({ title: "ValoraCasa — Free Property Valuations in Costa del Sol", description: "Get a free, instant property valuation for Costa del Sol. Compare agents, analyze listings, and make informed real estate decisions." });
+  useSEO({ title: "ValoraCasa — Free Property Valuations in Costa del Sol", description: "Get a free, instant property valuation for your home in Spain. Based on real market data from Costa del Sol.", path: "/" });
   const navigate = useNavigate();
   const [valuationType, setValuationType] = useState<"sell" | "buy">("sell");
   const [listingUrl, setListingUrl] = useState("");
@@ -162,6 +164,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
+      <Navbar />
       <div className="max-w-[1400px] mx-auto w-full flex flex-col">
 
         {/* ═══════════ HERO ═══════════ */}
@@ -815,7 +818,7 @@ const Index = () => {
         </section>
 
       </div>
-
+      <Footer />
     </div>
   );
 };

@@ -16,19 +16,20 @@ const Footer = () => (
           Services
         </p>
         <div className="flex flex-col gap-2">
-          <Link to="/sell/valuation" className="text-sm text-foreground/70 hover:text-foreground">Sell Valuation</Link>
-          <Link to="/buy" className="text-sm text-foreground/70 hover:text-foreground">Buy Analysis</Link>
-          <Link to="/lookup" className="text-sm text-foreground/70 hover:text-foreground">Lookup Valuation</Link>
+          <Link to="/sell/valuation" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Sell Valuation</Link>
+          <Link to="/rent/valuation" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Rental Valuation</Link>
+          <Link to="/buy" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Buy Analysis</Link>
+          <Link to="/lookup" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Lookup Valuation</Link>
         </div>
       </div>
       <div className="bg-card p-8">
         <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
-          Company
+          Explore
         </p>
         <div className="flex flex-col gap-2">
-          <span className="text-sm text-foreground/70">About Us</span>
-          <span className="text-sm text-foreground/70">Blog</span>
-          <span className="text-sm text-foreground/70">Contact</span>
+          <Link to="/" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Home</Link>
+          <Link to="/agentes" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Find an Agent</Link>
+          <Link to="/pro" className="text-sm text-foreground/70 hover:text-foreground transition-colors">For Agents</Link>
         </div>
       </div>
       <div className="bg-card p-8">
