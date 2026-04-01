@@ -314,9 +314,35 @@ function LeadsSection({ leads, onUpdateStatus }: { leads: Lead[]; onUpdateStatus
 
   const filtered = filter === "all" ? leads : leads.filter((l) => l.status === filter);
 
+  const handleExportCSV = () => {
+    const headers = ["Name", "Email", "Phone", "Interest", "Message", "Status", "Date"];
+    const rows = filtered.map((l) => [
+      l.name,
+      l.email,
+      l.phone || "",
+      l.interest || "",
+      (l.message || "").replace(/"/g, '""'),
+      l.status,
+      l.created_at ? format(new Date(l.created_at), "yyyy-MM-dd") : "",
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
-      <h2 className="font-serif text-xl font-bold">Leads</h2>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="font-serif text-xl font-bold">Leads</h2>
+        <Button variant="outline" size="sm" onClick={handleExportCSV} className="rounded-full text-xs">
+          Export CSV
+        </Button>
+      </div>
       <div className="flex gap-2 flex-wrap">
         {["all", "new", "contacted", "converted"].map((s) => (
           <Button key={s} variant={filter === s ? "default" : "outline"} size="sm" onClick={() => setFilter(s)} className="capitalize rounded-full">
@@ -472,7 +498,7 @@ const ProDashboard = () => {
 
   const checkAuthAndLoad = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { navigate("/pro/login"); return; }
+    if (!session) { navigate("/pro"); return; }
 
     const { data: prof, error } = await supabase.from("professionals").select("*").eq("user_id", session.user.id).single();
     if (error || !prof) { navigate("/pro/onboard"); return; }
