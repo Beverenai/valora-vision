@@ -120,6 +120,15 @@ const ProLanding = () => {
               <a href="#how-it-works">See how it works</a>
             </Button>
           </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35 }}
+            className="mt-4 text-sm text-foreground/50"
+          >
+            Already have an account?{" "}
+            <Link to="/pro/login" className="text-primary hover:underline font-medium">Sign in</Link>
+          </motion.p>
         </div>
       </section>
 
