@@ -15,6 +15,7 @@ import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
   Calendar, Leaf, Home, Info,
 } from "lucide-react";
+import { ShareMenu } from "@/components/shared/ShareMenu";
 import type { Comparable } from "@/components/ResultAnalysisGroup";
 
 // ── Lazy wrappers: each returns a single default-exported component ──
