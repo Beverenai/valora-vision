@@ -305,8 +305,8 @@ serve(async (req) => {
 
     if (comparables.length >= 3) {
       const pricesPerSqm = comparables
-        .filter((c: any) => c.price_per_sqm && c.price_per_sqm > 0)
-        .map((c: any) => Number(c.price_per_sqm));
+        .filter((c: any) => c.price_per_m2 && c.price_per_m2 > 0)
+        .map((c: any) => Number(c.price_per_m2));
 
       const filtered = filterOutliers(pricesPerSqm);
       areaMedianPricePerM2 = filtered.length > 0 ? Math.round(median(filtered)) : 3500;
