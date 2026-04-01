@@ -105,6 +105,8 @@ const ProOnboard = () => {
   const [socialInstagram, setSocialInstagram] = useState("");
   const [socialFacebook, setSocialFacebook] = useState("");
   const [socialLinkedin, setSocialLinkedin] = useState("");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [coverPhotoFailed, setCoverPhotoFailed] = useState(false);
   const [googleRating, setGoogleRating] = useState<number | null>(null);
   const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null);
   const [lat, setLat] = useState<number | null>(null);
