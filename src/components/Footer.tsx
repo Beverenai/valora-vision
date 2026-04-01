@@ -1,50 +1,53 @@
 import { Link } from "react-router-dom";
 
 const Footer = () => (
-  <footer className="max-w-[1400px] mx-auto border-t border-border">
-    <div className="grid gap-[1px] bg-border md:grid-cols-4">
-      <div className="bg-card p-8">
-        <span className="font-heading text-lg font-bold text-foreground">
-          Valora<span className="text-gold">Casa</span>
-        </span>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Free property valuations and rental estimates for owners in Spain.
-        </p>
-      </div>
-      <div className="bg-card p-8">
-        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
-          Services
-        </p>
-        <div className="flex flex-col gap-2">
-          <Link to="/sell/valuation" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Sell Valuation</Link>
-          <Link to="/rent/valuation" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Rental Valuation</Link>
-          <Link to="/buy" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Buy Analysis</Link>
-          <Link to="/lookup" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Lookup Valuation</Link>
+  <footer className="bg-brand">
+    <div className="max-w-[1400px] mx-auto">
+      <div className="grid gap-8 md:grid-cols-4 px-8 py-12">
+        <div>
+          <span className="font-sans text-lg font-bold text-white">
+            Valora<span className="text-[hsl(var(--gold))]">Casa</span>
+          </span>
+          <p className="mt-3 text-sm text-white/60">
+            Free property valuations and rental estimates for owners in Spain.
+          </p>
+          <p className="mt-4 text-xs text-white/40">Made in Marbella 🇪🇸</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-white/40 mb-3">
+            For Homeowners
+          </p>
+          <div className="flex flex-col gap-2">
+            <Link to="/sell/valuation" className="text-sm text-white/60 hover:text-white transition-colors">Sell Valuation</Link>
+            <Link to="/rent/valuation" className="text-sm text-white/60 hover:text-white transition-colors">Rental Valuation</Link>
+            <Link to="/buy" className="text-sm text-white/60 hover:text-white transition-colors">Buy Analysis</Link>
+            <Link to="/lookup" className="text-sm text-white/60 hover:text-white transition-colors">Lookup Valuation</Link>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-white/40 mb-3">
+            For Agents
+          </p>
+          <div className="flex flex-col gap-2">
+            <Link to="/agentes" className="text-sm text-white/60 hover:text-white transition-colors">Find an Agent</Link>
+            <Link to="/pro" className="text-sm text-white/60 hover:text-white transition-colors">List Your Agency</Link>
+            <Link to="/pro/login" className="text-sm text-white/60 hover:text-white transition-colors">Agent Login</Link>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-white/40 mb-3">
+            Company
+          </p>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-white/60">Privacy Policy</span>
+            <span className="text-sm text-white/60">Terms of Service</span>
+            <span className="text-sm text-white/60">Cookie Policy</span>
+          </div>
         </div>
       </div>
-      <div className="bg-card p-8">
-        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
-          Explore
-        </p>
-        <div className="flex flex-col gap-2">
-          <Link to="/" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Home</Link>
-          <Link to="/agentes" className="text-sm text-foreground/70 hover:text-foreground transition-colors">Find an Agent</Link>
-          <Link to="/pro" className="text-sm text-foreground/70 hover:text-foreground transition-colors">For Agents</Link>
-        </div>
+      <div className="border-t border-white/10 px-8 py-4 text-center text-xs text-white/40">
+        © {new Date().getFullYear()} ValoraCasa · Made in Marbella
       </div>
-      <div className="bg-card p-8">
-        <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-3">
-          Legal
-        </p>
-        <div className="flex flex-col gap-2">
-          <span className="text-sm text-foreground/70">Privacy Policy</span>
-          <span className="text-sm text-foreground/70">Terms of Service</span>
-          <span className="text-sm text-foreground/70">Cookie Policy</span>
-        </div>
-      </div>
-    </div>
-    <div className="bg-card border-t border-border px-8 py-4 text-center text-xs text-muted-foreground">
-      © {new Date().getFullYear()} ValoraCasa. All rights reserved.
     </div>
   </footer>
 );

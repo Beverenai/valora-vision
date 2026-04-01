@@ -10,21 +10,23 @@ interface CTABannerProps {
 }
 
 const CTABanner = ({ title, subtitle, buttonText, href }: CTABannerProps) => (
-  <section className="border border-border">
-    <div className="bg-primary p-12 md:p-16 text-center">
-      <h2 className="font-heading text-2xl font-bold text-primary-foreground md:text-3xl">
+  <section>
+    <div className="bg-gradient-to-br from-brand to-brand-light p-12 md:p-16 text-center rounded-2xl">
+      <h2 className="font-sans text-2xl font-bold text-white md:text-3xl">
         {title}
       </h2>
       {subtitle && (
-        <p className="mx-auto mt-2 max-w-lg text-primary-foreground/60 text-sm">{subtitle}</p>
+        <p className="mx-auto mt-2 max-w-lg text-white/60 text-sm">{subtitle}</p>
       )}
-      <Link
-        to={href}
-        className="mt-6 inline-flex items-center gap-2 bg-gold text-primary px-8 py-3.5 text-base font-semibold rounded-full hover:bg-gold-dark transition-colors shadow-md"
-      >
-        {buttonText}
-        <ArrowRight className="h-4 w-4" />
-      </Link>
+      <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+        <Link
+          to={href}
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3.5 text-base font-semibold rounded-[10px] hover:bg-primary-hover transition-all hover:-translate-y-[1px] hover:shadow-lg"
+        >
+          {buttonText}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
     </div>
   </section>
 );

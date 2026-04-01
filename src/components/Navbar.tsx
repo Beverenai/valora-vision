@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,10 +33,16 @@ function isProRoute(pathname: string): boolean {
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const context = detectContext(location.pathname);
-
   const onPro = isProRoute(location.pathname);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const visibleServiceLinks = context
     ? serviceLinks.filter((l) => l.id !== context)
@@ -46,11 +52,14 @@ const Navbar = () => {
   const cta = context ? ctaConfig[context] : ctaConfig.sell;
 
   return (
-    <header className="w-full border-b-2 border-primary">
-      <div className="max-w-[1400px] mx-auto flex items-center justify-between py-4 px-6 relative">
+    <header className={cn(
+      "w-full sticky top-0 z-50 transition-all duration-300",
+      scrolled ? "bg-brand shadow-lg" : "bg-brand"
+    )}>
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between h-16 px-6 relative">
         <Link to="/" className="flex items-center gap-1">
-          <span className="font-heading text-xl font-bold text-foreground">
-            Valora<span className="text-gold">Casa</span>
+          <span className="font-sans text-xl font-bold text-white">
+            Valora<span className="text-[hsl(var(--gold))]">Casa</span>
           </span>
         </Link>
 
@@ -61,10 +70,10 @@ const Navbar = () => {
               key={link.href}
               to={link.href}
               className={cn(
-                "text-sm transition-colors hover:text-foreground",
+                "text-sm transition-colors hover:text-white",
                 location.pathname === link.href
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground"
+                  ? "text-white font-medium"
+                  : "text-white/70"
               )}
             >
               {link.label}
@@ -73,7 +82,7 @@ const Navbar = () => {
           {onPro && (
             <Link
               to="/pro/login"
-              className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition-colors"
             >
               <LogIn className="h-4 w-4" />
               Login
@@ -82,7 +91,7 @@ const Navbar = () => {
           {!onPro && (
             <Link
               to={cta.href}
-              className="bg-primary text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+              className="bg-primary text-primary-foreground rounded-[10px] px-5 py-2 text-sm font-semibold hover:bg-primary-hover transition-all hover:-translate-y-[1px] hover:shadow-lg"
             >
               {cta.label}
             </Link>
@@ -91,7 +100,7 @@ const Navbar = () => {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden"
+          className="md:hidden text-white"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle navigation menu"
         >
@@ -100,13 +109,13 @@ const Navbar = () => {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 border-b border-border bg-card px-6 pb-4 md:hidden">
+          <div className="absolute top-full left-0 right-0 z-50 bg-brand px-6 pb-4 md:hidden shadow-xl">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block py-3 text-sm text-muted-foreground hover:text-foreground"
+                className="block py-3 text-sm text-white/70 hover:text-white"
               >
                 {link.label}
               </Link>
@@ -115,7 +124,7 @@ const Navbar = () => {
               <Link
                 to="/pro/login"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center gap-1.5 mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
+                className="flex items-center justify-center gap-1.5 mt-2 text-center bg-primary text-primary-foreground rounded-[10px] px-5 py-2.5 text-sm font-semibold"
               >
                 <LogIn className="h-4 w-4" />
                 Login
@@ -124,7 +133,7 @@ const Navbar = () => {
               <Link
                 to={cta.href}
                 onClick={() => setMobileOpen(false)}
-                className="block mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
+                className="block mt-2 text-center bg-primary text-primary-foreground rounded-[10px] px-5 py-2.5 text-sm font-semibold"
               >
                 {cta.label}
               </Link>
