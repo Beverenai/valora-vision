@@ -165,17 +165,17 @@ const ProOnboard = () => {
     const hasWebsite = !!website.trim();
     const stepDefs = hasWebsite
       ? [
-          { key: "scan_website", loadingLabel: "Scanning your website...", doneLabel: "Website scanned", skipLabel: "No website data" },
+          { key: "scan_website", loadingLabel: "Scanning your website...", doneLabel: "Found your logo", skipLabel: "No website data" },
           { key: "generate_desc", loadingLabel: "Generating description...", doneLabel: "Generated description", skipLabel: "Using default description" },
-          { key: "find_team", loadingLabel: "Looking for team members...", doneLabel: "", skipLabel: "No team members found" },
-          { key: "languages", loadingLabel: "Detecting languages...", doneLabel: "", skipLabel: "Default languages set" },
-          { key: "google", loadingLabel: "Checking Google reviews...", doneLabel: "", skipLabel: "No Google reviews found" },
+          { key: "find_team", loadingLabel: "Looking for team members...", doneLabel: "Found team members", skipLabel: "No team members found" },
+          { key: "languages", loadingLabel: "Detecting languages...", doneLabel: "Detected languages", skipLabel: "Default languages set" },
+          { key: "google", loadingLabel: "Checking Google reviews...", doneLabel: "Found reviews", skipLabel: "No Google reviews found" },
           { key: "social", loadingLabel: "Finding social media...", doneLabel: "Found social links", skipLabel: "No social links found" },
         ]
       : [
           { key: "generate_desc", loadingLabel: "Generating description...", doneLabel: "Generated description", skipLabel: "Using default description" },
-          { key: "google", loadingLabel: "Checking Google reviews...", doneLabel: "", skipLabel: "No Google reviews found" },
-          { key: "languages", loadingLabel: "Detecting languages...", doneLabel: "", skipLabel: "Default languages set" },
+          { key: "google", loadingLabel: "Checking Google reviews...", doneLabel: "Found reviews", skipLabel: "No Google reviews found" },
+          { key: "languages", loadingLabel: "Detecting languages...", doneLabel: "Detected languages", skipLabel: "Default languages set" },
         ];
 
     // Start API call (fire and forget, store result in ref)
