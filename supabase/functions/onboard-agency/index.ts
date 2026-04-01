@@ -80,6 +80,9 @@ Deno.serve(async (req) => {
             // Extract logo from metadata
             if (metadata.ogImage) result.logo_url = metadata.ogImage;
 
+            // Use og:image as cover photo candidate
+            if (metadata.ogImage) result.cover_photo_url = metadata.ogImage;
+
             // Extract social links from all links
             const links: string[] = scrapeData.data?.links || scrapeData.links || [];
             for (const link of links) {
