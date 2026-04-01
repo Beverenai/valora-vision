@@ -4,9 +4,9 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const serviceLinks = [
-  { id: "sell", label: "Sell", href: "/sell/valuation" },
+  { id: "sell", label: "Sell", href: "/?mode=sell" },
   { id: "rent", label: "Rent", href: "/rent/valuation" },
-  { id: "buy", label: "Buy Analysis", href: "/buy" },
+  { id: "buy", label: "Buy Analysis", href: "/?mode=buy" },
 ];
 
 const permanentLinks = [
@@ -15,9 +15,9 @@ const permanentLinks = [
 ];
 
 const ctaConfig: Record<string, { label: string; href: string }> = {
-  sell: { label: "Get Valuation", href: "/sell/valuation" },
+  sell: { label: "Get Valuation", href: "/?mode=sell" },
   rent: { label: "Estimate Rent", href: "/rent/valuation" },
-  buy: { label: "Analyze Price", href: "/buy" },
+  buy: { label: "Analyze Price", href: "/?mode=buy" },
 };
 
 function detectContext(pathname: string): string | null {
