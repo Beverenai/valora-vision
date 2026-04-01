@@ -399,9 +399,13 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
   });
   const [languages, setLanguages] = useState<string[]>(agent.languages || []);
   const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState((agent as any).cover_photo_url || "");
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [coverFailed, setCoverFailed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
