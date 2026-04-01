@@ -77,7 +77,7 @@ const ProOnboard = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
-  const [address, setAddress] = useState("");
+  const [address] = useState(""); // kept for potential legacy refs
   const [addressData, setAddressData] = useState<AddressData>({
     streetAddress: "", urbanization: "", city: "", province: "", country: "", latitude: undefined, longitude: undefined,
   });
