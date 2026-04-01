@@ -245,11 +245,18 @@ const ProLanding = () => {
         <p className="text-foreground/70 mb-8 max-w-lg mx-auto">
           Join ValoraCasa today and start receiving qualified leads from homeowners in your area.
         </p>
-        <Button asChild size="lg" className="rounded-full text-base px-10 shadow-md">
-          <Link to="/pro/onboard">
-            Get started for free <ArrowRight className="w-4 h-4 ml-1" />
-          </Link>
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Button asChild size="lg" className="rounded-full text-base px-10 shadow-md">
+            <Link to="/pro/onboard">
+              Get started for free <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="lg" className="rounded-full text-base text-primary">
+            <Link to="/pro/login">
+              Sign in to dashboard
+            </Link>
+          </Button>
+        </div>
       </section>
 
       <Footer />

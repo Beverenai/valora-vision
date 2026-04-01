@@ -111,13 +111,24 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to={cta.href}
-              onClick={() => setMobileOpen(false)}
-              className="block mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
-            >
-              {cta.label}
-            </Link>
+            {onPro ? (
+              <Link
+                to="/pro/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-1.5 mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
+              >
+                <LogIn className="h-4 w-4" />
+                Login
+              </Link>
+            ) : (
+              <Link
+                to={cta.href}
+                onClick={() => setMobileOpen(false)}
+                className="block mt-2 text-center bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold"
+              >
+                {cta.label}
+              </Link>
+            )}
           </div>
         )}
       </div>
