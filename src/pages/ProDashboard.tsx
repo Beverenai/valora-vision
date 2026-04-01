@@ -547,6 +547,37 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
       .select("*")
       .eq("professional_id", agent.id)
       .order("sort_order");
+
+    // Auto-seed owner if not present
+    const ownerExists = (data || []).some(
+      (m: any) => m.role?.toLowerCase() === "owner" || m.email === agent.email
+    );
+    if (!ownerExists) {
+      await supabase.from("agent_team_members").insert({
+        professional_id: agent.id,
+        name: agent.contact_name,
+        email: agent.email,
+        phone: agent.phone || null,
+        role: "Owner",
+        sort_order: 0,
+        is_active: true,
+      });
+      // Re-fetch after seeding
+      const { data: refreshed } = await supabase
+        .from("agent_team_members")
+        .select("*")
+        .eq("professional_id", agent.id)
+        .order("sort_order");
+      const sorted = (refreshed || []).sort((a: any, b: any) => {
+        if (a.is_active !== false && b.is_active === false) return -1;
+        if (a.is_active === false && b.is_active !== false) return 1;
+        return (a.sort_order || 0) - (b.sort_order || 0);
+      });
+      setTeamMembers(sorted);
+      setLoading(false);
+      return;
+    }
+
     // Sort: active first, then by sort_order
     const sorted = (data || []).sort((a: any, b: any) => {
       if (a.is_active !== false && b.is_active === false) return -1;
