@@ -142,8 +142,9 @@ const Index = () => {
 
   const isSell = valuationType === "sell";
   const isBuy = valuationType === "buy";
-  const testimonials = isSell ? TESTIMONIALS_SELL : TESTIMONIALS_BUY;
-  const reportFeatures = isSell ? REPORT_FEATURES_SELL : REPORT_FEATURES_BUY;
+  const isRent = valuationType === "rent";
+  const testimonials = isRent ? TESTIMONIALS_RENT : isBuy ? TESTIMONIALS_BUY : TESTIMONIALS_SELL;
+  const reportFeatures = isRent ? REPORT_FEATURES_RENT : isBuy ? REPORT_FEATURES_BUY : REPORT_FEATURES_SELL;
 
   // Reset testimonial index when switching type
   useEffect(() => {
