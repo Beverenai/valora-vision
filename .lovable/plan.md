@@ -1,37 +1,67 @@
 
 
-# Add Rent as Third Homepage Mode
+# Agent Login Flow + Dashboard Feature Improvements
 
-## What Changes
+## Overview
 
-Expand the homepage from 2 modes (`sell | buy`) to 3 modes (`sell | rent | buy`). Rent navigates to the homepage with `/?mode=rent` instead of `/rent/valuation`. The SkyToggle (binary Sell/Buy) stays as the primary toggle, and Rent mode is activated only via navbar link or direct URL.
+Add a "Login" link for agents in the Navbar and ProLanding page, protect the dashboard route with an auth guard, add logout, and improve the dashboard's profile editing, leads management, and subscription sections.
 
 ## Changes
 
-### 1. Update Navbar (`src/components/Navbar.tsx`)
-- Change Rent href from `/rent/valuation` to `/?mode=rent`
-- Change Rent CTA href similarly
+### 1. Add "Agent Login" link to Navbar and ProLanding
 
-### 2. Expand Index.tsx state to support 3 modes
-- Change `valuationType` type from `"sell" | "buy"` to `"sell" | "rent" | "buy"`
-- Add `modeParam === "rent"` handling in the `useEffect`
-- Add rent-specific content constants:
-  - `REPORT_FEATURES_RENT` (rental income estimate, comparable rents, area rental trends, etc.)
-  - `TESTIMONIALS_RENT`
-  - Rent hero copy: "How much rent can your property earn?" / "Get a rental income estimate in under 2 minutes"
-  - Rent showcase data for the preview card
-- Add `isRent` boolean alongside `isSell` / `isBuy`
-- Rent mode uses the same address input as Sell (not URL input like Buy)
-- On submit in rent mode, navigate to `/rent/valuation` with prefilled address (same pattern as sell navigates to `/sell/valuation`)
-- Rent uses a green/teal accent color to differentiate from sell (terracotta) and buy (blue)
-- Steps text, icons, and previews adapt for rent (similar to sell flow: enter address → property details → get estimate)
+**Navbar** (`src/components/Navbar.tsx`):
+- When on `/pro` or `/pro/*` routes, show a "Login" link in the nav that goes to `/pro/login`
+- Detect `/pro` context and add login link to `permanentLinks` or conditionally render it
 
-### 3. SkyToggle stays binary
-- The SkyToggle on the hero card keeps toggling between Sell and Buy only
-- When user arrives via `/?mode=rent`, the toggle is hidden or replaced with a simple "Rental Estimate" label
-- Switching back to sell/buy via the toggle resets to the normal flow
+**ProLanding** (`src/pages/ProLanding.tsx`):
+- Add a "Sign in" link in the hero area next to "Get Started Free" (or in the top section)
+- Add login link to the final CTA section as well
+
+### 2. Auth guard + Logout (`src/pages/ProDashboard.tsx`)
+
+- The dashboard already redirects to `/pro` if no session exists — this is the auth guard
+- Add a **Logout** button in the sidebar footer and mobile header
+- On logout, call `supabase.auth.signOut()` and navigate to `/pro/login`
+- Add a "Sign out" nav item in the Account group or as a footer action
+
+### 3. Profile editing improvements (`src/pages/ProDashboard.tsx` — `ProfileSection`)
+
+Current state: basic text fields (name, tagline, description, phone, website, address, socials).
+
+Add:
+- **Logo upload**: Show current logo with an "Upload" button. Use Supabase Storage bucket for agent logos. Display preview of uploaded image.
+- **Languages editor**: Multi-select chips for languages (English, Spanish, etc.) from the existing `languages` column
+- **Service zones display**: Show current zones as read-only badges (zones require admin assignment per business model)
+
+### 4. Leads management improvements (`src/pages/ProDashboard.tsx` — `LeadsSection`)
+
+Current state: filter by status, expand for details, export CSV, mark as contacted/converted.
+
+Add:
+- **Property address** in lead details — pull from the `interest` field or related data
+- **Quick reply via email link**: `mailto:` link with pre-filled subject when expanding a lead
+- **"Archive"** status option alongside contacted/converted
+- **Sort options**: by date (newest/oldest) toggle
+
+### 5. Subscription section (`src/pages/ProDashboard.tsx` — `SubscriptionSection`)
+
+Current state: placeholder text only.
+
+Replace with:
+- Show current plan status (Free tier by default since no billing is connected yet)
+- Display the 3 tier cards (Basic/Premium/Elite) from ProLanding with a "Current Plan" badge on the active one
+- "Upgrade" buttons that link to `/pro` pricing section or trigger a contact/interest flow
+- Note: actual Stripe billing can be added later; for now show plan info and upgrade interest
 
 ### Files Modified
-- `src/components/Navbar.tsx` — Rent href → `/?mode=rent`
-- `src/pages/Index.tsx` — Add rent as third mode with content, hero, and navigation logic
+
+- `src/components/Navbar.tsx` — add Login link when on /pro routes
+- `src/pages/ProLanding.tsx` — add Sign in links
+- `src/pages/ProDashboard.tsx` — logout button, profile improvements (logo upload, languages, zones), leads improvements (mailto, archive, sort), subscription section with tier display
+
+### Database
+
+- Create a Supabase Storage bucket `agent-logos` for logo uploads (if not already existing)
+- No schema changes needed — all columns already exist
 
