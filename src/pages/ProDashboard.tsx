@@ -431,7 +431,7 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
   });
   const [languages, setLanguages] = useState<string[]>(agent.languages || []);
   const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState((agent as any).cover_photo_url || "");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState(agent.cover_photo_url || "");
   const [uploading, setUploading] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
