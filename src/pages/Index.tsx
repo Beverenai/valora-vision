@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 /* ─── DATA ─── */
 
