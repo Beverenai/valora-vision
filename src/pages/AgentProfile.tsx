@@ -213,8 +213,33 @@ export default function AgentProfile() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center py-32">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        {/* Skeleton loader */}
+        <div className="animate-pulse">
+          <div className="h-[30vh] md:h-[40vh] w-full bg-muted" />
+          <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-12 relative z-10">
+            <div className="w-20 h-20 rounded-full bg-muted border-4 border-background mb-4" />
+            <div className="h-8 w-64 bg-muted rounded mb-3" />
+            <div className="h-4 w-48 bg-muted rounded mb-2" />
+            <div className="h-4 w-80 bg-muted rounded" />
+          </div>
+          <div className="border-y border-border/60 mt-8">
+            <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 flex gap-6">
+              <div className="h-4 w-32 bg-muted rounded" />
+              <div className="h-4 w-24 bg-muted rounded" />
+              <div className="h-4 w-28 bg-muted rounded" />
+            </div>
+          </div>
+          <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-8">
+              <div className="space-y-4">
+                <div className="h-4 w-20 bg-muted rounded" />
+                <div className="h-4 w-full bg-muted rounded" />
+                <div className="h-4 w-full bg-muted rounded" />
+                <div className="h-4 w-3/4 bg-muted rounded" />
+              </div>
+              <div className="h-64 bg-muted rounded-lg" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -225,20 +250,21 @@ export default function AgentProfile() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <h2 className="text-xl font-semibold text-foreground">{error ? "Something went wrong" : "Agente no encontrado"}</h2>
+          <Building2 size={48} className="text-muted-foreground/40" />
+          <h2 className="text-xl font-semibold text-foreground">Agent not found</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            {error
-              ? "We couldn't load this profile. Please try again."
-              : "No pudimos encontrar un perfil con esta dirección. Puede que el perfil aún no esté publicado."}
+            We couldn't find this agent. They may have moved or changed their profile.
           </p>
-          {error ? (
-            <Button variant="outline" onClick={() => { setError(false); setLoading(true); /* re-trigger useEffect */ window.location.reload(); }}>
-              Retry
+          <div className="flex gap-3">
+            <Button asChild variant="outline">
+              <Link to="/agentes">Browse all agents</Link>
             </Button>
-          ) : (
-            <Button asChild variant="outline"><Link to="/">Volver al inicio</Link></Button>
-          )}
+            <Button asChild variant="ghost">
+              <Link to="/">Go home</Link>
+            </Button>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
