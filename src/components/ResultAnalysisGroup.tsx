@@ -169,7 +169,7 @@ export const ComparablePropertiesSection: React.FC<{
         </div>
         <h2 className="font-serif text-2xl sm:text-3xl mb-2">Similar Properties</h2>
         <p className="text-sm text-muted-foreground mb-10">Currently on the market near you</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide">
           {displayed.map((comp, i) => (
             <ComparableCard
               key={comp.id || i} comp={comp}
