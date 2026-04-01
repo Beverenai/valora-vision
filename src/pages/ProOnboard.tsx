@@ -371,6 +371,7 @@ const ProOnboard = () => {
             slug,
             description: description || null,
             logo_url: logoUrl,
+            cover_photo_url: coverPhotoUrl,
             languages,
             instagram_url: socialInstagram || null,
             facebook_url: socialFacebook || null,
