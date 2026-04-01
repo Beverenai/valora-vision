@@ -274,7 +274,7 @@ export default function AgentProfile() {
         <Navbar />
         <div className="flex flex-col items-center justify-center py-32 gap-4">
           <Building2 size={48} className="text-muted-foreground/40" />
-          <h2 className="text-xl font-semibold text-foreground">Agent not found</h2>
+          <h2 className="text-xl font-semibold text-foreground">Agente no encontrado</h2>
           <p className="text-muted-foreground text-center max-w-md">
             We couldn't find this agent. They may have moved or changed their profile.
           </p>

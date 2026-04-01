@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useSEO } from "@/hooks/use-seo";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2, Globe, Mail, Phone, MapPin, Building2, User, ArrowLeft, SkipForward, Edit2, Plus, X, Instagram, Facebook, Linkedin } from "lucide-react";
+import { Check, Loader2, Globe, Mail, Phone, MapPin, Building2, User, ArrowLeft, Edit2, Plus, X, Instagram, Facebook, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -286,19 +286,12 @@ const ProOnboard = () => {
     setAiDone(true);
   }, [companyName, contactName, email, phone, website, derivedAddress]);
 
-  // Auto-advance from step 2
+  // Trigger AI onboarding when entering step 2
   useEffect(() => {
     if (step === 1) {
       runAiOnboarding();
     }
-  }, [step]);
-
-  useEffect(() => {
-    if (aiDone && step === 1) {
-      const t = setTimeout(() => setStep(2), 500);
-      return () => clearTimeout(t);
-    }
-  }, [aiDone, step]);
+  }, [step, runAiOnboarding]);
 
   // Publish
   const handlePublish = async () => {
@@ -589,14 +582,13 @@ const ProOnboard = () => {
               </div>
 
               {aiDone && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 text-sm text-primary font-medium">
-                  Almost ready — reviewing your profile...
-                </motion.p>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 flex flex-col items-center gap-2">
+                  <p className="text-sm text-primary font-medium">Your profile is ready!</p>
+                  <Button onClick={() => setStep(2)} size="lg" className="mt-2">
+                    Continue to review
+                  </Button>
+                </motion.div>
               )}
-
-              <button onClick={() => setStep(2)} className="mt-8 text-xs text-muted-foreground hover:text-foreground underline">
-                Skip <SkipForward className="inline w-3 h-3" />
-              </button>
             </motion.div>
           )}
 
@@ -618,7 +610,7 @@ const ProOnboard = () => {
                   {logoUrl && !logoFailed ? (
                     <img src={logoUrl} alt="Logo" className="w-16 h-16 rounded-xl object-cover border" onError={() => setLogoFailed(true)} />
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center text-white font-heading font-bold text-xl">
+                    <div className="w-16 h-16 rounded-xl bg-[#D4713B] flex items-center justify-center text-white font-heading font-bold text-xl">
                       {companyName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                     </div>
                   )}
