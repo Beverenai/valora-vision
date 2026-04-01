@@ -68,6 +68,7 @@ Deno.serve(async (req) => {
       avg_rating: avg_rating || 0,
       total_reviews: total_reviews || 0,
       team_size: team_size || null,
+      cover_photo_url: cover_photo_url || null,
       is_active: true,
       is_verified: false,
     };
