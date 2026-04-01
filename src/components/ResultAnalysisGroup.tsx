@@ -109,30 +109,35 @@ const ComparableCard: React.FC<{
 }> = ({ comp, leadBedrooms, leadBuiltSize, leadPricePerSqm, maxDistance }) => {
   const imageUrl = comp.image_urls?.[0] || "/placeholder.svg";
   const similarity = calcSimilarity(comp, leadBuiltSize || null, leadBedrooms || null, maxDistance);
-  const priceColorClass = getPriceColor(comp.price_per_sqm, leadPricePerSqm || null);
+  const priceDiff = comp.price_per_sqm && leadPricePerSqm
+    ? Math.round(((comp.price_per_sqm - leadPricePerSqm) / leadPricePerSqm) * 100)
+    : null;
 
   return (
-    <div className="rounded-lg overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
-      <div className="h-[180px] bg-muted overflow-hidden">
+    <div className="shrink-0 w-[280px] rounded-xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
+      <div className="relative h-44 bg-muted overflow-hidden">
         <img src={imageUrl} alt={comp.address || "Comparable"} className="w-full h-full object-cover" loading="lazy" />
+        {comp.distance_km != null && (
+          <Badge className="absolute top-3 left-3 bg-background/80 backdrop-blur-sm text-foreground border-0 text-[0.65rem]">
+            {comp.distance_km.toFixed(1)} km away
+          </Badge>
+        )}
       </div>
-      <div className="p-5">
-        <p className="text-xs text-muted-foreground capitalize">
-          {comp.property_type?.replace(/-/g, " ") || "Property"} · {comp.bedrooms ?? "—"} bed · {comp.bathrooms ?? "—"} bath
+      <div className="p-4 space-y-2">
+        {comp.price && <p className="text-lg font-semibold text-foreground">{compFmt(comp.price)}</p>}
+        <p className="text-sm text-muted-foreground capitalize">
+          {comp.bedrooms ?? "—"} bed · {comp.built_size_sqm ? `${comp.built_size_sqm} m²` : "—"} · {comp.property_type?.replace(/-/g, " ") || "Property"}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {comp.built_size_sqm ? `${comp.built_size_sqm} m² built` : ""}
-        </p>
-        <div className="flex items-baseline justify-between mt-3">
-          {comp.price && <p className="text-xl font-light tracking-tight text-foreground">{compFmt(comp.price)}</p>}
-          {comp.price_per_sqm && <p className={`text-xs font-medium ${priceColorClass}`}>{compFmt(comp.price_per_sqm)}/m²</p>}
+        {comp.city && <p className="text-xs text-muted-foreground">{comp.city}</p>}
+        <div className="flex justify-between items-center pt-2 border-t border-border/50">
+          {comp.price_per_sqm && <span className="text-sm font-medium text-foreground">{compFmt(comp.price_per_sqm)}/m²</span>}
+          {priceDiff != null && (
+            <Badge variant={priceDiff <= 0 ? "default" : "destructive"} className="text-xs">
+              {priceDiff > 0 ? "+" : ""}{priceDiff}%
+            </Badge>
+          )}
         </div>
-        <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
-          <MapPin size={12} />
-          <span>{comp.distance_km != null ? `${comp.distance_km.toFixed(1)} km away` : ""}</span>
-          {comp.city && <span>· {comp.city}</span>}
-        </div>
-        <div className="mt-4">
+        <div className="pt-1">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[0.6rem] uppercase tracking-[0.15em] text-muted-foreground">Similarity</span>
             <span className="text-xs font-semibold text-foreground">{similarity}%</span>
