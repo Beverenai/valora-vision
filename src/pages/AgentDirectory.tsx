@@ -79,21 +79,30 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-function AgentCard({ agent, zone, isFeatured }: { agent: Professional; zone: string | null; isFeatured: boolean }) {
+function AgentCard({ agent, zone, isFeatured, agencyName }: { agent: Professional; zone: string | null; isFeatured: boolean; agencyName?: string | null }) {
   const [logoFailed, setLogoFailed] = useState(false);
   const displayLocation = zone || agent.office_address;
   const hasRating = agent.avg_rating != null && agent.avg_rating > 0;
+  const isAgency = agent.type === "agency";
 
   return (
     <Link to={`/agentes/${agent.slug}`} className="block group">
       <Card className={`hover:shadow-md transition-shadow h-full ${isFeatured ? "ring-1 ring-primary/30 shadow-sm" : ""}`}>
         <CardContent className="p-5">
-          {isFeatured && (
-            <div className="flex items-center gap-1 mb-3">
-              <Badge className="bg-primary/10 text-primary border-0 text-[0.6rem] uppercase tracking-wider font-semibold">
-                <Sparkles className="h-3 w-3 mr-1" />
-                Featured
-              </Badge>
+          {(isFeatured || isAgency) && (
+            <div className="flex items-center gap-1.5 mb-3">
+              {isFeatured && (
+                <Badge className="bg-primary/10 text-primary border-0 text-[0.6rem] uppercase tracking-wider font-semibold">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Featured
+                </Badge>
+              )}
+              {isAgency && (
+                <Badge variant="outline" className="text-[0.6rem] uppercase tracking-wider font-semibold">
+                  <Users className="h-3 w-3 mr-1" />
+                  Agency
+                </Badge>
+              )}
             </div>
           )}
           <div className="flex items-start gap-3 mb-3">
