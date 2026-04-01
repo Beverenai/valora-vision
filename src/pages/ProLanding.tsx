@@ -231,7 +231,7 @@ const ProLanding = () => {
         <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
           Ready to grow your business?
         </h2>
-        <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+        <p className="text-foreground/70 mb-8 max-w-lg mx-auto">
           Join ValoraCasa today and start receiving qualified leads from homeowners in your area.
         </p>
         <Button asChild size="lg" className="rounded-full text-base px-10 shadow-md">
