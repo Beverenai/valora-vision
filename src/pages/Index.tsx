@@ -811,7 +811,7 @@ const Index = () => {
         {/* ═══════════ FINAL CTA ═══════════ */}
         <section
           className="w-full py-8 md:py-20 px-5 md:px-8 pb-32"
-          style={{ background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--${isSell ? 'terracotta-light' : 'buy-light'})) 100%)` }}
+          style={{ background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--${isRent ? 'rent-light' : isSell ? 'terracotta-light' : 'buy-light'})) 100%)` }}
         >
           <div className="flex flex-col items-center text-center gap-4 mb-2">
             <SectionLabel>Start Now</SectionLabel>
