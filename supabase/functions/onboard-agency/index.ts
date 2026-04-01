@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             model: "google/gemini-3-flash-preview",
             messages: [
-              { role: "user", content: `Extract team member names and roles from this real estate agency website content. Return a JSON array like [{"name":"John","role":"Director"}]. If no team members found, return []. Content: ${scrapedContent.substring(0, 4000)}` },
+              { role: "user", content: `Extract team member names, roles, email addresses, phone numbers, and WhatsApp numbers from this real estate agency website content. Return a JSON array. If no team members found, return []. Content: ${scrapedContent.substring(0, 4000)}` },
             ],
             tools: [{
               type: "function",
