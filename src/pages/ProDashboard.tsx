@@ -616,7 +616,37 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
     loadTeam();
   };
 
-  const handleInvite = async () => {
+  const openEditDialog = (member: any) => {
+    setEditingMember(member);
+    setEditForm({
+      name: member.name || "",
+      role: member.role || "",
+      email: member.email || "",
+      phone: member.phone || "",
+      whatsapp: member.whatsapp || "",
+      photo_url: member.photo_url || "",
+      languages: (member.languages || []).join(", "),
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMember) return;
+    setSaving(true);
+    const { error } = await supabase.from("agent_team_members").update({
+      name: editForm.name.trim(),
+      role: editForm.role.trim() || null,
+      email: editForm.email.trim() || null,
+      phone: editForm.phone.trim() || null,
+      whatsapp: editForm.whatsapp.trim() || null,
+      photo_url: editForm.photo_url.trim() || null,
+      languages: editForm.languages ? editForm.languages.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
+    }).eq("id", editingMember.id);
+    setSaving(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Team member updated" });
+    setEditingMember(null);
+    loadTeam();
+  };
     if (!inviteForm.name.trim()) {
       toast({ title: "Name required", variant: "destructive" });
       return;
