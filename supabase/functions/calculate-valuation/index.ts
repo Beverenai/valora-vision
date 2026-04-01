@@ -7,6 +7,129 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ─── Resales Online On-Demand Fetch ─────────────────────
+const RESALES_BASE_URL = "https://webapi.resales-online.com/V6";
+
+function mapPropertyType(rolType: string, rolSubType: string): string {
+  const map: Record<string, string> = {
+    Apartment: "apartment", Flat: "apartment", Penthouse: "penthouse",
+    Duplex: "duplex", Studio: "studio",
+    "Ground Floor Apartment": "apartment", "Middle Floor Apartment": "apartment",
+    "Top Floor Apartment": "apartment", "Garden Apartment": "apartment",
+    Villa: "villa", "Detached Villa": "villa",
+    "Semi-Detached House": "townhouse", "Town House": "townhouse",
+    "Terraced House": "townhouse", "Country House": "finca", Finca: "finca",
+    Plot: "plot", Commercial: "commercial",
+  };
+  return map[rolSubType] || map[rolType] || "other";
+}
+
+function extractFeatures(property: any): Record<string, boolean> {
+  const f: Record<string, boolean> = {
+    has_pool: false, has_garage: false, has_sea_views: false, has_terrace: false,
+    has_garden: false, has_lift: false, has_ac: false, has_balcony: false, has_storage: false,
+  };
+  const ft = JSON.stringify(property.Features || {}).toLowerCase();
+  const d = (property.Description || "").toLowerCase();
+  if (ft.includes("pool") || d.includes("pool")) f.has_pool = true;
+  if (ft.includes("garage") || ft.includes("parking")) f.has_garage = true;
+  if (ft.includes("sea view") || d.includes("sea view") || d.includes("vista al mar")) f.has_sea_views = true;
+  if (ft.includes("terrace") || property.Terrace > 0) f.has_terrace = true;
+  if (ft.includes("garden")) f.has_garden = true;
+  if (ft.includes("lift") || ft.includes("elevator")) f.has_lift = true;
+  if (ft.includes("air conditioning") || ft.includes("climate")) f.has_ac = true;
+  if (ft.includes("balcony")) f.has_balcony = true;
+  if (ft.includes("storage")) f.has_storage = true;
+  return f;
+}
+
+function transformResalesProperty(property: any, operation: string) {
+  const features = extractFeatures(property);
+  return {
+    property_code: `ROL-${property.Reference}`,
+    resales_reference: property.Reference,
+    data_source: "resales_online",
+    operation,
+    property_type: mapPropertyType(property.Type || "", property.SubType || property.ROLSubType || ""),
+    price: parseFloat(property.Price) || null,
+    price_per_m2: property.Built > 0 && property.Price > 0
+      ? Math.round(parseFloat(property.Price) / parseFloat(property.Built)) : null,
+    size_m2: parseFloat(property.Built) ? Math.round(parseFloat(property.Built)) : null,
+    rooms: parseInt(property.Bedrooms) || null,
+    bathrooms: parseInt(property.Bathrooms) || null,
+    address: property.Location || "",
+    municipality: property.Area || "",
+    district: property.Location || "",
+    latitude: property.GPS_Lat ? parseFloat(property.GPS_Lat) : null,
+    longitude: property.GPS_Lng ? parseFloat(property.GPS_Lng) : null,
+    description: property.Description || "",
+    thumbnail_url: property.Pictures?.Picture?.[0]?.PictureURL || property.MainImage || null,
+    ...features,
+    is_active: true,
+    scraped_at: new Date().toISOString(),
+  };
+}
+
+async function fetchResalesOnDemand(supabase: any, operation: string) {
+  const contactId = Deno.env.get("RESALES_CONTACT_ID");
+  const apiKey = Deno.env.get("RESALES_API_KEY");
+  if (!contactId || !apiKey) {
+    console.log("Resales Online credentials not configured, skipping on-demand fetch");
+    return 0;
+  }
+
+  const filterId = operation === "sale" ? 1 : 3;
+  const params = new URLSearchParams({
+    p1: contactId,
+    p2: apiKey,
+    p_agency_filterid: String(filterId),
+    P_Lang: "1,2",
+    P_PageSize: "50",
+    P_PageNo: "1",
+    P_SortType: "0",
+    p_images: "3",
+    P_Dimension: "1",
+    P_Currency: "EUR",
+  });
+
+  try {
+    const res = await fetch(`${RESALES_BASE_URL}/SearchProperties?${params}`);
+    if (!res.ok) {
+      console.error("Resales API error:", res.status);
+      return 0;
+    }
+    const result = await res.json();
+    if (result.transaction?.status === "error") {
+      console.error("Resales API error:", result.transaction.errordescription);
+      return 0;
+    }
+
+    const properties = result.Property || result.Properties?.Property || [];
+    const list = Array.isArray(properties) ? properties : [properties];
+    const batch = list
+      .filter((p: any) => p.Reference)
+      .map((p: any) => transformResalesProperty(p, operation));
+
+    if (batch.length > 0) {
+      const { error } = await supabase
+        .from("properties")
+        .upsert(batch, { onConflict: "property_code", ignoreDuplicates: false });
+      if (error) {
+        console.error("Resales upsert error:", error);
+        return 0;
+      }
+      // Refresh materialized view
+      try { await supabase.rpc("refresh_materialized_views"); } catch { /* ok */ }
+    }
+
+    console.log(`Resales on-demand: fetched ${batch.length} properties for ${operation}`);
+    return batch.length;
+  } catch (e) {
+    console.error("Resales on-demand fetch error:", e);
+    return 0;
+  }
+}
+
 // Hardcoded fallbacks — used only when zone_stats has insufficient data (<5 listings with feature)
 const FALLBACK_ADJUSTMENTS: Record<string, number> = {
   pool: 0.10,
@@ -213,6 +336,28 @@ serve(async (req) => {
       }
       if (zoneResult?.data?.[0]) {
         zoneStats = zoneResult.data[0];
+      }
+
+      // 2a. On-demand Resales Online fetch if insufficient comparables
+      if (comparables.length < 5) {
+        console.log(`Only ${comparables.length} comparables found, triggering Resales Online on-demand fetch...`);
+        const fetched = await fetchResalesOnDemand(supabase, isSell ? "sale" : "rent");
+        if (fetched > 0) {
+          const { data: newComps, error: reErr } = await supabase.rpc("find_comparables_with_fallback", {
+            p_lat: Number(latitude),
+            p_lng: Number(longitude),
+            p_operation: isSell ? "sale" : "rent",
+            p_property_type: property_type || "apartment",
+            p_size_m2: sizeM2,
+            p_rooms: roomsCount,
+            p_min_results: 8,
+            p_limit: 30,
+          });
+          if (!reErr && newComps?.length > 0) {
+            comparables = newComps;
+            console.log(`After Resales fetch: ${comparables.length} comparables available`);
+          }
+        }
       }
     }
 
