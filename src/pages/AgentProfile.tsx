@@ -356,7 +356,7 @@ export default function AgentProfile() {
                 className="rounded-full"
                 onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}
               >
-                Contact {professional.company_name.split(" ")[0]}
+                Contact
               </Button>
               {professional.website && (
                 <Button variant="outline" className="rounded-full" asChild>
