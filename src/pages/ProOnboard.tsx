@@ -460,11 +460,22 @@ const ProOnboard = () => {
                 </Button>
                 <Button
                   onClick={async () => {
-                    if (!emailValid && email.trim() && !emailError) {
+                    // Run email uniqueness check if not yet validated
+                    let emailOk = !emailError && !emailChecking;
+                    if (email.trim() && !emailValid && !emailError) {
                       await checkEmailUniqueness(email);
+                      // Re-check after async call — read latest from DOM-closure workaround
                     }
-                    if (canProceedStep1) setStep(1);
-                    else toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
+                    // Compute validity inline to avoid stale closure
+                    const canProceed = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim();
+                    if (canProceed) {
+                      // Small delay to let state settle after async check
+                      setTimeout(() => {
+                        setStep(1);
+                      }, 50);
+                    } else {
+                      toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
+                    }
                   }}
                   className="rounded-full px-8"
                 >
