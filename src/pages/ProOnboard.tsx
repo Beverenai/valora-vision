@@ -120,15 +120,14 @@ const ProOnboard = () => {
     else { setEmailError(""); }
   };
 
-  const checkEmailUniqueness = async (val: string) => {
-    if (!val.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
+  const checkEmailUniqueness = async (val: string): Promise<boolean> => {
+    if (!val.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return false;
     setEmailChecking(true);
     try {
       const { data } = await supabase.from("professionals").select("id").eq("email", val).maybeSingle();
-      if (data) { setEmailError("This email is already registered"); setEmailValid(false); }
-      else { setEmailError(""); setEmailValid(true); }
-    } catch { setEmailValid(true); }
-    setEmailChecking(false);
+      if (data) { setEmailError("This email is already registered"); setEmailValid(false); setEmailChecking(false); return false; }
+      else { setEmailError(""); setEmailValid(true); setEmailChecking(false); return true; }
+    } catch { setEmailValid(true); setEmailChecking(false); return true; }
   };
 
   const validateWebsite = (val: string) => {
