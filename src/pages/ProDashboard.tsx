@@ -83,7 +83,6 @@ const navGroups = [
     label: "Main",
     items: [
       { key: "overview" as Section, label: "Dashboard", icon: LayoutDashboard },
-      { key: "profile" as Section, label: "My Profile", icon: User },
       { key: "team" as Section, label: "Team", icon: Users },
       { key: "company" as Section, label: "Company Profile", icon: Building2 },
     ],
@@ -100,6 +99,7 @@ const navGroups = [
   {
     label: "Account",
     items: [
+      { key: "profile" as Section, label: "My Profile", icon: User },
       { key: "subscription" as Section, label: "Subscription", icon: CreditCard },
       { key: "settings" as Section, label: "Settings", icon: Settings },
     ],
