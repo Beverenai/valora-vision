@@ -266,17 +266,44 @@ function MobileDropdownNav({ active, onNav, badges }: { active: Section; onNav: 
 }
 
 /* ─── Overview Section ─── */
-function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSection }: {
+function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSection, activeZonesCount, reviewCount }: {
   agent: Professional; leads: Lead[]; impressionsCount: number; onViewLeads: () => void; setSection: (s: Section) => void;
+  activeZonesCount?: number; reviewCount?: number;
 }) {
   const recentLeads = leads.slice(0, 5);
 
-  // Compute a simple merit score based on profile completeness
-  const profileScore = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline]
-    .filter(Boolean).length;
-  const profileMerit = Math.round((profileScore / 6) * 100);
-  const ratingMerit = agent.avg_rating ? Math.round((agent.avg_rating / 5) * 100) : 0;
-  const meritScore = Math.round((profileMerit * 0.3 + ratingMerit * 0.2 + 50 * 0.2 + 40 * 0.15 + 80 * 0.15));
+  // ── Improved Merit Score Algorithm ──
+  // Profile completeness (10%): 8 key fields
+  const profileFields = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline, (agent as any).cover_photo_url, agent.languages?.length];
+  const profileMerit = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
+
+  // Rating (25%): avg_rating out of 5
+  const ratingMerit = agent.avg_rating ? Math.round((Number(agent.avg_rating) / 5) * 100) : 0;
+
+  // Zone coverage (15%): has active zones = 100, else 0
+  const zoneMerit = (activeZonesCount && activeZonesCount > 0) ? 100 : 0;
+
+  // Review count (15%): normalized, cap at 20 reviews for 100%
+  const reviewNorm = Math.min((reviewCount || agent.total_reviews || 0), 20);
+  const reviewMerit = Math.round((reviewNorm / 20) * 100);
+
+  // Lead responsiveness (20%): leads with status != 'new' / total leads (proxy for response)
+  const totalLeads = leads.length;
+  const respondedLeads = leads.filter(l => l.status !== "new").length;
+  const responseMerit = totalLeads > 0 ? Math.round((respondedLeads / totalLeads) * 100) : 0;
+
+  // Conversion rate (15%): leads marked 'converted' / total leads
+  const convertedLeads = leads.filter(l => l.status === "converted").length;
+  const conversionMerit = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
+
+  const meritScore = Math.round(
+    profileMerit * 0.10 +
+    ratingMerit * 0.25 +
+    zoneMerit * 0.15 +
+    reviewMerit * 0.15 +
+    responseMerit * 0.20 +
+    conversionMerit * 0.15
+  );
 
   const actionItems: { icon: React.ElementType; label: string; desc: string; section: Section; color: string }[] = [];
   if (!agent.bio && !agent.description) actionItems.push({ icon: Edit2, label: "Add a company description", desc: "+15 merit points", section: "profile", color: "text-amber-600" });
@@ -309,12 +336,13 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
               </svg>
             </div>
           </div>
-          <div className="grid grid-cols-5 gap-2 mt-4 text-center">
-            <div><p className="text-xs text-muted-foreground">Proximity</p><p className="text-sm font-medium">80</p></div>
-            <div><p className="text-xs text-muted-foreground">Rating</p><p className="text-sm font-medium">{ratingMerit}</p></div>
-            <div><p className="text-xs text-muted-foreground">Response</p><p className="text-sm font-medium">50</p></div>
-            <div><p className="text-xs text-muted-foreground">Conversion</p><p className="text-sm font-medium">40</p></div>
+          <div className="grid grid-cols-6 gap-2 mt-4 text-center">
             <div><p className="text-xs text-muted-foreground">Profile</p><p className="text-sm font-medium">{profileMerit}</p></div>
+            <div><p className="text-xs text-muted-foreground">Rating</p><p className="text-sm font-medium">{ratingMerit}</p></div>
+            <div><p className="text-xs text-muted-foreground">Zones</p><p className="text-sm font-medium">{zoneMerit}</p></div>
+            <div><p className="text-xs text-muted-foreground">Reviews</p><p className="text-sm font-medium">{reviewMerit}</p></div>
+            <div><p className="text-xs text-muted-foreground">Response</p><p className="text-sm font-medium">{responseMerit}</p></div>
+            <div><p className="text-xs text-muted-foreground">Conversion</p><p className="text-sm font-medium">{conversionMerit}</p></div>
           </div>
         </CardContent>
       </Card>
@@ -1252,7 +1280,7 @@ const ProDashboard = () => {
       </div>
 
       {section === "overview" && (
-        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} />
+        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} activeZonesCount={activeZones.length} reviewCount={reviews.length} />
       )}
       {section === "profile" && (
         <ProfileSection agent={agent} onSave={handleSaveProfile} saving={saving} />

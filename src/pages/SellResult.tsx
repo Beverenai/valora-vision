@@ -15,6 +15,7 @@ import {
   Bed, Bath, Grid3X3, Compass, Wrench, Mountain,
   Calendar, Leaf, Home, Info,
 } from "lucide-react";
+import { ShareMenu } from "@/components/shared/ShareMenu";
 import type { Comparable } from "@/components/ResultAnalysisGroup";
 
 // ── Lazy wrappers: each returns a single default-exported component ──
@@ -302,12 +303,17 @@ const SellResult: React.FC = () => {
   const comparableCount = (lead?.comparable_properties as any[])?.length || 0;
   const propertyAddress = lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : "";
 
+  const refCode = formatRefCode(id!);
+  const shareTitle = `Property Valuation – ${lead?.address || ""}`;
+  const shareMessage = `I valued my property on ValoraCasa (Ref: ${refCode}) and received an estimate of ${fmt(estimatedValue)}.\nSee the full report:`;
+  const shareUrl = window.location.href;
+
   const handleShare = () => {
-    const shareText = `My property at ${propertyAddress} is valued at ${fmt(estimatedValue)}.`;
+    const fullText = `${shareMessage} ${shareUrl}`;
     if (navigator.share) {
-      navigator.share({ title: `Property Valuation – ${lead?.address || ""}`, text: shareText, url: window.location.href });
+      navigator.share({ title: shareTitle, text: fullText, url: shareUrl });
     } else {
-      navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
+      navigator.clipboard.writeText(fullText);
       toast({ title: "Link copied!", description: "Valuation details copied to clipboard." });
     }
   };
@@ -336,7 +342,23 @@ const SellResult: React.FC = () => {
       mode="result"
       referenceCode={formatRefCode(id!)}
       onShare={handleShare}
-      onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
+      onDownload={async () => {
+        toast({ title: "Generating report…", description: "Your valuation report is being prepared." });
+        try {
+          const res = await supabase.functions.invoke("generate-valuation-pdf", {
+            body: { lead_id: id, lead_type: "sell" },
+          });
+          if (res.error) throw res.error;
+          // Response is HTML — open in new tab for print-to-PDF
+          const html = typeof res.data === "string" ? res.data : await new Response(res.data).text();
+          const blob = new Blob([html], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
+          window.open(url, "_blank");
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } catch {
+          toast({ title: "Coming Soon", description: "PDF download will be available shortly." });
+        }
+      }}
     />
   );
 

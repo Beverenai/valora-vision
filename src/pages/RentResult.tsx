@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatRefCode } from "@/utils/referenceCode";
 import { Copy, Check as CheckIcon } from "lucide-react";
+import { ShareMenu } from "@/components/shared/ShareMenu";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
@@ -75,12 +76,17 @@ const RentResult: React.FC = () => {
 
   const monthlyEstimate = lead?.monthly_long_term_estimate || 2500;
 
+  const refCode = formatRefCode(id!);
+  const shareTitle = `Rental Estimate – ${lead?.address || ""}`;
+  const shareMessage = `I valued my property on ValoraCasa (Ref: ${refCode}) and received a rental estimate of ${fmt(monthlyEstimate)}/mo.\nSee the full report:`;
+  const shareUrl = window.location.href;
+
   const handleShare = () => {
-    const shareText = `My property at ${lead?.address || ""}${lead?.city ? `, ${lead.city}` : ""} could earn ${fmt(monthlyEstimate)}/mo in rental income.`;
+    const fullText = `${shareMessage} ${shareUrl}`;
     if (navigator.share) {
-      navigator.share({ title: `Rental Estimate – ${lead?.address || ""}`, text: shareText, url: window.location.href });
+      navigator.share({ title: shareTitle, text: fullText, url: shareUrl });
     } else {
-      navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
+      navigator.clipboard.writeText(fullText);
       toast({ title: "Link copied!", description: "Estimate details copied to clipboard." });
     }
   };
@@ -110,7 +116,22 @@ const RentResult: React.FC = () => {
       mode="result"
       referenceCode={formatRefCode(id!)}
       onShare={handleShare}
-      onDownload={() => toast({ title: "Coming Soon", description: "PDF download will be available shortly." })}
+      onDownload={async () => {
+        toast({ title: "Generating report…", description: "Your rental estimate report is being prepared." });
+        try {
+          const res = await supabase.functions.invoke("generate-valuation-pdf", {
+            body: { lead_id: id, lead_type: "rent" },
+          });
+          if (res.error) throw res.error;
+          const html = typeof res.data === "string" ? res.data : await new Response(res.data).text();
+          const blob = new Blob([html], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
+          window.open(url, "_blank");
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } catch {
+          toast({ title: "Coming Soon", description: "PDF download will be available shortly." });
+        }
+      }}
     />
   );
 
