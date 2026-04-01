@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
         website: website || null,
         office_address: office_address || null,
         slug,
-        type: "agency",
+        type: "agent",
         description: description || null,
         logo_url: logo_url || null,
         languages: languages || [],
