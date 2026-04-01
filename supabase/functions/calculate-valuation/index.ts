@@ -313,7 +313,7 @@ serve(async (req) => {
 
         // Build comparable context for data-driven analysis
         const compPrices = comparables.filter((c: any) => c.price && c.price > 0).map((c: any) => Number(c.price));
-        const compPricesPerSqm = comparables.filter((c: any) => (isSell ? c.price_per_sqm : c.rent_per_sqm) > 0).map((c: any) => Number(isSell ? c.price_per_sqm : c.rent_per_sqm));
+        const compPricesPerSqm = comparables.filter((c: any) => c.price_per_m2 > 0).map((c: any) => Number(c.price_per_m2));
         const minCompPrice = compPrices.length > 0 ? Math.min(...compPrices) : 0;
         const maxCompPrice = compPrices.length > 0 ? Math.max(...compPrices) : 0;
         const medianCompPriceSqm = compPricesPerSqm.length > 0 ? median(compPricesPerSqm) : 0;
