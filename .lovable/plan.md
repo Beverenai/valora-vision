@@ -1,21 +1,34 @@
 
 
-## Plan: Fix Password Reset Flow
+## Plan: Fix Map Overflow on Mobile
 
 ### Problem
-The reset password page shows "Invalid or expired reset link" immediately because it checks `window.location.hash` for `type=recovery` on mount. Modern auth uses PKCE flow, which sends a `code` query parameter instead of hash fragments. The `onAuthStateChange` event fires `PASSWORD_RECOVERY` but only after the initial render — by then the "invalid link" message is already shown.
+The Google Map in verify phase overflows horizontally on mobile because:
+1. The card uses `overflow-visible` when in input mode with map expanded
+2. The map container div has no `max-width` constraint relative to its parent
 
-### Fix in `src/pages/ResetPassword.tsx`
+### Fix
 
-1. **Add a `isLoading` initial state** (`true`) to avoid showing the "invalid" message before the auth state is determined
-2. **Check for `code` query parameter** in addition to the hash fragment — PKCE flow uses `?code=...`
-3. **Add a timeout** (3-4 seconds) so if neither hash nor auth event fires, then show the "invalid" message
-4. **Keep `onAuthStateChange`** listener for `PASSWORD_RECOVERY` event as fallback
+**Modified: `src/components/ValuationTicketCard.tsx`**
 
-The key change: instead of immediately rendering "Invalid or expired" when `isRecovery` is false, show a loading spinner while waiting for the auth system to process the recovery token. Set `isRecovery = true` if hash contains `type=recovery` OR if URL has a `code` param OR if `PASSWORD_RECOVERY` event fires.
+1. Change `overflow-visible` to `overflow-hidden` when `mapExpanded` is true — the map doesn't need to overflow the card boundaries
+2. Keep `overflow-visible` only for the search phase (dropdown suggestions need it)
+
+Line 263: Change the overflow logic:
+```
+mapExpanded ? "overflow-hidden" : "overflow-visible"
+```
+
+Line 271: Same for the inner flex container — use `overflow-hidden` when map is expanded instead of `overflow-visible`.
+
+**Modified: `src/components/shared/GoogleAddressInput.tsx`**
+
+3. Add `max-w-full overflow-hidden` to the verify phase wrapper (line 392) to ensure the map respects parent width
+4. Change the map container from `w-full` with fixed `height: "220px"` to also include `max-w-full` to prevent any overflow
 
 ### Files
 | Action | File |
 |--------|------|
-| Modified | `src/pages/ResetPassword.tsx` — add loading state, PKCE code detection, timeout |
+| Modified | `src/components/ValuationTicketCard.tsx` — fix overflow logic for map phase |
+| Modified | `src/components/shared/GoogleAddressInput.tsx` — add max-w-full constraints |
 
