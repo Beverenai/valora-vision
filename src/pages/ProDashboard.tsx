@@ -498,7 +498,7 @@ const ProDashboard = () => {
 
   const checkAuthAndLoad = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { navigate("/pro/login"); return; }
+    if (!session) { navigate("/pro"); return; }
 
     const { data: prof, error } = await supabase.from("professionals").select("*").eq("user_id", session.user.id).single();
     if (error || !prof) { navigate("/pro/onboard"); return; }
