@@ -1584,6 +1584,61 @@ export type Database = {
         }
         Relationships: []
       }
+      zone_stats: {
+        Row: {
+          avg_price: number | null
+          avg_price_m2: number | null
+          avg_size_m2: number | null
+          count_with_garage: number | null
+          count_with_lift: number | null
+          count_with_pool: number | null
+          count_with_sea_views: number | null
+          count_with_terrace: number | null
+          last_data_update: string | null
+          listing_count: number | null
+          max_price_m2: number | null
+          median_m2_with_garage: number | null
+          median_m2_with_lift: number | null
+          median_m2_with_pool: number | null
+          median_m2_with_sea_views: number | null
+          median_m2_with_terrace: number | null
+          median_m2_without_garage: number | null
+          median_m2_without_lift: number | null
+          median_m2_without_pool: number | null
+          median_m2_without_sea_views: number | null
+          median_m2_without_terrace: number | null
+          median_price: number | null
+          median_price_m2: number | null
+          median_rooms: number | null
+          median_size_m2: number | null
+          min_price_m2: number | null
+          operation: string | null
+          pct_with_garage: number | null
+          pct_with_lift: number | null
+          pct_with_pool: number | null
+          pct_with_sea_views: number | null
+          pct_with_terrace: number | null
+          property_type: string | null
+          stddev_price_m2: number | null
+          zone_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_properties_zone"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       _postgis_deprecate: {
@@ -2008,6 +2063,50 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_zone_stats: {
+        Args: {
+          p_operation: string
+          p_property_type: string
+          p_zone_id: string
+        }
+        Returns: {
+          avg_price: number
+          avg_price_m2: number
+          avg_size_m2: number
+          count_with_garage: number
+          count_with_lift: number
+          count_with_pool: number
+          count_with_sea_views: number
+          count_with_terrace: number
+          last_data_update: string
+          listing_count: number
+          max_price_m2: number
+          median_m2_with_garage: number
+          median_m2_with_lift: number
+          median_m2_with_pool: number
+          median_m2_with_sea_views: number
+          median_m2_with_terrace: number
+          median_m2_without_garage: number
+          median_m2_without_lift: number
+          median_m2_without_pool: number
+          median_m2_without_sea_views: number
+          median_m2_without_terrace: number
+          median_price: number
+          median_price_m2: number
+          median_rooms: number
+          median_size_m2: number
+          min_price_m2: number
+          operation: string
+          pct_with_garage: number
+          pct_with_lift: number
+          pct_with_pool: number
+          pct_with_sea_views: number
+          pct_with_terrace: number
+          property_type: string
+          stddev_price_m2: number
+          zone_id: string
+        }[]
+      }
       gettransactionid: { Args: never; Returns: unknown }
       has_role: {
         Args: {
@@ -2077,6 +2176,7 @@ export type Database = {
       queue_due_scrapes: { Args: never; Returns: undefined }
       refresh_active_listings: { Args: never; Returns: undefined }
       refresh_search_views: { Args: never; Returns: undefined }
+      refresh_zone_stats: { Args: never; Returns: undefined }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown
