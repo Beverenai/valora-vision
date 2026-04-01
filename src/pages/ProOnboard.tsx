@@ -77,7 +77,7 @@ const ProOnboard = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
-  const [address, setAddress] = useState("");
+  const [address] = useState(""); // kept for potential legacy refs
   const [addressData, setAddressData] = useState<AddressData>({
     streetAddress: "", urbanization: "", city: "", province: "", country: "", latitude: undefined, longitude: undefined,
   });
@@ -137,19 +137,19 @@ const ProOnboard = () => {
 
   const handleAddressChange = (field: keyof AddressData, value: string | number | undefined) => {
     setAddressData(prev => ({ ...prev, [field]: value }));
-    if (field === "latitude" || field === "longitude") {
-      if (field === "latitude") setLat(value as number);
-      if (field === "longitude") setLng(value as number);
+    if (field === "latitude") setLat(value as number);
+    if (field === "longitude") setLng(value as number);
+    // Reset confirmation when address fields change (user went back to search)
+    if (field !== "latitude" && field !== "longitude") {
+      setAddressConfirmed(false);
     }
-    // Reconstruct address string
-    const updated = { ...addressData, [field]: value };
-    const parts = [updated.streetAddress, updated.city, updated.province].filter(Boolean);
-    setAddress(parts.join(", ") || "");
-    setAddressConfirmed(false);
   };
 
-  // Step 1 validation
-  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && !emailChecking;
+  // Derive address string from addressData for API calls
+  const derivedAddress = [addressData.streetAddress, addressData.urbanization, addressData.city, addressData.province, addressData.country].filter(Boolean).join(", ");
+
+  // Derive confirmed address validity
+  const hasConfirmedAddress = addressConfirmed && !!addressData.streetAddress?.trim() && typeof addressData.latitude === "number" && typeof addressData.longitude === "number";
 
   // Ref to hold API result so animation can read it asynchronously
   const apiResultRef = useRef<any>(null);
@@ -182,7 +182,7 @@ const ProOnboard = () => {
     const apiPromise = (async () => {
       try {
         const res = await supabase.functions.invoke("onboard-agency", {
-          body: { company_name: companyName, contact_name: contactName, email, phone, website, address },
+          body: { company_name: companyName, contact_name: contactName, email, phone, website, address: derivedAddress },
         });
         if (res.error) throw new Error(res.error.message);
         const data = res.data;
@@ -278,7 +278,7 @@ const ProOnboard = () => {
     setAiSteps((prev) => [...prev, { key: "complete", status: "done", label: "Profile ready!" }]);
     await delay(800);
     setAiDone(true);
-  }, [companyName, contactName, email, phone, website, address]);
+  }, [companyName, contactName, email, phone, website, derivedAddress]);
 
   // Auto-advance from step 2
   useEffect(() => {
@@ -331,7 +331,7 @@ const ProOnboard = () => {
             email,
             phone,
             website: website || null,
-            office_address: address,
+            office_address: derivedAddress,
             slug,
             description: description || null,
             logo_url: logoUrl,
@@ -459,11 +459,11 @@ const ProOnboard = () => {
                 </Button>
                 <Button
                   onClick={async () => {
-                    const hasRequiredFields = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim();
-                    if (!hasRequiredFields) {
-                      toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
-                      return;
-                    }
+                    if (!companyName.trim()) { toast({ title: "Missing field", description: "Please enter your agency name.", variant: "destructive" }); return; }
+                    if (!contactName.trim()) { toast({ title: "Missing field", description: "Please enter your name.", variant: "destructive" }); return; }
+                    if (!email.trim()) { toast({ title: "Missing field", description: "Please enter your email.", variant: "destructive" }); return; }
+                    if (!phone.trim()) { toast({ title: "Missing field", description: "Please enter your phone number.", variant: "destructive" }); return; }
+                    if (!hasConfirmedAddress) { toast({ title: "Address required", description: "Please search and confirm your office address on the map.", variant: "destructive" }); return; }
                     // Run email uniqueness check if not yet validated
                     if (!emailValid && !emailError) {
                       const isUnique = await checkEmailUniqueness(email);
