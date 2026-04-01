@@ -979,6 +979,9 @@ const ProDashboard = () => {
   const [impressionsByDay, setImpressionsByDay] = useState<{ date: string; count: number }[]>([]);
   const [leadsByDay, setLeadsByDay] = useState<{ date: string; count: number }[]>([]);
   const [section, setSection] = useState<Section>("overview");
+  const [activeZones, setActiveZones] = useState<ZoneWithDetails[]>([]);
+  const [availableZones, setAvailableZones] = useState<ZoneWithDetails[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   useSEO({ title: "Agent Dashboard | ValoraCasa", description: "Manage your profile, leads, and analytics." });
   const [saving, setSaving] = useState(false);
 
