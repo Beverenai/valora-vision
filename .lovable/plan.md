@@ -1,52 +1,43 @@
 
 
-# On-Demand Resales Online Fetch During Valuation
+# Location-Aware On-Demand Resales Online Fetch
 
 ## Problem
-Currently the Resales Online sync is a bulk operation triggered manually from admin. The user wants to fetch properties **only when someone requests a valuation**, keeping the data volume low and ensuring fresh comparables.
+The current `fetchResalesOnDemand` in `calculate-valuation` fetches 50 random properties from the entire Resales Online filter (sale/rent) with no location filtering. Since the database starts empty, these random properties are unlikely to be near the valuation address, so `find_comparables_with_fallback` still returns nothing useful.
 
-## Approach
-Modify the `calculate-valuation` edge function to call the Resales Online API directly when it finds few comparables in the database. The API doesn't support GPS-radius search, but it does return area/location data — so we fetch a page of properties from the same filter, upsert them into `properties`, then re-query comparables.
+## Solution
+Pass the valuation's city/area to the Resales Online API using the `P_Area` and/or `P_Location` query parameters, and also filter by property type using `P_PropertyType`. This focuses the fetch on properties relevant to the valuation request.
 
-Since the API returns ALL properties in a filter (not location-filtered), we'll fetch a small batch (1–2 pages = 50–100 properties) and rely on PostGIS `find_comparables_with_fallback` to pick the relevant nearby ones.
+## Changes in `supabase/functions/calculate-valuation/index.ts`
 
-## Changes
+### 1. Update `fetchResalesOnDemand` signature
+Change from `(supabase, operation)` to `(supabase, operation, city, propertyType)` so it receives location and type context from the valuation request.
 
-### 1. New helper function in `calculate-valuation/index.ts`
-Add an `async function fetchResalesNearby(...)` that:
-- Reads `RESALES_CONTACT_ID` and `RESALES_API_KEY` from env
-- Calls `SearchProperties` with the sale or rent filter (filter 1 for sale, 3 for rent)
-- Fetches just 1 page (50 properties) to keep it fast
-- Transforms and upserts them into `properties` table (same transform logic as the sync function)
-- Refreshes the `active_listings` materialized view
+### 2. Add location + type params to API call
+Add these query parameters to the `SearchProperties` request:
+- `P_Area` — set to the city/municipality from the valuation (e.g. "Marbella", "Estepona")
+- `P_PropertyType` — map the internal property type to Resales Online types (e.g. "apartment" → "Apartment", "villa" → "Villa")
 
-### 2. Integrate into valuation flow
-After the initial `find_comparables_with_fallback` call (line ~182), check if we got fewer than 5 comparables. If so:
-- Call `fetchResalesNearby()` to import a batch of Resales Online properties
-- Re-run `find_comparables_with_fallback` with the now-enriched database
-- This is a one-time "warm-up" — subsequent valuations in the same area will already have data
+If the city-filtered request returns 0 results, do a second attempt without the area filter as fallback.
 
-### 3. Reuse transform logic
-Copy the essential transform functions (`mapPropertyType`, `extractFeatures`, `transformProperty`) from `resales-online-sync` into `calculate-valuation` (since edge functions can't import across function folders). Keep them compact.
+### 3. Add `location_point` PostGIS column on upsert
+The upserted properties need `location_point` set from their GPS coordinates so `find_comparables_with_fallback` can find them. Add a raw SQL or use the existing trigger/function that sets `location_point` from lat/lng. Check if there's a trigger already — if not, set it via `ST_SetSRID(ST_MakePoint(lng, lat), 4326)`.
 
-### 4. No UI changes needed
-This is entirely backend — the user experience stays the same, just with better comparable data.
+### 4. Update the call site
+Pass `city` and `property_type` from the valuation request body into `fetchResalesOnDemand`.
 
-## Technical Details
+### 5. Property type mapping for API
+Add a reverse mapping function: internal types → Resales Online `P_PropertyType` values (e.g. "apartment" → "Apartments", "villa" → "Villas", "townhouse" → "Town Houses").
 
+## Technical Detail
 ```text
-User submits valuation
-  → calculate-valuation edge function
-    → Insert lead (status: processing)
-    → find_comparables_with_fallback (PostGIS)
-    → IF comparables < 5:
-        → Fetch 50 properties from Resales Online API
-        → Upsert into properties table
-        → Refresh active_listings materialized view
-        → Re-run find_comparables_with_fallback
-    → Continue with valuation calculation
+fetchResalesOnDemand(supabase, "sale", "Marbella", "apartment")
+  → GET SearchProperties?...&P_Area=Marbella&P_PropertyType=Apartments
+  → If 0 results: retry without P_Area
+  → Upsert with location_point from GPS coords
+  → Refresh materialized view
 ```
 
 ## Files Modified
-- `supabase/functions/calculate-valuation/index.ts` — add Resales Online on-demand fetch + re-query logic
+- `supabase/functions/calculate-valuation/index.ts` — add location/type params to on-demand fetch
 
