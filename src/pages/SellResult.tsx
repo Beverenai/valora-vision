@@ -303,12 +303,17 @@ const SellResult: React.FC = () => {
   const comparableCount = (lead?.comparable_properties as any[])?.length || 0;
   const propertyAddress = lead ? `${lead.address}${lead.city ? `, ${lead.city}` : ""}` : "";
 
+  const refCode = formatRefCode(id!);
+  const shareTitle = `Property Valuation – ${lead?.address || ""}`;
+  const shareMessage = `I valued my property on ValoraCasa (Ref: ${refCode}) and received an estimate of ${fmt(estimatedValue)}.\nSee the full report:`;
+  const shareUrl = window.location.href;
+
   const handleShare = () => {
-    const shareText = `My property at ${propertyAddress} is valued at ${fmt(estimatedValue)}.`;
+    const fullText = `${shareMessage} ${shareUrl}`;
     if (navigator.share) {
-      navigator.share({ title: `Property Valuation – ${lead?.address || ""}`, text: shareText, url: window.location.href });
+      navigator.share({ title: shareTitle, text: fullText, url: shareUrl });
     } else {
-      navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
+      navigator.clipboard.writeText(fullText);
       toast({ title: "Link copied!", description: "Valuation details copied to clipboard." });
     }
   };
