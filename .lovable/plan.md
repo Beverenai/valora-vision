@@ -1,100 +1,78 @@
 
 
-# Layer 4: AI Reasoning — Structured Data Package + Structured Output
+# BUY: Link vs Link — Property Comparison Feature
 
-## What This Does
+## Overview
 
-Upgrades the AI calls in both `calculate-valuation` and `analyze-listing` to use **tool calling** for structured JSON output instead of free-text prompts. The AI receives a complete pre-computed data package (property, valuation, comparables, zone_stats, feature_impacts) and returns structured analysis with specific fields for sell vs buy flows.
-
-## Current State
-
-- Both edge functions already call Lovable AI (gemini-2.5-flash-lite) with simple text prompts
-- Output is unstructured free-text stored in `analysis` and `market_trends` columns
-- No structured fields like `strengths`, `considerations`, `recommended_listing_price`, `verdict`, etc.
-- The AI prompt doesn't receive the full data package — it gets a loose text description
+Add the ability for users to paste two listing URLs and get a side-by-side comparison with AI-generated insights on which property offers better value.
 
 ## Changes
 
-### 1. Migration: Add structured AI output columns
-
-Add new JSON columns to `leads_sell`, `leads_rent`, and `buy_analyses` to store the structured AI output:
+### 1. Database: New `buy_comparisons` table
 
 ```sql
--- leads_sell
-ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS ai_strengths JSONB;
-ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS ai_considerations JSONB;
-ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS recommended_listing_price INTEGER;
-ALTER TABLE leads_sell ADD COLUMN IF NOT EXISTS quick_sale_price INTEGER;
-
--- leads_rent  
-ALTER TABLE leads_rent ADD COLUMN IF NOT EXISTS ai_strengths JSONB;
-ALTER TABLE leads_rent ADD COLUMN IF NOT EXISTS ai_considerations JSONB;
-
--- buy_analyses
-ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_verdict TEXT;
-ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_price_context TEXT;
-ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_worth_noting JSONB;
-ALTER TABLE buy_analyses ADD COLUMN IF NOT EXISTS ai_negotiation_context TEXT;
+CREATE TABLE buy_comparisons (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  analysis_a_id UUID REFERENCES buy_analyses(id),
+  analysis_b_id UUID REFERENCES buy_analyses(id),
+  ai_comparison TEXT,           -- AI narrative comparing both
+  ai_winner TEXT,               -- "a", "b", or "tie"
+  ai_comparison_points JSONB,   -- structured comparison bullets
+  status TEXT DEFAULT 'processing',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
-### 2. Update `calculate-valuation/index.ts` — Structured AI calls
+RLS: public read (no auth required, matches existing buy_analyses pattern).
 
-Replace the current free-text AI prompts with:
+### 2. New edge function: `compare-listings/index.ts`
 
-1. **Build a structured data package** containing property details, computed valuation, comparable summary stats, zone_stats, and feature impacts — matching the user's spec
-2. **Use tool calling** to get structured output:
-   - For SELL: `generate_sell_analysis` tool returning `{ summary, detailed_analysis, strengths[], considerations[], recommended_listing_price, quick_sale_price }`
-   - For RENT: `generate_rent_analysis` tool returning `{ summary, detailed_analysis, strengths[], considerations[] }`
-3. **Upgrade model** from `gemini-2.5-flash-lite` to `google/gemini-3-flash-preview` for better reasoning quality
-4. **Set temperature to 0.3** for consistent, non-creative output
-5. **System prompt**: Neutral, data-driven tone; never say "too expensive"; reference real data
-6. Store structured fields in new columns, keep `analysis` column populated with `summary + detailed_analysis` for backward compatibility
+Accepts `{ url_a, url_b }`. Flow:
+1. Call `analyze-listing` internally for both URLs in parallel (reuses all existing logic — scrape/cache, comparables, valuation, AI)
+2. Wait for both to reach `ready` status (poll if needed)
+3. Build a comparison data package with both properties' results
+4. Call AI with a `generate_comparison_analysis` tool:
+   - `winner`: which property is better value ("a", "b", or "tie")
+   - `summary`: 2-3 sentence comparison overview
+   - `comparison_points[]`: 4-6 structured bullet comparisons (price, value/m², features, location)
+   - `recommendation`: neutral recommendation text
+5. Store in `buy_comparisons`, return `comparison_id`
 
-### 3. Update `analyze-listing/index.ts` — Structured BUY analysis
+### 3. Update `BuyAnalysis.tsx` — Add compare mode
 
-Same approach for buy flow:
+Add a toggle or tab: "Analyze One" vs "Compare Two". In compare mode:
+- Show two URL input fields side by side (Property A / Property B)
+- Both get platform detection badges
+- Single "Compare Properties" button
+- Loading overlay with comparison-specific messages
+- On success, navigate to `/buy/compare/:id`
 
-1. **Build data package** with asking price, estimated value, deviation, comparables, zone context
-2. **Use tool calling**: `generate_buy_analysis` tool returning `{ verdict, summary, price_context, worth_noting[], negotiation_context }`
-3. **System prompt**: Explicitly neutral — "never say too expensive", present as "Above Market" / "Fair Price"
-4. Store in new columns (`ai_verdict`, `ai_price_context`, `ai_worth_noting`, `ai_negotiation_context`)
+### 4. New page: `BuyCompare.tsx` (`/buy/compare/:id`)
 
-### 4. Market trends — kept as free text
+Side-by-side comparison result page:
+- **Header**: "Property A vs Property B" with winner badge
+- **Split view**: Two property cards with thumbnail, address, asking price, estimated value, price score
+- **Comparison table**: Size, rooms, price/m², deviation %, features — with visual indicators showing which is better per metric
+- **AI comparison section**: Structured comparison points + recommendation
+- **Individual reports**: Link to each property's full `/buy/result/:id` page
+- Share button for the comparison
 
-The trends call stays as-is (free text in `market_trends` column) since it doesn't need structured output.
+### 5. Route registration in `App.tsx`
 
-## Technical Details
+Add `/buy/compare/:id` route with lazy-loaded `BuyCompare` page.
 
-**Tool calling schema example (sell):**
-```json
-{
-  "name": "generate_sell_analysis",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "summary": { "type": "string" },
-      "detailed_analysis": { "type": "string" },
-      "strengths": { "type": "array", "items": { "type": "string" } },
-      "considerations": { "type": "array", "items": { "type": "string" } },
-      "recommended_listing_price": { "type": "integer" },
-      "quick_sale_price": { "type": "integer" }
-    },
-    "required": ["summary", "detailed_analysis", "strengths", "considerations", "recommended_listing_price", "quick_sale_price"]
-  }
-}
-```
+## Files Modified/Created
 
-**Data package sent to AI** includes all pre-computed values from Layers 2+3 — the AI interprets, it does not calculate.
+- New migration SQL (`buy_comparisons` table + RLS)
+- `supabase/functions/compare-listings/index.ts` (new edge function)
+- `src/pages/BuyAnalysis.tsx` — add compare mode toggle + dual URL inputs
+- `src/pages/BuyCompare.tsx` (new page)
+- `src/App.tsx` — add route
 
-## Files Modified
+## Technical Notes
 
-- New migration SQL (add structured columns)
-- `supabase/functions/calculate-valuation/index.ts` — structured data package + tool calling for sell/rent
-- `supabase/functions/analyze-listing/index.ts` — structured data package + tool calling for buy
-
-## Backward Compatibility
-
-- `analysis` column still populated (summary + detailed_analysis concatenated)
-- `market_trends` column unchanged
-- Frontend can progressively adopt new structured fields
+- The compare function reuses `analyze-listing` for each URL, so all existing scraping, valuation, and AI logic is inherited
+- Both analyses run in parallel for speed
+- The AI comparison call only fires after both individual analyses are complete
+- Comparables may overlap if properties are in the same zone — this is expected and useful context for the AI
 
