@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const serviceLinks = [
   { id: "sell", label: "Sell", href: "/?mode=sell" },
-  { id: "rent", label: "Rent", href: "/rent/valuation" },
+  { id: "rent", label: "Rent", href: "/?mode=rent" },
   { id: "buy", label: "Buy Analysis", href: "/?mode=buy" },
 ];
 
