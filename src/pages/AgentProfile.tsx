@@ -195,7 +195,25 @@ export default function AgentProfile() {
         setZones(zoneData || []);
       }
 
-      // SEO title is handled by useSEO hook below
+      // If this is an agent belonging to an agency, fetch agency info
+      if ((prof as any).agency_id) {
+        const { data: agencyData } = await supabase
+          .from("professionals")
+          .select("*")
+          .eq("id", (prof as any).agency_id)
+          .single();
+        if (agencyData) setAgency(agencyData as unknown as Professional);
+      }
+
+      // If this is an agency, fetch all agents that belong to it
+      if ((prof as any).type === "agency") {
+        const { data: agentsData } = await supabase
+          .from("professionals")
+          .select("*")
+          .eq("agency_id", prof.id)
+          .eq("is_active", true);
+        if (agentsData) setAgencyAgents(agentsData as unknown as Professional[]);
+      }
 
       setLoading(false);
     }
