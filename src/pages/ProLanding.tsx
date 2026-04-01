@@ -100,7 +100,7 @@ const ProLanding = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mt-5 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
+            className="mt-5 text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto"
           >
             ValoraCasa connects you with qualified sellers in your area.
             No activation fees. No transaction limits.
@@ -153,7 +153,7 @@ const ProLanding = () => {
           <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-3">
             Simple, transparent pricing
           </h2>
-          <p className="text-center text-muted-foreground mb-12">Start free — upgrade when you're ready. No credit card required.</p>
+          <p className="text-center text-foreground/60 mb-12">Start free — upgrade when you're ready. No credit card required.</p>
 
           <div className="grid md:grid-cols-3 gap-6">
             {tiers.map((tier) => (
@@ -231,7 +231,7 @@ const ProLanding = () => {
         <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
           Ready to grow your business?
         </h2>
-        <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+        <p className="text-foreground/70 mb-8 max-w-lg mx-auto">
           Join ValoraCasa today and start receiving qualified leads from homeowners in your area.
         </p>
         <Button asChild size="lg" className="rounded-full text-base px-10 shadow-md">

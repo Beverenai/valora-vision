@@ -22,7 +22,7 @@
     --secondary-foreground: 0 0% 10%;
 
     --muted: 36 9% 94%;
-    --muted-foreground: 0 0% 47%;
+    --muted-foreground: 0 0% 35%;
 
     --accent: 21 62% 53%;
     --accent-foreground: 0 0% 100%;
@@ -44,8 +44,8 @@
     --rent-light: 152 40% 93%;
     --rent-foreground: 152 55% 28%;
     --text-primary: 0 0% 10%;
-    --text-secondary: 0 0% 47%;
-    --text-muted: 0 0% 73%;
+    --text-secondary: 0 0% 38%;
+    --text-muted: 0 0% 58%;
     --surface: 40 9% 97%;
     --buy: 210 60% 45%;
     --buy-light: 210 50% 93%;
