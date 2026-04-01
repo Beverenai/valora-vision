@@ -998,7 +998,7 @@ const ProDashboard = () => {
 
     setAgent(prof as unknown as Professional);
 
-    const [leadsRes, impressionsRes] = await Promise.all([
+    const [leadsRes, impressionsRes, zonesRes, reviewsRes, allZonesRes] = await Promise.all([
       supabase.from("agent_contact_requests").select("*").eq("professional_id", prof.id).order("created_at", { ascending: false }),
       supabase.from("professional_impressions").select("created_at").eq("professional_id", prof.id),
       supabase.from("professional_zones").select("*, zones(*)").eq("professional_id", prof.id).eq("is_active", true),
