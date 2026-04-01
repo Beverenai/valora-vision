@@ -17,6 +17,7 @@ const groups = [
     items: [
       { key: "zones" as AdminSection, label: "Zones", icon: Database },
       { key: "jobs" as AdminSection, label: "Scrape Jobs", icon: Zap },
+      { key: "resales" as AdminSection, label: "Resales Online", icon: Globe },
     ],
   },
   {
