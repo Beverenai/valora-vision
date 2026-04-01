@@ -59,7 +59,7 @@ const ProLogin = () => {
           <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2 text-center">
             {mode === "login" ? "Agent sign in" : "Reset password"}
           </h1>
-          <p className="text-muted-foreground text-center mb-8 text-sm">
+          <p className="text-foreground/60 text-center mb-8 text-sm">
             {mode === "login" ? "Access your ValoraCasa agent dashboard" : "Enter your email to receive a reset link"}
           </p>
 
@@ -84,7 +84,7 @@ const ProLogin = () => {
             {mode === "login" ? (
               <>
                 <button onClick={() => setMode("forgot")} className="text-primary hover:underline">Forgot password?</button>
-                <p className="text-muted-foreground">
+                <p className="text-foreground/60">
                   Don't have an account?{" "}
                   <Link to="/pro/onboard" className="text-primary hover:underline">Sign up</Link>
                 </p>
