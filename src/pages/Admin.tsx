@@ -505,6 +505,222 @@ function JobsTab({ dark }: { dark: boolean }) {
   );
 }
 
+// ─── RESALES ONLINE TAB ───────────────────────────────────
+interface ResalesConfig {
+  id: string;
+  contact_id: string;
+  api_key: string;
+  filter_alias: string;
+  filter_id: number;
+  province: string | null;
+  sync_interval_hours: number | null;
+  is_active: boolean | null;
+  last_sync_at: string | null;
+  last_sync_status: string | null;
+}
+
+interface SyncLogRow {
+  id: string;
+  config_id: string | null;
+  filter_alias: string | null;
+  status: string;
+  properties_fetched: number | null;
+  properties_upserted: number | null;
+  properties_deactivated: number | null;
+  error_message: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  duration_seconds: number | null;
+}
+
+function ResalesTab({ dark }: { dark: boolean }) {
+  const [configs, setConfigs] = useState<ResalesConfig[]>([]);
+  const [logs, setLogs] = useState<SyncLogRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [rolCount, setRolCount] = useState(0);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newConfig, setNewConfig] = useState({ contact_id: "", api_key: "", filter_alias: "sale", filter_id: 1, province: "Málaga", sync_interval_hours: 24 });
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const [configRes, logRes, countRes] = await Promise.all([
+      supabase.from("resales_online_config").select("*").order("filter_id"),
+      supabase.from("resales_sync_log").select("*").order("started_at", { ascending: false }).limit(20),
+      supabase.from("properties").select("id", { count: "exact", head: true }).eq("data_source", "resales_online").eq("is_active", true),
+    ]);
+    setConfigs((configRes.data || []) as ResalesConfig[]);
+    setLogs((logRes.data || []) as SyncLogRow[]);
+    setRolCount(countRes.count || 0);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Auto-refresh while syncing
+  useEffect(() => {
+    const hasRunning = logs.some(l => l.status === "running");
+    if (!hasRunning) return;
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
+  }, [logs, fetchData]);
+
+  const handleSync = async (filterId?: string) => {
+    setSyncing(filterId || "all");
+    try {
+      const body = filterId ? { filter_id: filterId } : { sync_all: true };
+      await supabase.functions.invoke("resales-online-sync", { body });
+      await fetchData();
+    } catch (e) {
+      console.error("Sync error:", e);
+    } finally {
+      setSyncing(null);
+    }
+  };
+
+  const handleAddConfig = async () => {
+    await supabase.from("resales_online_config").insert({
+      contact_id: newConfig.contact_id,
+      api_key: newConfig.api_key,
+      filter_alias: newConfig.filter_alias,
+      filter_id: newConfig.filter_id,
+      province: newConfig.province,
+      sync_interval_hours: newConfig.sync_interval_hours,
+    });
+    setShowAddModal(false);
+    setNewConfig({ contact_id: "", api_key: "", filter_alias: "sale", filter_id: 1, province: "Málaga", sync_interval_hours: 24 });
+    await fetchData();
+  };
+
+  const lastSuccessfulSync = configs.find(c => c.last_sync_at)?.last_sync_at;
+  const overallStatus = configs.length === 0 ? "No configs" : configs.some(c => c.last_sync_status === "failed") ? "Error" : "Connected";
+
+  return (
+    <div className="space-y-6">
+      {/* API Status Card */}
+      <div className={cn("rounded-xl p-5 flex flex-wrap items-center gap-4 justify-between", dark ? "bg-white/5 border border-white/10" : "bg-card border border-border")}>
+        <div className="flex items-center gap-4">
+          <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", overallStatus === "Connected" ? "bg-emerald-500/10" : overallStatus === "Error" ? "bg-destructive/10" : "bg-muted")}>
+            <Globe size={18} className={overallStatus === "Connected" ? "text-emerald-600" : overallStatus === "Error" ? "text-destructive" : "text-muted-foreground"} />
+          </div>
+          <div>
+            <p className={cn("font-medium", dark ? "text-white" : "text-foreground")}>Resales Online API</p>
+            <div className="flex gap-3 text-xs mt-0.5">
+              <StatusBadge status={overallStatus === "Connected" ? "completed" : overallStatus === "Error" ? "failed" : "pending"} dark={dark} />
+              <span className={dark ? "text-white/40" : "text-muted-foreground"}>{rolCount} properties</span>
+              {lastSuccessfulSync && <span className={dark ? "text-white/40" : "text-muted-foreground"}>Last sync: {timeAgo(lastSuccessfulSync)}</span>}
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowAddModal(true)} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+            Add Config
+          </Button>
+          <Button size="sm" onClick={() => handleSync()} disabled={syncing !== null || configs.length === 0}>
+            {syncing === "all" ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
+            Sync All
+          </Button>
+        </div>
+      </div>
+
+      {/* Add Config Modal */}
+      {showAddModal && (
+        <div className={cn("rounded-xl p-5 space-y-4", dark ? "bg-white/5 border border-white/10" : "bg-card border border-border")}>
+          <h3 className={cn("font-medium", dark ? "text-white" : "text-foreground")}>Add Resales Online Config</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Input placeholder="Contact ID (p1)" value={newConfig.contact_id} onChange={e => setNewConfig(p => ({ ...p, contact_id: e.target.value }))} className={cn(dark && "bg-white/5 border-white/10 text-white")} />
+            <Input placeholder="API Key (p2)" type="password" value={newConfig.api_key} onChange={e => setNewConfig(p => ({ ...p, api_key: e.target.value }))} className={cn(dark && "bg-white/5 border-white/10 text-white")} />
+            <Select value={String(newConfig.filter_id)} onValueChange={v => setNewConfig(p => ({ ...p, filter_id: Number(v), filter_alias: v === "1" ? "sale" : v === "2" ? "st_rental" : "lt_rental" }))}>
+              <SelectTrigger className={cn(dark && "bg-white/5 border-white/10 text-white")}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Sale (Filter 1)</SelectItem>
+                <SelectItem value="2">Short-term Rental (Filter 2)</SelectItem>
+                <SelectItem value="3">Long-term Rental (Filter 3)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input placeholder="Province" value={newConfig.province} onChange={e => setNewConfig(p => ({ ...p, province: e.target.value }))} className={cn(dark && "bg-white/5 border-white/10 text-white")} />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" size="sm" onClick={() => setShowAddModal(false)} className={cn(dark && "border-white/10 text-white/60")}>Cancel</Button>
+            <Button size="sm" onClick={handleAddConfig} disabled={!newConfig.contact_id || !newConfig.api_key}>Save</Button>
+          </div>
+        </div>
+      )}
+
+      {/* Filter Cards */}
+      {configs.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {configs.map(config => (
+            <div key={config.id} className={cn("rounded-xl p-4 space-y-3", dark ? "bg-white/5 border border-white/10" : "bg-card border border-border")}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={cn("font-medium text-sm", dark ? "text-white" : "text-foreground")}>{config.filter_alias}</p>
+                  <p className={cn("text-xs", dark ? "text-white/40" : "text-muted-foreground")}>Filter #{config.filter_id} · {config.province}</p>
+                </div>
+                <StatusBadge status={config.last_sync_status === "completed" ? "completed" : config.last_sync_status === "failed" ? "failed" : "pending"} dark={dark} />
+              </div>
+              <div className={cn("text-xs space-y-1", dark ? "text-white/50" : "text-muted-foreground")}>
+                <p>Last sync: {config.last_sync_at ? timeAgo(config.last_sync_at) : "Never"}</p>
+                <p>Interval: {config.sync_interval_hours}h</p>
+              </div>
+              <Button variant="outline" size="sm" className={cn("w-full", dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}
+                onClick={() => handleSync(config.id)} disabled={syncing !== null}>
+                {syncing === config.id ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
+                Sync Now
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sync History */}
+      <div>
+        <div className="flex gap-3 mb-3 items-center">
+          <h3 className={cn("text-sm font-medium", dark ? "text-white/60" : "text-muted-foreground")}>Sync History</h3>
+          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className={cn("ml-auto", dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          </Button>
+        </div>
+        <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
+                {["Time", "Filter", "Status", "Fetched", "Upserted", "Deactivated", "Duration", "Error"].map(h => (
+                  <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map(log => (
+                <tr key={log.id} className={cn("border-b transition-colors", dark ? "border-white/5 hover:bg-white/5" : "border-border/50 hover:bg-muted/30")}>
+                  <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{log.started_at ? timeAgo(log.started_at) : "—"}</td>
+                  <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{log.filter_alias || "—"}</td>
+                  <td className="px-4 py-3"><StatusBadge status={log.status} dark={dark} /></td>
+                  <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{log.properties_fetched ?? "—"}</td>
+                  <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{log.properties_upserted ?? "—"}</td>
+                  <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{log.properties_deactivated ?? "—"}</td>
+                  <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{log.duration_seconds ? `${log.duration_seconds}s` : "—"}</td>
+                  <td className="px-4 py-3 text-destructive text-xs max-w-[200px] truncate">{log.error_message || ""}</td>
+                </tr>
+              ))}
+              {logs.length === 0 && (
+                <tr><td colSpan={8} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>No sync history</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function timeAgo(dateStr: string): string {
+  const hours = (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60);
+  if (hours < 1) return "< 1h ago";
+  if (hours < 24) return `${Math.round(hours)}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
+}
+
 // ─── HEALTH TAB ───────────────────────────────────────────
 function HealthTab({ dark, onHealthScore }: { dark: boolean; onHealthScore: (v: string) => void }) {
   const [health, setHealth] = useState<HealthData | null>(null);
