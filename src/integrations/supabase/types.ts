@@ -1253,6 +1253,13 @@ export type Database = {
             foreignKeyName: "valuation_comparables_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "active_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "valuation_comparables_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -1483,6 +1490,58 @@ export type Database = {
       }
     }
     Views: {
+      active_listings: {
+        Row: {
+          address: string | null
+          agency_name: string | null
+          agency_phone: string | null
+          bathrooms: number | null
+          condition: string | null
+          district: string | null
+          feature_bits: number | null
+          floor: string | null
+          has_ac: boolean | null
+          has_balcony: boolean | null
+          has_garage: boolean | null
+          has_garden: boolean | null
+          has_lift: boolean | null
+          has_pool: boolean | null
+          has_sea_views: boolean | null
+          has_terrace: boolean | null
+          id: string | null
+          idealista_url: string | null
+          latitude: number | null
+          location_point: unknown
+          longitude: number | null
+          municipality: string | null
+          operation: string | null
+          price: number | null
+          price_per_m2: number | null
+          property_code: string | null
+          property_type: string | null
+          rooms: number | null
+          scraped_at: string | null
+          size_m2: number | null
+          thumbnail_url: string | null
+          zone_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_properties_zone"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geography_columns: {
         Row: {
           coord_dimension: number | null
@@ -1723,6 +1782,76 @@ export type Database = {
           thumbnail_url: string
         }[]
       }
+      find_comparables_v2: {
+        Args: {
+          p_lat: number
+          p_limit?: number
+          p_lng: number
+          p_operation: string
+          p_property_type: string
+          p_radius_km?: number
+          p_rooms: number
+          p_size_m2: number
+        }
+        Returns: {
+          address: string
+          bathrooms: number
+          distance_km: number
+          has_garage: boolean
+          has_pool: boolean
+          has_sea_views: boolean
+          has_terrace: boolean
+          id: string
+          idealista_url: string
+          latitude: number
+          longitude: number
+          municipality: string
+          price: number
+          price_per_m2: number
+          property_code: string
+          property_type: string
+          rooms: number
+          scraped_at: string
+          similarity_score: number
+          size_m2: number
+          thumbnail_url: string
+        }[]
+      }
+      find_comparables_with_fallback: {
+        Args: {
+          p_lat: number
+          p_limit?: number
+          p_lng: number
+          p_min_results?: number
+          p_operation: string
+          p_property_type: string
+          p_rooms: number
+          p_size_m2: number
+        }
+        Returns: {
+          address: string
+          bathrooms: number
+          distance_km: number
+          has_garage: boolean
+          has_pool: boolean
+          has_sea_views: boolean
+          has_terrace: boolean
+          id: string
+          idealista_url: string
+          latitude: number
+          longitude: number
+          municipality: string
+          price: number
+          price_per_m2: number
+          property_code: string
+          property_type: string
+          rooms: number
+          scraped_at: string
+          similarity_score: number
+          size_m2: number
+          thumbnail_url: string
+        }[]
+      }
       find_rent_comparables: {
         Args: {
           p_lat: number
@@ -1946,6 +2075,7 @@ export type Database = {
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
       queue_due_scrapes: { Args: never; Returns: undefined }
+      refresh_active_listings: { Args: never; Returns: undefined }
       refresh_search_views: { Args: never; Returns: undefined }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }

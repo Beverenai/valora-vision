@@ -467,7 +467,16 @@ serve(async (req) => {
       results.str_skipped = "RAPIDAPI_KEY not configured";
     }
 
-    // 4. Update scrape_zones.last_scraped_at
+    // 4. Refresh the active_listings materialized view
+    try {
+      console.log("Refreshing active_listings materialized view...");
+      await supabase.rpc("refresh_active_listings");
+      console.log("active_listings refreshed successfully");
+    } catch (refreshErr) {
+      console.error("Failed to refresh active_listings:", refreshErr);
+    }
+
+    // 5. Update scrape_zones.last_scraped_at
     if (zone_id) {
       const totalCount = (results.sale_count || 0) + (results.rent_count || 0) + (results.str_count || 0);
       await supabase

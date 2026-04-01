@@ -281,15 +281,15 @@ serve(async (req) => {
     // 5. Find comparables
     let comparables: any[] = [];
     if (propertyData.latitude && propertyData.longitude) {
-      const { data: comps, error: compError } = await supabase.rpc("find_comparables", {
+      const { data: comps, error: compError } = await supabase.rpc("find_comparables_with_fallback", {
         p_lat: Number(propertyData.latitude),
         p_lng: Number(propertyData.longitude),
         p_operation: "sale",
         p_property_type: propertyData.property_type || "apartment",
         p_size_m2: sizeM2,
         p_rooms: propertyData.rooms || 2,
-        p_radius_km: 5.0,
-        p_limit: 20,
+        p_min_results: 8,
+        p_limit: 30,
       });
       if (!compError && comps?.length > 0) {
         comparables = comps;
