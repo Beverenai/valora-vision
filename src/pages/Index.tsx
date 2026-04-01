@@ -769,7 +769,7 @@ const Index = () => {
                   onClick={() => setTestimonialIdx(i)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
-                    i === testimonialIdx ? (isSell ? "bg-primary" : "bg-[hsl(var(--buy))]") + " w-6" : "bg-border w-2 hover:bg-muted-foreground/30"
+                    i === testimonialIdx ? cn(accent.fill, "w-6") : "bg-border w-2 hover:bg-muted-foreground/30"
                   )}
                 />
               ))}
