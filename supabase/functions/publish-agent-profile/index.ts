@@ -125,16 +125,36 @@ Deno.serve(async (req) => {
       .delete()
       .eq("professional_id", professionalId);
 
+    // Always include the owner as a team member
+    const ownerTeamEntry = {
+      professional_id: professionalId,
+      name: contact_name,
+      role: "Owner",
+      email: email,
+      phone: phone || null,
+      photo_url: null,
+      sort_order: 0,
+      is_active: true,
+      whatsapp: null,
+    };
+
+    const teamInserts = [ownerTeamEntry];
     if (team && team.length > 0) {
-      const teamInserts = team.map((m: any, i: number) => ({
-        professional_id: professionalId,
-        name: m.name,
-        role: m.role || null,
-        photo_url: m.photo_url || null,
-        sort_order: i,
-      }));
-      await supabaseAdmin.from("agent_team_members").insert(teamInserts);
+      team.forEach((m: any, i: number) => {
+        teamInserts.push({
+          professional_id: professionalId,
+          name: m.name,
+          role: m.role || null,
+          email: m.email || null,
+          phone: m.phone || null,
+          photo_url: m.photo_url || null,
+          sort_order: i + 1,
+          is_active: true,
+          whatsapp: m.whatsapp || null,
+        });
+      });
     }
+    await supabaseAdmin.from("agent_team_members").insert(teamInserts);
 
     // 3. Idempotent role assignment: check first, then insert if missing
     const { data: existingRole } = await supabaseAdmin

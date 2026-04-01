@@ -170,6 +170,9 @@ Deno.serve(async (req) => {
                         properties: {
                           name: { type: "string" },
                           role: { type: "string" },
+                          email: { type: "string" },
+                          phone: { type: "string" },
+                          whatsapp: { type: "string" },
                         },
                         required: ["name", "role"],
                       },

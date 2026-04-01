@@ -55,6 +55,9 @@ interface TeamMember {
   name: string;
   role: string;
   photo_url?: string;
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
 }
 
 interface AiStep {
