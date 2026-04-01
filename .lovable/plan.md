@@ -1,60 +1,44 @@
 
 
-## Plan: SectionSkeleton, Sticky Agent Button, Typewriter Hero
+## Plan: Explore Areas Section, Admin Badge, Comparable Card Redesign
 
-### 1. Create `SectionSkeleton` component
-
-**New file: `src/components/ui/SectionSkeleton.tsx`**
-
-Animated pulse skeleton with configurable row count — label placeholder, heading placeholder, and content rows with decreasing widths. Replace the current `SectionFallback` spinner in `SellResult.tsx` with this component.
-
-### 2. Replace Suspense fallbacks in SellResult
-
-**Modified: `src/pages/SellResult.tsx`**
-
-Replace the inline `SectionFallback` spinner component with `<SectionSkeleton rows={4} />` for both lazy bundle Suspense boundaries.
-
-### 3. Create Sticky "Find Agent" button
-
-**New file: `src/components/shared/StickyAgentButton.tsx`**
-
-Fixed bottom-right floating button with `Users` icon and "Find your agent" text (hidden on mobile, icon-only). Uses `animate-in fade-in slide-in-from-bottom-4`. On click, scrolls to the matched agents section (`[data-section="matched-agents"]` or similar ID).
-
-**Modified: `src/pages/SellResult.tsx`**
-- Import and render `StickyAgentButton` inside the result view (after CardRevealWrapper content).
-
-**Modified: `src/components/ResultAgentGroup.tsx`**
-- Add `id="matched-agents"` to the MatchedAgentsSection wrapper so the sticky button can scroll to it.
-
-### 4. Typewriter effect in hero
-
-**New file: `src/components/shared/TypewriterText.tsx`**
-
-Rotates through an array of phrases with a typing/deleting animation:
-- Types character by character (50ms interval)
-- Pauses 2s at full phrase
-- Deletes character by character (30ms interval)
-- Moves to next phrase
-
-Props: `phrases: string[]`, `className?: string`
+### 1. Add "Explore Areas" section to Index.tsx
 
 **Modified: `src/pages/Index.tsx`**
-- Import `TypewriterText`
-- In the SELL hero, replace the static `h1` text with the typewriter cycling through:
-  - "What is your apartment worth?"
-  - "What can your villa sell for?"
-  - "Find the value of your property"
-  - "Free valuation in 2 minutes"
-- Keep the BUY hero text static (it's already distinct)
+
+Add a new section before the Final CTA (around line 719) with circular image thumbnails in a horizontal scroll container. Uses the 8 specified zones with placeholder images from Unsplash (Costa del Sol area photos). Each zone links to `/sone/{slug}` (non-functional route for now — just the visual). Uses `SectionLabel`, serif heading, `overflow-x-auto scrollbar-hide` flex layout, and `rounded-full` image containers with `border-2 border-primary/20 hover:border-primary`.
+
+Zones: Marbella, Nueva Andalucía, Puerto Banús, Golden Mile, Benahavís, Estepona, Mijas, Fuengirola.
+
+Add `scrollbar-hide` utility class to `src/index.css` if not already present (`.scrollbar-hide::-webkit-scrollbar { display: none }` + `-ms-overflow-style: none; scrollbar-width: none`).
+
+### 2. Admin View Badge
+
+**Modified: `src/pages/Admin.tsx`**
+
+After the password gate is passed (`isAuthenticated === true`), render a fixed top-center badge: `fixed top-0 left-1/2 -translate-x-1/2 z-[60] bg-primary/90 text-white text-xs px-4 py-1 rounded-b-lg` with "⚙ Admin View" text.
+
+### 3. Redesign Comparable Property Cards
+
+**Modified: `src/components/ResultAnalysisGroup.tsx`**
+
+Update the `ComparableCard` component to match the new design:
+- Add a `Badge` (from `@/components/ui/badge`) showing distance (`X.X km away`) positioned absolutely on the image with `bg-background/80 backdrop-blur-sm`
+- Restructure card body: price as `text-lg font-semibold`, property details line, area line
+- Add a bottom `border-t` row with price/m² on left and a colored Badge showing the % difference vs lead property (green for cheaper, destructive for more expensive)
+- Change card width to fixed `w-[280px] shrink-0` and make the parent container a horizontal scroll (`flex overflow-x-auto gap-5 pb-4 scrollbar-hide`) instead of a grid
+- Rounded corners to `rounded-xl`
+
+### 4. Update result section visual hierarchy
+
+Already mostly done from previous work. Ensure all sections in `ResultAnalysisGroup.tsx` and `ResultAgentGroup.tsx` consistently use `py-8 sm:py-12 border-b border-border/50` (already applied in last iteration — verify and patch any gaps).
 
 ### Files
 
 | Action | File |
 |--------|------|
-| New | `src/components/ui/SectionSkeleton.tsx` |
-| New | `src/components/shared/StickyAgentButton.tsx` |
-| New | `src/components/shared/TypewriterText.tsx` |
-| Modified | `src/pages/SellResult.tsx` — use SectionSkeleton, add StickyAgentButton |
-| Modified | `src/components/ResultAgentGroup.tsx` — add scroll target ID |
-| Modified | `src/pages/Index.tsx` — add TypewriterText to sell hero |
+| Modified | `src/pages/Index.tsx` — add Explore Areas section |
+| Modified | `src/index.css` — add scrollbar-hide utility |
+| Modified | `src/pages/Admin.tsx` — add admin view badge |
+| Modified | `src/components/ResultAnalysisGroup.tsx` — redesign ComparableCard + horizontal scroll |
 
