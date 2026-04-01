@@ -1,49 +1,59 @@
 
 
-# Layer 2: Search & Match — Materialized View + Optimized RPC
+# Layer 3: Zone Intelligence — zone_stats Materialized View
 
 ## What This Does
 
-Creates a pre-filtered materialized view (`active_listings`) of only active, recent properties with heavy indexes paid at refresh time, not query time. Adds `find_comparables_v2` (uses the view) and `find_comparables_with_fallback` (expanding search). Updates edge functions to use the new RPC.
+Creates a `zone_stats` materialized view that pre-computes per-zone market statistics (median/avg prices, feature prevalence, feature premiums) from `active_listings`. This eliminates aggregate queries at valuation time. Updates `calculate-valuation` to use dynamic feature premiums from `zone_stats` instead of hardcoded multipliers.
+
+## Current State
+
+- `zones` table already exists with all needed columns (name, municipality, province, tier, center_lat/lng, etc.)
+- `active_listings` materialized view exists (Layer 2) with zone_id, features, prices
+- `calculate-valuation` uses hardcoded `FEATURE_ADJUSTMENTS` (pool: +10%, sea_views: +20%, etc.)
+- `refresh_active_listings()` function exists, called after scrape runs
+- No `polygon` column on zones yet (low priority, can add later)
 
 ## Changes
 
-### 1. Migration: Materialized view + indexes + RPC functions
+### 1. Migration: Create `zone_stats` materialized view
 
-**`active_listings` materialized view**: Filters `properties` to `is_active = TRUE`, `scraped_at > NOW() - 90 days`, `price > 0`, `size_m2 > 0`. Includes a `feature_bits` integer for fast bitwise matching. Drops the `contact_info` column from the user's spec (doesn't exist on the table).
+Aggregates from `active_listings` grouped by `(zone_id, operation, property_type)`:
 
-**Indexes on the view**: GIST on `location_point`, plus B-tree on `(property_type, operation)`, `rooms`, `size_m2`, `price_per_m2`, `zone_id`.
+- **Price stats**: listing_count, median/avg/min/max/stddev price_per_m2, median/avg absolute price
+- **Size stats**: avg/median size_m2, median rooms
+- **Feature prevalence**: % with pool, garage, sea_views, terrace, lift
+- **Feature premiums**: median price_per_m2 WITH feature vs WITHOUT feature (for pool, sea_views, garage, terrace, lift) — enables dynamic premium calculation
+- **Freshness**: last data update timestamp
 
-**Unique index** on `id` (required for `REFRESH MATERIALIZED VIEW CONCURRENTLY`).
+Unique index on `(zone_id, operation, property_type)` for concurrent refresh. Additional index on `zone_id`.
 
-**`find_comparables_v2`**: Queries `active_listings` instead of `properties`. Same signature as existing `find_comparables` but with improved similarity scoring (normalized size diff + room penalty).
+### 2. Create `refresh_zone_stats()` function
 
-**`find_comparables_with_fallback`**: 4-stage expanding search — 2km strict → 5km → 10km with relaxed rooms/size → municipality-wide fallback. Uses temp tables internally to accumulate results.
+Simple `SECURITY DEFINER` function that refreshes `zone_stats` concurrently.
 
-### 2. Update edge functions to use new RPC
+### 3. Update `refresh_active_listings()` to also refresh `zone_stats`
 
-**`calculate-valuation/index.ts`**: Change `supabase.rpc("find_comparables", ...)` → `supabase.rpc("find_comparables_with_fallback", ...)` so valuations automatically get expanded search when comparables are sparse.
+Chain the refresh: after `active_listings` refreshes, automatically refresh `zone_stats` too. Single RPC call from the scrape pipeline refreshes both.
 
-**`analyze-listing/index.ts`**: Same change — use `find_comparables_with_fallback` for buy analyses.
+### 4. Create `get_zone_stats` RPC function
 
-### 3. Refresh strategy
+Takes `p_zone_id`, `p_operation`, `p_property_type` and returns the pre-computed stats row. Used by `calculate-valuation` to get instant zone context.
 
-Add a `refresh_active_listings()` SQL function that the scrape pipeline can call. The `scrape-properties` edge function will call this after completing a scrape batch.
+### 5. Update `calculate-valuation` edge function
 
-## Note on `contact_info`
+Replace hardcoded `FEATURE_ADJUSTMENTS` with dynamic premiums from `zone_stats`:
 
-The user's spec includes `contact_info` in the view but this column doesn't exist on `properties`. The view will omit it — agency info (`agency_name`, `agency_phone`, `agency_logo`) is already available as separate columns.
+```text
+Before: pool premium = hardcoded 0.10 (10%)
+After:  pool premium = (median_m2_with_pool - median_m2_without_pool) / median_m2_without_pool
+        Fallback to hardcoded if zone has < 5 properties with that feature
+```
 
-## Files Modified
+Also enrich the AI analysis prompt with zone context (median price, listing count, feature prevalence) for more data-driven text.
 
-- New migration SQL (materialized view, indexes, unique index, 3 functions)
-- `supabase/functions/calculate-valuation/index.ts` — use `find_comparables_with_fallback`
-- `supabase/functions/analyze-listing/index.ts` — use `find_comparables_with_fallback`
-- `supabase/functions/scrape-properties/index.ts` — call `refresh_active_listings()` after scrape
+### Files Modified
 
-## What This Enables
-
-- Sub-100ms comparable searches via pre-indexed materialized view
-- Automatic fallback ensures every valuation gets enough comparables
-- Layer 3 (Zone Intelligence) will build on top of this view
+- New migration SQL (zone_stats view, indexes, refresh function, get_zone_stats RPC)
+- `supabase/functions/calculate-valuation/index.ts` — use dynamic premiums + zone context
 
