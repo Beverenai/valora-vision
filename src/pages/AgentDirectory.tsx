@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, CheckCircle, MapPin, Globe, ChevronRight } from "lucide-react";
+import { Search, Star, CheckCircle, MapPin, Globe, ChevronRight, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -49,6 +49,13 @@ interface Professional {
   is_verified: boolean | null;
   languages: string[] | null;
   service_zones: string[] | null;
+  office_address: string | null;
+}
+
+interface ProfessionalZone {
+  professional_id: string;
+  tier: string;
+  is_active: boolean | null;
 }
 
 interface Zone {
@@ -65,11 +72,21 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-function AgentCard({ agent, zone }: { agent: Professional; zone: string | null }) {
+function AgentCard({ agent, zone, isFeatured }: { agent: Professional; zone: string | null; isFeatured: boolean }) {
   const [logoFailed, setLogoFailed] = useState(false);
+  const displayLocation = zone || agent.office_address;
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className={`hover:shadow-md transition-shadow ${isFeatured ? "ring-1 ring-primary/30 shadow-sm" : ""}`}>
       <CardContent className="p-5">
+        {isFeatured && (
+          <div className="flex items-center gap-1 mb-3">
+            <Badge className="bg-primary/10 text-primary border-0 text-[0.6rem] uppercase tracking-wider font-semibold">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Featured
+            </Badge>
+          </div>
+        )}
         <div className="flex items-start gap-3 mb-3">
           {agent.logo_url && !logoFailed ? (
             <img
@@ -104,16 +121,16 @@ function AgentCard({ agent, zone }: { agent: Professional; zone: string | null }
           {agent.tagline || agent.description || "Real estate professional"}
         </p>
 
-        {zone && (
+        {displayLocation && (
           <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-            <MapPin className="h-3 w-3" />
-            <span>{zone}</span>
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span className="truncate">{displayLocation}</span>
           </div>
         )}
 
         {agent.languages && agent.languages.length > 0 && (
           <div className="flex items-center gap-1 text-xs text-muted-foreground mb-4">
-            <Globe className="h-3 w-3" />
+            <Globe className="h-3 w-3 shrink-0" />
             <span>{agent.languages.join(" · ")}</span>
           </div>
         )}
@@ -130,9 +147,32 @@ function AgentCard({ agent, zone }: { agent: Professional; zone: string | null }
   );
 }
 
+function SkeletonCard() {
+  return (
+    <Card className="animate-pulse">
+      <CardContent className="p-5">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-12 h-12 rounded-full bg-muted shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-3/4 bg-muted rounded" />
+            <div className="h-3 w-1/2 bg-muted rounded" />
+          </div>
+        </div>
+        <div className="space-y-2 mb-3">
+          <div className="h-3 w-full bg-muted rounded" />
+          <div className="h-3 w-2/3 bg-muted rounded" />
+        </div>
+        <div className="h-3 w-1/3 bg-muted rounded mb-2" />
+        <div className="h-3 w-1/4 bg-muted rounded" />
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AgentDirectory() {
   const [agents, setAgents] = useState<Professional[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
+  const [profZones, setProfZones] = useState<ProfessionalZone[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("All locations");
@@ -148,15 +188,17 @@ export default function AgentDirectory() {
 
   async function loadData() {
     setLoading(true);
-    const [agentsRes, zonesRes] = await Promise.all([
+    const [agentsRes, zonesRes, pzRes] = await Promise.all([
       supabase
         .from("professionals")
-        .select("id, company_name, slug, logo_url, description, tagline, avg_rating, total_reviews, is_verified, languages, service_zones")
+        .select("id, company_name, slug, logo_url, description, tagline, avg_rating, total_reviews, is_verified, languages, service_zones, office_address")
         .eq("is_active", true),
       supabase.from("zones").select("id, name"),
+      supabase.from("professional_zones").select("professional_id, tier, is_active").eq("is_active", true),
     ]);
     setAgents((agentsRes.data as Professional[]) || []);
     setZones((zonesRes.data as Zone[]) || []);
+    setProfZones((pzRes.data as ProfessionalZone[]) || []);
     setLoading(false);
   }
 
@@ -165,6 +207,14 @@ export default function AgentDirectory() {
     zones.forEach((z) => (m[z.id] = z.name));
     return m;
   }, [zones]);
+
+  const featuredSet = useMemo(() => {
+    const s = new Set<string>();
+    profZones.forEach((pz) => {
+      if (pz.tier === "premium" || pz.tier === "featured") s.add(pz.professional_id);
+    });
+    return s;
+  }, [profZones]);
 
   const filtered = useMemo(() => {
     let list = [...agents];
@@ -176,6 +226,7 @@ export default function AgentDirectory() {
         (a) =>
           a.company_name.toLowerCase().includes(q) ||
           (a.description || "").toLowerCase().includes(q) ||
+          (a.office_address || "").toLowerCase().includes(q) ||
           (a.service_zones || []).some((zid) => (zoneMap[zid] || "").toLowerCase().includes(q))
       );
     }
@@ -183,7 +234,8 @@ export default function AgentDirectory() {
     // Location filter
     if (location !== "All locations") {
       list = list.filter((a) =>
-        (a.service_zones || []).some((zid) => (zoneMap[zid] || "").toLowerCase().includes(location.toLowerCase()))
+        (a.service_zones || []).some((zid) => (zoneMap[zid] || "").toLowerCase().includes(location.toLowerCase())) ||
+        (a.office_address || "").toLowerCase().includes(location.toLowerCase())
       );
     }
 
@@ -194,14 +246,17 @@ export default function AgentDirectory() {
       );
     }
 
-    // Sort
+    // Sort: featured first, then by chosen sort
     list.sort((a, b) => {
+      const aFeatured = featuredSet.has(a.id) ? 1 : 0;
+      const bFeatured = featuredSet.has(b.id) ? 1 : 0;
+      if (bFeatured !== aFeatured) return bFeatured - aFeatured;
       if (sort === "rating") return (b.avg_rating || 0) - (a.avg_rating || 0);
       return (b.total_reviews || 0) - (a.total_reviews || 0);
     });
 
     return list;
-  }, [agents, search, location, selectedLangs, sort, zoneMap]);
+  }, [agents, search, location, selectedLangs, sort, zoneMap, featuredSet]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -216,9 +271,31 @@ export default function AgentDirectory() {
     return zoneMap[zoneIds[0]] || null;
   }
 
+  // JSON-LD structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Real Estate Agents in Costa del Sol",
+    description: "Browse verified real estate agents across Costa del Sol.",
+    numberOfItems: filtered.length,
+    itemListElement: visible.map((agent, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "RealEstateAgent",
+        name: agent.company_name,
+        url: `https://valora-vision.lovable.app/agentes/${agent.slug}`,
+        ...(agent.avg_rating ? { aggregateRating: { "@type": "AggregateRating", ratingValue: agent.avg_rating, reviewCount: agent.total_reviews || 0 } } : {}),
+      },
+    })),
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
+
+      {/* JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Hero */}
       <section className="bg-gradient-to-b from-secondary to-background pt-24 pb-12 px-4 text-center">
@@ -287,19 +364,21 @@ export default function AgentDirectory() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse h-56" />
+              <SkeletonCard key={i} />
             ))}
           </div>
         ) : visible.length === 0 ? (
           <div className="text-center py-20">
+            <MapPin className="h-10 w-10 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground text-lg">No agents found in this area.</p>
             <p className="text-muted-foreground text-sm mt-1">Try expanding your search.</p>
           </div>
         ) : (
           <>
+            <p className="text-sm text-muted-foreground mb-6">{filtered.length} agent{filtered.length !== 1 ? "s" : ""} found</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {visible.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} zone={getPrimaryZone(agent)} />
+                <AgentCard key={agent.id} agent={agent} zone={getPrimaryZone(agent)} isFeatured={featuredSet.has(agent.id)} />
               ))}
             </div>
 
