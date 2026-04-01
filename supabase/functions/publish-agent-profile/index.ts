@@ -1,4 +1,4 @@
-// publish-agent-profile v2
+// publish-agent-profile v3 — idempotent upsert
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
@@ -48,41 +48,79 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // 1. Insert professional
-    const { data: profData, error: profError } = await supabaseAdmin
+    const profileData = {
+      user_id,
+      company_name,
+      contact_name,
+      email,
+      phone: phone || null,
+      website: website || null,
+      office_address: office_address || null,
+      slug,
+      type: "agent",
+      description: description || null,
+      logo_url: logo_url || null,
+      languages: languages || [],
+      instagram_url: instagram_url || null,
+      facebook_url: facebook_url || null,
+      linkedin_url: linkedin_url || null,
+      avg_rating: avg_rating || 0,
+      total_reviews: total_reviews || 0,
+      team_size: team_size || null,
+      is_active: true,
+      is_verified: false,
+    };
+
+    // 1. Check if professional already exists for this user_id
+    const { data: existing } = await supabaseAdmin
       .from("professionals")
-      .insert({
-        user_id,
-        company_name,
-        contact_name,
-        email,
-        phone: phone || null,
-        website: website || null,
-        office_address: office_address || null,
-        slug,
-        type: "agent",
-        description: description || null,
-        logo_url: logo_url || null,
-        languages: languages || [],
-        instagram_url: instagram_url || null,
-        facebook_url: facebook_url || null,
-        linkedin_url: linkedin_url || null,
-        avg_rating: avg_rating || 0,
-        total_reviews: total_reviews || 0,
-        team_size: team_size || null,
-        is_active: true,
-        is_verified: false,
-      })
       .select("id")
-      .single();
+      .eq("user_id", user_id)
+      .maybeSingle();
 
-    if (profError) throw profError;
-    console.log("[publish-agent-profile] Created professional:", profData.id);
+    let professionalId: string;
 
-    // 2. Insert team members
-    if (team && team.length > 0 && profData) {
+    if (existing) {
+      // UPDATE existing record
+      const { data: updated, error: updateError } = await supabaseAdmin
+        .from("professionals")
+        .update(profileData)
+        .eq("id", existing.id)
+        .select("id")
+        .single();
+      if (updateError) throw updateError;
+      professionalId = updated.id;
+      console.log("[publish-agent-profile] Updated professional:", professionalId);
+    } else {
+      // INSERT new record
+      const { data: inserted, error: insertError } = await supabaseAdmin
+        .from("professionals")
+        .insert(profileData)
+        .select("id")
+        .single();
+      if (insertError) {
+        // Provide clear message for FK violations
+        if (insertError.code === "23503") {
+          return new Response(
+            JSON.stringify({ error: "User account not found. Please try signing up again." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        throw insertError;
+      }
+      professionalId = inserted.id;
+      console.log("[publish-agent-profile] Created professional:", professionalId);
+    }
+
+    // 2. Idempotent team members: delete existing, then re-insert
+    await supabaseAdmin
+      .from("agent_team_members")
+      .delete()
+      .eq("professional_id", professionalId);
+
+    if (team && team.length > 0) {
       const teamInserts = team.map((m: any, i: number) => ({
-        professional_id: profData.id,
+        professional_id: professionalId,
         name: m.name,
         role: m.role || null,
         photo_url: m.photo_url || null,
@@ -91,11 +129,20 @@ Deno.serve(async (req) => {
       await supabaseAdmin.from("agent_team_members").insert(teamInserts);
     }
 
-    // 3. Assign agent role
-    await supabaseAdmin.from("user_roles").insert({
-      user_id,
-      role: "agent",
-    });
+    // 3. Idempotent role assignment: check first, then insert if missing
+    const { data: existingRole } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", user_id)
+      .eq("role", "agent")
+      .maybeSingle();
+
+    if (!existingRole) {
+      await supabaseAdmin.from("user_roles").insert({
+        user_id,
+        role: "agent",
+      });
+    }
 
     return new Response(
       JSON.stringify({ success: true, slug }),
