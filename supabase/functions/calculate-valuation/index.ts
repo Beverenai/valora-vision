@@ -379,17 +379,17 @@ serve(async (req) => {
     // 5. Prepare comparable data for storage
     const comparableData = comparables.slice(0, 10).map((c: any) => ({
       id: c.id,
-      price: isSell ? c.price : c.monthly_rent,
-      price_per_sqm: isSell ? c.price_per_sqm : c.rent_per_sqm,
-      built_size_sqm: c.built_size_sqm,
-      bedrooms: c.bedrooms,
+      price: c.price,
+      price_per_sqm: c.price_per_m2,
+      built_size_sqm: c.size_m2,
+      bedrooms: c.rooms,
       bathrooms: c.bathrooms,
       property_type: c.property_type,
       address: c.address,
-      city: c.city,
+      city: c.municipality,
       distance_km: c.distance_km,
-      image_urls: c.image_urls,
-      listing_url: c.listing_url,
+      image_urls: [],
+      listing_url: c.idealista_url,
     }));
 
     // 6. Update lead with results
