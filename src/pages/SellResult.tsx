@@ -167,7 +167,7 @@ const ValuationResultCard: React.FC<{
   monthlyRental: number; comparableCount: number; city?: string;
 }> = ({ estimatedValue, estimatedLow, estimatedHigh, monthlyRental, comparableCount, city }) => {
   const confidenceLevel = comparableCount >= 15 ? "HIGH" : comparableCount >= 8 ? "MEDIUM" : "LOW";
-  const confidenceColor = confidenceLevel === "HIGH" ? "text-emerald-600 bg-emerald-50" : confidenceLevel === "MEDIUM" ? "text-amber-600 bg-amber-50" : "text-red-500 bg-red-50";
+  const confidenceColor = confidenceLevel === "HIGH" ? "text-green-700 bg-green-100 border border-green-200" : confidenceLevel === "MEDIUM" ? "text-amber-700 bg-amber-100 border border-amber-200" : "text-red-700 bg-red-100 border border-red-200";
   const confidenceText = confidenceLevel === "HIGH"
     ? `Based on ${comparableCount} comparable properties within 5km`
     : confidenceLevel === "MEDIUM"
@@ -188,12 +188,12 @@ const ValuationResultCard: React.FC<{
             <span className="text-xs text-muted-foreground">{fmt(estimatedHigh)}</span>
           </div>
           <div className="relative h-3 bg-muted rounded-full">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gold/20 via-gold/40 to-gold/20" />
-            <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gold border-2 border-background shadow-md" style={{ left: `calc(${estimatePosition}% - 8px)` }} />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent/20 via-accent/40 to-accent/20" />
+            <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-accent border-2 border-background shadow-md" style={{ left: `calc(${estimatePosition}% - 8px)` }} />
           </div>
           <div className="flex justify-between mt-1">
             <span className="text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground/60">Low</span>
-            <span className="text-[0.55rem] uppercase tracking-[0.1em] text-gold font-semibold">Est.</span>
+            <span className="text-[0.55rem] uppercase tracking-[0.1em] text-accent font-semibold">Est.</span>
             <span className="text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground/60">High</span>
           </div>
         </div>

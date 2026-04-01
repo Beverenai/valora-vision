@@ -132,7 +132,7 @@ const ComparableCard: React.FC<{
         <div className="flex justify-between items-center pt-2 border-t border-border/50">
           {comp.price_per_sqm && <span className="text-sm font-medium text-foreground">{compFmt(comp.price_per_sqm)}/m²</span>}
           {priceDiff != null && (
-            <Badge variant={priceDiff <= 0 ? "default" : "destructive"} className="text-xs">
+            <Badge variant="outline" className={`text-xs ${priceDiff <= 0 ? "text-green-600 border-green-200" : "text-accent border-accent/30"}`}>
               {priceDiff > 0 ? "+" : ""}{priceDiff}%
             </Badge>
           )}
@@ -142,7 +142,7 @@ const ComparableCard: React.FC<{
             <span className="text-[0.6rem] uppercase tracking-[0.15em] text-muted-foreground">Similarity</span>
             <span className="text-xs font-semibold text-foreground">{similarity}%</span>
           </div>
-          <Progress value={similarity} className="h-1.5" />
+          <Progress value={similarity} className="h-1.5 [&>div]:bg-accent" />
         </div>
       </div>
     </div>
@@ -240,7 +240,7 @@ export const AreaComparisonSection: React.FC<{
                 </span>
               </div>
               <div className="relative h-3 bg-muted rounded-full overflow-hidden">
-                <div className="h-full rounded-full bg-gold transition-all duration-700" style={{ width: `${Math.min(bar.pct / 1.5, 100)}%` }} />
+                <div className="h-full rounded-full bg-accent transition-all duration-700" style={{ width: `${Math.min(bar.pct / 1.5, 100)}%` }} />
               </div>
               <div className="flex justify-between mt-1.5">
                 <span className="text-xs text-foreground font-medium">Yours: {bar.userValue}</span>

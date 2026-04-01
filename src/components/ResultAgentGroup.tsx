@@ -25,11 +25,17 @@ const AgentCard: React.FC<{ agent: MatchedAgent; onContact: (agent: MatchedAgent
   const fullStars = Math.floor(rating);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6 flex flex-col items-center text-center">
+    <div className="rounded-lg border border-border bg-card overflow-hidden flex flex-col items-center text-center">
+      {agent.is_verified && (
+        <div className="w-full bg-accent text-white text-[10px] font-medium tracking-wider uppercase px-3 py-1 text-center">
+          Featured Partner
+        </div>
+      )}
+      <div className="p-6 flex flex-col items-center w-full">
       {agent.logo_url ? (
         <img src={agent.logo_url} alt={agent.company_name} className="w-16 h-16 rounded-full object-cover border border-border" />
       ) : (
-        <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center text-lg font-semibold text-muted-foreground">{initials}</div>
+        <div className="w-16 h-16 rounded-full bg-accent text-white border border-accent/20 flex items-center justify-center text-lg font-semibold">{initials}</div>
       )}
       <div className="mt-4">
         <div className="flex items-center justify-center gap-1.5">
@@ -64,6 +70,7 @@ const AgentCard: React.FC<{ agent: MatchedAgent; onContact: (agent: MatchedAgent
           <Button variant="outline" className="w-full text-sm">View Profile</Button>
         </Link>
       </div>
+    </div>
     </div>
   );
 };
