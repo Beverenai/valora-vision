@@ -162,6 +162,20 @@ const Index = () => {
       navigate("/buy", { state: { listingUrl } });
       return;
     }
+    if (valuationType === "rent") {
+      navigate("/rent/valuation", {
+        state: {
+          address: {
+            streetAddress: addressData.streetAddress,
+            city: addressData.city,
+            province: addressData.province,
+            country: addressData.country,
+            urbanization: addressData.urbanization,
+          },
+        },
+      });
+      return;
+    }
     navigate("/sell/valuation", {
       state: {
         addressData: {
