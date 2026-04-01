@@ -143,6 +143,13 @@ function AgentCard({ agent, zone, isFeatured, agencyName }: { agent: Professiona
             {agent.tagline || agent.description || "Real estate professional"}
           </p>
 
+          {agencyName && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+              <Building2 className="h-3 w-3 shrink-0" />
+              <span className="truncate">{agencyName}</span>
+            </div>
+          )}
+
           {displayLocation && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
               <MapPin className="h-3 w-3 shrink-0" />
