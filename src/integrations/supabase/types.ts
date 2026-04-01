@@ -770,6 +770,7 @@ export type Database = {
           bathrooms: number | null
           condition: string | null
           created_at: string | null
+          data_source: string
           description: string | null
           district: string | null
           favorites_count: number | null
@@ -800,6 +801,8 @@ export type Database = {
           property_code: string
           property_type: string | null
           province: string | null
+          resales_filter_id: number | null
+          resales_reference: string | null
           rooms: number | null
           scraped_at: string | null
           size_m2: number | null
@@ -817,6 +820,7 @@ export type Database = {
           bathrooms?: number | null
           condition?: string | null
           created_at?: string | null
+          data_source?: string
           description?: string | null
           district?: string | null
           favorites_count?: number | null
@@ -847,6 +851,8 @@ export type Database = {
           property_code: string
           property_type?: string | null
           province?: string | null
+          resales_filter_id?: number | null
+          resales_reference?: string | null
           rooms?: number | null
           scraped_at?: string | null
           size_m2?: number | null
@@ -864,6 +870,7 @@ export type Database = {
           bathrooms?: number | null
           condition?: string | null
           created_at?: string | null
+          data_source?: string
           description?: string | null
           district?: string | null
           favorites_count?: number | null
@@ -894,6 +901,8 @@ export type Database = {
           property_code?: string
           property_type?: string | null
           province?: string | null
+          resales_filter_id?: number | null
+          resales_reference?: string | null
           rooms?: number | null
           scraped_at?: string | null
           size_m2?: number | null
@@ -1112,6 +1121,98 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resales_online_config: {
+        Row: {
+          api_key: string
+          contact_id: string
+          created_at: string | null
+          filter_alias: string
+          filter_id: number
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          last_sync_status: string | null
+          province: string | null
+          sync_interval_hours: number | null
+        }
+        Insert: {
+          api_key: string
+          contact_id: string
+          created_at?: string | null
+          filter_alias?: string
+          filter_id?: number
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          province?: string | null
+          sync_interval_hours?: number | null
+        }
+        Update: {
+          api_key?: string
+          contact_id?: string
+          created_at?: string | null
+          filter_alias?: string
+          filter_id?: number
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          province?: string | null
+          sync_interval_hours?: number | null
+        }
+        Relationships: []
+      }
+      resales_sync_log: {
+        Row: {
+          completed_at: string | null
+          config_id: string | null
+          duration_seconds: number | null
+          error_message: string | null
+          filter_alias: string | null
+          id: string
+          properties_deactivated: number | null
+          properties_fetched: number | null
+          properties_upserted: number | null
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          config_id?: string | null
+          duration_seconds?: number | null
+          error_message?: string | null
+          filter_alias?: string | null
+          id?: string
+          properties_deactivated?: number | null
+          properties_fetched?: number | null
+          properties_upserted?: number | null
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          config_id?: string | null
+          duration_seconds?: number | null
+          error_message?: string | null
+          filter_alias?: string | null
+          id?: string
+          properties_deactivated?: number | null
+          properties_fetched?: number | null
+          properties_upserted?: number | null
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resales_sync_log_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "resales_online_config"
             referencedColumns: ["id"]
           },
         ]
@@ -2005,6 +2106,17 @@ export type Database = {
           thumbnail_url: string
         }[]
       }
+      find_potential_duplicates: {
+        Args: never
+        Returns: {
+          distance_m: number
+          price_diff_pct: number
+          property_a: string
+          property_b: string
+          source_a: string
+          source_b: string
+        }[]
+      }
       find_rent_comparables: {
         Args: {
           p_lat: number
@@ -2273,6 +2385,7 @@ export type Database = {
       postgis_wagyu_version: { Args: never; Returns: string }
       queue_due_scrapes: { Args: never; Returns: undefined }
       refresh_active_listings: { Args: never; Returns: undefined }
+      refresh_materialized_views: { Args: never; Returns: undefined }
       refresh_search_views: { Args: never; Returns: undefined }
       refresh_zone_stats: { Args: never; Returns: undefined }
       st_3dclosestpoint: {
