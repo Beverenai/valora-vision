@@ -588,35 +588,35 @@ const Index = () => {
 
                   {/* ── Visual previews ── */}
                   {feat.visual === "hero" && (
-                    <div className={cn("rounded-xl p-4 mt-auto", isSell ? "bg-[hsl(var(--terracotta-light))]" : "bg-[hsl(var(--buy-light))]")}>
+                    <div className={cn("rounded-xl p-4 mt-auto", accent.bg)}>
                       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                        {isSell ? "Estimated value" : "Price score"}
+                        {isRent ? "Monthly estimate" : isSell ? "Estimated value" : "Price score"}
                       </p>
-                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
-                        {isSell ? "€845,000" : "FAIR PRICE"}
+                      <p className={cn("text-3xl md:text-4xl font-light tracking-tight", accent.text)}>
+                        {isRent ? "€1,800/mo" : isSell ? "€845,000" : "FAIR PRICE"}
                       </p>
                       <div className="flex items-center gap-2 mt-3">
                         <div className="flex-1 h-2 rounded-full bg-background overflow-hidden">
-                          <div className={cn("h-full rounded-full", isSell ? "bg-primary" : "bg-[hsl(var(--buy))]")} style={{ width: "78%" }} />
+                          <div className={cn("h-full rounded-full", accent.fill)} style={{ width: "78%" }} />
                         </div>
                         <span className="text-[0.65rem] text-muted-foreground whitespace-nowrap">High confidence</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
-                        {isSell ? "Range: €790K – €900K" : "Asking: €395K · Est: €380K"}
+                        {isRent ? "Range: €1,500 – €2,100/mo" : isSell ? "Range: €790K – €900K" : "Asking: €395K · Est: €380K"}
                       </p>
                     </div>
                   )}
 
                   {feat.visual === "metric" && (
                     <div className="mt-auto">
-                      <p className={cn("text-2xl font-light tracking-tight", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
-                        {isSell ? "€3,200" : "€3,150"}
+                      <p className={cn("text-2xl font-light tracking-tight", accent.text)}>
+                        {isRent ? "€14" : isSell ? "€3,200" : "€3,150"}
                         <span className="text-sm text-muted-foreground font-normal">/m²</span>
                       </p>
                       <div className="flex gap-1 mt-2">
                         {[65, 78, 85, 72, 90, 88, 95].map((h, j) => (
                           <div key={j} className="flex-1 rounded-sm bg-border" style={{ height: `${h * 0.3}px` }}>
-                            <div className={cn("w-full rounded-sm", isSell ? "bg-primary/30" : "bg-[hsl(var(--buy)/0.3)]")} style={{ height: `${h * 0.3}px` }} />
+                            <div className={cn("w-full rounded-sm", accent.fillAlpha)} style={{ height: `${h * 0.3}px` }} />
                           </div>
                         ))}
                       </div>
@@ -628,27 +628,21 @@ const Index = () => {
                       <div className="flex-1">
                         <svg viewBox="0 0 200 50" className="w-full h-10 md:h-12" fill="none">
                           <path
-                            d={isSell
-                              ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10"
-                              : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12"
-                            }
-                            stroke={isSell ? "hsl(var(--primary))" : "hsl(var(--buy))"}
+                            d="M0 40 Q25 38 50 30 T100 22 T150 18 T200 10"
+                            stroke={accent.stroke}
                             strokeWidth="2"
                             strokeLinecap="round"
                           />
                           <path
-                            d={isSell
-                              ? "M0 40 Q25 38 50 30 T100 22 T150 18 T200 10 V50 H0Z"
-                              : "M0 42 Q25 40 50 35 T100 28 T150 20 T200 12 V50 H0Z"
-                            }
-                            fill={isSell ? "hsl(var(--primary) / 0.08)" : "hsl(var(--buy) / 0.08)"}
+                            d="M0 40 Q25 38 50 30 T100 22 T150 18 T200 10 V50 H0Z"
+                            fill={accent.strokeAlpha}
                           />
                         </svg>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <TrendingUp className={cn("h-4 w-4", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")} />
-                        <span className={cn("text-sm font-semibold", isSell ? "text-primary" : "text-[hsl(var(--buy-foreground))]")}>
-                          {isSell ? "+4.2%" : "+6.1%"}
+                        <TrendingUp className={cn("h-4 w-4", accent.text)} />
+                        <span className={cn("text-sm font-semibold", accent.text)}>
+                          {isRent ? "+3.8%" : isSell ? "+4.2%" : "+6.1%"}
                         </span>
                       </div>
                     </div>
@@ -672,7 +666,7 @@ const Index = () => {
                         <>
                           <div className="flex -space-x-2">
                             {[0, 1, 2].map(n => (
-                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", isSell ? "bg-primary" : "bg-[hsl(var(--buy))]")} style={{ opacity: 1 - n * 0.2 }}>
+                              <div key={n} className={cn("w-8 h-8 rounded-full border-2 border-card flex items-center justify-center text-[0.6rem] font-bold text-primary-foreground", accent.fill)} style={{ opacity: 1 - n * 0.2 }}>
                                 {["A", "B", "C"][n]}
                               </div>
                             ))}
@@ -683,7 +677,7 @@ const Index = () => {
                         <>
                           <div className="flex gap-1.5">
                             {[1, 2, 3, 4, 5].map(n => (
-                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? (isSell ? "bg-primary" : "bg-[hsl(var(--buy))]") : "bg-border")} />
+                              <div key={n} className={cn("w-2 h-2 rounded-full", n <= 4 ? accent.fill : "bg-border")} />
                             ))}
                           </div>
                           <span className="text-xs text-muted-foreground">Strong property score</span>
@@ -701,7 +695,7 @@ const Index = () => {
               viewport={{ once: true }}
               className="flex justify-center mt-10"
             >
-              <span className={cn("inline-block rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider", isSell ? "bg-[hsl(var(--terracotta-light))] text-primary" : "bg-[hsl(var(--buy-light))] text-[hsl(var(--buy-foreground))]")}>
+              <span className={cn("inline-block rounded-full px-5 py-2.5 text-sm font-medium uppercase tracking-wider", accent.bg, accent.text)}>
                 All included — completely free
               </span>
             </motion.div>
