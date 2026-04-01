@@ -132,25 +132,26 @@ serve(async (req) => {
 
     if (propertyCode) {
       const { data: existing } = await supabase
-        .from("properties_for_sale")
+        .from("properties")
         .select("*")
-        .eq("external_id", propertyCode)
+        .eq("property_code", propertyCode)
+        .eq("operation", "sale")
         .maybeSingle();
 
       if (existing) {
         propertyData = {
           address: existing.address,
-          city: existing.city,
+          city: existing.municipality,
           latitude: existing.latitude ? Number(existing.latitude) : null,
           longitude: existing.longitude ? Number(existing.longitude) : null,
           property_type: existing.property_type,
-          size_m2: existing.built_size_sqm ? Number(existing.built_size_sqm) : null,
-          rooms: existing.bedrooms,
+          size_m2: existing.size_m2 ? Number(existing.size_m2) : null,
+          rooms: existing.rooms,
           bathrooms: existing.bathrooms,
           asking_price: Number(existing.price),
-          features: existing.features,
-          image_urls: existing.image_urls,
-          thumbnail_url: existing.image_urls?.[0] || null,
+          features: existing.images || [],
+          image_urls: existing.images ? (Array.isArray(existing.images) ? existing.images : []) : [],
+          thumbnail_url: existing.thumbnail_url || null,
         };
       }
     }
@@ -280,9 +281,10 @@ serve(async (req) => {
     // 5. Find comparables
     let comparables: any[] = [];
     if (propertyData.latitude && propertyData.longitude) {
-      const { data: comps, error: compError } = await supabase.rpc("find_sale_comparables", {
+      const { data: comps, error: compError } = await supabase.rpc("find_comparables", {
         p_lat: Number(propertyData.latitude),
         p_lng: Number(propertyData.longitude),
+        p_operation: "sale",
         p_property_type: propertyData.property_type || "apartment",
         p_size_m2: sizeM2,
         p_rooms: propertyData.rooms || 2,
@@ -303,8 +305,8 @@ serve(async (req) => {
 
     if (comparables.length >= 3) {
       const pricesPerSqm = comparables
-        .filter((c: any) => c.price_per_sqm && c.price_per_sqm > 0)
-        .map((c: any) => Number(c.price_per_sqm));
+        .filter((c: any) => c.price_per_m2 && c.price_per_m2 > 0)
+        .map((c: any) => Number(c.price_per_m2));
 
       const filtered = filterOutliers(pricesPerSqm);
       areaMedianPricePerM2 = filtered.length > 0 ? Math.round(median(filtered)) : 3500;
@@ -325,10 +327,10 @@ serve(async (req) => {
 
       // Prepare comparable data for storage
       const comparableData = comparables.slice(0, 15).map((c: any) => ({
-        id: c.id, price: c.price, price_per_sqm: c.price_per_sqm,
-        built_size_sqm: c.built_size_sqm, bedrooms: c.bedrooms, bathrooms: c.bathrooms,
-        property_type: c.property_type, address: c.address, city: c.city,
-        distance_km: c.distance_km, image_urls: c.image_urls, listing_url: c.listing_url,
+        id: c.id, price: c.price, price_per_sqm: c.price_per_m2,
+        built_size_sqm: c.size_m2, bedrooms: c.rooms, bathrooms: c.bathrooms,
+        property_type: c.property_type, address: c.address, city: c.municipality,
+        distance_km: c.distance_km, image_urls: [], listing_url: c.idealista_url,
       }));
 
       // 7. Generate AI analysis

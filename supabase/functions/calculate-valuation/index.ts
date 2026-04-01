@@ -133,34 +133,19 @@ serve(async (req) => {
     let annualRent = 0;
 
     if (latitude && longitude) {
-      if (isSell) {
-        const { data: comps, error: compError } = await supabase.rpc("find_sale_comparables", {
-          p_lat: Number(latitude),
-          p_lng: Number(longitude),
-          p_property_type: property_type || "apartment",
-          p_size_m2: sizeM2,
-          p_rooms: roomsCount,
-          p_radius_km: 5.0,
-          p_limit: 20,
-        });
+      const { data: comps, error: compError } = await supabase.rpc("find_comparables", {
+        p_lat: Number(latitude),
+        p_lng: Number(longitude),
+        p_operation: isSell ? "sale" : "rent",
+        p_property_type: property_type || "apartment",
+        p_size_m2: sizeM2,
+        p_rooms: roomsCount,
+        p_radius_km: 5.0,
+        p_limit: 20,
+      });
 
-        if (!compError && comps && comps.length > 0) {
-          comparables = comps;
-        }
-      } else {
-        const { data: comps, error: compError } = await supabase.rpc("find_rent_comparables", {
-          p_lat: Number(latitude),
-          p_lng: Number(longitude),
-          p_property_type: property_type || "apartment",
-          p_size_m2: sizeM2,
-          p_rooms: roomsCount,
-          p_radius_km: 5.0,
-          p_limit: 20,
-        });
-
-        if (!compError && comps && comps.length > 0) {
-          comparables = comps;
-        }
+      if (!compError && comps && comps.length > 0) {
+        comparables = comps;
       }
     }
 
@@ -187,8 +172,8 @@ serve(async (req) => {
     if (isSell) {
       if (comparables.length > 0) {
         const pricesPerSqm = comparables
-          .filter((c: any) => c.price_per_sqm && c.price_per_sqm > 0)
-          .map((c: any) => Number(c.price_per_sqm));
+          .filter((c: any) => c.price_per_m2 && c.price_per_m2 > 0)
+          .map((c: any) => Number(c.price_per_m2));
 
         const filtered = filterOutliers(pricesPerSqm);
         const medianPricePerSqm = filtered.length > 0 ? median(filtered) : 3500;
@@ -230,12 +215,12 @@ serve(async (req) => {
       // Rent valuation
       if (comparables.length > 0) {
         const rentsPerSqm = comparables
-          .filter((c: any) => c.rent_per_sqm && c.rent_per_sqm > 0)
-          .map((c: any) => Number(c.rent_per_sqm));
+          .filter((c: any) => c.price_per_m2 && c.price_per_m2 > 0)
+          .map((c: any) => Number(c.price_per_m2));
 
         const monthlyRents = comparables
-          .filter((c: any) => c.monthly_rent && c.monthly_rent > 0)
-          .map((c: any) => Number(c.monthly_rent));
+          .filter((c: any) => c.price && c.price > 0)
+          .map((c: any) => Number(c.price));
 
         if (rentsPerSqm.length > 0) {
           const filtered = filterOutliers(rentsPerSqm);
@@ -328,7 +313,7 @@ serve(async (req) => {
 
         // Build comparable context for data-driven analysis
         const compPrices = comparables.filter((c: any) => c.price && c.price > 0).map((c: any) => Number(c.price));
-        const compPricesPerSqm = comparables.filter((c: any) => (isSell ? c.price_per_sqm : c.rent_per_sqm) > 0).map((c: any) => Number(isSell ? c.price_per_sqm : c.rent_per_sqm));
+        const compPricesPerSqm = comparables.filter((c: any) => c.price_per_m2 > 0).map((c: any) => Number(c.price_per_m2));
         const minCompPrice = compPrices.length > 0 ? Math.min(...compPrices) : 0;
         const maxCompPrice = compPrices.length > 0 ? Math.max(...compPrices) : 0;
         const medianCompPriceSqm = compPricesPerSqm.length > 0 ? median(compPricesPerSqm) : 0;
@@ -394,17 +379,17 @@ serve(async (req) => {
     // 5. Prepare comparable data for storage
     const comparableData = comparables.slice(0, 10).map((c: any) => ({
       id: c.id,
-      price: isSell ? c.price : c.monthly_rent,
-      price_per_sqm: isSell ? c.price_per_sqm : c.rent_per_sqm,
-      built_size_sqm: c.built_size_sqm,
-      bedrooms: c.bedrooms,
+      price: c.price,
+      price_per_sqm: c.price_per_m2,
+      built_size_sqm: c.size_m2,
+      bedrooms: c.rooms,
       bathrooms: c.bathrooms,
       property_type: c.property_type,
       address: c.address,
-      city: c.city,
+      city: c.municipality,
       distance_km: c.distance_km,
-      image_urls: c.image_urls,
-      listing_url: c.listing_url,
+      image_urls: [],
+      listing_url: c.idealista_url,
     }));
 
     // 6. Update lead with results

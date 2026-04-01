@@ -663,6 +663,155 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          address: string | null
+          agency_logo: string | null
+          agency_name: string | null
+          agency_phone: string | null
+          bathrooms: number | null
+          condition: string | null
+          created_at: string | null
+          description: string | null
+          district: string | null
+          favorites_count: number | null
+          floor: string | null
+          has_ac: boolean | null
+          has_balcony: boolean | null
+          has_garage: boolean | null
+          has_garden: boolean | null
+          has_lift: boolean | null
+          has_pool: boolean | null
+          has_sea_views: boolean | null
+          has_storage: boolean | null
+          has_terrace: boolean | null
+          id: string
+          idealista_url: string | null
+          images: Json | null
+          is_exterior: boolean | null
+          latitude: number | null
+          listed_at: string | null
+          location_id: string | null
+          location_point: unknown
+          longitude: number | null
+          municipality: string | null
+          operation: string
+          price: number
+          price_per_m2: number | null
+          property_code: string
+          property_type: string | null
+          province: string | null
+          rooms: number | null
+          scraped_at: string | null
+          size_m2: number | null
+          source: string | null
+          thumbnail_url: string | null
+          updated_at: string | null
+          views_count: number | null
+          zone_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          agency_logo?: string | null
+          agency_name?: string | null
+          agency_phone?: string | null
+          bathrooms?: number | null
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          district?: string | null
+          favorites_count?: number | null
+          floor?: string | null
+          has_ac?: boolean | null
+          has_balcony?: boolean | null
+          has_garage?: boolean | null
+          has_garden?: boolean | null
+          has_lift?: boolean | null
+          has_pool?: boolean | null
+          has_sea_views?: boolean | null
+          has_storage?: boolean | null
+          has_terrace?: boolean | null
+          id?: string
+          idealista_url?: string | null
+          images?: Json | null
+          is_exterior?: boolean | null
+          latitude?: number | null
+          listed_at?: string | null
+          location_id?: string | null
+          location_point?: unknown
+          longitude?: number | null
+          municipality?: string | null
+          operation: string
+          price: number
+          price_per_m2?: number | null
+          property_code: string
+          property_type?: string | null
+          province?: string | null
+          rooms?: number | null
+          scraped_at?: string | null
+          size_m2?: number | null
+          source?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          views_count?: number | null
+          zone_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          agency_logo?: string | null
+          agency_name?: string | null
+          agency_phone?: string | null
+          bathrooms?: number | null
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          district?: string | null
+          favorites_count?: number | null
+          floor?: string | null
+          has_ac?: boolean | null
+          has_balcony?: boolean | null
+          has_garage?: boolean | null
+          has_garden?: boolean | null
+          has_lift?: boolean | null
+          has_pool?: boolean | null
+          has_sea_views?: boolean | null
+          has_storage?: boolean | null
+          has_terrace?: boolean | null
+          id?: string
+          idealista_url?: string | null
+          images?: Json | null
+          is_exterior?: boolean | null
+          latitude?: number | null
+          listed_at?: string | null
+          location_id?: string | null
+          location_point?: unknown
+          longitude?: number | null
+          municipality?: string | null
+          operation?: string
+          price?: number
+          price_per_m2?: number | null
+          property_code?: string
+          property_type?: string | null
+          province?: string | null
+          rooms?: number | null
+          scraped_at?: string | null
+          size_m2?: number | null
+          source?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          views_count?: number | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties_for_rent: {
         Row: {
           address: string | null
@@ -1064,6 +1213,48 @@ export type Database = {
         }
         Relationships: []
       }
+      valuation_comparables: {
+        Row: {
+          created_at: string | null
+          distance_km: number | null
+          id: string
+          property_id: string | null
+          similarity_score: number | null
+          valuation_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          distance_km?: number | null
+          id?: string
+          property_id?: string | null
+          similarity_score?: number | null
+          valuation_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          distance_km?: number | null
+          id?: string
+          property_id?: string | null
+          similarity_score?: number | null
+          valuation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "valuation_comparables_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "valuation_comparables_valuation_id_fkey"
+            columns: ["valuation_id"]
+            isOneToOne: false
+            referencedRelation: "valuations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       valuation_feedback: {
         Row: {
           actual_value: number | null
@@ -1091,6 +1282,126 @@ export type Database = {
           lead_id?: string
           lead_type?: string
           rating?: number | null
+        }
+        Relationships: []
+      }
+      valuations: {
+        Row: {
+          address: string
+          analysis: string | null
+          annual_rent_estimate: number | null
+          area_avg_price_m2: number | null
+          area_price_trend: string | null
+          bathrooms: number
+          comparable_count: number | null
+          completed_at: string | null
+          condition: string | null
+          created_at: string | null
+          email: string | null
+          estimated_value: number | null
+          estimated_value_high: number | null
+          estimated_value_low: number | null
+          floor: string | null
+          has_ac: boolean | null
+          has_balcony: boolean | null
+          has_garage: boolean | null
+          has_garden: boolean | null
+          has_lift: boolean | null
+          has_pool: boolean | null
+          has_sea_views: boolean | null
+          has_terrace: boolean | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          market_trends: string | null
+          monthly_rent_estimate: number | null
+          name: string | null
+          phone: string | null
+          price_per_m2: number | null
+          property_type: string
+          rental_yield_percent: number | null
+          rooms: number
+          size_m2: number
+          status: string | null
+          valuation_type: string | null
+        }
+        Insert: {
+          address: string
+          analysis?: string | null
+          annual_rent_estimate?: number | null
+          area_avg_price_m2?: number | null
+          area_price_trend?: string | null
+          bathrooms: number
+          comparable_count?: number | null
+          completed_at?: string | null
+          condition?: string | null
+          created_at?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          estimated_value_high?: number | null
+          estimated_value_low?: number | null
+          floor?: string | null
+          has_ac?: boolean | null
+          has_balcony?: boolean | null
+          has_garage?: boolean | null
+          has_garden?: boolean | null
+          has_lift?: boolean | null
+          has_pool?: boolean | null
+          has_sea_views?: boolean | null
+          has_terrace?: boolean | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          market_trends?: string | null
+          monthly_rent_estimate?: number | null
+          name?: string | null
+          phone?: string | null
+          price_per_m2?: number | null
+          property_type: string
+          rental_yield_percent?: number | null
+          rooms: number
+          size_m2: number
+          status?: string | null
+          valuation_type?: string | null
+        }
+        Update: {
+          address?: string
+          analysis?: string | null
+          annual_rent_estimate?: number | null
+          area_avg_price_m2?: number | null
+          area_price_trend?: string | null
+          bathrooms?: number
+          comparable_count?: number | null
+          completed_at?: string | null
+          condition?: string | null
+          created_at?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          estimated_value_high?: number | null
+          estimated_value_low?: number | null
+          floor?: string | null
+          has_ac?: boolean | null
+          has_balcony?: boolean | null
+          has_garage?: boolean | null
+          has_garden?: boolean | null
+          has_lift?: boolean | null
+          has_pool?: boolean | null
+          has_sea_views?: boolean | null
+          has_terrace?: boolean | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          market_trends?: string | null
+          monthly_rent_estimate?: number | null
+          name?: string | null
+          phone?: string | null
+          price_per_m2?: number | null
+          property_type?: string
+          rental_yield_percent?: number | null
+          rooms?: number
+          size_m2?: number
+          status?: string | null
+          valuation_type?: string | null
         }
         Relationships: []
       }
@@ -1367,6 +1678,41 @@ export type Database = {
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      find_comparables: {
+        Args: {
+          p_lat: number
+          p_limit?: number
+          p_lng: number
+          p_operation: string
+          p_property_type: string
+          p_radius_km?: number
+          p_rooms: number
+          p_size_m2: number
+        }
+        Returns: {
+          address: string
+          agency_name: string
+          bathrooms: number
+          distance_km: number
+          has_garage: boolean
+          has_pool: boolean
+          has_sea_views: boolean
+          has_terrace: boolean
+          id: string
+          idealista_url: string
+          latitude: number
+          longitude: number
+          municipality: string
+          price: number
+          price_per_m2: number
+          property_code: string
+          property_type: string
+          rooms: number
+          scraped_at: string
+          size_m2: number
+          thumbnail_url: string
+        }[]
+      }
       find_rent_comparables: {
         Args: {
           p_lat: number
