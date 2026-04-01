@@ -206,7 +206,7 @@ export default function AgentDirectory() {
     const [agentsRes, zonesRes, pzRes] = await Promise.all([
       supabase
         .from("professionals")
-        .select("id, company_name, slug, logo_url, description, tagline, avg_rating, total_reviews, is_verified, languages, service_zones, office_address, created_at")
+        .select("id, company_name, slug, logo_url, description, tagline, avg_rating, total_reviews, is_verified, languages, service_zones, office_address, created_at, type, agency_id, contact_name")
         .eq("is_active", true),
       supabase.from("zones").select("id, name"),
       supabase.from("professional_zones").select("professional_id, tier, is_active").eq("is_active", true),
