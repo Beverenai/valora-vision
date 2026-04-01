@@ -18,6 +18,7 @@ const SellResult = lazy(() => lazyRetry(() => import("./pages/SellResult.tsx")))
 const RentResult = lazy(() => lazyRetry(() => import("./pages/RentResult.tsx")));
 const BuyAnalysis = lazy(() => lazyRetry(() => import("./pages/BuyAnalysis.tsx")));
 const BuyResult = lazy(() => lazyRetry(() => import("./pages/BuyResult.tsx")));
+const BuyCompare = lazy(() => lazyRetry(() => import("./pages/BuyCompare.tsx")));
 const ValuationLookup = lazy(() => lazyRetry(() => import("./pages/ValuationLookup.tsx")));
 const Admin = lazy(() => lazyRetry(() => import("./pages/Admin.tsx")));
 const AgentProfile = lazy(() => lazyRetry(() => import("./pages/AgentProfile.tsx")));
