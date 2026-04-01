@@ -443,6 +443,32 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
     }
   };
 
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    const ext = file.name.split(".").pop();
+    const path = `${agent.id}/cover.${ext}`;
+
+    const { error: uploadError } = await supabase.storage.from("agent-logos").upload(path, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+      setUploadingCover(false);
+      return;
+    }
+
+    const { data: publicData } = supabase.storage.from("agent-logos").getPublicUrl(path);
+    const newUrl = publicData.publicUrl + `?t=${Date.now()}`;
+    setCoverPhotoUrl(newUrl);
+    setCoverFailed(false);
+    setUploadingCover(false);
+
+    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl }).eq("id", agent.id);
+    if (!error) {
+      toast({ title: "Cover photo updated!" });
+    }
+  };
+
   const handleSave = () => {
     onSave({ ...form, languages, logo_url: logoUrl || null });
   };
