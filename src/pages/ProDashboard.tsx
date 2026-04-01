@@ -399,9 +399,13 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
   });
   const [languages, setLanguages] = useState<string[]>(agent.languages || []);
   const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState((agent as any).cover_photo_url || "");
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [coverFailed, setCoverFailed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
@@ -439,6 +443,32 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
     }
   };
 
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    const ext = file.name.split(".").pop();
+    const path = `${agent.id}/cover.${ext}`;
+
+    const { error: uploadError } = await supabase.storage.from("agent-logos").upload(path, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+      setUploadingCover(false);
+      return;
+    }
+
+    const { data: publicData } = supabase.storage.from("agent-logos").getPublicUrl(path);
+    const newUrl = publicData.publicUrl + `?t=${Date.now()}`;
+    setCoverPhotoUrl(newUrl);
+    setCoverFailed(false);
+    setUploadingCover(false);
+
+    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl }).eq("id", agent.id);
+    if (!error) {
+      toast({ title: "Cover photo updated!" });
+    }
+  };
+
   const handleSave = () => {
     onSave({ ...form, languages, logo_url: logoUrl || null });
   };
@@ -471,6 +501,24 @@ function ProfileSection({ agent, onSave, saving }: { agent: Professional; onSave
           </Button>
           <p className="text-xs text-muted-foreground mt-1">JPG or PNG, max 2MB</p>
         </div>
+      </div>
+
+      {/* Cover Photo */}
+      <div>
+        <Label className="mb-2 block">Cover Photo</Label>
+        <p className="text-xs text-muted-foreground mb-2">This appears as the hero banner on your public profile</p>
+        {coverPhotoUrl && !coverFailed ? (
+          <img src={coverPhotoUrl} alt="Cover" className="w-full h-36 rounded-xl object-cover border mb-2" onError={() => setCoverFailed(true)} />
+        ) : (
+          <div className="w-full h-36 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-dashed border-border flex items-center justify-center mb-2">
+            <span className="text-sm text-muted-foreground">No cover photo</span>
+          </div>
+        )}
+        <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+        <Button variant="outline" size="sm" className="rounded-full" onClick={() => coverInputRef.current?.click()} disabled={uploadingCover}>
+          {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+          {uploadingCover ? "Uploading…" : coverPhotoUrl ? "Change cover photo" : "Upload cover photo"}
+        </Button>
       </div>
 
       <div className="space-y-4">

@@ -105,6 +105,8 @@ const ProOnboard = () => {
   const [socialInstagram, setSocialInstagram] = useState("");
   const [socialFacebook, setSocialFacebook] = useState("");
   const [socialLinkedin, setSocialLinkedin] = useState("");
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+  const [coverPhotoFailed, setCoverPhotoFailed] = useState(false);
   const [googleRating, setGoogleRating] = useState<number | null>(null);
   const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null);
   const [lat, setLat] = useState<number | null>(null);
@@ -200,6 +202,7 @@ const ProOnboard = () => {
         if (data.social?.instagram) setSocialInstagram(data.social.instagram);
         if (data.social?.facebook) setSocialFacebook(data.social.facebook);
         if (data.social?.linkedin) setSocialLinkedin(data.social.linkedin);
+        if (data.cover_photo_url) setCoverPhotoUrl(data.cover_photo_url);
         if (data.google_rating) setGoogleRating(data.google_rating);
         if (data.google_review_count) setGoogleReviewCount(data.google_review_count);
         if (data.lat) setLat(data.lat);
@@ -368,6 +371,7 @@ const ProOnboard = () => {
             slug,
             description: description || null,
             logo_url: logoUrl,
+            cover_photo_url: coverPhotoUrl,
             languages,
             instagram_url: socialInstagram || null,
             facebook_url: socialFacebook || null,
@@ -630,6 +634,39 @@ const ProOnboard = () => {
                     />
                     <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById("logo-upload")?.click()}>
                       Upload logo
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cover Photo */}
+              <div className="mb-6">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Cover Photo</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-2">This appears as the hero banner on your profile page</p>
+                <div className="mt-2">
+                  {coverPhotoUrl && !coverPhotoFailed ? (
+                    <img src={coverPhotoUrl} alt="Cover" className="w-full h-32 rounded-xl object-cover border" onError={() => setCoverPhotoFailed(true)} />
+                  ) : (
+                    <div className="w-full h-32 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-dashed border-border flex items-center justify-center">
+                      <span className="text-sm text-muted-foreground">No cover photo yet</span>
+                    </div>
+                  )}
+                  <div className="mt-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="cover-upload"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setCoverPhotoUrl(URL.createObjectURL(file));
+                          setCoverPhotoFailed(false);
+                        }
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById("cover-upload")?.click()}>
+                      {coverPhotoUrl ? "Change cover photo" : "Upload cover photo"}
                     </Button>
                   </div>
                 </div>

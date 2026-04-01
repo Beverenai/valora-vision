@@ -32,6 +32,7 @@ Deno.serve(async (req) => {
       total_reviews,
       team_size,
       team,
+      cover_photo_url,
     } = await req.json();
 
     console.log("[publish-agent-profile] Received:", { user_id, company_name, contact_name, email, slug });
@@ -67,6 +68,7 @@ Deno.serve(async (req) => {
       avg_rating: avg_rating || 0,
       total_reviews: total_reviews || 0,
       team_size: team_size || null,
+      cover_photo_url: cover_photo_url || null,
       is_active: true,
       is_verified: false,
     };
