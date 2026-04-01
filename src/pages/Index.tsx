@@ -825,7 +825,9 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="font-serif text-3xl md:text-5xl font-black uppercase tracking-tight text-foreground leading-[1.05]"
               >
-                {isSell ? (
+                {isRent ? (
+                  <>Ready to find out your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">rental potential</span>?</>
+                ) : isSell ? (
                   <>Ready to discover your<br />property's <span className="font-['DM_Serif_Display'] italic normal-case">true value</span>?</>
                 ) : (
                   <>Ready to find out if<br />the price is <span className="font-['DM_Serif_Display'] italic normal-case">really fair</span>?</>
