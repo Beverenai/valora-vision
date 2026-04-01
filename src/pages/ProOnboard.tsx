@@ -70,6 +70,7 @@ const ProOnboard = () => {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [password, setPassword] = useState("");
+  const [registrationType, setRegistrationType] = useState<"agency" | "agent">("agency");
 
   // Step 1 fields
   const [companyName, setCompanyName] = useState("");
