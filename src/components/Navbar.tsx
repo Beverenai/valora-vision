@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const serviceLinks = [
   { id: "sell", label: "Sell", href: "/?mode=sell" },
-  { id: "rent", label: "Rent", href: "/rent/valuation" },
+  { id: "rent", label: "Rent", href: "/?mode=rent" },
   { id: "buy", label: "Buy Analysis", href: "/?mode=buy" },
 ];
 
@@ -16,7 +16,7 @@ const permanentLinks = [
 
 const ctaConfig: Record<string, { label: string; href: string }> = {
   sell: { label: "Get Valuation", href: "/?mode=sell" },
-  rent: { label: "Estimate Rent", href: "/rent/valuation" },
+  rent: { label: "Estimate Rent", href: "/?mode=rent" },
   buy: { label: "Analyze Price", href: "/?mode=buy" },
 };
 
