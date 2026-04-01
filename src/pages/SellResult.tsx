@@ -383,7 +383,7 @@ const SellResult: React.FC = () => {
           <div className="w-full h-px bg-border" />
 
           {/* Group 3: Lazy — prediction game, matched agents, disclaimer */}
-          <Suspense fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionSkeleton rows={3} />}>
             <LazyAgentBundle
               leadId={id!}
               latitude={lead?.latitude || null}
