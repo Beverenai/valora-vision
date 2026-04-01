@@ -183,6 +183,10 @@ const Admin = () => {
   ];
 
   return (
+    <>
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[60] bg-primary/90 text-primary-foreground text-xs px-4 py-1 rounded-b-lg">
+        ⚙ Admin View
+      </div>
     <div className={cn(
       "min-h-screen flex flex-col",
       dark ? "bg-[hsl(220,18%,9%)]" : "bg-background"
@@ -221,6 +225,7 @@ const Admin = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
