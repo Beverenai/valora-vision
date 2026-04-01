@@ -150,7 +150,7 @@ const ProOnboard = () => {
   };
 
   // Step 1 validation
-  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && emailValid;
+  const canProceedStep1 = companyName.trim() && contactName.trim() && email.trim() && phone.trim() && address.trim() && !emailError && !emailChecking;
 
   // Ref to hold API result so animation can read it asynchronously
   const apiResultRef = useRef<any>(null);
@@ -404,7 +404,7 @@ const ProOnboard = () => {
                     <Input
                       id="email" type="email" autoComplete="off"
                       value={email}
-                      onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); validateEmail(e.target.value); setEmailValid(false); }}
+                      onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); validateEmail(e.target.value); }}
                       onBlur={(e) => { validateEmail(e.target.value); checkEmailUniqueness(e.target.value); }}
                       onFocus={(e) => e.target.select()}
                       placeholder="info@agency.com"
@@ -459,7 +459,13 @@ const ProOnboard = () => {
                   <a href="/pro/login">Already have an account? Sign in</a>
                 </Button>
                 <Button
-                  onClick={() => { if (canProceedStep1) setStep(1); else toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" }); }}
+                  onClick={async () => {
+                    if (!emailValid && email.trim() && !emailError) {
+                      await checkEmailUniqueness(email);
+                    }
+                    if (canProceedStep1) setStep(1);
+                    else toast({ title: "Required fields", description: "Please fill in all required fields.", variant: "destructive" });
+                  }}
                   className="rounded-full px-8"
                 >
                   Continue
