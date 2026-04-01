@@ -294,9 +294,11 @@ Deno.serve(async (req) => {
     }
 
     // Refresh materialized views
-    await supabase.rpc("refresh_materialized_views").catch(() => {
+    try {
+      await supabase.rpc("refresh_materialized_views");
+    } catch {
       console.log("Materialized view refresh skipped");
-    });
+    }
 
     return new Response(
       JSON.stringify({ success: true, results }),
