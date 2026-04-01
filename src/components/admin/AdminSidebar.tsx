@@ -1,9 +1,9 @@
-import { Users, Database, Zap, Activity, ChevronDown } from "lucide-react";
+import { Users, Database, Zap, Activity, ChevronDown, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export type AdminSection = "leads" | "zones" | "jobs" | "health";
+export type AdminSection = "leads" | "zones" | "jobs" | "resales" | "health";
 
 const groups = [
   {
