@@ -76,6 +76,18 @@ const ResetPassword = () => {
     }
   };
 
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-[400px] mx-auto px-6 py-24 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+          <p className="text-muted-foreground mt-4 text-sm">Verifying reset link...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isRecovery && !isSuccess) {
     return (
       <div className="min-h-screen bg-background">
