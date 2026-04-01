@@ -1,38 +1,31 @@
 
 
-# Center "How It Works" Timeline + Add More Detail
+# How It Works: Vertical Layout + Agent Matching Step
 
 ## What Changes
-The current timeline is left-aligned with the step numbers and content pushed to the left. We'll center the entire layout, expand descriptions, and add richer visual previews to better use the available space.
+1. Switch the 3-column grid back to a vertical stacked layout (steps going downward) with a connecting line between steps
+2. Add a 4th step: "Get matched with top local agents" — highlighting that users get connected with the best agents in their area for a full overview
 
-## Changes in `src/pages/Index.tsx` (lines ~290–465)
+## Changes in `src/pages/Index.tsx`
 
-### 1. Center the layout
-- Change the section content wrapper from left-aligned to `text-center` / `items-center`
-- Each step becomes a centered column layout instead of a horizontal `flex gap` row
-- Step number + icon circle centered above the content
-- Remove the left-side vertical connecting line (doesn't work centered)
-- Add a subtle horizontal or dotted connector between steps on desktop (optional)
+### 1. Vertical layout
+- Replace `grid grid-cols-1 md:grid-cols-3` with a single-column vertical layout
+- Each step: large number left + content right (on desktop), or stacked centered (mobile)
+- Thin vertical connecting line between steps using a pseudo-element or border
+- Alternating visual placement (step visual left/right) for visual interest on desktop
 
-### 2. Switch to 3-column grid on desktop
-- Desktop: `grid grid-cols-3 gap-8` with each step as a centered card-like column
-- Mobile: stack vertically as before
-- Each column: large step number → icon circle → title → expanded description → visual preview
+### 2. Add Step 04 — Agent Matching
+- Icon: `Users` from lucide-react
+- Title: "Get the best agents in your area"
+- Description: "We match you with top-rated, verified local agents so you get a complete picture — from valuation to sale. Compare agents, read reviews, and choose with confidence."
+- Visual mock: 2-3 overlapping agent avatar circles with star ratings and a "Matched in your area" badge
 
-### 3. Expand content per step
-- **Step 1** (Enter address / Paste link): Add detail like "Google-powered autocomplete with map verification" for sell/rent, or "Supports Idealista, Fotocasa, Habitaclia and more" for buy. Keep the address input mock visual but make it wider.
-- **Step 2** (Property details / Market analysis): Add "Bedrooms, bathrooms, pool, terrace, parking — every detail that affects value" or "Our AI compares against hundreds of active and sold listings". Expand the property pills visual with more items (Pool, Terrace, Garage).
-- **Step 3** (Get results): Add "Instant PDF report with price range, confidence score, comparable properties, and AI market summary. Share or download." Keep the text, remove the separate ValuationTicketCard below (or keep it centered below the grid).
+### 3. Update heading
+- Change "Three Steps" → "Four Steps" in the section heading
+- Update subtitle to mention agent matching
 
-### 4. Keep the flippable ValuationTicketCard
-- Keep it below the 3-column grid as a centered showcase element
-- No structural change to the card itself
-
-### 5. Typography
-- Section heading and subtitle: centered (already are)
-- Step titles: slightly larger (`text-base` instead of `text-sm`), still uppercase bold
-- Descriptions: `text-sm` or `text-base`, centered, `max-w-xs mx-auto`
+### 4. Keep the flippable ValuationTicketCard showcase below
 
 ## Files Modified
-- `src/pages/Index.tsx` — restructure How It Works from left-aligned timeline to centered 3-column grid with richer descriptions
+- `src/pages/Index.tsx` — restructure How It Works to vertical + add step 4
 
