@@ -753,15 +753,22 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
                       {m.phone && ` · ${m.phone}`}
                     </p>
                   </div>
-                  {isAdmin && !isOwner && (
+                  {isAdmin && (
                     <div className="flex items-center gap-2 shrink-0">
-                      <Switch
-                        checked={isActive}
-                        onCheckedChange={() => handleToggleActive(m.id, isActive, m.role)}
-                      />
-                      <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(m.id, m.role)} className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(m)}>
+                        <Edit2 className="h-3.5 w-3.5" />
                       </Button>
+                      {!isOwner && (
+                        <>
+                          <Switch
+                            checked={isActive}
+                            onCheckedChange={() => handleToggleActive(m.id, isActive, m.role)}
+                          />
+                          <Button variant="ghost" size="sm" onClick={() => handleRemoveMember(m.id, m.role)} className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -770,6 +777,51 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
           })}
         </div>
       )}
+
+      {/* Edit Member Dialog */}
+      <Dialog open={!!editingMember} onOpenChange={(open) => !open && setEditingMember(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Team Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Name</Label>
+              <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+            </div>
+            <div>
+              <Label className="text-xs">Role</Label>
+              <Input value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} placeholder="e.g. Agent, Manager" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Email</Label>
+                <Input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Phone</Label>
+                <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">WhatsApp</Label>
+              <Input value={editForm.whatsapp} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} placeholder="+34 600 000 000" />
+            </div>
+            <div>
+              <Label className="text-xs">Photo URL</Label>
+              <Input value={editForm.photo_url} onChange={(e) => setEditForm({ ...editForm, photo_url: e.target.value })} placeholder="https://..." />
+            </div>
+            <div>
+              <Label className="text-xs">Languages (comma-separated)</Label>
+              <Input value={editForm.languages} onChange={(e) => setEditForm({ ...editForm, languages: e.target.value })} placeholder="English, Spanish" />
+            </div>
+            <Button onClick={handleSaveEdit} disabled={saving} className="w-full rounded-full">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
