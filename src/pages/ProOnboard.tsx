@@ -529,10 +529,10 @@ const ProOnboard = () => {
               <div className="max-w-sm mx-auto space-y-3 text-left">
                 {aiSteps.map((s, i) => (
                   <motion.div
-                    key={s.key + i}
+                    key={s.key}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.3 }}
+                    transition={{ duration: 0.3 }}
                     className="flex items-center gap-3"
                   >
                     {s.status === "loading" ? (
