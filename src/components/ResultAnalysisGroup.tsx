@@ -132,7 +132,7 @@ const ComparableCard: React.FC<{
         <div className="flex justify-between items-center pt-2 border-t border-border/50">
           {comp.price_per_sqm && <span className="text-sm font-medium text-foreground">{compFmt(comp.price_per_sqm)}/m²</span>}
           {priceDiff != null && (
-            <Badge variant={priceDiff <= 0 ? "default" : "destructive"} className="text-xs">
+            <Badge variant="outline" className={`text-xs ${priceDiff <= 0 ? "text-green-600 border-green-200" : "text-accent border-accent/30"}`}>
               {priceDiff > 0 ? "+" : ""}{priceDiff}%
             </Badge>
           )}
