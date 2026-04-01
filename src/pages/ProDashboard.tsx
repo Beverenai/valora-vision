@@ -278,7 +278,7 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
 
   // ── Improved Merit Score Algorithm ──
   // Profile completeness (10%): 8 key fields
-  const profileFields = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline, (agent as any).cover_photo_url, agent.languages?.length];
+  const profileFields = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline, agent.cover_photo_url, agent.languages?.length];
   const profileMerit = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
   // Rating (25%): avg_rating out of 5
