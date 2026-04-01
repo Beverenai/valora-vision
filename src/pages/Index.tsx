@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { TypewriterText } from "@/components/shared/TypewriterText";
 import { useSEO } from "@/hooks/use-seo";
 import { useNavigate, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
