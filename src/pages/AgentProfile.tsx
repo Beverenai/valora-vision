@@ -381,11 +381,11 @@ export default function AgentProfile() {
         value={contactForm.interest}
         onChange={e => setContactForm(f => ({ ...f, interest: e.target.value }))}
       >
-        <option value="valuation">Necesito una valoración</option>
-        <option value="selling">Quiero vender</option>
-        <option value="buying">Quiero comprar</option>
-        <option value="renting">Alquiler</option>
-        <option value="other">Otro</option>
+        <option value="valuation">I need a valuation</option>
+        <option value="selling">I want to sell</option>
+        <option value="buying">I want to buy</option>
+        <option value="renting">Rental</option>
+        <option value="other">Other</option>
       </select>
       <Textarea
         placeholder="Tu mensaje..."
@@ -406,7 +406,7 @@ export default function AgentProfile() {
   const ContactFormSection = (
     <Card className="border-border/60">
       <CardContent className="p-6">
-        <p className={SECTION_LABEL}>CONTACTAR {professional.company_name.toUpperCase()}</p>
+        <p className={SECTION_LABEL}>CONTACT {professional.company_name.toUpperCase()}</p>
 
         {/* Show phone button */}
         {professional.phone && (
@@ -426,7 +426,7 @@ export default function AgentProfile() {
                 onClick={() => setShowPhone(true)}
               >
                 <Eye size={16} className="mr-2" />
-                Mostrar número
+                Show number
               </Button>
             )}
           </div>
@@ -471,7 +471,7 @@ export default function AgentProfile() {
                 )}
                 {professional.is_verified && (
                   <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[0.65rem] uppercase tracking-wider">
-                    <CheckCircle2 size={12} className="mr-1" /> Verificado
+                    <CheckCircle2 size={12} className="mr-1" /> Verified
                   </Badge>
                 )}
                 {professional.languages && professional.languages.length > 0 && (
@@ -492,7 +492,7 @@ export default function AgentProfile() {
                 className="rounded-full bg-[#D4713B] hover:bg-[#c0612f] text-white"
                 onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}
               >
-                Contactar
+                Contact
               </Button>
               {professional.website && (
                 <Button variant="outline" className="rounded-full" asChild>
@@ -598,7 +598,7 @@ export default function AgentProfile() {
             {/* Agency context — enhanced */}
             {agency && (
               <section>
-                <p className={SECTION_LABEL}>AGENCIA</p>
+                <p className={SECTION_LABEL}>AGENCY</p>
                 <Link to={`/agentes/${agency.slug}`}>
                   <Card className="border-border/60 hover:shadow-md transition-shadow">
                     <CardContent className="p-5 flex items-center gap-4">
@@ -613,7 +613,7 @@ export default function AgentProfile() {
                           </div>
                         )}
                       </div>
-                      <span className="text-xs font-medium text-[#D4713B] shrink-0">Ver más →</span>
+                      <span className="text-xs font-medium text-[#D4713B] shrink-0">View more →</span>
                     </CardContent>
                   </Card>
                 </Link>
@@ -642,7 +642,7 @@ export default function AgentProfile() {
                         to={`/agentes/${agency.slug}`}
                         className="text-xs font-medium text-[#D4713B] hover:underline"
                       >
-                        +{agencyAgents.length - 4} más
+                        +{agencyAgents.length - 4} more
                       </Link>
                     )}
                   </div>
@@ -730,7 +730,7 @@ export default function AgentProfile() {
             {/* Agency agents — if this is an agency profile */}
             {!agency && agencyAgents.length > 0 && (
               <section>
-                <p className={SECTION_LABEL}>NUESTROS AGENTES</p>
+                <p className={SECTION_LABEL}>OUR AGENTS</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {agencyAgents.map(agent => (
                     <Link key={agent.id} to={`/agentes/${agent.slug}`}>
@@ -872,10 +872,10 @@ export default function AgentProfile() {
       <div className="border-t border-border/60 py-8">
         <div className="max-w-5xl mx-auto px-4 md:px-8 text-center">
           <p className="text-xs text-muted-foreground">
-            Valoración por <Link to="/" className="text-[#D4713B] hover:underline">ValoraCasa</Link>
+            Powered by <Link to="/" className="text-[#D4713B] hover:underline">ValoraCasa</Link>
           </p>
           <p className="text-[0.65rem] text-muted-foreground/60 mt-2">
-            La información de esta página es proporcionada por la agencia. ValoraCasa no garantiza su exactitud.
+            The information on this page is provided by the agency. ValoraCasa does not guarantee its accuracy.
           </p>
         </div>
       </div>
@@ -890,13 +890,13 @@ export default function AgentProfile() {
               className="fixed bottom-4 left-4 right-4 z-50 rounded-full shadow-lg bg-[#D4713B] hover:bg-[#c0612f] text-white h-12 text-base"
             >
               <Mail size={18} className="mr-2" />
-              Contactar
+              Contact
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
             <SheetHeader>
               <SheetTitle className="font-serif text-lg">
-                Contactar {professional.company_name}
+                Contact {professional.company_name}
               </SheetTitle>
             </SheetHeader>
             <div className="px-1 py-4">
@@ -918,7 +918,7 @@ export default function AgentProfile() {
                       onClick={() => setShowPhone(true)}
                     >
                       <Eye size={16} className="mr-2" />
-                      Mostrar número
+                      Show number
                     </Button>
                   )}
                 </div>

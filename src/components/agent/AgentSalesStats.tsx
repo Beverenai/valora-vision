@@ -107,16 +107,16 @@ export default function AgentSalesStats({ sales, agentName }: AgentSalesStatsPro
       transition={{ duration: 0.5 }}
     >
       <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">
-        ESTADÍSTICAS DE VENTA
+        SALES STATISTICS
       </p>
 
       {/* Summary text */}
       <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-        En los últimos 24 meses, <span className="font-semibold text-foreground">{agentName}</span> vendió{" "}
-        <span className="font-semibold text-foreground">{stats.totalSold}</span> propiedades
+        In the last 24 months, <span className="font-semibold text-foreground">{agentName}</span> sold{" "}
+        <span className="font-semibold text-foreground">{stats.totalSold}</span> properties
         {stats.medianPrice && (
           <>
-            {" "}con un precio de venta mediano de{" "}
+            {" "}with a median sale price of{" "}
             <span className="font-semibold text-foreground">€{formatPrice(stats.medianPrice)}</span>
           </>
         )}
@@ -131,7 +131,7 @@ export default function AgentSalesStats({ sales, agentName }: AgentSalesStatsPro
             <p className="text-3xl font-serif font-bold text-foreground">
               <AnimatedNumber value={stats.totalSold} />
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Propiedades vendidas</p>
+            <p className="text-xs text-muted-foreground mt-1">Properties sold</p>
           </CardContent>
         </Card>
 
@@ -142,7 +142,7 @@ export default function AgentSalesStats({ sales, agentName }: AgentSalesStatsPro
               <p className="text-3xl font-serif font-bold text-foreground">
                 €<AnimatedNumber value={Math.round(stats.medianPrice / 1000)} suffix="k" />
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Precio mediano</p>
+              <p className="text-xs text-muted-foreground mt-1">Median price</p>
             </CardContent>
           </Card>
         )}

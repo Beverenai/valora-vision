@@ -27,7 +27,7 @@ interface AgentPropertyCardsProps {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("es-ES", { month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
 export default function AgentPropertyCards({
@@ -49,7 +49,7 @@ export default function AgentPropertyCards({
   return (
     <section>
       <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">
-        PROPIEDADES VENDIDAS
+        PROPERTIES SOLD
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -64,11 +64,11 @@ export default function AgentPropertyCards({
                 </div>
               )}
               <Badge className="absolute top-2 left-2 bg-[#D4713B] text-white border-0 text-[0.6rem] uppercase tracking-wider font-semibold">
-                Vendido
+                Sold
               </Badge>
               {sale.verified && (
                 <Badge className="absolute top-2 right-2 bg-emerald-600 text-white border-0 text-[0.6rem] gap-1">
-                  <CheckCircle2 size={10} /> Verificado
+                  <CheckCircle2 size={10} /> Verified
                 </Badge>
               )}
             </div>
@@ -79,20 +79,20 @@ export default function AgentPropertyCards({
                 </p>
               )}
               <p className="font-serif font-medium text-sm text-foreground capitalize">
-                {sale.property_type || "Propiedad"}
-                {sale.bedrooms != null && ` — ${sale.bedrooms} dormitorios`}
+                {sale.property_type || "Property"}
+                {sale.bedrooms != null && ` — ${sale.bedrooms} bedrooms`}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {sale.city || sale.address_text || "—"}
               </p>
               {sale.show_price && sale.sale_price && (
-                <p className="text-sm font-semibold text-foreground mt-2">
-                  €{sale.sale_price.toLocaleString("es-ES")}
+              <p className="text-sm font-semibold text-foreground mt-2">
+                  €{sale.sale_price.toLocaleString("en-GB")}
                 </p>
               )}
               <p className="text-[0.6rem] text-muted-foreground mt-2">
-                Vendido por <span className="font-medium">{agentName}</span>
-                {agencyName && <> de <span className="font-medium">{agencyName}</span></>}
+                Sold by <span className="font-medium">{agentName}</span>
+                {agencyName && <> from <span className="font-medium">{agencyName}</span></>}
               </p>
             </CardContent>
           </Card>
@@ -109,7 +109,7 @@ export default function AgentPropertyCards({
             disabled={page === 0}
             className="rounded-full"
           >
-            <ChevronLeft size={14} className="mr-1" /> Anterior
+            <ChevronLeft size={14} className="mr-1" /> Previous
           </Button>
 
           {Array.from({ length: totalPages }, (_, i) => (
@@ -131,7 +131,7 @@ export default function AgentPropertyCards({
             disabled={page === totalPages - 1}
             className="rounded-full"
           >
-            Siguiente <ChevronRight size={14} className="ml-1" />
+            Next <ChevronRight size={14} className="ml-1" />
           </Button>
         </div>
       )}

@@ -40,7 +40,7 @@ export default function AgentBreadcrumbs({
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link to="/" className="font-serif hover:text-[#D4713B] transition-colors">
-              Inicio
+              Home
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -49,7 +49,7 @@ export default function AgentBreadcrumbs({
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link to="/agentes" className="font-serif hover:text-[#D4713B] transition-colors">
-              Agentes
+              Agents
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
