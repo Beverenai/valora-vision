@@ -798,7 +798,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
             <Input placeholder="Province" value={newConfig.province} onChange={e => setNewConfig(p => ({ ...p, province: e.target.value }))} className={cn(dark && "bg-white/10 border-white/20 text-white")} />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={() => setShowAddModal(false)} className={cn(dark && "border-white/10 text-white/80")}>Cancel</Button>
+            <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={() => setShowAddModal(false)}>Cancel</Button>
             <Button size="sm" onClick={handleAddConfig} disabled={!newConfig.contact_id || !newConfig.api_key}>Save</Button>
           </div>
         </div>
