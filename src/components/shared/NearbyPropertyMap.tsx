@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { GOOGLE_MAPS_API_KEY } from "@/config/google-maps";
 
 interface NearbyPropertyMapProps {
@@ -31,11 +31,13 @@ function formatSaleDate(dateStr: string | null): string {
   return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
-const loader = new Loader({
-  apiKey: GOOGLE_MAPS_API_KEY,
-  version: "weekly",
-  libraries: ["marker"],
-});
+let optionsSet = false;
+function ensureOptions() {
+  if (!optionsSet) {
+    setOptions({ key: GOOGLE_MAPS_API_KEY });
+    optionsSet = true;
+  }
+}
 
 export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm = 5 }: NearbyPropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
