@@ -283,37 +283,44 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
 }) {
   const recentLeads = leads.slice(0, 5);
 
-  // ── Improved Merit Score Algorithm ──
-  // Profile completeness (10%): 8 key fields
+  // ── Improved Merit Score Algorithm (7 factors) ──
+  // Profile completeness (8%): 8 key fields
   const profileFields = [agent.bio, agent.logo_url, agent.description, agent.phone, agent.website, agent.tagline, agent.cover_photo_url, agent.languages?.length];
   const profileMerit = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
-  // Rating (25%): avg_rating out of 5
+  // Rating (20%): avg_rating out of 5
   const ratingMerit = agent.avg_rating ? Math.round((Number(agent.avg_rating) / 5) * 100) : 0;
 
-  // Zone coverage (15%): has active zones = 100, else 0
+  // Zone coverage (12%): has active zones = 100, else 0
   const zoneMerit = (activeZonesCount && activeZonesCount > 0) ? 100 : 0;
 
-  // Review count (15%): normalized, cap at 20 reviews for 100%
+  // Review count (12%): normalized, cap at 20 reviews for 100%
   const reviewNorm = Math.min((reviewCount || agent.total_reviews || 0), 20);
   const reviewMerit = Math.round((reviewNorm / 20) * 100);
 
-  // Lead responsiveness (20%): leads with status != 'new' / total leads (proxy for response)
+  // Lead responsiveness (18%): leads with status != 'new' / total leads
   const totalLeads = leads.length;
   const respondedLeads = leads.filter(l => l.status !== "new").length;
   const responseMerit = totalLeads > 0 ? Math.round((respondedLeads / totalLeads) * 100) : 0;
 
-  // Conversion rate (15%): leads marked 'converted' / total leads
+  // Conversion rate (12%): leads marked 'converted' / total leads
   const convertedLeads = leads.filter(l => l.status === "converted").length;
   const conversionMerit = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
 
+  // Sales (18%): 0=0, 1-5=30, 6-15=60, 16-30=80, 30+=100, +10 if >50% verified (cap 100)
+  const sc = salesCount || 0;
+  const vc = verifiedSalesCount || 0;
+  let salesMerit = sc === 0 ? 0 : sc <= 5 ? 30 : sc <= 15 ? 60 : sc <= 30 ? 80 : 100;
+  if (sc > 0 && vc / sc > 0.5) salesMerit = Math.min(salesMerit + 10, 100);
+
   const meritScore = Math.round(
-    profileMerit * 0.10 +
-    ratingMerit * 0.25 +
-    zoneMerit * 0.15 +
-    reviewMerit * 0.15 +
-    responseMerit * 0.20 +
-    conversionMerit * 0.15
+    profileMerit * 0.08 +
+    ratingMerit * 0.20 +
+    zoneMerit * 0.12 +
+    reviewMerit * 0.12 +
+    responseMerit * 0.18 +
+    conversionMerit * 0.12 +
+    salesMerit * 0.18
   );
 
   const actionItems: { icon: React.ElementType; label: string; desc: string; section: Section; color: string }[] = [];
