@@ -514,6 +514,52 @@ export default function AgentProfile() {
               </section>
             )}
 
+            {/* Recent Sales */}
+            {recentSales.length > 0 && (
+              <section>
+                <p className={SECTION_LABEL}>RECENT SALES</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {(showAllSales ? recentSales : recentSales.slice(0, 6)).map((sale: any) => (
+                    <Card key={sale.id} className="overflow-hidden border-border/60">
+                      <div className="relative h-28 bg-muted">
+                        {sale.photo_url ? (
+                          <img src={sale.photo_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Home size={20} className="text-muted-foreground/30" />
+                          </div>
+                        )}
+                        <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground border-0 text-[0.6rem] uppercase tracking-wider">
+                          Sold
+                        </Badge>
+                        {sale.verified && (
+                          <Badge className="absolute top-2 right-2 bg-emerald-600 text-white border-0 text-[0.6rem] gap-1">
+                            <CheckCircle2 size={10} /> Verified
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-3">
+                        <p className="font-medium text-sm capitalize">{sale.property_type || "Property"}</p>
+                        <p className="text-xs text-muted-foreground">{sale.city || sale.address_text || "—"}</p>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          {sale.bedrooms != null && <span>{sale.bedrooms} bed</span>}
+                          {sale.built_size_sqm != null && <span>{sale.built_size_sqm} m²</span>}
+                          {sale.sale_date && (
+                            <span>{new Date(sale.sale_date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {recentSales.length > 6 && !showAllSales && (
+                  <Button variant="outline" className="w-full mt-4 rounded-full" onClick={() => setShowAllSales(true)}>
+                    Show all {recentSales.length} sales
+                  </Button>
+                )}
+              </section>
+            )}
+
             {/* Team */}
             {team.length > 0 && (
               <section>
