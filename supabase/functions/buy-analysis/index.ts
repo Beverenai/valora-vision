@@ -17,7 +17,7 @@ function jsonResponse(body: unknown, status = 200) {
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms)),
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Request timeout")), ms)),
   ]);
 }
 
@@ -65,55 +65,29 @@ Deno.serve(async (req) => {
     const API_KEY = Deno.env.get("SCRAPINGBEE_API_KEY");
     if (!API_KEY) return jsonResponse({ error: "ScrapingBee API key not configured" }, 500);
 
-    // Step 2: Scrape detail page — fast-first fallback
+    // Step 2: Scrape detail page — single attempt, generous timeout
     const detailUrl = `https://www.idealista.com/inmueble/${propertyCode}/`;
     let detailCredits = 0;
-    let property;
 
-    // Attempt 1: no JS rendering (fast)
+    console.log("Fetching detail:", detailUrl);
+    const t0 = Date.now();
+    let detailResult;
     try {
-      console.log("Detail attempt 1 (no JS):", detailUrl);
-      const t0 = Date.now();
-      const r = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: false, premiumProxy: true, countryCode: "es",
-      }), 20_000);
-      console.log(`Detail attempt 1 took ${Date.now() - t0}ms, status=${r.statusCode}, credits=${r.creditsUsed}`);
-      detailCredits += r.creditsUsed;
-      if (!r.error) {
-        const parsed = parsePropertyDetail(r.html);
-        if (parsed && parsed.price && parsed.sizeM2) {
-          property = parsed;
-        }
-      }
+      detailResult = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
+        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
+      }), 35_000);
+      console.log(`Detail took ${Date.now() - t0}ms, status=${detailResult.statusCode}, credits=${detailResult.creditsUsed}`);
+      detailCredits = detailResult.creditsUsed;
     } catch (e) {
-      console.log("Detail attempt 1 failed:", String(e));
+      console.error("Detail fetch error:", String(e));
+      return jsonResponse({ error: "Failed to fetch listing (timeout)", detail: String(e) }, 502);
     }
 
-    // Attempt 2: with JS rendering (slower, ~20s)
-    if (!property) {
-      if (Date.now() > DEADLINE) {
-        return jsonResponse({ error: "Timed out fetching listing", detail: "Could not parse without JS and no time for retry" }, 504);
-      }
-      try {
-        console.log("Detail attempt 2 (with JS):", detailUrl);
-        const t0 = Date.now();
-        const r = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
-          renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
-        }), 25_000);
-        console.log(`Detail attempt 2 took ${Date.now() - t0}ms, status=${r.statusCode}, credits=${r.creditsUsed}`);
-        detailCredits += r.creditsUsed;
-        if (!r.error) {
-          const parsed = parsePropertyDetail(r.html);
-          if (parsed && parsed.price && parsed.sizeM2) {
-            property = parsed;
-          }
-        }
-      } catch (e) {
-        console.error("Detail attempt 2 failed:", String(e));
-        return jsonResponse({ error: "Failed to fetch listing", detail: String(e) }, 502);
-      }
+    if (detailResult.error) {
+      return jsonResponse({ error: "ScrapingBee error fetching listing", detail: detailResult.error }, 502);
     }
 
+    const property = parsePropertyDetail(detailResult.html);
     if (!property || !property.price || !property.sizeM2) {
       return jsonResponse({
         error: "Could not parse property data. The listing may have been removed or the page structure changed.",
@@ -128,14 +102,14 @@ Deno.serve(async (req) => {
         property,
         analysis: null,
         comparables: [],
-        meta: { platform: "idealista", message: "Could not identify area for comparable search" },
+        meta: { platform: "idealista", creditsUsed: detailCredits, message: "Could not identify area for comparable search" },
       });
     }
 
-    // Step 4: Check deadline before comparables search
-    const timeLeft = DEADLINE - Date.now();
-    if (timeLeft < 28_000) {
-      console.log(`Only ${timeLeft}ms left, skipping comparables search`);
+    // Step 4: Check if we have time for comparables
+    const remainingMs = DEADLINE - Date.now();
+    if (remainingMs < 10_000) {
+      console.log(`Only ${remainingMs}ms left, returning property without analysis`);
       return jsonResponse({
         property,
         analysis: null,
@@ -143,12 +117,12 @@ Deno.serve(async (req) => {
         meta: {
           platform: "idealista",
           creditsUsed: detailCredits,
-          message: "Property data retrieved but ran out of time for comparables. Try again.",
+          message: "Property data retrieved but not enough time for comparables search. Please try again.",
         },
       });
     }
 
-    // Search comparables
+    // Search comparables with remaining time
     const idealistaType = (PROPERTY_TYPE_MAP[property.propertyType || ""] || "viviendas") as "viviendas" | "chalets" | "pisos" | "aticos";
     const minSize = Math.round(property.sizeM2 * 0.7);
     const maxSize = Math.round(property.sizeM2 * 1.3);
@@ -159,21 +133,27 @@ Deno.serve(async (req) => {
       minSize, maxSize,
     });
 
+    const searchTimeout = Math.min(remainingMs - 3_000, 30_000); // leave 3s for processing
     let searchResult;
     try {
-      console.log("Fetching comparables:", searchUrl);
+      console.log(`Fetching comparables (timeout ${searchTimeout}ms):`, searchUrl);
       const t1 = Date.now();
       searchResult = await withTimeout(fetchWithScrapingBee(searchUrl, API_KEY, {
         renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
-      }), 25_000);
-      console.log(`Search fetch took ${Date.now() - t1}ms, status=${searchResult.statusCode}, credits=${searchResult.creditsUsed}`);
+      }), searchTimeout);
+      console.log(`Search took ${Date.now() - t1}ms, status=${searchResult.statusCode}, credits=${searchResult.creditsUsed}`);
     } catch (e) {
+      console.log("Search timeout/error, returning property only:", String(e));
       return jsonResponse({
         property,
         analysis: null,
         comparables: [],
-        meta: { platform: "idealista", message: "Failed to fetch comparables", detail: String(e), creditsUsed: detailCredits },
-      }, 502);
+        meta: {
+          platform: "idealista",
+          creditsUsed: detailCredits,
+          message: "Property found but comparables search timed out. Please try again.",
+        },
+      });
     }
 
     const allComps = searchResult.error ? [] : parseSearchResults(searchResult.html);
@@ -186,7 +166,6 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    // Step 5: Calculate analysis
     if (filtered.length < 3) {
       return jsonResponse({
         property,
