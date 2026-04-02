@@ -1,47 +1,39 @@
 
 
-# Add Sale Date to Map Popups + Admin Valuations Map
+# Fix Team Member Count + Improve Address Geocoding
 
-## Three changes needed
+## Two Issues
 
-### 1. Show sale date in map popups (AgentPropertyMap + NearbyPropertyMap)
+### 1. Team member count shows wrong number
 
-The `AgentPropertyMap` and `NearbyPropertyMap` components already render popups with photo, type, bedrooms, city, and price — but not the sale date. The `sale_date` field is already available in the data.
+**Root cause**: The agent profile page displays `professional.team_size` — a static column set once during onboarding. For "La Sala homes", this was set to `1` during signup, but the actual `agent_team_members` table has `2` active members.
 
-**AgentPropertyMap.tsx**:
-- Add `sale_date: string | null` to the `PropertyMarker` interface
-- Add sale date line to the popup HTML: `Sold: Mar 2025`
+**Fix**: In `AgentProfile.tsx`, replace `professional.team_size` with the actual count of loaded team members (`teamMembers.length`). Also pluralize correctly: "1 member" vs "2 members".
 
-**NearbyPropertyMap.tsx**:
-- Add `sale_date` to the `SaleMarker` interface and the RPC data mapping
-- Add sale date line to the popup HTML
-- Update the `find_nearby_agent_sales` RPC return type if needed (it returns `SETOF agent_sales` so `sale_date` is already included)
+**File**: `src/pages/AgentProfile.tsx` (line ~524-528)
+- Replace `professional.team_size` with `teamMembers.length`
+- Use `teamMembers.length === 1 ? "member" : "members"` for proper pluralization
+- Only show the badge when `teamMembers.length > 0`
 
-### 2. Translate remaining Spanish strings in AgentPropertyMap
+### 2. Geocode address from Idealista links for accurate map pins
 
-The fallback text still says "UBICACIÓN DE VENTAS" and "Mapa de propiedades disponible próximamente" — change to English: "SALES LOCATIONS" and "Property map available soon". Also fix popup text: "Propiedad" → "Property", "dormitorios" → "bedrooms".
+**Root cause**: The enrich function asks Firecrawl to extract `latitude`/`longitude` directly, but Idealista pages rarely expose raw coordinates. So most enriched sales end up with no coordinates and don't appear on the map.
 
-### 3. Admin Valuations Map (new section in Admin.tsx)
+**Fix**: After Firecrawl extraction, if coordinates are missing but an address/city was found, use a **geocoding fallback** (Google Geocoding API or Mapbox Geocoding API) to convert the address string into precise lat/lng.
 
-Add a new "Map" tab/section to the Admin page that shows all completed valuations on a Mapbox map. This creates a geographic overview of where valuations have been requested.
+**File**: `supabase/functions/enrich-sale-listing/index.ts`
+- After extracting data from Firecrawl, check if `latitude`/`longitude` are missing but `address` + `city` exist
+- Call the Mapbox Geocoding API (already have `VITE_MAPBOX_TOKEN` — will need it as a server-side secret `MAPBOX_TOKEN`) to geocode: `https://api.mapbox.com/geocoding/v5/mapbox.places/{address},{city},Spain.json?access_token=...`
+- Parse the first result's `center` coordinates `[lng, lat]`
+- Set `update.latitude` and `update.longitude` from the geocode result
+- This ensures every enriched sale with an address gets a map pin
 
-**Implementation**:
-- Add a new `MapTab` component inside `Admin.tsx`
-- Fetch `leads_sell` and `leads_rent` where `status = 'completed'` and `latitude`/`longitude` are not null
-- Render a Mapbox map with markers (blue for sell, green for rent)
-- Popup shows: address, city, estimated value, date, property type
-- Add "map" to the `AdminSection` type and sidebar navigation
-
-**Data**: The `leads_sell` and `leads_rent` tables already have `latitude`, `longitude`, `estimated_value`, `address`, `city`, `property_type`, and `created_at` columns.
+**Secret needed**: `MAPBOX_TOKEN` (same value as the frontend `VITE_MAPBOX_TOKEN`, but available server-side in the edge function)
 
 ## Files to change
 
 | File | Change |
 |------|--------|
-| `src/components/agent/AgentPropertyMap.tsx` | Add `sale_date` to interface + popup; translate Spanish → English |
-| `src/components/shared/NearbyPropertyMap.tsx` | Add `sale_date` to interface + popup |
-| `src/pages/Admin.tsx` | Add "Map" section with valuations Mapbox map |
-| `src/components/admin/AdminSidebar.tsx` | Add "map" to section type + nav item |
-
-No database changes needed — all data already exists.
+| `src/pages/AgentProfile.tsx` | Use `teamMembers.length` instead of `professional.team_size`; fix pluralization |
+| `supabase/functions/enrich-sale-listing/index.ts` | Add Mapbox geocoding fallback when Firecrawl doesn't return coordinates |
 
