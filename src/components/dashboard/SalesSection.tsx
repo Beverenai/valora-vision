@@ -59,6 +59,19 @@ export default function SalesSection({ professionalId }: { professionalId: strin
 
   useEffect(() => { fetchSales(); }, [professionalId]);
 
+  useEffect(() => {
+    async function fetchTeam() {
+      const { data } = await supabase
+        .from("agent_team_members")
+        .select("id, name")
+        .eq("professional_id", professionalId)
+        .eq("is_active", true)
+        .order("sort_order");
+      if (data) setTeamMembers(data);
+    }
+    fetchTeam();
+  }, [professionalId]);
+
   async function handleDelete(id: string) {
     const { error } = await supabase.from("agent_sales").delete().eq("id", id);
     if (error) {
