@@ -1,54 +1,22 @@
 
 
-# Create `buy-analysis` Edge Function
+# Update `buy-analysis` with sell-valuation fixes
 
-## File to create
+## Changes to `supabase/functions/buy-analysis/index.ts`
 
-`supabase/functions/buy-analysis/index.ts`
+1. **Property type mapping** (line 26): Change `apartment: "pisos"` → `apartment: "viviendas"`, `duplex: "pisos"` → `duplex: "viviendas"`, `studio: "pisos"` → `studio: "viviendas"`
 
-## What it does
+2. **ScrapingBee settings for detail scrape** (line 63-64): Change to `renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 3000`
 
-Accepts an Idealista listing URL, scrapes the property detail page, finds comparables via a search scrape, and returns a Price Score analysis comparing asking price to estimated market value.
+3. **ScrapingBee settings for search scrape** (line 109-110): Same: `renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 3000`
 
-## Flow
+4. **Remove price filters from search URL** (lines 97-104): Remove `minPrice`/`maxPrice` variables and their usage in `buildIdealistaSearchUrl()`. Keep only `minSize`/`maxSize`.
 
-1. CORS preflight
-2. Validate URL contains `idealista.com/inmueble/`, extract property code
-3. Scrape detail page via `fetchWithScrapingBee()` → parse with `parsePropertyDetail()`
-4. Detect municipality from parsed address/title using `MUNICIPALITY_SLUGS`
-5. Scrape comparables search page → parse with `parseSearchResults()`
-6. Filter comparables (exclude target, ±1 rooms, ±30% size)
-7. Run `calculateBuyAnalysis(askingPrice, input, comparables)` from valuation engine
-8. Return structured response with property, analysis, comparables (max 10), and meta
+## No changes needed to shared files
 
-## Response mapping
+The `scrapingbee-client.ts` already has `stealthProxy` and `wait` support (added during sell-valuation fixes).
 
-Maps `BuyAnalysisResult` fields to the prompt's response format:
-- `priceRangeLow` → `estimatedLow`, `priceRangeHigh` → `estimatedHigh`
-- `pricePerM2` → `estimatedPricePerM2`, `medianPricePerM2` → `areaMedianPricePerM2`
-- `confidenceLevel` → `confidence`
-- `priceScore.score/label/color/deviationPercent` → flat fields
-- Each comparable gets a `priceComparison` field (cheaper/similar/more_expensive/unknown)
+## Test after deploy
 
-## Error handling
-
-- 400: missing/invalid URL, non-Idealista portal
-- 422: parsing failed (removed listing, no price/size)
-- 502: ScrapingBee error
-- 500: unexpected error
-
-## Imports
-
-- `fetchWithScrapingBee`, `buildIdealistaSearchUrl` from `../_shared/scrapingbee-client.ts`
-- `parsePropertyDetail`, `parseSearchResults`, `MUNICIPALITY_SLUGS` from `../_shared/idealista-parser.ts`
-- `calculateBuyAnalysis`, `ValuationInput`, `ComparableProperty` from `../_shared/valuation-engine.ts`
-
-## Secrets
-
-`SCRAPINGBEE_API_KEY` is already configured — no new secret needed.
-
-## Notes
-
-- No frontend changes, no database changes
-- Uses ~10 ScrapingBee credits per call (2 requests, no JS rendering)
+Call `POST /functions/v1/buy-analysis` with `{ "url": "https://www.idealista.com/inmueble/106583498/" }`.
 
