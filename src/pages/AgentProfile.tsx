@@ -774,7 +774,7 @@ export default function AgentProfile() {
 
             {/* Reviews */}
             <section>
-              <p className={SECTION_LABEL}>OPINIONES DE CLIENTES</p>
+              <p className={SECTION_LABEL}>CLIENT REVIEWS</p>
 
               {reviews.length > 0 ? (
                 <>
