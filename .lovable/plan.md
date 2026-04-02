@@ -1,45 +1,66 @@
 
 
-# Enhance Team Cards + Add Sales Map to Agency & Member Pages
+# Auto-Enrich Listing Links via Firecrawl + Sales Map on Valuation Results
 
-## Two Issues to Fix
+## What This Does
 
-### 1. Team Member Cards — Show More Info
-Currently the "OUR TEAM" cards on the agency profile (`AgentProfile.tsx`) show: photo, name, role, star rating, and languages. The `agent_team_members` table also has `phone`, `email`, `bio`, and `whatsapp` but these are not displayed.
+1. **When an agent pastes an Idealista/Fotocasa link** in the "Add Sale" dialog, a backend function scrapes the listing page using Firecrawl to auto-fill: photo, property type, bedrooms, bathrooms, size, price, city, address, and critically **latitude/longitude** — so the sale appears on the map.
 
-**Changes to `src/pages/AgentProfile.tsx` (team section ~lines 681-727):**
-- Add email icon + truncated email below the role
-- Add phone icon + phone number (or "Show number" button consistent with the rest of the page)
-- Show a short bio snippet (first ~80 chars) if available
-- Add a small "sales count" badge if the member has attributed sales (query `agent_sales` by `team_member_id`)
+2. **On the Sell Result page**, show a map with the user's valuation property pinned at center, plus all nearby `agent_sales` within a radius, so sellers can see real sold properties around them.
 
-To get per-member sales counts, we need to fetch sales grouped by `team_member_id`. This can be done alongside the existing sales fetch — group the `recentSales` data in a `useMemo` to create a `Map<team_member_id, count>`.
+## Implementation
 
-### 2. Sales Map — Agency-Level and Per-Member
-Currently the map and sales stats only show on the agency profile using `agent_sales` filtered by `professional_id`. Two improvements needed:
+### 1. New Edge Function: `enrich-sale-listing/index.ts`
 
-**A. Agency profile (`AgentProfile.tsx`):**
-- Already has the map. No change needed — it already shows all sales for the agency's `professional_id`.
+- Accepts `{ sale_id, listing_url }` 
+- Uses Firecrawl to scrape the URL with `formats: ['markdown', 'json']` and a JSON schema to extract structured data (price, bedrooms, bathrooms, size, property_type, address, city, lat, lng, image_url, description)
+- Updates the `agent_sales` row with the extracted fields using service role key
+- Sets `enriched_title` and `enriched_description` from scraped content
+- Returns `{ success: true, enriched_fields: [...] }`
 
-**B. Team member profile (`TeamMemberProfile.tsx`):**
-- Currently fetches sales filtered by `team_member_id` but does NOT render a map, stats, or property cards.
-- Add the same `AgentSalesStats`, `AgentPropertyMap`, and `AgentPropertyCards` components that are already used on `AgentProfile.tsx`.
-- Lazy-load the map component, compute `mapCenter` from sales coordinates.
+### 2. Update `AddSaleDialog.tsx` — Link Tab
+
+After inserting the sale row (which returns the new `id`), invoke `supabase.functions.invoke("enrich-sale-listing", { body: { sale_id, listing_url } })` in the background. Show a toast: "Listing details are being imported...". The dialog closes immediately; enrichment happens async.
+
+### 3. New RPC Function: `find_nearby_agent_sales`
+
+SQL function that finds `agent_sales` within a given radius of a lat/lng point:
+```sql
+CREATE FUNCTION find_nearby_agent_sales(
+  p_lat NUMERIC, p_lng NUMERIC, p_radius_km NUMERIC DEFAULT 5, p_limit INT DEFAULT 50
+) RETURNS SETOF agent_sales
+```
+Uses the existing PostGIS `location_point` column and GIST index.
+
+### 4. New Component: `NearbyPropertyMap.tsx`
+
+A map component for the valuation result page that:
+- Pins the user's property at center (distinct color/icon)
+- Fetches nearby sold properties via the RPC
+- Shows agent sale markers with popups (photo, price, type)
+- Reuses the Mapbox lazy-loading pattern from `AgentPropertyMap`
+
+### 5. Update `SellResult.tsx`
+
+Add the `NearbyPropertyMap` section after the valuation card, before the agent matching section. Only renders when the lead has lat/lng coordinates. Lazy-loaded with Suspense.
 
 ## Technical Details
 
-### File: `src/pages/AgentProfile.tsx`
-- In the team card rendering (~line 686-725), add: email with `Mail` icon, phone with `Phone` icon, bio snippet, and sales count badge
-- Add a `useMemo` that groups `recentSales` by `team_member_id` to get per-member counts
+| Item | Detail |
+|------|--------|
+| Firecrawl | Already connected. Uses `FIRECRAWL_API_KEY` env var in edge function |
+| JSON extraction | Firecrawl's `formats: [{ type: 'json', schema }]` for structured data |
+| Geocoding fallback | If Firecrawl doesn't return lat/lng, use the address + Google Geocoding API |
+| `agent_sales` columns | All needed columns already exist: `latitude`, `longitude`, `location_point` (auto-set by trigger), `photo_url`, `enriched_title`, `enriched_description` |
+| Map | Reuses Mapbox with `VITE_MAPBOX_TOKEN` |
 
-### File: `src/pages/TeamMemberProfile.tsx`
-- Import `AgentSalesStats`, `AgentPropertyCards`, and lazy-import `AgentPropertyMap`
-- After existing content sections, add:
-  - `<AgentSalesStats>` with the member's sales
-  - `<AgentPropertyMap>` (lazy, with Suspense) when sales have coordinates
-  - `<AgentPropertyCards>` with pagination
-- Add `useMemo` for `mapCenter` calculation (same pattern as AgentProfile)
+## Files
 
-### No database changes needed
-All data already exists — `agent_sales.team_member_id` links sales to team members.
+| File | Action |
+|------|--------|
+| `supabase/functions/enrich-sale-listing/index.ts` | Create — Firecrawl scraping + DB update |
+| `src/components/dashboard/AddSaleDialog.tsx` | Edit — call enrichment after insert |
+| `supabase/migrations/` | Create — `find_nearby_agent_sales` RPC |
+| `src/components/shared/NearbyPropertyMap.tsx` | Create — valuation result map |
+| `src/pages/SellResult.tsx` | Edit — add nearby sales map section |
 
