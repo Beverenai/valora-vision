@@ -642,7 +642,7 @@ export default function AgentProfile() {
                         to={`/agentes/${agency.slug}`}
                         className="text-xs font-medium text-[#D4713B] hover:underline"
                       >
-                        +{agencyAgents.length - 4} más
+                        +{agencyAgents.length - 4} more
                       </Link>
                     )}
                   </div>

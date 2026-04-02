@@ -79,8 +79,8 @@ export default function AgentPropertyCards({
                 </p>
               )}
               <p className="font-serif font-medium text-sm text-foreground capitalize">
-                {sale.property_type || "Propiedad"}
-                {sale.bedrooms != null && ` — ${sale.bedrooms} dormitorios`}
+                {sale.property_type || "Property"}
+                {sale.bedrooms != null && ` — ${sale.bedrooms} bedrooms`}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {sale.city || sale.address_text || "—"}
