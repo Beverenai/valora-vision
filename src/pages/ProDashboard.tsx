@@ -326,6 +326,7 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
   const actionItems: { icon: React.ElementType; label: string; desc: string; section: Section; color: string }[] = [];
   if (!agent.bio && !agent.description) actionItems.push({ icon: Edit2, label: "Add a company description", desc: "+15 merit points", section: "profile", color: "text-amber-600" });
   if (!agent.logo_url) actionItems.push({ icon: Eye, label: "Upload your logo", desc: "+20 merit points", section: "profile", color: "text-amber-600" });
+  if (sc === 0) actionItems.push({ icon: Home, label: "Register your first sale", desc: "Build trust with potential clients", section: "sales", color: "text-emerald-600" });
   actionItems.push({ icon: MapPin, label: "Select your service zones", desc: "Required to appear in valuation results", section: "zones", color: "text-blue-600" });
 
   return (
