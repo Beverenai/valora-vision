@@ -131,7 +131,7 @@ export default function AgentSalesStats({ sales, agentName }: AgentSalesStatsPro
             <p className="text-3xl font-serif font-bold text-foreground">
               <AnimatedNumber value={stats.totalSold} />
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Propiedades vendidas</p>
+            <p className="text-xs text-muted-foreground mt-1">Properties sold</p>
           </CardContent>
         </Card>
 
