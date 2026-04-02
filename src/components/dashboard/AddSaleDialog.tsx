@@ -35,7 +35,6 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
   const [listingUrl, setListingUrl] = useState("");
   const [linkTeamMemberId, setLinkTeamMemberId] = useState("");
 
-  // Manual mode
   const [form, setForm] = useState({
     property_type: "apartment",
     bedrooms: "",
@@ -47,6 +46,7 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
     sale_date: "",
     photo_url: "",
     show_price: true,
+    team_member_id: "",
   });
 
   const updateForm = (field: string, value: string | boolean) => setForm(f => ({ ...f, [field]: value }));
