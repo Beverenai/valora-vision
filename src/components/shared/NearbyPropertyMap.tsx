@@ -86,9 +86,9 @@ export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm 
 
     async function initMap() {
       try {
-        const { Map: GoogleMap } = await loader.importLibrary("maps");
-
-        map = new GoogleMap(mapRef.current!, {
+        ensureOptions();
+        const { Map: GoogleMap } = await importLibrary("maps") as google.maps.MapsLibrary;
+        await importLibrary("marker");
           center: { lat: latitude, lng: longitude },
           zoom: 13,
           mapId: "nearby-sales-map",

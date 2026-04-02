@@ -802,14 +802,10 @@ function ValuationsMapTab({ dark }: { dark: boolean }) {
 
     async function initMap() {
       try {
-        const { Loader: MapsLoader } = await import("@googlemaps/js-api-loader");
+        const { setOptions: setGoogleOptions, importLibrary } = await import("@googlemaps/js-api-loader");
         const { GOOGLE_MAPS_API_KEY } = await import("@/config/google-maps");
 
-        const loader = new MapsLoader({
-          apiKey: GOOGLE_MAPS_API_KEY,
-          version: "weekly",
-          libraries: ["marker"],
-        });
+        setGoogleOptions({ key: GOOGLE_MAPS_API_KEY });
 
         const [sellRes, rentRes] = await Promise.all([
           supabase.from("leads_sell").select("id, address, city, property_type, estimated_value, latitude, longitude, created_at").not("latitude", "is", null).not("longitude", "is", null).eq("status", "completed").limit(500),
@@ -827,8 +823,8 @@ function ValuationsMapTab({ dark }: { dark: boolean }) {
           return;
         }
 
-        const { Map: GoogleMap } = await loader.importLibrary("maps");
-        await loader.importLibrary("marker");
+        const { Map: GoogleMap } = await importLibrary("maps") as google.maps.MapsLibrary;
+        await importLibrary("marker");
 
         map = new GoogleMap(mapRef.current!, {
           center: { lat: allPoints[0].latitude!, lng: allPoints[0].longitude! },

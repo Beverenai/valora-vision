@@ -55,9 +55,9 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
 
     async function initMap() {
       try {
-        const { Map: GoogleMap } = await loader.importLibrary("maps");
-
-        const defaultCenter = centerLat && centerLng
+        ensureOptions();
+        const { Map: GoogleMap } = await importLibrary("maps") as google.maps.MapsLibrary;
+        await importLibrary("marker");
           ? { lat: centerLat, lng: centerLng }
           : { lat: markers[0].latitude!, lng: markers[0].longitude! };
 
