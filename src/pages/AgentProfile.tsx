@@ -458,6 +458,12 @@ export default function AgentProfile() {
               <span className="text-sm text-muted-foreground">{professional.languages.join(", ")}</span>
             </div>
           )}
+          {recentSales.length > 0 && (
+            <div className="flex items-center gap-2 shrink-0">
+              <Home size={16} className="text-primary" />
+              <span className="text-sm text-muted-foreground">{recentSales.length} sales</span>
+            </div>
+          )}
         </div>
       </section>
 
