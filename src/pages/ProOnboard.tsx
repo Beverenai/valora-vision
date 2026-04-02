@@ -115,6 +115,7 @@ const ProOnboard = () => {
   const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
+  const [importedReviews, setImportedReviews] = useState<Array<{ reviewer_name: string; rating: number; comment: string; source: string; source_url: string }>>([]);
 
   const progressPercentage = ((step + 1) / wizardSteps.length) * 100;
 
@@ -209,6 +210,7 @@ const ProOnboard = () => {
         if (data.cover_photo_url) setCoverPhotoUrl(data.cover_photo_url);
         if (data.google_rating) setGoogleRating(data.google_rating);
         if (data.google_review_count) setGoogleReviewCount(data.google_review_count);
+        if (data.reviews?.length) setImportedReviews(data.reviews);
         if (data.lat) setLat(data.lat);
         if (data.lng) setLng(data.lng);
 
@@ -399,6 +401,27 @@ const ProOnboard = () => {
       console.log("[ProOnboard] publish response:", { publishData, publishError, slug });
       if (publishError) throw publishError;
       if (publishData?.error) throw new Error(publishData.error);
+
+      // Insert imported reviews if any
+      const professionalId = publishData?.id;
+      if (professionalId && importedReviews.length > 0) {
+        try {
+          const reviewInserts = importedReviews.map((r) => ({
+            professional_id: professionalId,
+            reviewer_name: r.reviewer_name,
+            rating: r.rating,
+            comment: r.comment,
+            is_verified: true,
+            source: r.source,
+            source_url: r.source_url,
+          }));
+          await supabase.from("agent_reviews").insert(reviewInserts);
+          console.log(`[ProOnboard] Inserted ${reviewInserts.length} imported reviews`);
+        } catch (reviewErr) {
+          console.error("Failed to insert reviews:", reviewErr);
+          // Non-blocking — profile still published
+        }
+      }
 
       navigate(`/pro/onboard/success?slug=${slug}`);
     } catch (e: any) {

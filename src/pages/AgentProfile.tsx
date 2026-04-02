@@ -67,6 +67,8 @@ interface Review {
   comment: string | null;
   is_verified: boolean;
   created_at: string;
+  source: string | null;
+  source_url: string | null;
 }
 
 // ── Helpers ──
@@ -705,6 +707,17 @@ export default function AgentProfile() {
                               {review.reviewer_role && (
                                 <Badge className={`text-[0.6rem] border-0 ${ROLE_COLORS[review.reviewer_role] || "bg-muted text-muted-foreground"}`}>
                                   {review.reviewer_role.charAt(0).toUpperCase() + review.reviewer_role.slice(1)}
+                                </Badge>
+                              )}
+                              {review.source && review.source !== "manual" && (
+                                <Badge variant="outline" className="text-[0.55rem] px-1.5 py-0 gap-1 font-normal">
+                                  {review.source === "google" && (
+                                    <img src="https://www.google.com/favicon.ico" alt="Google" className="w-3 h-3" />
+                                  )}
+                                  {review.source === "trustpilot" && (
+                                    <img src="https://www.trustpilot.com/favicon.ico" alt="Trustpilot" className="w-3 h-3" />
+                                  )}
+                                  {review.source.charAt(0).toUpperCase() + review.source.slice(1)}
                                 </Badge>
                               )}
                               {review.is_verified && (

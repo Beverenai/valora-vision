@@ -15,6 +15,86 @@ interface OnboardInput {
   address: string;
 }
 
+// ── Helpers ──
+
+async function scrapeUrl(firecrawlKey: string, url: string): Promise<{ markdown: string; links: string[]; metadata: Record<string, unknown> } | null> {
+  try {
+    let formattedUrl = url.trim();
+    if (!formattedUrl.startsWith("http")) formattedUrl = `https://${formattedUrl}`;
+
+    const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${firecrawlKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ url: formattedUrl, formats: ["markdown", "links"], onlyMainContent: false }),
+    });
+    const data = await res.json();
+    if (data.success === false) return null;
+    return {
+      markdown: (data.data?.markdown || data.markdown || "").substring(0, 6000),
+      links: data.data?.links || data.links || [],
+      metadata: data.data?.metadata || data.metadata || {},
+    };
+  } catch (e) {
+    console.error("Scrape error:", e);
+    return null;
+  }
+}
+
+async function extractReviewsWithAI(lovableKey: string, content: string, source: string): Promise<Array<{ reviewer_name: string; rating: number; comment: string }>> {
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "user", content: `Extract individual customer reviews from this ${source} page content. Only extract real reviews with actual reviewer names and ratings. Content:\n\n${content.substring(0, 5000)}` },
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "extract_reviews",
+            description: "Extract customer reviews from page content",
+            parameters: {
+              type: "object",
+              properties: {
+                reviews: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      reviewer_name: { type: "string" },
+                      rating: { type: "number", description: "Rating from 1 to 5" },
+                      comment: { type: "string" },
+                    },
+                    required: ["reviewer_name", "rating", "comment"],
+                  },
+                },
+              },
+              required: ["reviews"],
+            },
+          },
+        }],
+        tool_choice: { type: "function", function: { name: "extract_reviews" } },
+      }),
+    });
+
+    if (!res.ok) return [];
+    const data = await res.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) return [];
+    const parsed = JSON.parse(toolCall.function.arguments);
+    return (parsed.reviews || [])
+      .filter((r: any) => r.reviewer_name && r.rating >= 1 && r.rating <= 5)
+      .slice(0, 20);
+  } catch (e) {
+    console.error("Review extraction error:", e);
+    return [];
+  }
+}
+
+// ── Main Handler ──
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -43,6 +123,7 @@ Deno.serve(async (req) => {
       service_areas: [],
       lat: null,
       lng: null,
+      reviews: [] as Array<{ reviewer_name: string; rating: number; comment: string; source: string; source_url: string }>,
       steps: [] as { key: string; status: string; label: string }[],
     };
 
@@ -50,59 +131,37 @@ Deno.serve(async (req) => {
 
     // --- 1. Scrape website with Firecrawl (if provided) ---
     let scrapedContent = "";
-    if (website) {
+    let scrapedLinks: string[] = [];
+    const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
+
+    if (website && firecrawlKey) {
       steps.push({ key: "scan_website", status: "loading", label: "Scanning your website..." });
-      const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
-      if (firecrawlKey) {
-        try {
-          let formattedUrl = website.trim();
-          if (!formattedUrl.startsWith("http")) formattedUrl = `https://${formattedUrl}`;
+      const scrapeResult = await scrapeUrl(firecrawlKey, website);
 
-          const scrapeRes = await fetch("https://api.firecrawl.dev/v1/scrape", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${firecrawlKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              url: formattedUrl,
-              formats: ["markdown", "links"],
-              onlyMainContent: false,
-            }),
-          });
+      if (scrapeResult) {
+        scrapedContent = scrapeResult.markdown;
+        scrapedLinks = scrapeResult.links;
+        const metadata = scrapeResult.metadata;
 
-          const scrapeData = await scrapeRes.json();
-          if (scrapeData.success !== false) {
-            const md = scrapeData.data?.markdown || scrapeData.markdown || "";
-            scrapedContent = md.substring(0, 6000);
-            const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
+        if (metadata.ogImage) result.logo_url = metadata.ogImage;
+        if (metadata.ogImage) result.cover_photo_url = metadata.ogImage;
 
-            // Extract logo from metadata
-            if (metadata.ogImage) result.logo_url = metadata.ogImage;
-
-            // Use og:image as cover photo candidate
-            if (metadata.ogImage) result.cover_photo_url = metadata.ogImage;
-
-            // Extract social links from all links
-            const links: string[] = scrapeData.data?.links || scrapeData.links || [];
-            for (const link of links) {
-              if (typeof link === "string") {
-                if (link.includes("instagram.com") && !(result.social as Record<string, unknown>).instagram)
-                  (result.social as Record<string, unknown>).instagram = link;
-                if (link.includes("facebook.com") && !(result.social as Record<string, unknown>).facebook)
-                  (result.social as Record<string, unknown>).facebook = link;
-                if (link.includes("linkedin.com") && !(result.social as Record<string, unknown>).linkedin)
-                  (result.social as Record<string, unknown>).linkedin = link;
-              }
-            }
-
-            steps.push({ key: "found_logo", status: result.logo_url ? "done" : "skip", label: result.logo_url ? "Found your logo" : "No logo found" });
-            steps.push({ key: "found_social", status: "done", label: "Checked social media links" });
+        // Extract social links
+        for (const link of scrapedLinks) {
+          if (typeof link === "string") {
+            if (link.includes("instagram.com") && !(result.social as Record<string, unknown>).instagram)
+              (result.social as Record<string, unknown>).instagram = link;
+            if (link.includes("facebook.com") && !(result.social as Record<string, unknown>).facebook)
+              (result.social as Record<string, unknown>).facebook = link;
+            if (link.includes("linkedin.com") && !(result.social as Record<string, unknown>).linkedin)
+              (result.social as Record<string, unknown>).linkedin = link;
           }
-        } catch (e) {
-          console.error("Firecrawl error:", e);
-          steps.push({ key: "scan_website", status: "error", label: "Could not scan website" });
         }
+
+        steps.push({ key: "found_logo", status: result.logo_url ? "done" : "skip", label: result.logo_url ? "Found your logo" : "No logo found" });
+        steps.push({ key: "found_social", status: "done", label: "Checked social media links" });
+      } else {
+        steps.push({ key: "scan_website", status: "error", label: "Could not scan website" });
       }
     }
 
@@ -117,10 +176,7 @@ Deno.serve(async (req) => {
 
         const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableKey}`,
-            "Content-Type": "application/json",
-          },
+          headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: "google/gemini-3-flash-preview",
             messages: [
@@ -146,10 +202,7 @@ Deno.serve(async (req) => {
       try {
         const teamRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableKey}`,
-            "Content-Type": "application/json",
-          },
+          headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: "google/gemini-3-flash-preview",
             messages: [
@@ -273,6 +326,66 @@ Deno.serve(async (req) => {
     const matchedAreas = knownAreas.filter((a) => addressLower.includes(a.toLowerCase()));
     if (matchedAreas.length > 0) {
       result.service_areas = matchedAreas;
+    }
+
+    // --- 7. Scrape reviews from Google/Trustpilot links ---
+    if (firecrawlKey && lovableKey) {
+      const reviewResults = result.reviews as Array<{ reviewer_name: string; rating: number; comment: string; source: string; source_url: string }>;
+
+      // Find review page links from scraped website links
+      let googleReviewUrl: string | null = null;
+      let trustpilotUrl: string | null = null;
+
+      for (const link of scrapedLinks) {
+        if (typeof link !== "string") continue;
+        if (!googleReviewUrl && (link.includes("google.com/maps") || link.includes("business.google.com") || link.includes("g.page"))) {
+          googleReviewUrl = link;
+        }
+        if (!trustpilotUrl && link.includes("trustpilot.com")) {
+          trustpilotUrl = link;
+        }
+      }
+
+      // Also check scraped content for Trustpilot links
+      if (!trustpilotUrl && scrapedContent) {
+        const tpMatch = scrapedContent.match(/trustpilot\.com\/review\/[^\s)"\]]+/);
+        if (tpMatch) trustpilotUrl = `https://www.${tpMatch[0]}`;
+      }
+
+      const reviewSources: Array<{ url: string; source: string }> = [];
+      if (googleReviewUrl) reviewSources.push({ url: googleReviewUrl, source: "google" });
+      if (trustpilotUrl) reviewSources.push({ url: trustpilotUrl, source: "trustpilot" });
+
+      if (reviewSources.length > 0) {
+        steps.push({ key: "import_reviews", status: "loading", label: "Importing reviews..." });
+        
+        for (const { url, source } of reviewSources) {
+          try {
+            const reviewPageData = await scrapeUrl(firecrawlKey, url);
+            if (reviewPageData && reviewPageData.markdown.length > 100) {
+              const extracted = await extractReviewsWithAI(lovableKey, reviewPageData.markdown, source);
+              for (const review of extracted) {
+                reviewResults.push({
+                  reviewer_name: review.reviewer_name,
+                  rating: review.rating,
+                  comment: review.comment,
+                  source,
+                  source_url: url,
+                });
+              }
+            }
+          } catch (e) {
+            console.error(`Error scraping ${source} reviews:`, e);
+          }
+        }
+
+        const totalReviews = reviewResults.length;
+        steps.push({
+          key: "import_reviews",
+          status: totalReviews > 0 ? "done" : "skip",
+          label: totalReviews > 0 ? `Imported ${totalReviews} reviews` : "No reviews found",
+        });
+      }
     }
 
     steps.push({ key: "complete", status: "done", label: "Profile ready!" });

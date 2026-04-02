@@ -69,6 +69,8 @@ export type Database = {
           rating: number
           reviewer_name: string
           reviewer_role: string | null
+          source: string
+          source_url: string | null
         }
         Insert: {
           comment?: string | null
@@ -80,6 +82,8 @@ export type Database = {
           rating: number
           reviewer_name: string
           reviewer_role?: string | null
+          source?: string
+          source_url?: string | null
         }
         Update: {
           comment?: string | null
@@ -91,6 +95,8 @@ export type Database = {
           rating?: number
           reviewer_name?: string
           reviewer_role?: string | null
+          source?: string
+          source_url?: string | null
         }
         Relationships: [
           {
