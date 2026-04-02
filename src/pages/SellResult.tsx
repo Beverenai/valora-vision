@@ -388,6 +388,19 @@ const SellResult: React.FC = () => {
           
           <div className="w-full h-px bg-border" />
 
+          {/* Nearby sales map — only when we have coordinates */}
+          {lead?.latitude && lead?.longitude && (
+            <Suspense fallback={<SectionSkeleton rows={2} />}>
+              <LazyNearbyMap
+                latitude={lead.latitude}
+                longitude={lead.longitude}
+                city={lead.city}
+              />
+            </Suspense>
+          )}
+
+          <div className="w-full h-px bg-border" />
+
           {/* Group 2: Lazy — features, comparables, area comparison, market trends */}
           <Suspense fallback={<SectionSkeleton rows={4} />}>
             <LazyAnalysisBundle

@@ -82,17 +82,26 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
       : listingUrl.includes("fotocasa") ? "fotocasa"
       : "other";
 
-    const { error } = await supabase.from("agent_sales").insert({
+    const { data: insertedData, error } = await supabase.from("agent_sales").insert({
       professional_id: professionalId,
       listing_url: listingUrl.trim(),
       listing_source: source,
       team_member_id: linkTeamMemberId || null,
-    } as any);
+    } as any).select("id").single();
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
     } else {
-      toast({ title: "Sale registered!", description: "You can add more details later." });
+      toast({ title: "Sale registered!", description: "Listing details are being imported…" });
+      // Trigger async enrichment
+      if (insertedData?.id) {
+        supabase.functions.invoke("enrich-sale-listing", {
+          body: { sale_id: insertedData.id, listing_url: listingUrl.trim() },
+        }).then(res => {
+          if (res.error) console.error("Enrichment failed:", res.error);
+          else console.log("Enrichment complete:", res.data);
+        });
+      }
       setListingUrl("");
       onSaleAdded();
       onOpenChange(false);
