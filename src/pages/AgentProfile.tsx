@@ -846,8 +846,8 @@ export default function AgentProfile() {
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
                     <Star size={32} fill="hsl(var(--primary))" className="mx-auto text-primary mb-3 opacity-30" strokeWidth={0} />
-                    <p className="text-sm text-foreground/70">Opiniones disponibles pronto</p>
-                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews importadas</p>
+                    <p className="text-sm text-foreground/70">Reviews available soon</p>
+                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews imported</p>
                   </CardContent>
                 </Card>
               ) : (
