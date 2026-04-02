@@ -730,7 +730,7 @@ export default function AgentProfile() {
             {/* Agency agents — if this is an agency profile */}
             {!agency && agencyAgents.length > 0 && (
               <section>
-                <p className={SECTION_LABEL}>NUESTROS AGENTES</p>
+                <p className={SECTION_LABEL}>OUR AGENTS</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {agencyAgents.map(agent => (
                     <Link key={agent.id} to={`/agentes/${agent.slug}`}>
