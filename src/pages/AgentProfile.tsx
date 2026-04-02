@@ -890,7 +890,7 @@ export default function AgentProfile() {
               className="fixed bottom-4 left-4 right-4 z-50 rounded-full shadow-lg bg-[#D4713B] hover:bg-[#c0612f] text-white h-12 text-base"
             >
               <Mail size={18} className="mr-2" />
-              Contactar
+              Contact
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
