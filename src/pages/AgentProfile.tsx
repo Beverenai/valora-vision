@@ -524,7 +524,7 @@ export default function AgentProfile() {
           {professional.team_size && (
             <div className="flex items-center gap-2 shrink-0">
               <Users size={16} className="text-[#D4713B]" />
-              <span className="text-sm text-muted-foreground">{professional.team_size} miembros</span>
+              <span className="text-sm text-muted-foreground">{professional.team_size} members</span>
             </div>
           )}
           {professional.languages && professional.languages.length > 0 && (
