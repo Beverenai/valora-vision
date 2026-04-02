@@ -117,7 +117,8 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
       sale_date: form.sale_date || null,
       photo_url: form.photo_url || null,
       show_price: form.show_price,
-    });
+      team_member_id: form.team_member_id || null,
+    } as any);
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
