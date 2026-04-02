@@ -222,6 +222,7 @@ const Admin = () => {
             {section === "jobs" && <JobsTab dark={dark} />}
             {section === "resales" && <ResalesTab dark={dark} />}
             {section === "health" && <HealthTab dark={dark} onHealthScore={setHealthScore} />}
+            {section === "map" && <ValuationsMapTab dark={dark} />}
           </div>
         </div>
       </div>
