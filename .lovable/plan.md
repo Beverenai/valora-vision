@@ -1,45 +1,41 @@
 
 
-# Create ScrapingBee Shared Utilities for Edge Functions
+# Create `sell-valuation` Edge Function
 
-## Overview
+## File to create
 
-Create three shared utility files under `supabase/functions/_shared/` that handle ScrapingBee API communication, Idealista HTML parsing, and property valuation calculations. Also add the `SCRAPINGBEE_API_KEY` secret.
+`supabase/functions/sell-valuation/index.ts`
 
-## Step 0: Add Secret
+## What it does
 
-Use the `add_secret` tool to store `SCRAPINGBEE_API_KEY` with the value provided.
+A POST endpoint that accepts property details (municipality, type, size, rooms, features), scrapes Idealista for comparable listings via ScrapingBee, filters them, runs the valuation engine, and returns an estimated market value with comparables.
 
-## Files to Create
+## Flow
 
-### 1. `supabase/functions/_shared/scrapingbee-client.ts`
-- `fetchWithScrapingBee(url, apiKey, options)` — calls ScrapingBee API with configurable proxy, JS rendering, country code, and timeout (90s)
-- `buildIdealistaSearchUrl(params)` — constructs Idealista search URLs from operation, property type, municipality slug, price/size/room filters, and pagination
-- Default: `renderJs=false`, `premiumProxy=true`, `countryCode="es"`
+1. CORS preflight handling
+2. Validate required fields: `municipality`, `sizeM2`, `rooms`
+3. Look up municipality slug from `MUNICIPALITY_SLUGS`
+4. Map `propertyType` → Idealista URL format (`pisos`, `aticos`, `chalets`, `viviendas`)
+5. Build size filters (±30%) and price filters (base €3000/m² ±50%)
+6. Call `buildIdealistaSearchUrl()` → `fetchWithScrapingBee()` with `SCRAPINGBEE_API_KEY` from env
+7. Parse HTML with `parseSearchResults()`
+8. Filter: must have size+rooms, rooms ±1, size ±30%
+9. Run `calculateValuation()` from shared engine
+10. Return JSON with `valuation`, `comparables` (max 15), and `meta`
 
-### 2. `supabase/functions/_shared/idealista-parser.ts`
-- Types: `ParsedProperty`, `PropertyFeatures`, `ParsedDetailProperty`
-- `parseSearchResults(html)` — extracts property listings from Idealista search page HTML using regex on article elements (property code, price in Spanish format, size, rooms, bathrooms, thumbnail, property type detection, feature detection)
-- `parsePropertyDetail(html)` — extracts full detail from a single listing page (images, GPS coords, energy rating, construction year, contact info)
-- `MUNICIPALITY_SLUGS` — mapping of city names to Idealista URL slugs (Marbella, Estepona, Málaga, etc.)
-- All parsing uses regex (no DOM parser needed in Deno)
+## Imports from shared modules
 
-### 3. `supabase/functions/_shared/valuation-engine.ts`
-- `calculateValuation(input, comparables)` — computes estimated value using:
-  - MAD-based outlier removal on price/m² values
-  - Median price/m² × target size as base estimate
-  - Feature adjustments (pool +10%, sea views +20%, garage +5%, etc.) applied only when target differs significantly from comparable set (>70% or <30% thresholds)
-  - Confidence levels based on comparable count (high/medium/low/insufficient)
-  - Range of ±15%
-- `calculateBuyAnalysis(askingPrice, input, comparables)` — extends valuation with:
-  - Price deviation percentage
-  - Price score (below_market / good_value / fair_price / slightly_above / above_market)
-  - Color codes and negotiation hints with actual € amounts
+- `fetchWithScrapingBee`, `buildIdealistaSearchUrl` from `../_shared/scrapingbee-client.ts`
+- `parseSearchResults`, `MUNICIPALITY_SLUGS` from `../_shared/idealista-parser.ts`
+- `calculateValuation`, `ValuationInput`, `ComparableProperty` from `../_shared/valuation-engine.ts`
 
-## Technical Notes
+## Response shape
 
-- Files are pure utility modules (no HTTP handlers) — they export functions for use by edge functions
-- Consistent with existing patterns in `calculate-valuation/index.ts` (same MAD filtering, feature adjustment approach) but extracted into reusable modules
-- No frontend changes
-- No database changes
+Maps `ValuationResult` fields to the response format specified in the prompt (estimatedValue, estimatedLow/High, confidence, featureAdjustments with label/percent/amount, etc.). Comparables capped at 15.
+
+## Technical notes
+
+- Uses CORS headers from `@supabase/supabase-js/cors`
+- Reads `SCRAPINGBEE_API_KEY` via `Deno.env.get()`
+- No frontend changes, no database changes
 
