@@ -1,38 +1,76 @@
 
 
-# Cover Photo Focal Point Picker
+# Auto-Import Reviews During Onboarding
 
-## Problem
-When a team cover photo is cropped (e.g., from a wide landscape to a narrow banner), `object-cover` centers the crop by default — often cutting off faces at the top or bottom.
-
-## Solution
-Add a clickable focal point selector on the cover photo preview in the Company Profile section. The agent clicks where the important content is (e.g., faces), and we store that position as `cover_photo_focus_x` and `cover_photo_focus_y` (0-100 percentages). Both the dashboard preview and the public AgentProfile page use `object-position` with these values.
-
-## How It Works
-1. After uploading a cover photo, the preview becomes clickable
-2. A small crosshair dot appears where the agent clicks
-3. The x/y percentage is saved to the `professionals` table
-4. The public profile uses `object-position: {x}% {y}%` instead of default `center`
+## What This Does
+When an agency onboards and provides their website URL, we already scrape it with Firecrawl. We'll extend that to:
+1. Find Google Reviews and Trustpilot links on their website
+2. Scrape those review pages with Firecrawl
+3. Use AI to extract individual reviews (name, rating, comment, date)
+4. Insert them into `agent_reviews` with `source` tracking and `is_verified = true`
 
 ## Changes
 
-### Database Migration
-- Add two columns to `professionals`: `cover_photo_focus_x SMALLINT DEFAULT 50` and `cover_photo_focus_y SMALLINT DEFAULT 50`
+### 1. Database Migration
+Add `source` column to `agent_reviews` to track where reviews came from:
+- `source TEXT DEFAULT 'manual'` — values: `manual`, `google`, `trustpilot`, `website`
+- Add `source_url TEXT` for the original review page URL
 
-### ProDashboard.tsx — Company Profile Section
-- Add state for `focusX` / `focusY` (default 50/50)
-- Make the cover photo preview clickable — on click, compute % position relative to image bounds
-- Show a small dot overlay at the focal point
-- Apply `object-position: {focusX}% {focusY}%` to the preview
-- Save focus values alongside cover photo URL on handleSave
-- Add helper text: "Click on the photo to set the focus point"
+### 2. Update `onboard-agency/index.ts`
+After the existing website scrape (step 1), add a new step:
 
-### AgentProfile.tsx — Hero Banner
-- Read `cover_photo_focus_x` and `cover_photo_focus_y` from the professional record
-- Apply as `background-position: {x}% {y}%` on the hero div (which uses `background: url(...) center/cover`)
+**Step 1b: Find review page links**
+- From the already-scraped links array, detect:
+  - Google: links containing `google.com/maps` or `business.google.com`
+  - Trustpilot: links containing `trustpilot.com`
+  - Also check the scraped markdown for embedded review text
+
+**Step 2b: Scrape review pages**
+- If Google/Trustpilot links found, scrape each with Firecrawl (markdown format)
+- Limit to 1 URL per source to stay within credit budget
+
+**Step 3b: Extract reviews with AI**
+- Send scraped review page content to Lovable AI with tool calling
+- Extract: `reviewer_name`, `rating` (1-5), `comment`, `source`
+- Cap at 20 reviews per source
+
+**Step 4b: Return reviews in result**
+- Add `reviews: []` array to the onboard response
+- The frontend (ProOnboard.tsx) will insert them into `agent_reviews` after profile creation
+
+### 3. Update `ProOnboard.tsx` — handlePublish
+After the professional is created, bulk-insert the returned reviews into `agent_reviews` with:
+- `professional_id` from the newly created professional
+- `is_verified: true` (imported from verified source)
+- `source: 'google' | 'trustpilot'`
+
+Add an onboarding step: "Importing reviews..." with count feedback.
+
+### 4. Update `AgentProfile.tsx` — Review Display
+Show a small badge on imported reviews indicating source (Google icon, Trustpilot icon) so visitors can see these are verified external reviews.
+
+## Technical Details
+
+### AI extraction prompt (tool calling)
+```text
+Extract individual reviews from this review page content.
+Return reviewer name, rating (1-5), comment text, and approximate date.
+```
+
+### Review insert shape
+```typescript
+{ professional_id, reviewer_name, rating, comment, 
+  is_verified: true, source: 'google', source_url: '...' }
+```
 
 ### Files Modified
-- `supabase/migrations/` — add 2 columns
-- `src/pages/ProDashboard.tsx` — focal point picker UI + save logic
-- `src/pages/AgentProfile.tsx` — use focal point in hero background-position
+- `supabase/migrations/` — add `source` and `source_url` columns to `agent_reviews`
+- `supabase/functions/onboard-agency/index.ts` — review scraping + AI extraction
+- `src/pages/ProOnboard.tsx` — insert reviews on publish
+- `src/pages/AgentProfile.tsx` — source badge on reviews
+
+### Limitations
+- Firecrawl may not capture all Google reviews (Google limits visible reviews)
+- Trustpilot pages are usually scrapeable and contain more review text
+- We cap at 20 reviews per source to avoid excessive AI token usage
 
