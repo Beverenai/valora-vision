@@ -153,6 +153,21 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
               />
               <p className="text-xs text-muted-foreground mt-1">Paste a link from Idealista, Fotocasa, or another portal.</p>
             </div>
+            {teamMembers.length > 0 && (
+              <div>
+                <Label>Attributed to</Label>
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={linkTeamMemberId}
+                  onChange={e => setLinkTeamMemberId(e.target.value)}
+                >
+                  <option value="">Company (no specific agent)</option>
+                  {teamMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <Button onClick={handleSubmitLink} disabled={saving} className="w-full">
               {saving && <Loader2 size={14} className="mr-2 animate-spin" />}
               Register Sale
