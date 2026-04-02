@@ -126,6 +126,12 @@ Deno.serve(async (req) => {
       .eq("professional_id", professionalId);
 
     // Always include the owner as a team member
+    const makeSlug = (name: string) =>
+      name.trim()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
     const ownerTeamEntry = {
       professional_id: professionalId,
       name: contact_name,
@@ -136,6 +142,7 @@ Deno.serve(async (req) => {
       sort_order: 0,
       is_active: true,
       whatsapp: null,
+      slug: makeSlug(contact_name),
     };
 
     const teamInserts = [ownerTeamEntry];
@@ -151,6 +158,7 @@ Deno.serve(async (req) => {
           sort_order: i + 1,
           is_active: true,
           whatsapp: m.whatsapp || null,
+          slug: m.slug || makeSlug(m.name),
         });
       });
     }
