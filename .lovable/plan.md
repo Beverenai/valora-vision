@@ -1,67 +1,41 @@
 
 
-# Gamified Merit Score Breakdown with Actionable Navigation
+# Revamp /pro "Market Insight" Section with KPMG Seller Behaviour Data
 
-## What Changes
+## Concept
 
-The current Merit Score card shows a single number + 7 tiny labels with raw scores (0-100). Agents don't understand what each score means, how much weight it carries, or how to improve it. We'll replace this with an interactive, gamified breakdown that makes scoring transparent and improvement effortless.
+Instead of quoting RealAdvisor's traffic numbers, we use the KPMG study to tell a story about **how Spanish homeowners behave before selling** — and why that makes ValoraCasa valuable. Two parts:
 
-## New Merit Score Card Design
+### Part A — "How sellers start their journey" (KPMG-backed)
+A bento grid showing general market behaviour insights sourced from KPMG Spain:
 
-### Overall Score (top)
-- Keep the circular progress ring + total score
-- Add a subtitle: **"Your Merit Score determines your visibility to property sellers — combined with your subscription tier"**
-- Add a small info tooltip: "Higher scores = more prominent placement in valuation results"
+| Card | Stat | Copy |
+|------|------|------|
+| Wide card | "1 in 2" | "One in two sellers uses an online valuation tool before contacting an agent" |
+| Card | "87%" | "of agents who join online platforms renew their subscription" |
+| Card | "14%" | "of clients come through referrals from other satisfied clients" |
+| Banner | — | "Sellers today research online first. If you're not visible where they look, you're invisible." |
 
-### Category Breakdown (7 rows)
-Each of the 7 factors becomes a visual row showing:
+Source line: "Source: KPMG Spain, 2025"
 
-```text
-┌──────────────────────────────────────────────────────────┐
-│  📝 Profile Completeness              6 / 8 pts    [→]  │
-│  ████████████████████░░░░  75%                           │
-│  "Complete your tagline and cover photo"                 │
-├──────────────────────────────────────────────────────────┤
-│  ⭐ Client Rating                    16 / 20 pts        │
-│  ████████████████████░░░░  80%                           │
-│  "Maintain great service to keep your rating high"       │
-├──────────────────────────────────────────────────────────┤
-│  📍 Zone Coverage                    12 / 12 pts   [→]  │
-│  ████████████████████████  100%  ✓                       │
-└──────────────────────────────────────────────────────────┘
-```
+Each card uses the same rounded-2xl border bg-card style from Index.tsx bento grid.
 
-- **Label** with icon + category name
-- **Score**: weighted points earned / max weighted points (e.g., "6 / 8" for Profile at 8% weight)
-- **Progress bar** colored: green (80%+), amber (40-79%), red (<40%)
-- **Hint text**: contextual tip when score < 100%
-- **Action button** `[Improve →]`: clickable, navigates to the relevant dashboard section (`setSection("profile")`, `setSection("zones")`, etc.). Hidden when score is 100%.
-- **Checkmark** shown when category is maxed out
+### Part B — "What sellers look for in an agent" (keep + upgrade)
+Keep the existing 5 factors (Proximity 29%, Reviews 21%, Recent Sales 19%, Experience 18%, Brand 14%) but upgrade the visual to bento-style cards instead of plain circles. Each card gets:
+- Icon + percentage in large bold text
+- Label + one-line explanation of why it matters
+- Subtle progress bar showing the percentage
 
-### Visibility Explainer (bottom)
-A subtle banner below the breakdown:
-> "Your visibility ranking = Merit Score × Subscription Tier. Upgrade your plan for maximum exposure." with a link to the subscription section.
+SectionLabel "Market Insight" above the whole section. Subtitle references the KPMG study properly.
 
-## Categories with hints and navigation targets
+### Part C — Vertical timeline for "How it works"
+Adopt the Index.tsx vertical timeline pattern (numbered circles, icon pills, connecting line) instead of the current 3-column grid.
 
-| Category | Weight | Max pts | Hint when low | Nav target |
-|----------|--------|---------|----------------|------------|
-| Profile | 8 | 8 | "Add bio, logo, tagline, cover photo" | `profile` |
-| Rating | 20 | 20 | "Great reviews boost your rating" | `reviews` |
-| Zones | 12 | 12 | "Select service zones to appear in results" | `zones` |
-| Reviews | 12 | 12 | "Ask satisfied clients for reviews" | `reviews` |
-| Response | 18 | 18 | "Respond to new leads promptly" | `leads` |
-| Conversion | 12 | 12 | "Mark leads as converted when you close deals" | `leads` |
-| Sales | 18 | 18 | "Add more verified sales to your portfolio" | `sales` |
-
-## Remove separate Action Items card
-The action items card becomes redundant since each merit category now has its own "Improve" button. Remove it.
-
-## File changes
+## Files to change
 
 | File | Change |
 |------|--------|
-| `src/pages/ProDashboard.tsx` | Rewrite the Merit Score card in `OverviewSection` with category rows, progress bars, hints, action buttons, and visibility explainer. Remove the Action Items card. |
+| `src/pages/ProLanding.tsx` | Replace "What sellers look for" with two-part KPMG section (seller journey + agent factors); upgrade "How it works" to vertical timeline; add SectionLabel components |
 
 No database changes needed.
 
