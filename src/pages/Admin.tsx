@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatRefCode } from "@/utils/referenceCode";
-import { Lock, ExternalLink, RefreshCw, Activity, Database, Zap, Users, AlertTriangle, CheckCircle, Clock, Play, Globe, MapPin } from "lucide-react";
+import { Lock, ExternalLink, RefreshCw, Activity, Database, Zap, Users, AlertTriangle, CheckCircle, Clock, Play, Globe, MapPin, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 
 const ADMIN_PASSWORD = "1234";
 
