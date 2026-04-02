@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
+import { Loader } from "@googlemaps/js-api-loader";
+import { GOOGLE_MAPS_API_KEY } from "@/config/google-maps";
 
 interface PropertyMarker {
   id: string;
@@ -28,82 +30,92 @@ function formatSaleDate(dateStr: string | null): string {
   return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
+const loader = new Loader({
+  apiKey: GOOGLE_MAPS_API_KEY,
+  version: "weekly",
+  libraries: ["marker"],
+});
+
 export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentPropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState(false);
 
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-
   const markers = sales.filter(s => s.latitude != null && s.longitude != null);
 
   useEffect(() => {
-    if (!mapboxToken || !mapRef.current || markers.length === 0) {
+    if (!mapRef.current || markers.length === 0) {
       setMapError(true);
       return;
     }
 
-    let map: any;
+    let map: google.maps.Map | null = null;
 
     async function initMap() {
       try {
-        const mapboxgl = (await import("mapbox-gl")).default;
-        await import("mapbox-gl/dist/mapbox-gl.css");
+        const { Map: GoogleMap } = await loader.importLibrary("maps");
 
-        (mapboxgl as any).accessToken = mapboxToken;
+        const defaultCenter = centerLat && centerLng
+          ? { lat: centerLat, lng: centerLng }
+          : { lat: markers[0].latitude!, lng: markers[0].longitude! };
 
-        const defaultCenter: [number, number] = centerLng && centerLat
-          ? [centerLng, centerLat]
-          : [markers[0].longitude!, markers[0].latitude!];
-
-        map = new mapboxgl.Map({
-          container: mapRef.current!,
-          style: "mapbox://styles/mapbox/light-v11",
+        map = new GoogleMap(mapRef.current!, {
           center: defaultCenter,
           zoom: 11,
+          mapId: "agent-sales-map",
+          disableDefaultUI: true,
+          zoomControl: true,
+          styles: [
+            { featureType: "poi", stylers: [{ visibility: "off" }] },
+            { featureType: "transit", stylers: [{ visibility: "off" }] },
+          ],
         });
 
-        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        const infoWindow = new google.maps.InfoWindow();
+        const bounds = new google.maps.LatLngBounds();
 
-        map.on("load", () => {
-          setMapLoaded(true);
+        markers.forEach(sale => {
+          const position = { lat: sale.latitude!, lng: sale.longitude! };
+          bounds.extend(position);
 
-          markers.forEach(sale => {
-            const el = document.createElement("div");
-            el.className = "w-6 h-6 rounded-full border-2 border-white shadow-md flex items-center justify-center text-[8px] font-bold text-white cursor-pointer";
-            el.style.backgroundColor = "#D4713B";
+          const pin = document.createElement("div");
+          pin.className = "w-6 h-6 rounded-full border-2 border-white shadow-md cursor-pointer";
+          pin.style.backgroundColor = "#D4713B";
 
-            const priceHtml = sale.show_price && sale.sale_price
-              ? `<p class="text-sm font-semibold">€${(sale.sale_price / 1000).toFixed(0)}k</p>`
-              : "";
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position,
+            content: pin,
+          });
 
-            const dateHtml = sale.sale_date
-              ? `<p class="text-gray-400 text-[10px]">Sold: ${formatSaleDate(sale.sale_date)}</p>`
-              : "";
+          const priceHtml = sale.show_price && sale.sale_price
+            ? `<p style="font-size:13px;font-weight:600;margin:2px 0">€${(sale.sale_price / 1000).toFixed(0)}k</p>`
+            : "";
 
-            const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(`
-              <div class="text-xs">
-                ${sale.photo_url ? `<img src="${sale.photo_url}" class="w-full h-20 object-cover rounded mb-1" />` : ""}
-                <p class="font-semibold capitalize">${sale.property_type || "Property"}</p>
+          const dateHtml = sale.sale_date
+            ? `<p style="color:#9ca3af;font-size:10px">Sold: ${formatSaleDate(sale.sale_date)}</p>`
+            : "";
+
+          marker.addListener("click", () => {
+            infoWindow.setContent(`
+              <div style="font-size:12px;max-width:200px">
+                ${sale.photo_url ? `<img src="${sale.photo_url}" style="width:100%;height:80px;object-fit:cover;border-radius:4px;margin-bottom:4px" />` : ""}
+                <p style="font-weight:600;text-transform:capitalize">${sale.property_type || "Property"}</p>
                 ${sale.bedrooms ? `<p>${sale.bedrooms} bedrooms</p>` : ""}
-                ${sale.city ? `<p class="text-gray-500">${sale.city}</p>` : ""}
+                ${sale.city ? `<p style="color:#6b7280">${sale.city}</p>` : ""}
                 ${priceHtml}
                 ${dateHtml}
               </div>
             `);
-
-            new mapboxgl.Marker(el)
-              .setLngLat([sale.longitude!, sale.latitude!])
-              .setPopup(popup)
-              .addTo(map);
+            infoWindow.open(map, marker);
           });
-
-          if (markers.length > 1) {
-            const bounds = new mapboxgl.LngLatBounds();
-            markers.forEach(s => bounds.extend([s.longitude!, s.latitude!]));
-            map.fitBounds(bounds, { padding: 50, maxZoom: 14 });
-          }
         });
+
+        if (markers.length > 1) {
+          map.fitBounds(bounds, 50);
+        }
+
+        setMapLoaded(true);
       } catch {
         setMapError(true);
       }
@@ -112,11 +124,11 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
     initMap();
 
     return () => {
-      if (map) map.remove();
+      if (map) map = null;
     };
-  }, [mapboxToken, markers.length]);
+  }, [markers.length]);
 
-  if (!mapboxToken || markers.length === 0) {
+  if (markers.length === 0) {
     return (
       <section>
         <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">

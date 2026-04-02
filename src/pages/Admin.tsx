@@ -792,18 +792,25 @@ function ValuationsMapTab({ dark }: { dark: boolean }) {
   const [mapError, setMapError] = useState(false);
   const [stats, setStats] = useState({ sell: 0, rent: 0 });
 
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-
   useEffect(() => {
-    if (!mapboxToken || !mapRef.current) {
+    if (!mapRef.current) {
       setMapError(true);
       return;
     }
 
-    let map: any;
+    let map: google.maps.Map | null = null;
 
     async function initMap() {
       try {
+        const { Loader: MapsLoader } = await import("@googlemaps/js-api-loader");
+        const { GOOGLE_MAPS_API_KEY } = await import("@/config/google-maps");
+
+        const loader = new MapsLoader({
+          apiKey: GOOGLE_MAPS_API_KEY,
+          version: "weekly",
+          libraries: ["marker"],
+        });
+
         const [sellRes, rentRes] = await Promise.all([
           supabase.from("leads_sell").select("id, address, city, property_type, estimated_value, latitude, longitude, created_at").not("latitude", "is", null).not("longitude", "is", null).eq("status", "completed").limit(500),
           supabase.from("leads_rent").select("id, address, city, property_type, annual_income_estimate, latitude, longitude, created_at").not("latitude", "is", null).not("longitude", "is", null).eq("status", "completed").limit(500),
@@ -820,70 +827,65 @@ function ValuationsMapTab({ dark }: { dark: boolean }) {
           return;
         }
 
-        const mapboxgl = (await import("mapbox-gl")).default;
-        await import("mapbox-gl/dist/mapbox-gl.css");
-        (mapboxgl as any).accessToken = mapboxToken;
+        const { Map: GoogleMap } = await loader.importLibrary("maps");
+        await loader.importLibrary("marker");
 
-        map = new mapboxgl.Map({
-          container: mapRef.current!,
-          style: dark ? "mapbox://styles/mapbox/dark-v11" : "mapbox://styles/mapbox/light-v11",
-          center: [allPoints[0].longitude!, allPoints[0].latitude!],
+        map = new GoogleMap(mapRef.current!, {
+          center: { lat: allPoints[0].latitude!, lng: allPoints[0].longitude! },
           zoom: 9,
+          mapId: "admin-valuations-map",
+          disableDefaultUI: true,
+          zoomControl: true,
         });
 
-        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        const infoWindow = new google.maps.InfoWindow();
+        const bounds = new google.maps.LatLngBounds();
 
-        map.on("load", () => {
-          setMapLoaded(true);
+        allPoints.forEach(point => {
+          const position = { lat: point.latitude!, lng: point.longitude! };
+          bounds.extend(position);
 
-          allPoints.forEach(point => {
-            const el = document.createElement("div");
-            el.className = "w-5 h-5 rounded-full border-2 border-white shadow-md cursor-pointer";
-            el.style.backgroundColor = point.type === "sell" ? "#2563eb" : "#16a34a";
+          const el = document.createElement("div");
+          el.className = "w-5 h-5 rounded-full border-2 border-white shadow-md cursor-pointer";
+          el.style.backgroundColor = point.type === "sell" ? "#2563eb" : "#16a34a";
 
-            const value = point.type === "sell"
-              ? (point as any).estimated_value ? `€${((point as any).estimated_value / 1000).toFixed(0)}k` : ""
-              : (point as any).annual_income_estimate ? `€${((point as any).annual_income_estimate / 1000).toFixed(0)}k/yr` : "";
+          const value = point.type === "sell"
+            ? (point as any).estimated_value ? `€${((point as any).estimated_value / 1000).toFixed(0)}k` : ""
+            : (point as any).annual_income_estimate ? `€${((point as any).annual_income_estimate / 1000).toFixed(0)}k/yr` : "";
 
-            const popup = new mapboxgl.Popup({ offset: 20, maxWidth: "220px" }).setHTML(`
-              <div class="text-xs">
-                <p class="font-semibold">${point.address || "Unknown"}</p>
-                ${point.city ? `<p class="text-gray-500">${point.city}</p>` : ""}
-                ${point.property_type ? `<p class="capitalize">${point.property_type}</p>` : ""}
-                ${value ? `<p class="font-semibold mt-1">${value}</p>` : ""}
-                <p class="text-gray-400 mt-1">${point.type === "sell" ? "Sale" : "Rental"} valuation · ${point.created_at ? new Date(point.created_at).toLocaleDateString() : ""}</p>
-              </div>
-            `);
-
-            new mapboxgl.Marker(el)
-              .setLngLat([point.longitude!, point.latitude!])
-              .setPopup(popup)
-              .addTo(map);
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position,
+            content: el,
           });
 
-          if (allPoints.length > 1) {
-            const bounds = new mapboxgl.LngLatBounds();
-            allPoints.forEach(p => bounds.extend([p.longitude!, p.latitude!]));
-            map.fitBounds(bounds, { padding: 60, maxZoom: 14 });
-          }
+          marker.addListener("click", () => {
+            infoWindow.setContent(`
+              <div style="font-size:12px;max-width:220px">
+                <p style="font-weight:600">${point.address || "Unknown"}</p>
+                ${point.city ? `<p style="color:#6b7280">${point.city}</p>` : ""}
+                ${point.property_type ? `<p style="text-transform:capitalize">${point.property_type}</p>` : ""}
+                ${value ? `<p style="font-weight:600;margin-top:4px">${value}</p>` : ""}
+                <p style="color:#9ca3af;margin-top:4px">${point.type === "sell" ? "Sale" : "Rental"} valuation · ${point.created_at ? new Date(point.created_at).toLocaleDateString() : ""}</p>
+              </div>
+            `);
+            infoWindow.open(map, marker);
+          });
         });
+
+        if (allPoints.length > 1) {
+          map.fitBounds(bounds, 60);
+        }
+
+        setMapLoaded(true);
       } catch {
         setMapError(true);
       }
     }
 
     initMap();
-    return () => { if (map) map.remove(); };
-  }, [mapboxToken, dark]);
-
-  if (!mapboxToken) {
-    return (
-      <div className={cn("py-12 text-center", dark ? "text-white/40" : "text-muted-foreground")}>
-        <MapPin size={32} className="mx-auto mb-3 opacity-30" />
-        <p>Mapbox token not configured</p>
-      </div>
-    );
-  }
+    return () => { map = null; };
+  }, [dark]);
 
   return (
     <div className="space-y-4">
