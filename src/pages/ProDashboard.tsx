@@ -1560,6 +1560,11 @@ const ProDashboard = () => {
 
     if (reviewsRes.data) setReviews(reviewsRes.data as unknown as Review[]);
 
+    if (salesRes.data) {
+      setSalesCount(salesRes.data.length);
+      setVerifiedSalesCount(salesRes.data.filter((s: any) => s.verified).length);
+    }
+
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const dayMap: Record<string, number> = {};
