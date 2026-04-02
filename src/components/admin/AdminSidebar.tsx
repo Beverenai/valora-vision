@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export type AdminSection = "leads" | "zones" | "jobs" | "resales" | "health";
+export type AdminSection = "leads" | "zones" | "jobs" | "resales" | "health" | "map";
 
 const groups = [
   {
