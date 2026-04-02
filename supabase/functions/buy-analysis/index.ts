@@ -70,13 +70,13 @@ Deno.serve(async (req) => {
     let detailCredits = 0;
     let property;
 
-    // Attempt 1: no JS rendering (fast, ~5s)
+    // Attempt 1: no JS rendering (fast)
     try {
       console.log("Detail attempt 1 (no JS):", detailUrl);
       const t0 = Date.now();
       const r = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: false, premiumProxy: true, stealthProxy: true, countryCode: "es",
-      }), 25_000);
+        renderJs: false, premiumProxy: true, countryCode: "es",
+      }), 20_000);
       console.log(`Detail attempt 1 took ${Date.now() - t0}ms, status=${r.statusCode}, credits=${r.creditsUsed}`);
       detailCredits += r.creditsUsed;
       if (!r.error) {
