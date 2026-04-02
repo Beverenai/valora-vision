@@ -60,6 +60,19 @@ export default function SalesSection({ professionalId }: { professionalId: strin
 
   useEffect(() => { fetchSales(); }, [professionalId]);
 
+  // Polling: re-fetch while any sale is still enriching
+  const isEnriching = useCallback((s: AgentSale) => 
+    !!s.listing_url && !s.city && !s.photo_url && !s.property_type, []);
+  const hasEnriching = sales.some(isEnriching);
+  const pollRef = useRef<ReturnType<typeof setInterval>>();
+
+  useEffect(() => {
+    if (hasEnriching) {
+      pollRef.current = setInterval(fetchSales, 8000);
+    }
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [hasEnriching]);
+
   useEffect(() => {
     async function fetchTeam() {
       const { data } = await supabase
