@@ -782,7 +782,7 @@ export default function AgentProfile() {
                     <div className="text-center">
                       <p className="text-4xl font-serif font-light text-foreground">{professional.avg_rating.toFixed(1)}</p>
                       <StarRating rating={professional.avg_rating} size={14} />
-                      <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} opiniones</p>
+                      <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} reviews</p>
                     </div>
                     <div className="flex-1 space-y-1.5">
                       {starDist.map(d => (
