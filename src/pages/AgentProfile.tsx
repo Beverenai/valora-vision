@@ -854,7 +854,7 @@ export default function AgentProfile() {
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
                     <Star size={32} className="mx-auto text-muted-foreground/30 mb-3" />
-                    <p className="text-sm text-muted-foreground">Sé el primero en opinar sobre {professional.company_name}</p>
+                    <p className="text-sm text-muted-foreground">Be the first to review {professional.company_name}</p>
                   </CardContent>
                 </Card>
               )}
