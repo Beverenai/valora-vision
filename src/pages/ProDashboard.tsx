@@ -833,6 +833,10 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
               <Label className="text-xs">Languages (comma-separated)</Label>
               <Input value={editForm.languages} onChange={(e) => setEditForm({ ...editForm, languages: e.target.value })} placeholder="English, Spanish" />
             </div>
+            <div>
+              <Label className="text-xs">Bio</Label>
+              <Textarea value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} placeholder="Short personal bio…" rows={3} />
+            </div>
             <Button onClick={handleSaveEdit} disabled={saving} className="w-full rounded-full">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
               Save Changes
