@@ -1,6 +1,7 @@
-import { fetchWithScrapingBee, buildIdealistaSearchUrl } from "../_shared/scrapingbee-client.ts";
-import { parsePropertyDetail, parseSearchResults, MUNICIPALITY_SLUGS } from "../_shared/idealista-parser.ts";
+import { fetchWithScrapingBee } from "../_shared/scrapingbee-client.ts";
+import { parsePropertyDetail, MUNICIPALITY_SLUGS } from "../_shared/idealista-parser.ts";
 import { calculateBuyAnalysis, ValuationInput, ComparableProperty } from "../_shared/valuation-engine.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,8 +46,6 @@ const FEATURE_LABELS: Record<string, string> = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const DEADLINE = Date.now() + 55_000;
-
   try {
     const { url } = await req.json();
     if (!url || typeof url !== "string") {
@@ -65,19 +64,17 @@ Deno.serve(async (req) => {
     const API_KEY = Deno.env.get("SCRAPINGBEE_API_KEY");
     if (!API_KEY) return jsonResponse({ error: "ScrapingBee API key not configured" }, 500);
 
-    // Step 2: Scrape detail page — single attempt, generous timeout
+    // Step 1: Scrape detail page
     const detailUrl = `https://www.idealista.com/inmueble/${propertyCode}/`;
-    let detailCredits = 0;
-
     console.log("Fetching detail:", detailUrl);
     const t0 = Date.now();
+
     let detailResult;
     try {
       detailResult = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: false, premiumProxy: true, stealthProxy: true, countryCode: "es",
-      }), 25_000);
+        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
+      }), 45_000);
       console.log(`Detail took ${Date.now() - t0}ms, status=${detailResult.statusCode}, credits=${detailResult.creditsUsed}`);
-      detailCredits = detailResult.creditsUsed;
     } catch (e) {
       console.error("Detail fetch error:", String(e));
       return jsonResponse({ error: "Failed to fetch listing (timeout)", detail: String(e) }, 502);
@@ -94,7 +91,7 @@ Deno.serve(async (req) => {
       }, 422);
     }
 
-    // Step 3: Detect municipality
+    // Step 2: Detect municipality
     const municipalitySlug = detectMunicipality(property.address, property.title);
 
     if (!municipalitySlug) {
@@ -102,67 +99,41 @@ Deno.serve(async (req) => {
         property,
         analysis: null,
         comparables: [],
-        meta: { platform: "idealista", creditsUsed: detailCredits, message: "Could not identify area for comparable search" },
+        meta: { platform: "idealista", creditsUsed: detailResult.creditsUsed, message: "Could not identify area for comparable search" },
       });
     }
 
-    // Step 4: Check if we have time for comparables
-    const remainingMs = DEADLINE - Date.now();
-    if (remainingMs < 10_000) {
-      console.log(`Only ${remainingMs}ms left, returning property without analysis`);
-      return jsonResponse({
-        property,
-        analysis: null,
-        comparables: [],
-        meta: {
-          platform: "idealista",
-          creditsUsed: detailCredits,
-          message: "Property data retrieved but not enough time for comparables search. Please try again.",
-        },
-      });
-    }
+    // Step 3: Query our own database for comparables (no second ScrapingBee call)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Search comparables with remaining time
-    const idealistaType = (PROPERTY_TYPE_MAP[property.propertyType || ""] || "viviendas") as "viviendas" | "chalets" | "pisos" | "aticos";
+    const municipalityName = municipalitySlug.split("-")[0];
     const minSize = Math.round(property.sizeM2 * 0.7);
     const maxSize = Math.round(property.sizeM2 * 1.3);
-    const searchUrl = buildIdealistaSearchUrl({
-      operation: "venta",
-      municipality: municipalitySlug,
-      propertyType: idealistaType,
-      minSize, maxSize,
-    });
+    const targetRooms = property.rooms || 0;
 
-    const searchTimeout = Math.min(remainingMs - 3_000, 30_000); // leave 3s for processing
-    let searchResult;
-    try {
-      console.log(`Fetching comparables (timeout ${searchTimeout}ms):`, searchUrl);
-      const t1 = Date.now();
-      searchResult = await withTimeout(fetchWithScrapingBee(searchUrl, API_KEY, {
-        renderJs: false, premiumProxy: true, stealthProxy: true, countryCode: "es",
-      }), searchTimeout);
-      console.log(`Search took ${Date.now() - t1}ms, status=${searchResult.statusCode}, credits=${searchResult.creditsUsed}`);
-    } catch (e) {
-      console.log("Search timeout/error, returning property only:", String(e));
-      return jsonResponse({
-        property,
-        analysis: null,
-        comparables: [],
-        meta: {
-          platform: "idealista",
-          creditsUsed: detailCredits,
-          message: "Property found but comparables search timed out. Please try again.",
-        },
-      });
+    const { data: dbComps, error: dbError } = await supabase
+      .from("properties")
+      .select("price, size_m2, price_per_m2, rooms, has_pool, has_sea_views, has_garage, has_terrace, has_garden, has_lift, has_ac, is_exterior, property_code, address, thumbnail_url")
+      .eq("is_active", true)
+      .eq("operation", "venta")
+      .ilike("municipality", `%${municipalityName}%`)
+      .gte("size_m2", minSize)
+      .lte("size_m2", maxSize)
+      .not("price", "is", null)
+      .not("size_m2", "is", null)
+      .limit(200);
+
+    if (dbError) {
+      console.error("DB query error:", dbError);
     }
 
-    const allComps = searchResult.error ? [] : parseSearchResults(searchResult.html);
-    const targetRooms = property.rooms || 0;
+    const allComps = (dbComps || []);
     const filtered = allComps.filter((c) => {
-      if (c.propertyCode === propertyCode) return false;
-      if (!c.sizeM2 || !c.rooms) return false;
+      if (c.property_code === propertyCode) return false;
+      if (!c.size_m2 || !c.rooms) return false;
       if (Math.abs(c.rooms - targetRooms) > 1) return false;
-      if (Math.abs(c.sizeM2 - property.sizeM2!) / property.sizeM2! > 0.3) return false;
       return true;
     });
 
@@ -172,12 +143,31 @@ Deno.serve(async (req) => {
         analysis: null,
         comparables: [],
         meta: {
-          platform: "idealista", searchUrl, totalSearchResults: allComps.length,
+          platform: "idealista",
+          totalSearchResults: allComps.length,
           comparablesFound: filtered.length,
-          message: "Too few comparable properties found for reliable analysis",
+          creditsUsed: detailResult.creditsUsed,
+          message: "Too few comparable properties found in database for reliable analysis",
         },
       });
     }
+
+    // Convert DB records to engine format
+    const compsForEngine: ComparableProperty[] = filtered.map((c) => ({
+      price: c.price,
+      sizeM2: c.size_m2,
+      pricePerM2: c.price_per_m2 || Math.round(c.price / c.size_m2),
+      features: {
+        hasPool: c.has_pool || false,
+        hasSeaViews: c.has_sea_views || false,
+        hasGarage: c.has_garage || false,
+        hasTerrace: c.has_terrace || false,
+        hasGarden: c.has_garden || false,
+        hasLift: c.has_lift || false,
+        hasAC: c.has_ac || false,
+        isExterior: c.is_exterior || false,
+      },
+    }));
 
     const input: ValuationInput = {
       sizeM2: property.sizeM2!,
@@ -187,26 +177,29 @@ Deno.serve(async (req) => {
       features: property.features,
     };
 
-    const compsForEngine: ComparableProperty[] = filtered.map((c) => ({
-      price: c.price,
-      sizeM2: c.sizeM2,
-      pricePerM2: c.pricePerM2,
-      features: c.features,
-    }));
-
     const result = calculateBuyAnalysis(property.price, input, compsForEngine);
     const totalAdjPct = result.featureAdjustments.reduce((s, a) => s + a.adjustment, 0);
-    const targetPricePerM2 = property.pricePerM2 || (property.sizeM2 ? Math.round(property.price / property.sizeM2) : null);
+    const targetPricePerM2 = property.pricePerM2 || Math.round(property.price / property.sizeM2!);
 
     const comparablesOut = filtered.slice(0, 10).map((c) => {
+      const cPricePerM2 = c.price_per_m2 || Math.round(c.price / c.size_m2);
       let priceComparison = "unknown";
-      if (targetPricePerM2 && c.pricePerM2) {
-        const ratio = c.pricePerM2 / targetPricePerM2;
+      if (targetPricePerM2 && cPricePerM2) {
+        const ratio = cPricePerM2 / targetPricePerM2;
         if (ratio < 0.95) priceComparison = "cheaper";
         else if (ratio > 1.05) priceComparison = "more_expensive";
         else priceComparison = "similar";
       }
-      return { ...c, priceComparison };
+      return {
+        propertyCode: c.property_code,
+        price: c.price,
+        sizeM2: c.size_m2,
+        pricePerM2: cPricePerM2,
+        rooms: c.rooms,
+        address: c.address,
+        thumbnail: c.thumbnail_url,
+        priceComparison,
+      };
     });
 
     return jsonResponse({
@@ -222,7 +215,7 @@ Deno.serve(async (req) => {
         floor: property.floor,
         propertyType: property.propertyType,
         address: property.address,
-        municipality: municipalitySlug.split("-")[0],
+        municipality: municipalityName,
         latitude: property.latitude,
         longitude: property.longitude,
         features: property.features,
@@ -261,10 +254,10 @@ Deno.serve(async (req) => {
       comparables: comparablesOut,
       meta: {
         platform: "idealista",
-        searchUrl,
+        source: "database",
         totalSearchResults: allComps.length,
         comparablesFound: filtered.length,
-        creditsUsed: detailCredits + (searchResult?.creditsUsed || 0),
+        creditsUsed: detailResult.creditsUsed,
         timestamp: new Date().toISOString(),
       },
     });
