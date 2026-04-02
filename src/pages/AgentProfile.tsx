@@ -659,10 +659,16 @@ export default function AgentProfile() {
             )}
 
             {/* Property Map */}
-            {recentSales.some((s: any) => s.latitude && s.longitude) && (
+            {recentSales.length > 0 && (
               <Suspense fallback={<div className="h-[300px] bg-muted rounded-xl animate-pulse" />}>
                 <AgentPropertyMap
-                  sales={recentSales}
+                  sales={recentSales.map((s: any) => ({
+                    ...s,
+                    latitude: s.latitude ? Number(s.latitude) : null,
+                    longitude: s.longitude ? Number(s.longitude) : null,
+                    sale_price: s.sale_price ? Number(s.sale_price) : null,
+                    address_text: s.address_text || null,
+                  }))}
                   centerLat={mapCenter.lat}
                   centerLng={mapCenter.lng}
                 />

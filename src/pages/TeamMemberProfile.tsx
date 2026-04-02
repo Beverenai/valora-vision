@@ -391,7 +391,7 @@ export default function TeamMemberProfile() {
             )}
 
             {/* Sales Map */}
-            {sales.some((s: any) => s.latitude != null && s.longitude != null) && (
+            {sales.length > 0 && (
               <Suspense fallback={<div className="h-[300px] bg-muted animate-pulse rounded-xl" />}>
                 <AgentPropertyMap
                   sales={sales.map((s: any) => ({
@@ -406,15 +406,8 @@ export default function TeamMemberProfile() {
                     bedrooms: s.bedrooms,
                     verified: s.verified ?? false,
                     sale_date: s.sale_date || null,
+                    address_text: s.address_text || null,
                   }))}
-                  centerLat={(() => {
-                    const withCoords = sales.filter((s: any) => s.latitude != null);
-                    return withCoords.length > 0 ? withCoords.reduce((sum: number, s: any) => sum + Number(s.latitude), 0) / withCoords.length : undefined;
-                  })()}
-                  centerLng={(() => {
-                    const withCoords = sales.filter((s: any) => s.longitude != null);
-                    return withCoords.length > 0 ? withCoords.reduce((sum: number, s: any) => sum + Number(s.longitude), 0) / withCoords.length : undefined;
-                  })()}
                 />
               </Suspense>
             )}

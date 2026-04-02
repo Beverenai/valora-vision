@@ -16,6 +16,7 @@ interface PropertyMarker {
   bedrooms: number | null;
   verified: boolean;
   sale_date: string | null;
+  address_text?: string | null;
 }
 
 interface AgentPropertyMapProps {
@@ -38,15 +39,64 @@ function ensureOptions() {
   }
 }
 
+// Simple client-side geocoder with in-memory cache
+const geocodeCache = new Map<string, { lat: number; lng: number } | null>();
+
+async function geocodeAddress(address: string, city: string | null): Promise<{ lat: number; lng: number } | null> {
+  const query = [address, city, "Spain"].filter(Boolean).join(", ");
+  if (geocodeCache.has(query)) return geocodeCache.get(query) ?? null;
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${GOOGLE_MAPS_API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.status === "OK" && data.results?.length > 0) {
+      const loc = data.results[0].geometry.location;
+      const result = { lat: loc.lat, lng: loc.lng };
+      geocodeCache.set(query, result);
+      return result;
+    }
+    geocodeCache.set(query, null);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentPropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState(false);
+  const [resolvedMarkers, setResolvedMarkers] = useState<(PropertyMarker & { latitude: number; longitude: number })[]>([]);
 
-  const markers = sales.filter(s => s.latitude != null && s.longitude != null);
+  // Resolve coordinates: use existing ones or geocode from address
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resolve() {
+      const results: (PropertyMarker & { latitude: number; longitude: number })[] = [];
+
+      for (const sale of sales) {
+        if (sale.latitude != null && sale.longitude != null) {
+          results.push(sale as PropertyMarker & { latitude: number; longitude: number });
+        } else if (sale.address_text || sale.city) {
+          const coords = await geocodeAddress(sale.address_text || "", sale.city);
+          if (coords && !cancelled) {
+            results.push({ ...sale, latitude: coords.lat, longitude: coords.lng });
+          }
+        }
+      }
+
+      if (!cancelled) setResolvedMarkers(results);
+    }
+
+    resolve();
+    return () => { cancelled = true; };
+  }, [sales]);
 
   useEffect(() => {
-    if (!mapRef.current || markers.length === 0) {
+    if (!mapRef.current || resolvedMarkers.length === 0) {
+      if (resolvedMarkers.length === 0 && sales.length > 0) return; // still resolving
       setMapError(true);
       return;
     }
@@ -61,7 +111,7 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
 
         const defaultCenter = centerLat && centerLng
           ? { lat: centerLat, lng: centerLng }
-          : { lat: markers[0].latitude!, lng: markers[0].longitude! };
+          : { lat: resolvedMarkers[0].latitude, lng: resolvedMarkers[0].longitude };
 
         map = new GoogleMap(mapRef.current!, {
           center: defaultCenter,
@@ -78,8 +128,8 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
         const infoWindow = new google.maps.InfoWindow();
         const bounds = new google.maps.LatLngBounds();
 
-        markers.forEach(sale => {
-          const position = { lat: sale.latitude!, lng: sale.longitude! };
+        resolvedMarkers.forEach(sale => {
+          const position = { lat: sale.latitude, lng: sale.longitude };
           bounds.extend(position);
 
           const pin = document.createElement("div");
@@ -115,7 +165,7 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
           });
         });
 
-        if (markers.length > 1) {
+        if (resolvedMarkers.length > 1) {
           map.fitBounds(bounds, 50);
         }
 
@@ -130,9 +180,9 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
     return () => {
       if (map) map = null;
     };
-  }, [markers.length]);
+  }, [resolvedMarkers, centerLat, centerLng]);
 
-  if (markers.length === 0) {
+  if (sales.length === 0) {
     return (
       <section>
         <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">
