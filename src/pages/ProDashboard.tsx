@@ -547,7 +547,7 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
   const [inviteForm, setInviteForm] = useState({ name: "", email: "", phone: "", role: "" });
   const [inviting, setInviting] = useState(false);
   const [editingMember, setEditingMember] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", role: "", email: "", phone: "", whatsapp: "", photo_url: "", languages: "" });
+  const [editForm, setEditForm] = useState({ name: "", role: "", email: "", phone: "", whatsapp: "", photo_url: "", languages: "", bio: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
