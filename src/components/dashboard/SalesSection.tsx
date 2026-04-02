@@ -252,6 +252,7 @@ export default function SalesSection({ professionalId }: { professionalId: strin
         onOpenChange={setDialogOpen}
         professionalId={professionalId}
         onSaleAdded={fetchSales}
+        teamMembers={teamMembers}
       />
     </div>
   );
