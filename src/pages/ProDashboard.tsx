@@ -673,6 +673,9 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
     }
     setInviting(true);
     const maxSort = teamMembers.reduce((max: number, m: any) => Math.max(max, m.sort_order || 0), 0);
+    const inviteSlug = inviteForm.name.trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     const { error } = await supabase.from("agent_team_members").insert({
       professional_id: agent.id,
       name: inviteForm.name.trim(),
@@ -681,7 +684,8 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
       role: inviteForm.role.trim() || null,
       sort_order: maxSort + 1,
       is_active: true,
-    });
+      slug: inviteSlug || null,
+    } as any);
     setInviting(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Team member added!" });
