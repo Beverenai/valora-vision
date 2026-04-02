@@ -834,7 +834,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
       <div>
         <div className="flex gap-3 mb-3 items-center">
           <h3 className={cn("text-sm font-medium", dark ? "text-white/80" : "text-muted-foreground")}>Sync History</h3>
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className={cn("ml-auto", dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+          <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={fetchData} disabled={loading} className="ml-auto">
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </Button>
         </div>
