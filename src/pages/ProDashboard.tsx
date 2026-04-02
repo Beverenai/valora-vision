@@ -1518,6 +1518,7 @@ const ProDashboard = () => {
       supabase.from("professional_zones").select("*, zones(*)").eq("professional_id", prof.id).eq("is_active", true),
       supabase.from("agent_reviews").select("*").eq("professional_id", prof.id).order("created_at", { ascending: false }),
       supabase.from("zones").select("id, name, tier, is_active, municipality, region").eq("is_active", true),
+      supabase.from("agent_sales").select("id, verified").eq("professional_id", prof.id),
     ]);
 
     if (leadsRes.data) setLeads(leadsRes.data as unknown as Lead[]);
