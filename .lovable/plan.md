@@ -1,32 +1,24 @@
 
 
-# Move "Our Team" Section Directly Under "About Us"
+# Standardize Team Member Cards
 
-## Current Order (left column)
-1. About Us
-2. Agency context
-3. Sales Statistics
-4. Property Map
-5. Property Cards
-6. **Our Team** ← currently here
-7. Service Areas
-8. Reviews
+## Changes to `src/pages/AgentProfile.tsx` (lines 613–691)
 
-## New Order
-1. About Us
-2. **Our Team** ← move here
-3. Agency context
-4. Sales Statistics
-5. Property Map
-6. Property Cards
-7. Service Areas
-8. Reviews
+Redesign each team member card to have a fixed-height layout with consistent structure regardless of content:
 
-## File to change
+1. **Fixed card layout** — Replace the horizontal `flex items-start` layout with a vertical centered layout using fixed height (`h-[220px]` or similar) so all cards match.
+
+2. **Content: Picture → Name/Title → Button only** — Remove variable-height content (bio, email/phone, languages, sales badge, star ratings) from the card. Keep only:
+   - Photo/avatar (centered, larger ~16x16)
+   - Name (single line, truncated)
+   - Role/title (single line, truncated)
+   - "View Profile" button (links to member profile) instead of "Contact" button
+
+3. **Button behavior** — If member has a `slug`, the button navigates to `/agentes/${professional.slug}/${member.slug}`. If no slug, button is disabled or hidden. Remove the outer `<Link>` wrapper since the button itself handles navigation.
+
+## File
 
 | File | Change |
 |------|--------|
-| `src/pages/AgentProfile.tsx` | Move the team section block (lines 688–780 approx) from after Property Cards to immediately after the About Us section (after line 596) |
-
-One block move, no logic changes.
+| `src/pages/AgentProfile.tsx` | Rewrite team card markup (lines ~613–691): vertical layout, fixed height, photo + name + role + "View Profile" button only |
 
