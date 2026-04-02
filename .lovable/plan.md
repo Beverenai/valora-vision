@@ -1,41 +1,54 @@
 
 
-# Create `sell-valuation` Edge Function
+# Create `buy-analysis` Edge Function
 
 ## File to create
 
-`supabase/functions/sell-valuation/index.ts`
+`supabase/functions/buy-analysis/index.ts`
 
 ## What it does
 
-A POST endpoint that accepts property details (municipality, type, size, rooms, features), scrapes Idealista for comparable listings via ScrapingBee, filters them, runs the valuation engine, and returns an estimated market value with comparables.
+Accepts an Idealista listing URL, scrapes the property detail page, finds comparables via a search scrape, and returns a Price Score analysis comparing asking price to estimated market value.
 
 ## Flow
 
-1. CORS preflight handling
-2. Validate required fields: `municipality`, `sizeM2`, `rooms`
-3. Look up municipality slug from `MUNICIPALITY_SLUGS`
-4. Map `propertyType` → Idealista URL format (`pisos`, `aticos`, `chalets`, `viviendas`)
-5. Build size filters (±30%) and price filters (base €3000/m² ±50%)
-6. Call `buildIdealistaSearchUrl()` → `fetchWithScrapingBee()` with `SCRAPINGBEE_API_KEY` from env
-7. Parse HTML with `parseSearchResults()`
-8. Filter: must have size+rooms, rooms ±1, size ±30%
-9. Run `calculateValuation()` from shared engine
-10. Return JSON with `valuation`, `comparables` (max 15), and `meta`
+1. CORS preflight
+2. Validate URL contains `idealista.com/inmueble/`, extract property code
+3. Scrape detail page via `fetchWithScrapingBee()` → parse with `parsePropertyDetail()`
+4. Detect municipality from parsed address/title using `MUNICIPALITY_SLUGS`
+5. Scrape comparables search page → parse with `parseSearchResults()`
+6. Filter comparables (exclude target, ±1 rooms, ±30% size)
+7. Run `calculateBuyAnalysis(askingPrice, input, comparables)` from valuation engine
+8. Return structured response with property, analysis, comparables (max 10), and meta
 
-## Imports from shared modules
+## Response mapping
+
+Maps `BuyAnalysisResult` fields to the prompt's response format:
+- `priceRangeLow` → `estimatedLow`, `priceRangeHigh` → `estimatedHigh`
+- `pricePerM2` → `estimatedPricePerM2`, `medianPricePerM2` → `areaMedianPricePerM2`
+- `confidenceLevel` → `confidence`
+- `priceScore.score/label/color/deviationPercent` → flat fields
+- Each comparable gets a `priceComparison` field (cheaper/similar/more_expensive/unknown)
+
+## Error handling
+
+- 400: missing/invalid URL, non-Idealista portal
+- 422: parsing failed (removed listing, no price/size)
+- 502: ScrapingBee error
+- 500: unexpected error
+
+## Imports
 
 - `fetchWithScrapingBee`, `buildIdealistaSearchUrl` from `../_shared/scrapingbee-client.ts`
-- `parseSearchResults`, `MUNICIPALITY_SLUGS` from `../_shared/idealista-parser.ts`
-- `calculateValuation`, `ValuationInput`, `ComparableProperty` from `../_shared/valuation-engine.ts`
+- `parsePropertyDetail`, `parseSearchResults`, `MUNICIPALITY_SLUGS` from `../_shared/idealista-parser.ts`
+- `calculateBuyAnalysis`, `ValuationInput`, `ComparableProperty` from `../_shared/valuation-engine.ts`
 
-## Response shape
+## Secrets
 
-Maps `ValuationResult` fields to the response format specified in the prompt (estimatedValue, estimatedLow/High, confidence, featureAdjustments with label/percent/amount, etc.). Comparables capped at 15.
+`SCRAPINGBEE_API_KEY` is already configured — no new secret needed.
 
-## Technical notes
+## Notes
 
-- Uses CORS headers from `@supabase/supabase-js/cors`
-- Reads `SCRAPINGBEE_API_KEY` via `Deno.env.get()`
 - No frontend changes, no database changes
+- Uses ~10 ScrapingBee credits per call (2 requests, no JS rendering)
 
