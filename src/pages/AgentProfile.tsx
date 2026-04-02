@@ -896,7 +896,7 @@ export default function AgentProfile() {
           <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
             <SheetHeader>
               <SheetTitle className="font-serif text-lg">
-                Contactar {professional.company_name}
+                Contact {professional.company_name}
               </SheetTitle>
             </SheetHeader>
             <div className="px-1 py-4">
