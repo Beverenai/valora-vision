@@ -637,6 +637,7 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
       whatsapp: member.whatsapp || "",
       photo_url: member.photo_url || "",
       languages: (member.languages || []).join(", "),
+      bio: member.bio || "",
     });
   };
 
