@@ -23,6 +23,7 @@ const groups = [
   {
     label: "System",
     items: [
+      { key: "map" as AdminSection, label: "Valuations Map", icon: Map },
       { key: "health" as AdminSection, label: "Health", icon: Activity },
     ],
   },

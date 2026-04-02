@@ -1,5 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useRef, useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,6 +20,13 @@ interface SaleMarker {
   photo_url: string | null;
   bedrooms: number | null;
   verified: boolean;
+  sale_date: string | null;
+}
+
+function formatSaleDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
 export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm = 5 }: NearbyPropertyMapProps) {
@@ -54,6 +60,7 @@ export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm 
               photo_url: s.photo_url,
               bedrooms: s.bedrooms,
               verified: s.verified,
+              sale_date: s.sale_date || null,
             }))
         );
       }
@@ -114,6 +121,10 @@ export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm 
                 ? `<p class="text-sm font-semibold">€${(sale.sale_price / 1000).toFixed(0)}k</p>`
                 : "";
 
+            const dateHtml = sale.sale_date
+              ? `<p class="text-gray-400 text-[10px]">Sold: ${formatSaleDate(sale.sale_date)}</p>`
+              : "";
+
             const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(`
               <div class="text-xs">
                 ${sale.photo_url ? `<img src="${sale.photo_url}" class="w-full h-20 object-cover rounded mb-1" />` : ""}
@@ -121,6 +132,7 @@ export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm 
                 ${sale.bedrooms ? `<p>${sale.bedrooms} bedrooms</p>` : ""}
                 ${sale.city ? `<p class="text-gray-500">${sale.city}</p>` : ""}
                 ${priceHtml}
+                ${dateHtml}
                 ${sale.verified ? '<p class="text-green-600 text-[10px] font-medium mt-1">✓ Verified sale</p>' : ""}
               </div>
             `);

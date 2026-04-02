@@ -13,12 +13,19 @@ interface PropertyMarker {
   photo_url: string | null;
   bedrooms: number | null;
   verified: boolean;
+  sale_date: string | null;
 }
 
 interface AgentPropertyMapProps {
   sales: PropertyMarker[];
   centerLat?: number;
   centerLng?: number;
+}
+
+function formatSaleDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
 export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentPropertyMapProps) {
@@ -28,7 +35,6 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
 
   const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-  // Filter sales with coordinates
   const markers = sales.filter(s => s.latitude != null && s.longitude != null);
 
   useEffect(() => {
@@ -71,13 +77,18 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
               ? `<p class="text-sm font-semibold">€${(sale.sale_price / 1000).toFixed(0)}k</p>`
               : "";
 
+            const dateHtml = sale.sale_date
+              ? `<p class="text-gray-400 text-[10px]">Sold: ${formatSaleDate(sale.sale_date)}</p>`
+              : "";
+
             const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(`
               <div class="text-xs">
                 ${sale.photo_url ? `<img src="${sale.photo_url}" class="w-full h-20 object-cover rounded mb-1" />` : ""}
-                <p class="font-semibold capitalize">${sale.property_type || "Propiedad"}</p>
-                ${sale.bedrooms ? `<p>${sale.bedrooms} dormitorios</p>` : ""}
+                <p class="font-semibold capitalize">${sale.property_type || "Property"}</p>
+                ${sale.bedrooms ? `<p>${sale.bedrooms} bedrooms</p>` : ""}
                 ${sale.city ? `<p class="text-gray-500">${sale.city}</p>` : ""}
                 ${priceHtml}
+                ${dateHtml}
               </div>
             `);
 
@@ -87,7 +98,6 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
               .addTo(map);
           });
 
-          // Fit bounds if multiple markers
           if (markers.length > 1) {
             const bounds = new mapboxgl.LngLatBounds();
             markers.forEach(s => bounds.extend([s.longitude!, s.latitude!]));
@@ -107,17 +117,16 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
   }, [mapboxToken, markers.length]);
 
   if (!mapboxToken || markers.length === 0) {
-    // Fallback
     return (
       <section>
         <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">
-          UBICACIÓN DE VENTAS
+          SALES LOCATIONS
         </p>
         <Card className="border-border/60">
           <CardContent className="p-8 text-center">
             <MapPin size={32} className="mx-auto text-muted-foreground/30 mb-3" />
             <p className="text-sm text-muted-foreground">
-              Mapa de propiedades disponible próximamente
+              Property map available soon
             </p>
           </CardContent>
         </Card>
@@ -128,7 +137,7 @@ export default function AgentPropertyMap({ sales, centerLat, centerLng }: AgentP
   return (
     <section>
       <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">
-        UBICACIÓN DE VENTAS
+        SALES LOCATIONS
       </p>
       <div className="rounded-xl overflow-hidden border border-border/60 relative">
         <div ref={mapRef} className="h-[300px] md:h-[400px] w-full" />
