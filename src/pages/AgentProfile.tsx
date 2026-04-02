@@ -561,7 +561,7 @@ export default function AgentProfile() {
             {/* About */}
             {aboutText && (
               <section>
-                <p className={SECTION_LABEL}>SOBRE NOSOTROS</p>
+                <p className={SECTION_LABEL}>ABOUT US</p>
                 <div className="prose prose-sm max-w-none text-foreground/80 leading-relaxed whitespace-pre-line">
                   {aboutText}
                 </div>
