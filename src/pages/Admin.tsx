@@ -808,13 +808,24 @@ function ValuationsMapTab({ dark }: { dark: boolean }) {
         setGoogleOptions({ key: GOOGLE_MAPS_API_KEY });
 
         const [sellRes, rentRes] = await Promise.all([
-          supabase.from("leads_sell").select("id, address, city, property_type, estimated_value, latitude, longitude, created_at").not("latitude", "is", null).not("longitude", "is", null).eq("status", "completed").limit(500),
-          supabase.from("leads_rent").select("id, address, city, property_type, annual_income_estimate, latitude, longitude, created_at").not("latitude", "is", null).not("longitude", "is", null).eq("status", "completed").limit(500),
+          supabase.from("leads_sell").select("id, address, city, property_type, estimated_value, latitude, longitude, created_at").not("latitude", "is", null).not("longitude", "is", null).in("status", ["completed", "ready"]).limit(500),
+          supabase.from("leads_rent").select("id, address, city, property_type, annual_income_estimate, latitude, longitude, created_at").not("latitude", "is", null).not("longitude", "is", null).in("status", ["completed", "ready"]).limit(500),
         ]);
 
         const sellPoints = (sellRes.data || []).map(s => ({ ...s, type: "sell" as const }));
         const rentPoints = (rentRes.data || []).map(s => ({ ...s, type: "rent" as const }));
-        const allPoints = [...sellPoints, ...rentPoints];
+        const merged = [...sellPoints, ...rentPoints];
+
+        // Deduplicate by address — keep most recent per unique address
+        const byAddress = new Map<string, typeof merged[number]>();
+        merged.forEach(p => {
+          const key = (p.address || "").trim().toLowerCase();
+          const existing = byAddress.get(key);
+          if (!existing || (p.created_at && existing.created_at && p.created_at > existing.created_at)) {
+            byAddress.set(key, p);
+          }
+        });
+        const allPoints = Array.from(byAddress.values());
 
         setStats({ sell: sellPoints.length, rent: rentPoints.length });
 
