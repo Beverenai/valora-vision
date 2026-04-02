@@ -60,10 +60,14 @@ Deno.serve(async (req) => {
     const detailUrl = `https://www.idealista.com/inmueble/${propertyCode}/`;
     let detailResult;
     try {
+      console.log("Fetching detail page:", detailUrl);
+      const t0 = Date.now();
       detailResult = await fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 3000,
+        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
       });
+      console.log(`Detail fetch took ${Date.now() - t0}ms, status=${detailResult.statusCode}, credits=${detailResult.creditsUsed}`);
     } catch (e) {
+      console.error("Detail fetch error:", e);
       return jsonResponse({ error: "Failed to fetch listing", detail: String(e) }, 502);
     }
 
