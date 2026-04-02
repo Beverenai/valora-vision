@@ -64,11 +64,11 @@ export default function AgentPropertyCards({
                 </div>
               )}
               <Badge className="absolute top-2 left-2 bg-[#D4713B] text-white border-0 text-[0.6rem] uppercase tracking-wider font-semibold">
-                Vendido
+                Sold
               </Badge>
               {sale.verified && (
                 <Badge className="absolute top-2 right-2 bg-emerald-600 text-white border-0 text-[0.6rem] gap-1">
-                  <CheckCircle2 size={10} /> Verificado
+                  <CheckCircle2 size={10} /> Verified
                 </Badge>
               )}
             </div>
