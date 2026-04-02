@@ -107,7 +107,7 @@ export default function AgentSalesStats({ sales, agentName }: AgentSalesStatsPro
       transition={{ duration: 0.5 }}
     >
       <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-muted-foreground mb-6">
-        ESTADÍSTICAS DE VENTA
+        SALES STATISTICS
       </p>
 
       {/* Summary text */}
