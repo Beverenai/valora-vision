@@ -169,13 +169,6 @@ const Admin = () => {
     );
   }
 
-  const statsTiles: StatTile[] = [
-    { key: "leads", label: "Total Leads", value: leadCount, icon: Users, color: "text-primary" },
-    { key: "zones", label: "Active Zones", value: zoneCount, icon: Database, color: "text-emerald-500" },
-    { key: "jobs", label: "Jobs Completed", value: jobCount, icon: Zap, color: "text-blue-500" },
-    { key: "health", label: "Health", value: healthScore, icon: Activity, color: "text-amber-500" },
-  ];
-
   return (
     <>
       <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[60] bg-primary/90 text-primary-foreground text-xs px-4 py-1 rounded-b-lg">
@@ -189,29 +182,20 @@ const Admin = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar — hidden on mobile, shown via dropdown in content area */}
-        <div className="hidden md:block">
-          <AdminSidebar active={section} onNav={setSection} dark={dark} badges={{ leads: leadCount }} />
+        <div className="hidden md:flex h-full">
+          <AdminSidebar active={section} onNav={setSection} dark={dark} badges={{ leads: leadCount, buy: buyCount }} />
         </div>
 
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Mobile nav dropdown */}
           <div className="md:hidden px-4 pt-4">
-            <AdminSidebar active={section} onNav={setSection} dark={dark} badges={{ leads: leadCount }} />
-          </div>
-
-          {/* Stats bar */}
-          <div className="px-4 md:px-6 pt-4 md:pt-6">
-            <StatsBar
-              tiles={statsTiles}
-              activeKey={section}
-              onSelect={(key) => setSection(key as AdminSection)}
-              dark={dark}
-            />
+            <AdminSidebar active={section} onNav={setSection} dark={dark} badges={{ leads: leadCount, buy: buyCount }} />
           </div>
 
           {/* Content */}
           <div className="flex-1 px-4 md:px-6 py-6">
             {section === "leads" && <LeadsTab navigate={navigate} dark={dark} />}
+            {section === "buy" && <BuyAnalysesTab navigate={navigate} dark={dark} />}
             {section === "zones" && <ZonesTab dark={dark} />}
             {section === "jobs" && <JobsTab dark={dark} />}
             {section === "resales" && <ResalesTab dark={dark} />}
