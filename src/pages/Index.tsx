@@ -246,35 +246,6 @@ const Index = () => {
 
       <div className="max-w-[1400px] mx-auto w-full flex flex-col">
 
-        {/* ═══════════ FLOATING AGENCIES ═══════════ */}
-        <section className="w-full py-8 md:py-20 overflow-hidden px-5 md:px-8">
-          <SectionLabel className="text-center mb-8 md:mb-14">
-            Used every day by real estate professionals
-          </SectionLabel>
-          <div className="relative max-w-4xl mx-auto h-[120px] md:h-[140px]">
-            {AGENCIES.map((a, i) => (
-              <motion.span
-                key={a.name}
-                className={cn(
-                  "absolute font-sans text-muted-foreground cursor-default select-none",
-                  a.size
-                )}
-                style={{ left: a.x, top: `${30 + (i % 3) * 28}%` }}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: a.opacity }}
-                viewport={{ once: true }}
-                animate={{ y: [a.y, a.y - 6, a.y] }}
-                transition={{
-                  y: { duration: a.dur, repeat: Infinity, ease: "easeInOut" },
-                  opacity: { duration: 0.8, delay: i * 0.1 },
-                }}
-                whileHover={{ opacity: 0.6, scale: 1.05 }}
-              >
-                {a.name}
-              </motion.span>
-            ))}
-          </div>
-        </section>
 
         {/* ═══════════ HOW IT WORKS — Vertical Timeline ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
