@@ -74,8 +74,8 @@ Deno.serve(async (req) => {
     let detailResult;
     try {
       detailResult = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
-      }), 35_000);
+        renderJs: false, premiumProxy: true, stealthProxy: true, countryCode: "es",
+      }), 25_000);
       console.log(`Detail took ${Date.now() - t0}ms, status=${detailResult.statusCode}, credits=${detailResult.creditsUsed}`);
       detailCredits = detailResult.creditsUsed;
     } catch (e) {
