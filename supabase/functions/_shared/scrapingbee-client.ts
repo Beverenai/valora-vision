@@ -52,9 +52,10 @@ export async function fetchWithScrapingBee(
     params.set("wait", String(wait));
   }
 
+  const timeoutMs = renderJs ? 120000 : 90000;
   const response = await fetch(`${SCRAPINGBEE_BASE}?${params.toString()}`, {
     method: "GET",
-    signal: AbortSignal.timeout(90000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   const html = await response.text();
