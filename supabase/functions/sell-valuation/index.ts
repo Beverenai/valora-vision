@@ -68,21 +68,11 @@ Deno.serve(async (req) => {
 
     console.log(`Fetching: ${searchUrl}`);
 
-    let scrapeResult = await fetchWithScrapingBee(searchUrl, apiKey, {
-      renderJs: false,
+    const scrapeResult = await fetchWithScrapingBee(searchUrl, apiKey, {
+      renderJs: true,
       premiumProxy: true,
       countryCode: "es",
     });
-
-    // Fallback to JS rendering if initial request fails
-    if (scrapeResult.error) {
-      console.log("Retrying with render_js=true...");
-      scrapeResult = await fetchWithScrapingBee(searchUrl, apiKey, {
-        renderJs: true,
-        premiumProxy: true,
-        countryCode: "es",
-      });
-    }
 
     if (scrapeResult.error) {
       console.error("ScrapingBee error:", scrapeResult.error);
