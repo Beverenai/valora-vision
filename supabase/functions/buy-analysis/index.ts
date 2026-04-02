@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     let detailResult;
     try {
       detailResult = await fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: false, premiumProxy: true, countryCode: "es",
+        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 3000,
       });
     } catch (e) {
       return jsonResponse({ error: "Failed to fetch listing", detail: String(e) }, 502);
