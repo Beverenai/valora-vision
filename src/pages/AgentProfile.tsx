@@ -297,6 +297,18 @@ export default function AgentProfile() {
 
   const displayedReviews = showAllReviews ? reviews : reviews.slice(0, isMobile ? 3 : 5);
 
+  // Map center from zones
+  const mapCenter = useMemo(() => {
+    const salesWithCoords = recentSales.filter(s => s.latitude && s.longitude);
+    if (salesWithCoords.length > 0) {
+      return {
+        lat: salesWithCoords.reduce((sum: number, s: any) => sum + Number(s.latitude), 0) / salesWithCoords.length,
+        lng: salesWithCoords.reduce((sum: number, s: any) => sum + Number(s.longitude), 0) / salesWithCoords.length,
+      };
+    }
+    return { lat: 36.51, lng: -4.88 };
+  }, [recentSales]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
