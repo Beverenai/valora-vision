@@ -1,30 +1,35 @@
 
+Fix the button issue at the source instead of only tweaking opacity.
 
-# Fix Low-Contrast Admin Controls (Dark Mode)
+1. Root cause
+- The shared `outline` button in `src/components/ui/button.tsx` hardcodes `bg-background`.
+- In this app, `bg-background` is white here, so every admin `variant="outline"` button is still white.
+- `src/pages/Admin.tsx` then adds white text classes on top, which creates the “white text inside a white button” problem.
 
-## Problem
+2. Implementation
+- Add a dedicated dark admin outline variant in `src/components/ui/button.tsx`, for example:
+  - `border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white`
+- Keep the existing `outline` variant unchanged so light pages do not regress.
+- In `src/pages/Admin.tsx`, replace the admin dark-mode outline buttons with:
+  - `variant={dark ? "outline-dark" : "outline"}`
+- Remove the repeated dark-mode border/text overrides that are currently trying to patch the wrong base style.
+- Keep primary buttons like `Enter`, `Save`, and `Sync All` unchanged.
 
-All inputs, select triggers, and buttons on the admin panel use `bg-white/5 border-white/10` — that's 5% white background with 10% white border on a near-black background. Nearly invisible. The refresh button uses `text-white/60` which is also too dim.
+3. What this fixes
+This will correct all current broken admin buttons, including:
+- Refresh
+- Load More
+- Scrape
+- Add Config
+- Cancel
+- Sync Now
+- Health Refresh
 
-## Fix
+4. Files
+- `src/components/ui/button.tsx` — add reusable dark-outline variant
+- `src/pages/Admin.tsx` — switch admin outline buttons to the new variant
 
-Increase opacity levels across all admin dark-mode controls in `src/pages/Admin.tsx`:
-
-| Current | Replacement | Element |
-|---------|-------------|---------|
-| `bg-white/5 border-white/10` | `bg-white/10 border-white/20` | Inputs, SelectTriggers, form fields |
-| `placeholder:text-white/30` | `placeholder:text-white/50` | Input placeholders |
-| `text-white/60` | `text-white/80` | Refresh button text |
-| `text-white/30` (search icon) | `text-white/50` | Search icon |
-| `text-white/40` (count text) | `text-white/60` | "6 valuations" counter |
-
-This is a bulk find-and-replace across the file — roughly 57 occurrences of `bg-white/5 border-white/10` become `bg-white/10 border-white/20`, and similar for the other opacity values.
-
-## Files to change
-
-| File | Change |
-|------|--------|
-| `src/pages/Admin.tsx` | Increase all dark-mode opacity values for inputs, selects, buttons, icons, and helper text |
-
-No database or component changes needed — the issue is purely opacity values in inline class strings.
-
+5. Notes
+- I checked the shared button styles and admin page usage: this is a structural variant issue, not just a contrast tweak.
+- The problematic pattern is currently in `Admin.tsx`; light-page outline buttons can stay as they are.
+- No backend or database changes are needed.
