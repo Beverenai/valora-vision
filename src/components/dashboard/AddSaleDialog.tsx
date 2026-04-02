@@ -31,6 +31,7 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
   const [mode, setMode] = useState<"link" | "manual">("link");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [linkAdded, setLinkAdded] = useState(false);
 
   const [listingUrl, setListingUrl] = useState("");
   const [linkTeamMemberId, setLinkTeamMemberId] = useState("");
