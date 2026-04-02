@@ -26,9 +26,11 @@ export async function fetchWithScrapingBee(
   const {
     renderJs = false,
     premiumProxy = true,
+    stealthProxy = false,
     countryCode = "es",
     blockAds = true,
     waitForSelector,
+    wait,
   } = options;
 
   const params = new URLSearchParams({
@@ -40,8 +42,14 @@ export async function fetchWithScrapingBee(
     block_ads: String(blockAds),
   });
 
+  if (stealthProxy) {
+    params.set("stealth_proxy", "true");
+  }
   if (waitForSelector) {
     params.set("wait_for", waitForSelector);
+  }
+  if (wait) {
+    params.set("wait", String(wait));
   }
 
   const response = await fetch(`${SCRAPINGBEE_BASE}?${params.toString()}`, {
