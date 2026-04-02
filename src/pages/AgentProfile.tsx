@@ -135,6 +135,8 @@ export default function AgentProfile() {
   const [submitting, setSubmitting] = useState(false);
   const [agency, setAgency] = useState<Professional | null>(null);
   const [agencyAgents, setAgencyAgents] = useState<Professional[]>([]);
+  const [recentSales, setRecentSales] = useState<any[]>([]);
+  const [showAllSales, setShowAllSales] = useState(false);
 
   const primaryCity = useMemo(() => {
     if (zones.length > 0) return zones[0].name;
