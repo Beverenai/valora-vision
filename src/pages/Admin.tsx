@@ -81,7 +81,7 @@ function StatusBadge({ status, dark }: { status: string; dark?: boolean }) {
     success: "bg-emerald-500/10 text-emerald-600",
     running: "bg-blue-500/10 text-blue-600",
     processing: "bg-blue-500/10 text-blue-600",
-    pending: dark ? "bg-white/10 text-white/60" : "bg-muted text-muted-foreground",
+    pending: dark ? "bg-white/10 text-white/80" : "bg-muted text-muted-foreground",
     failed: "bg-destructive/10 text-destructive",
   };
   return (
@@ -160,7 +160,7 @@ const Admin = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
             <Button onClick={handleLogin}>Enter</Button>
           </div>
@@ -258,16 +258,16 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
     <div>
       <div className="flex gap-3 mb-4 flex-wrap items-center">
         <div className="relative">
-          <Search size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", dark ? "text-white/30" : "text-muted-foreground")} />
+          <Search size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", dark ? "text-white/50" : "text-muted-foreground")} />
           <Input
             placeholder="Search name, email, address..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn("pl-9 w-[240px]", dark && "bg-white/5 border-white/10 text-white placeholder:text-white/30")}
+            className={cn("pl-9 w-[240px]", dark && "bg-white/10 border-white/20 text-white placeholder:text-white/50")}
           />
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className={cn("w-[120px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[120px]", dark && "bg-white/10 border-white/20 text-white")}><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="sell">Sell</SelectItem>
@@ -275,7 +275,7 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className={cn("w-[120px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[120px]", dark && "bg-white/10 border-white/20 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -285,17 +285,17 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
         </Select>
         {cities.length > 0 && (
           <Select value={cityFilter} onValueChange={setCityFilter}>
-            <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="City" /></SelectTrigger>
+            <SelectTrigger className={cn("w-[140px]", dark && "bg-white/10 border-white/20 text-white")}><SelectValue placeholder="City" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Cities</SelectItem>
               {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
         )}
-        <Button variant="outline" size="sm" onClick={fetchLeads} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+        <Button variant="outline" size="sm" onClick={fetchLeads} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} valuations</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{filtered.length} valuations</span>
       </div>
 
       <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
@@ -303,7 +303,7 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
           <thead>
             <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
               {["Ref", "Date", "Type", "Name", "Email", "Address", "City", "Status", "Value", ""].map((h) => (
-                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/60" : "text-muted-foreground")}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -328,14 +328,14 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
                     : "—"}
                 </td>
                 <td className="px-4 py-3">
-                  <Button variant="ghost" size="sm" onClick={() => navigate(`/${lead.type}/result/${lead.id}`)} className={cn(dark && "text-white/40 hover:text-white hover:bg-white/10")}>
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/${lead.type}/result/${lead.id}`)} className={cn(dark && "text-white/60 hover:text-white hover:bg-white/10")}>
                     <ExternalLink size={14} />
                   </Button>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={10} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No valuations found"}</td></tr>
+              <tr><td colSpan={10} className={cn("text-center py-12", dark ? "text-white/60" : "text-muted-foreground")}>{loading ? "Loading..." : "No valuations found"}</td></tr>
             )}
           </tbody>
         </table>
@@ -429,17 +429,17 @@ function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNav
     <div>
       <div className="flex gap-3 mb-4 flex-wrap items-center">
         <div className="relative">
-          <Search size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", dark ? "text-white/30" : "text-muted-foreground")} />
+          <Search size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", dark ? "text-white/50" : "text-muted-foreground")} />
           <Input
             placeholder="Search email, address..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn("pl-9 w-[220px]", dark && "bg-white/5 border-white/10 text-white placeholder:text-white/30")}
+            className={cn("pl-9 w-[220px]", dark && "bg-white/10 border-white/20 text-white placeholder:text-white/50")}
           />
         </div>
         {cities.length > 0 && (
           <Select value={cityFilter} onValueChange={setCityFilter}>
-            <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="City" /></SelectTrigger>
+            <SelectTrigger className={cn("w-[140px]", dark && "bg-white/10 border-white/20 text-white")}><SelectValue placeholder="City" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Cities</SelectItem>
               {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -448,17 +448,17 @@ function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNav
         )}
         {scores.length > 0 && (
           <Select value={scoreFilter} onValueChange={setScoreFilter}>
-            <SelectTrigger className={cn("w-[160px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Price Score" /></SelectTrigger>
+            <SelectTrigger className={cn("w-[160px]", dark && "bg-white/10 border-white/20 text-white")}><SelectValue placeholder="Price Score" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Scores</SelectItem>
               {scores.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
         )}
-        <Button variant="outline" size="sm" onClick={() => { setPage(0); fetchAnalyses(0); }} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+        <Button variant="outline" size="sm" onClick={() => { setPage(0); fetchAnalyses(0); }} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} analyses</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{filtered.length} analyses</span>
       </div>
 
       <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
@@ -466,7 +466,7 @@ function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNav
           <thead>
             <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
               {["Date", "Email", "Address", "City", "Score", "Asking", "Estimated", "Status", ""].map((h) => (
-                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/60" : "text-muted-foreground")}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -486,14 +486,14 @@ function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNav
                 <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>{a.estimated_value ? `€${a.estimated_value.toLocaleString()}` : "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={a.status || "pending"} dark={dark} /></td>
                 <td className="px-4 py-3">
-                  <Button variant="ghost" size="sm" onClick={() => navigate(`/buy/result/${a.id}`)} className={cn(dark && "text-white/40 hover:text-white hover:bg-white/10")}>
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/buy/result/${a.id}`)} className={cn(dark && "text-white/60 hover:text-white hover:bg-white/10")}>
                     <ExternalLink size={14} />
                   </Button>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={9} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No buy analyses found"}</td></tr>
+              <tr><td colSpan={9} className={cn("text-center py-12", dark ? "text-white/60" : "text-muted-foreground")}>{loading ? "Loading..." : "No buy analyses found"}</td></tr>
             )}
           </tbody>
         </table>
@@ -501,7 +501,7 @@ function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNav
 
       {hasMore && filtered.length > 0 && (
         <div className="flex justify-center mt-4">
-          <Button variant="outline" size="sm" onClick={loadMore} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+          <Button variant="outline" size="sm" onClick={loadMore} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
             {loading ? <RefreshCw size={14} className="animate-spin" /> : null}
             Load More
           </Button>
@@ -543,10 +543,10 @@ function ZonesTab({ dark }: { dark: boolean }) {
   return (
     <div>
       <div className="flex gap-3 mb-4 items-center">
-        <Button variant="outline" size="sm" onClick={fetchZones} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+        <Button variant="outline" size="sm" onClick={fetchZones} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{zones.length} zones</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{zones.length} zones</span>
       </div>
 
       <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
@@ -554,7 +554,7 @@ function ZonesTab({ dark }: { dark: boolean }) {
           <thead>
             <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
               {["Zone", "Municipality", "Tier", "Location ID", "Last Scraped", "Properties", "Status", ""].map((h) => (
-                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/60" : "text-muted-foreground")}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -564,13 +564,13 @@ function ZonesTab({ dark }: { dark: boolean }) {
                 <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>{zone.name}</td>
                 <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{zone.municipality || "—"}</td>
                 <td className="px-4 py-3"><TierBadge tier={zone.tier} /></td>
-                <td className={cn("px-4 py-3 font-mono text-xs", dark ? "text-white/40" : "text-muted-foreground")}>{zone.idealista_location || "—"}</td>
+                <td className={cn("px-4 py-3 font-mono text-xs", dark ? "text-white/60" : "text-muted-foreground")}>{zone.idealista_location || "—"}</td>
                 <td className="px-4 py-3"><StalenessIndicator lastScraped={zone.last_scraped_at} tier={zone.tier} /></td>
                 <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{zone.total_properties || 0}</td>
                 <td className="px-4 py-3"><StatusBadge status={zone.last_scrape_status || "pending"} dark={dark} /></td>
                 <td className="px-4 py-3">
                   <Button variant="outline" size="sm" disabled={!zone.idealista_location || scraping === zone.id} onClick={() => triggerScrape(zone)}
-                    className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+                    className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
                     {scraping === zone.id ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
                     Scrape
                   </Button>
@@ -612,7 +612,7 @@ function JobsTab({ dark }: { dark: boolean }) {
     <div>
       <div className="flex gap-3 mb-4 items-center flex-wrap">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[140px]", dark && "bg-white/10 border-white/20 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -621,10 +621,10 @@ function JobsTab({ dark }: { dark: boolean }) {
             <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="sm" onClick={fetchJobs} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+        <Button variant="outline" size="sm" onClick={fetchJobs} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} jobs</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{filtered.length} jobs</span>
       </div>
 
       <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
@@ -632,7 +632,7 @@ function JobsTab({ dark }: { dark: boolean }) {
           <thead>
             <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
               {["Zone", "Status", "Items Found", "Upserted", "Duration", "Created", "Error"].map((h) => (
-                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/60" : "text-muted-foreground")}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -654,7 +654,7 @@ function JobsTab({ dark }: { dark: boolean }) {
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No jobs found"}</td></tr>
+              <tr><td colSpan={7} className={cn("text-center py-12", dark ? "text-white/60" : "text-muted-foreground")}>{loading ? "Loading..." : "No jobs found"}</td></tr>
             )}
           </tbody>
         </table>
@@ -765,13 +765,13 @@ function ResalesTab({ dark }: { dark: boolean }) {
             <p className={cn("font-medium", dark ? "text-white" : "text-foreground")}>Resales Online API</p>
             <div className="flex gap-3 text-xs mt-0.5">
               <StatusBadge status={overallStatus === "Connected" ? "completed" : overallStatus === "Error" ? "failed" : "pending"} dark={dark} />
-              <span className={dark ? "text-white/40" : "text-muted-foreground"}>{rolCount} properties</span>
-              {lastSuccessfulSync && <span className={dark ? "text-white/40" : "text-muted-foreground"}>Last sync: {timeAgo(lastSuccessfulSync)}</span>}
+              <span className={dark ? "text-white/60" : "text-muted-foreground"}>{rolCount} properties</span>
+              {lastSuccessfulSync && <span className={dark ? "text-white/60" : "text-muted-foreground"}>Last sync: {timeAgo(lastSuccessfulSync)}</span>}
             </div>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowAddModal(true)} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+          <Button variant="outline" size="sm" onClick={() => setShowAddModal(true)} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
             Add Config
           </Button>
           <Button size="sm" onClick={() => handleSync()} disabled={syncing !== null || configs.length === 0}>
@@ -786,20 +786,20 @@ function ResalesTab({ dark }: { dark: boolean }) {
         <div className={cn("rounded-xl p-5 space-y-4", dark ? "bg-white/5 border border-white/10" : "bg-card border border-border")}>
           <h3 className={cn("font-medium", dark ? "text-white" : "text-foreground")}>Add Resales Online Config</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Input placeholder="Contact ID (p1)" value={newConfig.contact_id} onChange={e => setNewConfig(p => ({ ...p, contact_id: e.target.value }))} className={cn(dark && "bg-white/5 border-white/10 text-white")} />
-            <Input placeholder="API Key (p2)" type="password" value={newConfig.api_key} onChange={e => setNewConfig(p => ({ ...p, api_key: e.target.value }))} className={cn(dark && "bg-white/5 border-white/10 text-white")} />
+            <Input placeholder="Contact ID (p1)" value={newConfig.contact_id} onChange={e => setNewConfig(p => ({ ...p, contact_id: e.target.value }))} className={cn(dark && "bg-white/10 border-white/20 text-white")} />
+            <Input placeholder="API Key (p2)" type="password" value={newConfig.api_key} onChange={e => setNewConfig(p => ({ ...p, api_key: e.target.value }))} className={cn(dark && "bg-white/10 border-white/20 text-white")} />
             <Select value={String(newConfig.filter_id)} onValueChange={v => setNewConfig(p => ({ ...p, filter_id: Number(v), filter_alias: v === "1" ? "sale" : v === "2" ? "st_rental" : "lt_rental" }))}>
-              <SelectTrigger className={cn(dark && "bg-white/5 border-white/10 text-white")}><SelectValue /></SelectTrigger>
+              <SelectTrigger className={cn(dark && "bg-white/10 border-white/20 text-white")}><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">Sale (Filter 1)</SelectItem>
                 <SelectItem value="2">Short-term Rental (Filter 2)</SelectItem>
                 <SelectItem value="3">Long-term Rental (Filter 3)</SelectItem>
               </SelectContent>
             </Select>
-            <Input placeholder="Province" value={newConfig.province} onChange={e => setNewConfig(p => ({ ...p, province: e.target.value }))} className={cn(dark && "bg-white/5 border-white/10 text-white")} />
+            <Input placeholder="Province" value={newConfig.province} onChange={e => setNewConfig(p => ({ ...p, province: e.target.value }))} className={cn(dark && "bg-white/10 border-white/20 text-white")} />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={() => setShowAddModal(false)} className={cn(dark && "border-white/10 text-white/60")}>Cancel</Button>
+            <Button variant="outline" size="sm" onClick={() => setShowAddModal(false)} className={cn(dark && "border-white/10 text-white/80")}>Cancel</Button>
             <Button size="sm" onClick={handleAddConfig} disabled={!newConfig.contact_id || !newConfig.api_key}>Save</Button>
           </div>
         </div>
@@ -813,7 +813,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className={cn("font-medium text-sm", dark ? "text-white" : "text-foreground")}>{config.filter_alias}</p>
-                  <p className={cn("text-xs", dark ? "text-white/40" : "text-muted-foreground")}>Filter #{config.filter_id} · {config.province}</p>
+                  <p className={cn("text-xs", dark ? "text-white/60" : "text-muted-foreground")}>Filter #{config.filter_id} · {config.province}</p>
                 </div>
                 <StatusBadge status={config.last_sync_status === "completed" ? "completed" : config.last_sync_status === "failed" ? "failed" : "pending"} dark={dark} />
               </div>
@@ -821,7 +821,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
                 <p>Last sync: {config.last_sync_at ? timeAgo(config.last_sync_at) : "Never"}</p>
                 <p>Interval: {config.sync_interval_hours}h</p>
               </div>
-              <Button variant="outline" size="sm" className={cn("w-full", dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}
+              <Button variant="outline" size="sm" className={cn("w-full", dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}
                 onClick={() => handleSync(config.id)} disabled={syncing !== null}>
                 {syncing === config.id ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
                 Sync Now
@@ -834,8 +834,8 @@ function ResalesTab({ dark }: { dark: boolean }) {
       {/* Sync History */}
       <div>
         <div className="flex gap-3 mb-3 items-center">
-          <h3 className={cn("text-sm font-medium", dark ? "text-white/60" : "text-muted-foreground")}>Sync History</h3>
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className={cn("ml-auto", dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+          <h3 className={cn("text-sm font-medium", dark ? "text-white/80" : "text-muted-foreground")}>Sync History</h3>
+          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className={cn("ml-auto", dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </Button>
         </div>
@@ -844,7 +844,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
             <thead>
               <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
                 {["Time", "Filter", "Status", "Fetched", "Upserted", "Deactivated", "Duration", "Error"].map(h => (
-                  <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+                  <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/60" : "text-muted-foreground")}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -862,7 +862,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
                 </tr>
               ))}
               {logs.length === 0 && (
-                <tr><td colSpan={8} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>No sync history</td></tr>
+                <tr><td colSpan={8} className={cn("text-center py-12", dark ? "text-white/60" : "text-muted-foreground")}>No sync history</td></tr>
               )}
             </tbody>
           </table>
@@ -899,7 +899,7 @@ function HealthTab({ dark, onHealthScore }: { dark: boolean; onHealthScore: (v: 
   useEffect(() => { fetchHealth(); }, [fetchHealth]);
 
   if (!health) {
-    return <div className={cn("py-12 text-center", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading health data..." : "Failed to load health data"}</div>;
+    return <div className={cn("py-12 text-center", dark ? "text-white/60" : "text-muted-foreground")}>{loading ? "Loading health data..." : "Failed to load health data"}</div>;
   }
 
   const cards = [
@@ -918,7 +918,7 @@ function HealthTab({ dark, onHealthScore }: { dark: boolean; onHealthScore: (v: 
   return (
     <div>
       <div className="flex gap-3 mb-6 items-center">
-        <Button variant="outline" size="sm" onClick={fetchHealth} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+        <Button variant="outline" size="sm" onClick={fetchHealth} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
       </div>
@@ -929,11 +929,11 @@ function HealthTab({ dark, onHealthScore }: { dark: boolean; onHealthScore: (v: 
             dark ? "bg-white/5 border border-white/10" : "bg-card border border-border"
           )}>
             <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", dark ? "bg-white/10" : "bg-muted")}>
-              <c.icon size={16} className={c.color || (dark ? "text-white/60" : "text-muted-foreground")} />
+              <c.icon size={16} className={c.color || (dark ? "text-white/80" : "text-muted-foreground")} />
             </div>
             <div>
               <p className={cn("text-xl font-bold leading-none", dark ? "text-white" : "text-foreground")}>{c.value}</p>
-              <p className={cn("text-[0.6rem] uppercase tracking-wider mt-0.5", dark ? "text-white/40" : "text-muted-foreground")}>{c.label}</p>
+              <p className={cn("text-[0.6rem] uppercase tracking-wider mt-0.5", dark ? "text-white/60" : "text-muted-foreground")}>{c.label}</p>
             </div>
           </div>
         ))}
@@ -1056,13 +1056,13 @@ function ValuationsMapTab({ dark }: { dark: boolean }) {
       <div className="flex gap-4 items-center flex-wrap">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-blue-600 inline-block" />
-          <span className={cn("text-sm", dark ? "text-white/60" : "text-muted-foreground")}>Sale valuations ({stats.sell})</span>
+          <span className={cn("text-sm", dark ? "text-white/80" : "text-muted-foreground")}>Sale valuations ({stats.sell})</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-green-600 inline-block" />
-          <span className={cn("text-sm", dark ? "text-white/60" : "text-muted-foreground")}>Rental valuations ({stats.rent})</span>
+          <span className={cn("text-sm", dark ? "text-white/80" : "text-muted-foreground")}>Rental valuations ({stats.rent})</span>
         </div>
-        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{stats.sell + stats.rent} total</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{stats.sell + stats.rent} total</span>
       </div>
       <div className={cn("rounded-xl overflow-hidden border relative", dark ? "border-white/10" : "border-border")}>
         <div ref={mapRef} className="h-[500px] md:h-[600px] w-full" />
@@ -1075,7 +1075,7 @@ function ValuationsMapTab({ dark }: { dark: boolean }) {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <MapPin size={32} className={cn("mx-auto mb-3", dark ? "text-white/20" : "text-muted-foreground/30")} />
-              <p className={cn("text-sm", dark ? "text-white/40" : "text-muted-foreground")}>No valuation data with coordinates found</p>
+              <p className={cn("text-sm", dark ? "text-white/60" : "text-muted-foreground")}>No valuation data with coordinates found</p>
             </div>
           </div>
         )}
