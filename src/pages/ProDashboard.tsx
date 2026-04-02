@@ -959,7 +959,28 @@ function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professi
         <Label className="mb-2 block">Cover Photo</Label>
         <p className="text-xs text-muted-foreground mb-2">This appears as the hero banner on your public profile</p>
         {coverPhotoUrl && !coverFailed ? (
-          <img src={coverPhotoUrl} alt="Cover" className="w-full h-36 rounded-xl object-cover border mb-2" onError={() => setCoverFailed(true)} />
+          <div
+            className="relative w-full h-36 rounded-xl border mb-2 overflow-hidden cursor-crosshair group"
+            onClick={handleCoverFocusClick}
+          >
+            <img
+              src={coverPhotoUrl}
+              alt="Cover"
+              className="w-full h-full object-cover"
+              style={{ objectPosition: `${focusX}% ${focusY}%` }}
+              onError={() => setCoverFailed(true)}
+            />
+            {/* Focus point indicator */}
+            <div
+              className="absolute w-5 h-5 rounded-full border-2 border-white shadow-lg pointer-events-none transition-all duration-150"
+              style={{ left: `${focusX}%`, top: `${focusY}%`, transform: "translate(-50%, -50%)", background: "rgba(255,255,255,0.4)" }}
+            >
+              <div className="absolute inset-1 rounded-full bg-white/80" />
+            </div>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-end justify-center pb-2 opacity-0 group-hover:opacity-100">
+              <span className="text-xs text-white bg-black/50 px-2 py-1 rounded-full">Click to set focus point</span>
+            </div>
+          </div>
         ) : (
           <div className="w-full h-36 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-dashed border-border flex items-center justify-center mb-2">
             <span className="text-sm text-muted-foreground">No cover photo</span>

@@ -379,7 +379,7 @@ export default function AgentProfile() {
           className="h-[30vh] md:h-[40vh] w-full"
           style={{
             background: professional.cover_photo_url
-              ? `url(${professional.cover_photo_url}) center/cover no-repeat`
+              ? `url(${professional.cover_photo_url}) ${(professional as any).cover_photo_focus_x ?? 50}% ${(professional as any).cover_photo_focus_y ?? 50}%/cover no-repeat`
               : "linear-gradient(135deg, hsl(21 62% 53% / 0.25) 0%, hsl(30 80% 80% / 0.15) 50%, hsl(40 9% 97%) 100%)",
           }}
         />
