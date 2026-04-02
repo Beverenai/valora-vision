@@ -55,7 +55,7 @@ export default function TeamMemberProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [showAllSales, setShowAllSales] = useState(false);
+  
 
   const [contactForm, setContactForm] = useState({
     name: "", email: "", phone: "",
