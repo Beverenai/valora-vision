@@ -644,6 +644,10 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
   const handleSaveEdit = async () => {
     if (!editingMember) return;
     setSaving(true);
+    // Generate slug from name
+    const slug = editForm.name.trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     const { error } = await supabase.from("agent_team_members").update({
       name: editForm.name.trim(),
       role: editForm.role.trim() || null,
@@ -652,7 +656,9 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
       whatsapp: editForm.whatsapp.trim() || null,
       photo_url: editForm.photo_url.trim() || null,
       languages: editForm.languages ? editForm.languages.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
-    }).eq("id", editingMember.id);
+      bio: editForm.bio.trim() || null,
+      slug: slug || null,
+    } as any).eq("id", editingMember.id);
     setSaving(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Team member updated" });
