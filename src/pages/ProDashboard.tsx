@@ -921,7 +921,7 @@ function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professi
   };
 
   const handleSave = () => {
-    onSave({ ...form, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null });
+    onSave({ ...form, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null, cover_photo_focus_x: focusX, cover_photo_focus_y: focusY } as any);
   };
 
   const initials = agent.company_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
