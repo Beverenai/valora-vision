@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { useSEO } from "@/hooks/use-seo";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,10 +12,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AgentSalesStats from "@/components/agent/AgentSalesStats";
+import AgentPropertyCards from "@/components/agent/AgentPropertyCards";
 import {
   Star, MapPin, ChevronRight, Send, Phone, Mail, Home,
   Building2, CheckCircle2, Globe, Users,
 } from "lucide-react";
+
+const AgentPropertyMap = lazy(() => import("@/components/agent/AgentPropertyMap"));
 
 function getInitials(name: string) {
   return name.split(/\s+/).filter(Boolean).map(w => w[0]).join("").slice(0, 2).toUpperCase();
