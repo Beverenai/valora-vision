@@ -405,6 +405,7 @@ export default function TeamMemberProfile() {
                     photo_url: s.photo_url,
                     bedrooms: s.bedrooms,
                     verified: s.verified ?? false,
+                    sale_date: s.sale_date || null,
                   }))}
                   centerLat={(() => {
                     const withCoords = sales.filter((s: any) => s.latitude != null);

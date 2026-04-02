@@ -1,9 +1,9 @@
-import { Users, Database, Zap, Activity, ChevronDown, Globe } from "lucide-react";
+import { Users, Database, Zap, Activity, ChevronDown, Globe, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export type AdminSection = "leads" | "zones" | "jobs" | "resales" | "health";
+export type AdminSection = "leads" | "zones" | "jobs" | "resales" | "health" | "map";
 
 const groups = [
   {
@@ -23,6 +23,7 @@ const groups = [
   {
     label: "System",
     items: [
+      { key: "map" as AdminSection, label: "Valuations Map", icon: Map },
       { key: "health" as AdminSection, label: "Health", icon: Activity },
     ],
   },
