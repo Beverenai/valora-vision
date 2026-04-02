@@ -23,6 +23,7 @@ interface AddSaleDialogProps {
   onOpenChange: (open: boolean) => void;
   professionalId: string;
   onSaleAdded: () => void;
+  teamMembers?: { id: string; name: string }[];
 }
 
 export default function AddSaleDialog({ open, onOpenChange, professionalId, onSaleAdded }: AddSaleDialogProps) {
