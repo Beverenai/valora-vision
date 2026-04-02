@@ -80,6 +80,7 @@ const App = () => {
               <Route path="/lookup" element={<ValuationLookup />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/agentes" element={<AgentDirectory />} />
+              <Route path="/agentes/:slug/:memberSlug" element={<TeamMemberProfile />} />
               <Route path="/agentes/:slug" element={<AgentProfile />} />
               <Route path="/pro" element={<ProLanding />} />
               <Route path="/pro/onboard" element={<ProOnboard />} />
