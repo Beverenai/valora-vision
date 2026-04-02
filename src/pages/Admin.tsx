@@ -292,7 +292,7 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
             </SelectContent>
           </Select>
         )}
-        <Button variant="outline" size="sm" onClick={fetchLeads} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+        <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={fetchLeads} disabled={loading} className="">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
         <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{filtered.length} valuations</span>
@@ -455,7 +455,7 @@ function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNav
             </SelectContent>
           </Select>
         )}
-        <Button variant="outline" size="sm" onClick={() => { setPage(0); fetchAnalyses(0); }} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+        <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={() => { setPage(0); fetchAnalyses(0); }} disabled={loading} className="">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
         <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{filtered.length} analyses</span>
@@ -501,7 +501,7 @@ function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNav
 
       {hasMore && filtered.length > 0 && (
         <div className="flex justify-center mt-4">
-          <Button variant="outline" size="sm" onClick={loadMore} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+          <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={loadMore} disabled={loading} className="">
             {loading ? <RefreshCw size={14} className="animate-spin" /> : null}
             Load More
           </Button>
@@ -543,7 +543,7 @@ function ZonesTab({ dark }: { dark: boolean }) {
   return (
     <div>
       <div className="flex gap-3 mb-4 items-center">
-        <Button variant="outline" size="sm" onClick={fetchZones} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+        <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={fetchZones} disabled={loading} className="">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
         <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{zones.length} zones</span>
@@ -621,7 +621,7 @@ function JobsTab({ dark }: { dark: boolean }) {
             <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="sm" onClick={fetchJobs} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+        <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={fetchJobs} disabled={loading} className="">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
         <span className={cn("text-sm ml-auto", dark ? "text-white/60" : "text-muted-foreground")}>{filtered.length} jobs</span>
@@ -771,7 +771,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowAddModal(true)} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+          <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={() => setShowAddModal(true)} className="">
             Add Config
           </Button>
           <Button size="sm" onClick={() => handleSync()} disabled={syncing !== null || configs.length === 0}>
@@ -918,7 +918,7 @@ function HealthTab({ dark, onHealthScore }: { dark: boolean; onHealthScore: (v: 
   return (
     <div>
       <div className="flex gap-3 mb-6 items-center">
-        <Button variant="outline" size="sm" onClick={fetchHealth} disabled={loading} className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+        <Button variant={dark ? "outline-dark" : "outline"} size="sm" onClick={fetchHealth} disabled={loading} className="">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
       </div>
