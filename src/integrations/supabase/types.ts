@@ -133,6 +133,7 @@ export type Database = {
           sale_date: string | null
           sale_price: number | null
           show_price: boolean
+          team_member_id: string | null
           updated_at: string
           verification_method: string | null
           verified: boolean
@@ -162,6 +163,7 @@ export type Database = {
           sale_date?: string | null
           sale_price?: number | null
           show_price?: boolean
+          team_member_id?: string | null
           updated_at?: string
           verification_method?: string | null
           verified?: boolean
@@ -191,6 +193,7 @@ export type Database = {
           sale_date?: string | null
           sale_price?: number | null
           show_price?: boolean
+          team_member_id?: string | null
           updated_at?: string
           verification_method?: string | null
           verified?: boolean
@@ -205,6 +208,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "agent_sales_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agent_team_members"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "agent_sales_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
@@ -216,6 +226,7 @@ export type Database = {
       agent_team_members: {
         Row: {
           avg_rating: number | null
+          bio: string | null
           created_at: string | null
           email: string | null
           id: string
@@ -226,12 +237,14 @@ export type Database = {
           photo_url: string | null
           professional_id: string
           role: string | null
+          slug: string | null
           sort_order: number | null
           total_reviews: number | null
           whatsapp: string | null
         }
         Insert: {
           avg_rating?: number | null
+          bio?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -242,12 +255,14 @@ export type Database = {
           photo_url?: string | null
           professional_id: string
           role?: string | null
+          slug?: string | null
           sort_order?: number | null
           total_reviews?: number | null
           whatsapp?: string | null
         }
         Update: {
           avg_rating?: number | null
+          bio?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -258,6 +273,7 @@ export type Database = {
           photo_url?: string | null
           professional_id?: string
           role?: string | null
+          slug?: string | null
           sort_order?: number | null
           total_reviews?: number | null
           whatsapp?: string | null
