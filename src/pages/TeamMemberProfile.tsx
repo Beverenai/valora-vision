@@ -377,55 +377,66 @@ export default function TeamMemberProfile() {
               </Link>
             </section>
 
-            {/* Sold Properties */}
+            {/* Sales Statistics */}
             {sales.length > 0 && (
-              <section>
-                <p className={SECTION_LABEL}>PROPERTIES SOLD</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {displayedSales.map((sale: any) => (
-                    <Card key={sale.id} className="overflow-hidden border-border/60">
-                      <div className="relative h-28 bg-muted">
-                        {sale.photo_url ? (
-                          <img src={sale.photo_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Home size={20} className="text-muted-foreground/30" />
-                          </div>
-                        )}
-                        <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground border-0 text-[0.6rem] uppercase tracking-wider">
-                          Sold
-                        </Badge>
-                        {sale.verified && (
-                          <Badge className="absolute top-2 right-2 bg-emerald-600 text-white border-0 text-[0.6rem] gap-1">
-                            <CheckCircle2 size={10} /> Verified
-                          </Badge>
-                        )}
-                      </div>
-                      <CardContent className="p-3">
-                        <p className="font-medium text-sm capitalize">{sale.property_type || "Property"}</p>
-                        <p className="text-xs text-muted-foreground">{sale.city || sale.address_text || "—"}</p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                          {sale.bedrooms != null && <span>{sale.bedrooms} bed</span>}
-                          {sale.built_size_sqm != null && <span>{sale.built_size_sqm} m²</span>}
-                          {sale.show_price && sale.sale_price && (
-                            <span className="font-medium text-foreground">€{Number(sale.sale_price).toLocaleString()}</span>
-                          )}
-                        </div>
-                        {sale.sale_date && (
-                          <p className="text-[0.65rem] text-muted-foreground mt-1">
-                            {new Date(sale.sale_date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
-                          </p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                {sales.length > 6 && !showAllSales && (
-                  <Button variant="outline" className="w-full mt-4 rounded-full" onClick={() => setShowAllSales(true)}>
-                    Show all {sales.length} sales
-                  </Button>
-                )}
-              </section>
+              <AgentSalesStats
+                sales={sales.map(s => ({
+                  sale_price: s.sale_price ? Number(s.sale_price) : null,
+                  show_price: s.show_price ?? true,
+                  property_type: s.property_type,
+                  sale_date: s.sale_date,
+                }))}
+                agentName={member.name}
+              />
+            )}
+
+            {/* Sales Map */}
+            {sales.some((s: any) => s.latitude != null && s.longitude != null) && (
+              <Suspense fallback={<div className="h-[300px] bg-muted animate-pulse rounded-xl" />}>
+                <AgentPropertyMap
+                  sales={sales.map((s: any) => ({
+                    id: s.id,
+                    latitude: s.latitude ? Number(s.latitude) : null,
+                    longitude: s.longitude ? Number(s.longitude) : null,
+                    property_type: s.property_type,
+                    city: s.city,
+                    sale_price: s.sale_price ? Number(s.sale_price) : null,
+                    show_price: s.show_price ?? true,
+                    photo_url: s.photo_url,
+                    bedrooms: s.bedrooms,
+                    verified: s.verified ?? false,
+                  }))}
+                  centerLat={(() => {
+                    const withCoords = sales.filter((s: any) => s.latitude != null);
+                    return withCoords.length > 0 ? withCoords.reduce((sum: number, s: any) => sum + Number(s.latitude), 0) / withCoords.length : undefined;
+                  })()}
+                  centerLng={(() => {
+                    const withCoords = sales.filter((s: any) => s.longitude != null);
+                    return withCoords.length > 0 ? withCoords.reduce((sum: number, s: any) => sum + Number(s.longitude), 0) / withCoords.length : undefined;
+                  })()}
+                />
+              </Suspense>
+            )}
+
+            {/* Property Cards */}
+            {sales.length > 0 && (
+              <AgentPropertyCards
+                sales={sales.map((s: any) => ({
+                  id: s.id,
+                  property_type: s.property_type,
+                  city: s.city,
+                  address_text: s.address_text,
+                  sale_price: s.sale_price ? Number(s.sale_price) : null,
+                  show_price: s.show_price ?? true,
+                  sale_date: s.sale_date,
+                  photo_url: s.photo_url,
+                  bedrooms: s.bedrooms,
+                  built_size_sqm: s.built_size_sqm ? Number(s.built_size_sqm) : null,
+                  verified: s.verified ?? false,
+                }))}
+                agentName={member.name}
+                agencyName={agency.company_name}
+              />
             )}
 
             {/* Reviews */}
