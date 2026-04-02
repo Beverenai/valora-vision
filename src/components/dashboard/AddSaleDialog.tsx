@@ -26,7 +26,7 @@ interface AddSaleDialogProps {
   teamMembers?: { id: string; name: string }[];
 }
 
-export default function AddSaleDialog({ open, onOpenChange, professionalId, onSaleAdded }: AddSaleDialogProps) {
+export default function AddSaleDialog({ open, onOpenChange, professionalId, onSaleAdded, teamMembers = [] }: AddSaleDialogProps) {
   const { toast } = useToast();
   const [mode, setMode] = useState<"link" | "manual">("link");
   const [saving, setSaving] = useState(false);
