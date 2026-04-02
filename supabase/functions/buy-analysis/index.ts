@@ -23,7 +23,7 @@ function detectMunicipality(address: string | null, title: string): string | nul
 }
 
 const PROPERTY_TYPE_MAP: Record<string, string> = {
-  apartment: "pisos", duplex: "pisos", studio: "pisos",
+  apartment: "viviendas", duplex: "viviendas", studio: "viviendas",
   penthouse: "aticos",
   villa: "chalets", house: "chalets", chalet: "chalets",
   townhouse: "chalets", "semi-detached": "chalets", country_house: "chalets",
