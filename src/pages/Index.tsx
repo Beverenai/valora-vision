@@ -7,22 +7,13 @@ import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 /* ─── DATA ─── */
-
-const AGENCIES = [
-  { name: "Engel & Völkers", x: "5%", y: 0, opacity: 0.35, size: "text-base", dur: 4.2 },
-  { name: "Sotheby's", x: "55%", y: -8, opacity: 0.25, size: "text-lg", dur: 3.6 },
-  { name: "Panorama", x: "25%", y: 6, opacity: 0.3, size: "text-sm", dur: 5.0 },
-  { name: "DM Properties", x: "70%", y: -4, opacity: 0.2, size: "text-base", dur: 4.8 },
-  { name: "Terra Meridiana", x: "10%", y: 10, opacity: 0.28, size: "text-sm", dur: 3.8 },
-  { name: "Drumelia", x: "48%", y: -2, opacity: 0.22, size: "text-lg", dur: 4.5 },
-  { name: "La Sala Estates", x: "75%", y: 4, opacity: 0.32, size: "text-sm", dur: 3.4 },
-];
 
 const SERVICES = [
   { icon: Home, title: "Free Valuation", desc: "Get an instant property valuation based on real comparable data." },
@@ -255,35 +246,6 @@ const Index = () => {
 
       <div className="max-w-[1400px] mx-auto w-full flex flex-col">
 
-        {/* ═══════════ FLOATING AGENCIES ═══════════ */}
-        <section className="w-full py-8 md:py-20 overflow-hidden px-5 md:px-8">
-          <SectionLabel className="text-center mb-8 md:mb-14">
-            Used every day by real estate professionals
-          </SectionLabel>
-          <div className="relative max-w-4xl mx-auto h-[120px] md:h-[140px]">
-            {AGENCIES.map((a, i) => (
-              <motion.span
-                key={a.name}
-                className={cn(
-                  "absolute font-sans text-muted-foreground cursor-default select-none",
-                  a.size
-                )}
-                style={{ left: a.x, top: `${30 + (i % 3) * 28}%` }}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: a.opacity }}
-                viewport={{ once: true }}
-                animate={{ y: [a.y, a.y - 6, a.y] }}
-                transition={{
-                  y: { duration: a.dur, repeat: Infinity, ease: "easeInOut" },
-                  opacity: { duration: 0.8, delay: i * 0.1 },
-                }}
-                whileHover={{ opacity: 0.6, scale: 1.05 }}
-              >
-                {a.name}
-              </motion.span>
-            ))}
-          </div>
-        </section>
 
         {/* ═══════════ HOW IT WORKS — Vertical Timeline ═══════════ */}
         <section className="w-full py-8 md:py-20 px-5 md:px-8">
@@ -786,6 +748,51 @@ const Index = () => {
                 />
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ═══════════ FAQ ═══════════ */}
+        <section className="w-full py-12 md:py-20 px-5 md:px-8">
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-10 text-center"
+            >
+              <SectionLabel>FAQ</SectionLabel>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
+                Frequently Asked Questions
+              </h2>
+            </motion.div>
+
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="free">
+                <AccordionTrigger>Why is this free?</AccordionTrigger>
+                <AccordionContent>
+                  ValoraCasa is 100% free for homeowners and buyers. We are funded by carefully vetted real estate professionals who pay to feature their brand on the platform. Every agent is reviewed and approved before joining, so you only see trusted, qualified professionals — never random ads.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="accuracy">
+                <AccordionTrigger>How accurate is the valuation?</AccordionTrigger>
+                <AccordionContent>
+                  Our valuations are based on real comparable data from current and recent listings in your area, combined with AI-powered analysis of property features, location, and market trends. While no automated valuation replaces a full appraisal, our estimates typically fall within a few percent of actual market value.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="data">
+                <AccordionTrigger>Is my data shared with anyone?</AccordionTrigger>
+                <AccordionContent>
+                  Your information is kept confidential. We only share your details with agents you explicitly choose to connect with. We never sell your data to third parties.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="agents">
+                <AccordionTrigger>How do you choose which agents appear?</AccordionTrigger>
+                <AccordionContent>
+                  All agents on ValoraCasa are carefully vetted for local expertise, track record, and professionalism before being approved. We only work with established professionals who meet our quality standards, ensuring you get the best advice for your area.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </section>
 
