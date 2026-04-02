@@ -1,35 +1,40 @@
 
-Fix the button issue at the source instead of only tweaking opacity.
 
-1. Root cause
-- The shared `outline` button in `src/components/ui/button.tsx` hardcodes `bg-background`.
-- In this app, `bg-background` is white here, so every admin `variant="outline"` button is still white.
-- `src/pages/Admin.tsx` then adds white text classes on top, which creates the “white text inside a white button” problem.
+# Show Agent Sales on Map — Fix Missing Coordinates
 
-2. Implementation
-- Add a dedicated dark admin outline variant in `src/components/ui/button.tsx`, for example:
-  - `border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white`
-- Keep the existing `outline` variant unchanged so light pages do not regress.
-- In `src/pages/Admin.tsx`, replace the admin dark-mode outline buttons with:
-  - `variant={dark ? "outline-dark" : "outline"}`
-- Remove the repeated dark-mode border/text overrides that are currently trying to patch the wrong base style.
-- Keep primary buttons like `Enter`, `Save`, and `Sync All` unchanged.
+## Problem
 
-3. What this fixes
-This will correct all current broken admin buttons, including:
-- Refresh
-- Load More
-- Scrape
-- Add Config
-- Cancel
-- Sync Now
-- Health Refresh
+The `AgentPropertyMap` component is already integrated on both the company profile page (`AgentProfile.tsx`) and individual team member pages (`TeamMemberProfile.tsx`). However, the map never renders because **none of the `agent_sales` records have `latitude`/`longitude` values** — the geocoding step in the enrich function requires a Google Maps API key secret (`GOOGLE_MAPS_API_KEY`) and may not have run.
 
-4. Files
-- `src/components/ui/button.tsx` — add reusable dark-outline variant
-- `src/pages/Admin.tsx` — switch admin outline buttons to the new variant
+The single sale in the database has `address_text: "Calle Algorta"` and `city: "Marbella"` but null coordinates.
 
-5. Notes
-- I checked the shared button styles and admin page usage: this is a structural variant issue, not just a contrast tweak.
-- The problematic pattern is currently in `Admin.tsx`; light-page outline buttons can stay as they are.
-- No backend or database changes are needed.
+## Fix — Two Parts
+
+### Part 1: Geocode sales that have addresses but no coordinates
+
+Add a fallback geocoding step in the frontend when loading sales for the agent profile. When `agent_sales` rows have `city`/`address_text` but no `latitude`/`longitude`, use the Google Maps Geocoding API (key already in `src/config/google-maps.ts`) to resolve coordinates client-side and cache them back to the database via a lightweight edge function or just display them in-memory.
+
+**Recommended approach**: Create a small utility that, when `AgentPropertyMap` receives sales with missing coordinates, geocodes them client-side using the existing Google Maps API key (already public/domain-restricted) and passes the resolved positions to the map. No database update needed — just enrich at render time.
+
+### Part 2: Ensure the enrich edge function geocodes on save
+
+Check that the `GOOGLE_MAPS_API_KEY` secret is set for edge functions so that newly added sales get geocoded during enrichment. If not set, add it.
+
+## Files to change
+
+| File | Change |
+|------|--------|
+| `src/components/agent/AgentPropertyMap.tsx` | Add client-side geocoding fallback: for sales with `city`/`address_text` but no coordinates, batch-geocode using Google Maps API and merge results before rendering markers |
+| `src/components/agent/AgentPropertyMap.tsx` | Update the `PropertyMarker` interface to include `address_text` so geocoding has input data |
+| `src/pages/AgentProfile.tsx` | Pass `address_text` in the sales data mapped to `AgentPropertyMap` |
+| `src/pages/TeamMemberProfile.tsx` | Pass `address_text` in the sales data mapped to `AgentPropertyMap` |
+
+Additionally, verify the `GOOGLE_MAPS_API_KEY` edge function secret is configured for future enrichment.
+
+## Technical details
+
+- The Google Maps Geocoding API is called with `address_text + city + "Spain"` 
+- Results are cached in a `useRef` map keyed by sale ID to avoid re-geocoding on re-renders
+- Sales without coordinates AND without address data are excluded from the map
+- The existing map component already handles the `markers.length === 0` empty state gracefully
+
