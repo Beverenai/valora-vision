@@ -92,6 +92,7 @@ const navGroups = [
     label: "Business",
     items: [
       { key: "leads" as Section, label: "Leads", icon: MessageSquare },
+      { key: "sales" as Section, label: "My Sales", icon: Home },
       { key: "zones" as Section, label: "My Zones", icon: MapPin },
       { key: "reviews" as Section, label: "Reviews", icon: Star },
       { key: "analytics" as Section, label: "Performance", icon: BarChart3 },
