@@ -521,10 +521,10 @@ export default function AgentProfile() {
               <span className="text-sm text-muted-foreground">Est. {professional.founded_year}</span>
             </div>
           )}
-          {teamMembers.length > 0 && (
+          {team.length > 0 && (
             <div className="flex items-center gap-2 shrink-0">
               <Users size={16} className="text-[#D4713B]" />
-              <span className="text-sm text-muted-foreground">{teamMembers.length} {teamMembers.length === 1 ? "member" : "members"}</span>
+              <span className="text-sm text-muted-foreground">{team.length} {team.length === 1 ? "member" : "members"}</span>
             </div>
           )}
           {professional.languages && professional.languages.length > 0 && (

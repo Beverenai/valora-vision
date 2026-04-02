@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
+import { GOOGLE_MAPS_API_KEY } from "@/config/google-maps";
 
 interface NearbyPropertyMapProps {
   latitude: number;
@@ -29,13 +31,19 @@ function formatSaleDate(dateStr: string | null): string {
   return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
+let optionsSet = false;
+function ensureOptions() {
+  if (!optionsSet) {
+    setOptions({ key: GOOGLE_MAPS_API_KEY });
+    optionsSet = true;
+  }
+}
+
 export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm = 5 }: NearbyPropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState(false);
   const [sales, setSales] = useState<SaleMarker[]>([]);
-
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
   useEffect(() => {
     async function fetchNearby() {
@@ -69,94 +77,95 @@ export default function NearbyPropertyMap({ latitude, longitude, city, radiusKm 
   }, [latitude, longitude, radiusKm]);
 
   useEffect(() => {
-    if (!mapboxToken || !mapRef.current) {
+    if (!mapRef.current) {
       setMapError(true);
       return;
     }
 
-    let map: any;
+    let map: google.maps.Map | null = null;
 
     async function initMap() {
       try {
-        const mapboxgl = (await import("mapbox-gl")).default;
-        await import("mapbox-gl/dist/mapbox-gl.css");
+        ensureOptions();
+        const { Map: GoogleMap } = await importLibrary("maps") as google.maps.MapsLibrary;
+        await importLibrary("marker");
 
-        (mapboxgl as any).accessToken = mapboxToken;
-
-        map = new mapboxgl.Map({
-          container: mapRef.current!,
-          style: "mapbox://styles/mapbox/light-v11",
-          center: [longitude, latitude],
+        map = new GoogleMap(mapRef.current!, {
+          center: { lat: latitude, lng: longitude },
           zoom: 13,
+          mapId: "nearby-sales-map",
+          disableDefaultUI: true,
+          zoomControl: true,
+          styles: [
+            { featureType: "poi", stylers: [{ visibility: "off" }] },
+            { featureType: "transit", stylers: [{ visibility: "off" }] },
+          ],
         });
 
-        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        const infoWindow = new google.maps.InfoWindow();
 
-        map.on("load", () => {
-          setMapLoaded(true);
+        // User's property pin — blue
+        const userPin = document.createElement("div");
+        userPin.className = "w-8 h-8 rounded-full border-[3px] border-white shadow-lg flex items-center justify-center";
+        userPin.style.backgroundColor = "#2563eb";
+        userPin.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
 
-          // User's property pin — distinct blue color
-          const userEl = document.createElement("div");
-          userEl.className = "w-8 h-8 rounded-full border-3 border-white shadow-lg flex items-center justify-center";
-          userEl.style.backgroundColor = "#2563eb";
-          userEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
+        const userMarker = new google.maps.marker.AdvancedMarkerElement({
+          map,
+          position: { lat: latitude, lng: longitude },
+          content: userPin,
+        });
 
-          new mapboxgl.Marker(userEl)
-            .setLngLat([longitude, latitude])
-            .setPopup(
-              new mapboxgl.Popup({ offset: 25 }).setHTML(
-                `<div class="text-xs font-semibold">Your Property</div>`
-              )
-            )
-            .addTo(map);
+        userMarker.addListener("click", () => {
+          infoWindow.setContent(`<div style="font-size:12px;font-weight:600">Your Property</div>`);
+          infoWindow.open(map, userMarker);
+        });
 
-          // Sale markers — terracotta
-          sales.forEach((sale) => {
-            const el = document.createElement("div");
-            el.className = "w-6 h-6 rounded-full border-2 border-white shadow-md cursor-pointer";
-            el.style.backgroundColor = "#D4713B";
+        // Sale markers — terracotta
+        sales.forEach((sale) => {
+          const el = document.createElement("div");
+          el.className = "w-6 h-6 rounded-full border-2 border-white shadow-md cursor-pointer";
+          el.style.backgroundColor = "#D4713B";
 
-            const priceHtml =
-              sale.show_price && sale.sale_price
-                ? `<p class="text-sm font-semibold">€${(sale.sale_price / 1000).toFixed(0)}k</p>`
-                : "";
+          const priceHtml = sale.show_price && sale.sale_price
+            ? `<p style="font-size:13px;font-weight:600;margin:2px 0">€${(sale.sale_price / 1000).toFixed(0)}k</p>`
+            : "";
 
-            const dateHtml = sale.sale_date
-              ? `<p class="text-gray-400 text-[10px]">Sold: ${formatSaleDate(sale.sale_date)}</p>`
-              : "";
+          const dateHtml = sale.sale_date
+            ? `<p style="color:#9ca3af;font-size:10px">Sold: ${formatSaleDate(sale.sale_date)}</p>`
+            : "";
 
-            const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(`
-              <div class="text-xs">
-                ${sale.photo_url ? `<img src="${sale.photo_url}" class="w-full h-20 object-cover rounded mb-1" />` : ""}
-                <p class="font-semibold capitalize">${sale.property_type || "Property"}</p>
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position: { lat: sale.latitude, lng: sale.longitude },
+            content: el,
+          });
+
+          marker.addListener("click", () => {
+            infoWindow.setContent(`
+              <div style="font-size:12px;max-width:200px">
+                ${sale.photo_url ? `<img src="${sale.photo_url}" style="width:100%;height:80px;object-fit:cover;border-radius:4px;margin-bottom:4px" />` : ""}
+                <p style="font-weight:600;text-transform:capitalize">${sale.property_type || "Property"}</p>
                 ${sale.bedrooms ? `<p>${sale.bedrooms} bedrooms</p>` : ""}
-                ${sale.city ? `<p class="text-gray-500">${sale.city}</p>` : ""}
+                ${sale.city ? `<p style="color:#6b7280">${sale.city}</p>` : ""}
                 ${priceHtml}
                 ${dateHtml}
-                ${sale.verified ? '<p class="text-green-600 text-[10px] font-medium mt-1">✓ Verified sale</p>' : ""}
+                ${sale.verified ? '<p style="color:#16a34a;font-size:10px;font-weight:500;margin-top:4px">✓ Verified sale</p>' : ""}
               </div>
             `);
-
-            new mapboxgl.Marker(el)
-              .setLngLat([sale.longitude, sale.latitude])
-              .setPopup(popup)
-              .addTo(map);
+            infoWindow.open(map, marker);
           });
         });
+
+        setMapLoaded(true);
       } catch {
         setMapError(true);
       }
     }
 
     initMap();
-    return () => {
-      if (map) map.remove();
-    };
-  }, [mapboxToken, sales, latitude, longitude]);
-
-  if (!mapboxToken) {
-    return null;
-  }
+    return () => { map = null; };
+  }, [sales, latitude, longitude]);
 
   return (
     <section className="py-16 md:py-24">

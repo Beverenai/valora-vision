@@ -6,6 +6,25 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function geocodeAddress(address: string, city: string | null, apiKey: string): Promise<{ lat: number; lng: number } | null> {
+  const query = [address, city, "Spain"].filter(Boolean).join(", ");
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.status === "OK" && data.results?.length > 0) {
+      const loc = data.results[0].geometry.location;
+      return { lat: loc.lat, lng: loc.lng };
+    }
+    console.log("Geocoding returned no results for:", query, data.status);
+    return null;
+  } catch (err) {
+    console.error("Geocoding error:", err);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -43,7 +62,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         url: listing_url,
-        formats: ["markdown", "extract"],
+        formats: ["extract"],
         extract: {
           schema: {
             type: "object",
@@ -64,7 +83,7 @@ Deno.serve(async (req) => {
             },
           },
           prompt:
-            "Extract property listing details. property_type should be one of: apartment, villa, townhouse, penthouse, finca, plot. image_url should be the main/hero property photo URL. latitude and longitude are the property coordinates if available.",
+            "Extract property listing details. property_type should be one of: apartment, villa, townhouse, penthouse, finca, plot. image_url should be the main/hero property photo URL. latitude and longitude are the property coordinates if available. address should be the full street address.",
         },
         onlyMainContent: true,
         waitFor: 3000,
@@ -74,20 +93,19 @@ Deno.serve(async (req) => {
     const scrapeData = await scrapeRes.json();
 
     if (!scrapeRes.ok) {
-      console.error("Firecrawl error:", scrapeData);
+      console.error("Firecrawl error:", JSON.stringify(scrapeData));
       return new Response(
-        JSON.stringify({ success: false, error: "Scraping failed" }),
+        JSON.stringify({ success: false, error: "Scraping failed", details: scrapeData?.error || scrapeData }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Extract structured data - handle nested response
+    // Extract structured data
     const extracted = scrapeData?.data?.extract || scrapeData?.extract || scrapeData?.data?.json || {};
-    const metadata = scrapeData?.data?.metadata || scrapeData?.metadata || {};
 
     console.log("Extracted data:", JSON.stringify(extracted));
 
-    // Build update payload — only set fields that were actually extracted
+    // Build update payload
     const update: Record<string, unknown> = {};
     const enrichedFields: string[] = [];
 
@@ -135,10 +153,26 @@ Deno.serve(async (req) => {
       update.photo_url = extracted.image_url;
       enrichedFields.push("photo_url");
     }
+
+    // Handle coordinates — use extracted if available, otherwise geocode
     if (extracted.latitude && extracted.longitude) {
       update.latitude = extracted.latitude;
       update.longitude = extracted.longitude;
       enrichedFields.push("latitude", "longitude");
+    } else if (extracted.address || extracted.city) {
+      const googleKey = Deno.env.get("VITE_GOOGLE_MAPS_API_KEY") || Deno.env.get("GOOGLE_MAPS_API_KEY");
+      if (googleKey) {
+        console.log("No coordinates from scrape, attempting geocode...");
+        const coords = await geocodeAddress(extracted.address || "", extracted.city || null, googleKey);
+        if (coords) {
+          update.latitude = coords.lat;
+          update.longitude = coords.lng;
+          enrichedFields.push("latitude", "longitude");
+          console.log(`Geocoded to: ${coords.lat}, ${coords.lng}`);
+        }
+      } else {
+        console.log("No Google Maps API key available for geocoding");
+      }
     }
 
     if (Object.keys(update).length === 0) {
