@@ -84,6 +84,10 @@ const LazyAgentBundle = lazy(() =>
   )
 );
 
+const LazyNearbyMap = lazy(() =>
+  lazyRetry(() => import("@/components/shared/NearbyPropertyMap"))
+);
+
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [
