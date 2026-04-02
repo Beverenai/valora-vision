@@ -27,7 +27,7 @@ interface AgentPropertyCardsProps {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("es-ES", { month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
 export default function AgentPropertyCards({
