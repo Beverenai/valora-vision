@@ -471,7 +471,7 @@ export default function AgentProfile() {
                 )}
                 {professional.is_verified && (
                   <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[0.65rem] uppercase tracking-wider">
-                    <CheckCircle2 size={12} className="mr-1" /> Verificado
+                    <CheckCircle2 size={12} className="mr-1" /> Verified
                   </Badge>
                 )}
                 {professional.languages && professional.languages.length > 0 && (
