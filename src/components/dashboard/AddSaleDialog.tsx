@@ -179,6 +179,11 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
                 </select>
               </div>
             )}
+            {linkAdded && (
+              <div className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 rounded-md px-3 py-2">
+                <span>✓</span> Added! Importing details… You can paste another link.
+              </div>
+            )}
             <Button onClick={handleSubmitLink} disabled={saving} className="w-full">
               {saving && <Loader2 size={14} className="mr-2 animate-spin" />}
               Register Sale

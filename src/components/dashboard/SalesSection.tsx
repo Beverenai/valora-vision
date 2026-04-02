@@ -191,73 +191,98 @@ export default function SalesSection({ professionalId }: { professionalId: strin
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sales.map(sale => (
-            <Card key={sale.id} className="overflow-hidden group">
-              <div className="relative h-36 bg-muted">
-                {sale.photo_url ? (
-                  <img src={sale.photo_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Home size={24} className="text-muted-foreground/30" />
+          {sales.map(sale => {
+            const enriching = isEnriching(sale);
+            if (enriching) {
+              return (
+                <Card key={sale.id} className="overflow-hidden">
+                  <div className="relative h-36 bg-muted animate-pulse">
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                      <RefreshCw size={20} className="animate-spin text-muted-foreground/40" />
+                      <span className="text-xs text-muted-foreground/60">Importing details…</span>
+                    </div>
                   </div>
-                )}
-                <Badge className="absolute top-2 left-2 bg-red-600 text-white border-0 text-[0.6rem] uppercase tracking-wider">
-                  Sold
-                </Badge>
-                {sale.verified && (
-                  <Badge className="absolute top-2 right-2 bg-emerald-600 text-white border-0 text-[0.6rem] gap-1">
-                    <CheckCircle2 size={10} /> Verified
+                  <CardContent className="p-4 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                    <div className="flex gap-3 mt-2">
+                      <Skeleton className="h-3 w-12" />
+                      <Skeleton className="h-3 w-12" />
+                      <Skeleton className="h-3 w-14" />
+                    </div>
+                    <Skeleton className="h-3 w-28 mt-2" />
+                  </CardContent>
+                </Card>
+              );
+            }
+            return (
+              <Card key={sale.id} className="overflow-hidden group">
+                <div className="relative h-36 bg-muted">
+                  {sale.photo_url ? (
+                    <img src={sale.photo_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Home size={24} className="text-muted-foreground/30" />
+                    </div>
+                  )}
+                  <Badge className="absolute top-2 left-2 bg-red-600 text-white border-0 text-[0.6rem] uppercase tracking-wider">
+                    Sold
                   </Badge>
-                )}
-              </div>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium text-sm capitalize">{sale.property_type || "Property"}</p>
-                    <p className="text-xs text-muted-foreground">{sale.city || sale.address_text || "—"}</p>
+                  {sale.verified && (
+                    <Badge className="absolute top-2 right-2 bg-emerald-600 text-white border-0 text-[0.6rem] gap-1">
+                      <CheckCircle2 size={10} /> Verified
+                    </Badge>
+                  )}
+                </div>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium text-sm capitalize">{sale.property_type || "Property"}</p>
+                      <p className="text-xs text-muted-foreground">{sale.city || sale.address_text || "—"}</p>
+                    </div>
+                    {sale.show_price && sale.sale_price && (
+                      <p className="font-bold text-sm">€{sale.sale_price.toLocaleString()}</p>
+                    )}
                   </div>
-                  {sale.show_price && sale.sale_price && (
-                    <p className="font-bold text-sm">€{sale.sale_price.toLocaleString()}</p>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                    {sale.bedrooms != null && <span>{sale.bedrooms} bed</span>}
+                    {sale.bathrooms != null && <span>{sale.bathrooms} bath</span>}
+                    {sale.built_size_sqm != null && <span>{sale.built_size_sqm} m²</span>}
+                  </div>
+                  {sale.sale_date && (
+                    <p className="text-[0.65rem] text-muted-foreground mt-2">
+                      Sold {new Date(sale.sale_date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                      {sale.days_on_market != null && ` · ${sale.days_on_market} days on market`}
+                    </p>
                   )}
-                </div>
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                  {sale.bedrooms != null && <span>{sale.bedrooms} bed</span>}
-                  {sale.bathrooms != null && <span>{sale.bathrooms} bath</span>}
-                  {sale.built_size_sqm != null && <span>{sale.built_size_sqm} m²</span>}
-                </div>
-                {sale.sale_date && (
-                  <p className="text-[0.65rem] text-muted-foreground mt-2">
-                    Sold {new Date(sale.sale_date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
-                    {sale.days_on_market != null && ` · ${sale.days_on_market} days on market`}
-                  </p>
-                )}
-                <div className="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {sale.listing_url && (
-                    <a href={sale.listing_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                      <ExternalLink size={12} /> View listing
-                    </a>
-                  )}
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button className="ml-auto text-muted-foreground hover:text-destructive transition-colors">
-                        <Trash2 size={14} />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this sale?</AlertDialogTitle>
-                        <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(sale.id)}>Delete</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {sale.listing_url && (
+                      <a href={sale.listing_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                        <ExternalLink size={12} /> View listing
+                      </a>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className="ml-auto text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 size={14} />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete this sale?</AlertDialogTitle>
+                          <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(sale.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
