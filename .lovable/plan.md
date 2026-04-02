@@ -1,66 +1,35 @@
 
 
-# Auto-Enrich Listing Links via Firecrawl + Sales Map on Valuation Results
+# Keep Dialog Open + Show Loading Cards While Enriching
 
-## What This Does
+## What Changes
 
-1. **When an agent pastes an Idealista/Fotocasa link** in the "Add Sale" dialog, a backend function scrapes the listing page using Firecrawl to auto-fill: photo, property type, bedrooms, bathrooms, size, price, city, address, and critically **latitude/longitude** — so the sale appears on the map.
+Currently, when an agent submits a link, the dialog closes immediately and the sale card appears with no data (blank photo, no details). The agent must close/reopen the dialog to add another sale.
 
-2. **On the Sell Result page**, show a map with the user's valuation property pinned at center, plus all nearby `agent_sales` within a radius, so sellers can see real sold properties around them.
+**New behavior:**
+1. After submitting a link, the dialog stays open and the URL field clears — ready for the next link
+2. In the sales grid behind the dialog, newly added sales that are still being enriched show as **skeleton/loading cards** (pulsing placeholder for photo, shimmer text lines)
+3. Once enrichment completes, the card auto-updates with the real data (photo, price, details)
 
 ## Implementation
 
-### 1. New Edge Function: `enrich-sale-listing/index.ts`
+### 1. `AddSaleDialog.tsx` — Stay open after link submit
+- After successful insert + enrichment trigger, clear the URL field but **do not** call `onOpenChange(false)`
+- Still call `onSaleAdded()` so the parent refreshes the list
+- Show a small inline success message ("Added! Importing details...") instead of closing
 
-- Accepts `{ sale_id, listing_url }` 
-- Uses Firecrawl to scrape the URL with `formats: ['markdown', 'json']` and a JSON schema to extract structured data (price, bedrooms, bathrooms, size, property_type, address, city, lat, lng, image_url, description)
-- Updates the `agent_sales` row with the extracted fields using service role key
-- Sets `enriched_title` and `enriched_description` from scraped content
-- Returns `{ success: true, enriched_fields: [...] }`
+### 2. `SalesSection.tsx` — Loading state for enriching cards
+- Add an `enriched` field check: a sale is "still loading" when it has a `listing_url` but no `city`, no `photo_url`, and no `property_type` (all null = not yet enriched)
+- For these cards, render a skeleton variant: pulsing gray image area, shimmer text lines, a small "Importing..." label
+- Set up a **polling interval** (every 8 seconds) that re-fetches sales while any card is in the "enriching" state, so data appears automatically when the edge function finishes
+- Stop polling once all cards have data
 
-### 2. Update `AddSaleDialog.tsx` — Link Tab
+### 3. Files to change
 
-After inserting the sale row (which returns the new `id`), invoke `supabase.functions.invoke("enrich-sale-listing", { body: { sale_id, listing_url } })` in the background. Show a toast: "Listing details are being imported...". The dialog closes immediately; enrichment happens async.
-
-### 3. New RPC Function: `find_nearby_agent_sales`
-
-SQL function that finds `agent_sales` within a given radius of a lat/lng point:
-```sql
-CREATE FUNCTION find_nearby_agent_sales(
-  p_lat NUMERIC, p_lng NUMERIC, p_radius_km NUMERIC DEFAULT 5, p_limit INT DEFAULT 50
-) RETURNS SETOF agent_sales
-```
-Uses the existing PostGIS `location_point` column and GIST index.
-
-### 4. New Component: `NearbyPropertyMap.tsx`
-
-A map component for the valuation result page that:
-- Pins the user's property at center (distinct color/icon)
-- Fetches nearby sold properties via the RPC
-- Shows agent sale markers with popups (photo, price, type)
-- Reuses the Mapbox lazy-loading pattern from `AgentPropertyMap`
-
-### 5. Update `SellResult.tsx`
-
-Add the `NearbyPropertyMap` section after the valuation card, before the agent matching section. Only renders when the lead has lat/lng coordinates. Lazy-loaded with Suspense.
-
-## Technical Details
-
-| Item | Detail |
+| File | Change |
 |------|--------|
-| Firecrawl | Already connected. Uses `FIRECRAWL_API_KEY` env var in edge function |
-| JSON extraction | Firecrawl's `formats: [{ type: 'json', schema }]` for structured data |
-| Geocoding fallback | If Firecrawl doesn't return lat/lng, use the address + Google Geocoding API |
-| `agent_sales` columns | All needed columns already exist: `latitude`, `longitude`, `location_point` (auto-set by trigger), `photo_url`, `enriched_title`, `enriched_description` |
-| Map | Reuses Mapbox with `VITE_MAPBOX_TOKEN` |
+| `src/components/dashboard/AddSaleDialog.tsx` | Don't close dialog after link submit; clear URL field; show inline "Added" feedback |
+| `src/components/dashboard/SalesSection.tsx` | Add skeleton card variant for un-enriched sales; add polling interval while enriching |
 
-## Files
-
-| File | Action |
-|------|--------|
-| `supabase/functions/enrich-sale-listing/index.ts` | Create — Firecrawl scraping + DB update |
-| `src/components/dashboard/AddSaleDialog.tsx` | Edit — call enrichment after insert |
-| `supabase/migrations/` | Create — `find_nearby_agent_sales` RPC |
-| `src/components/shared/NearbyPropertyMap.tsx` | Create — valuation result map |
-| `src/pages/SellResult.tsx` | Edit — add nearby sales map section |
+No database or edge function changes needed.
 
