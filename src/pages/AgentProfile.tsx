@@ -918,7 +918,7 @@ export default function AgentProfile() {
                       onClick={() => setShowPhone(true)}
                     >
                       <Eye size={16} className="mr-2" />
-                      Mostrar número
+                      Show number
                     </Button>
                   )}
                 </div>

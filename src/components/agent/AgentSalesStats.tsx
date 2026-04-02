@@ -142,7 +142,7 @@ export default function AgentSalesStats({ sales, agentName }: AgentSalesStatsPro
               <p className="text-3xl font-serif font-bold text-foreground">
                 €<AnimatedNumber value={Math.round(stats.medianPrice / 1000)} suffix="k" />
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Precio mediano</p>
+              <p className="text-xs text-muted-foreground mt-1">Median price</p>
             </CardContent>
           </Card>
         )}

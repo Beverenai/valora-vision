@@ -131,7 +131,7 @@ export default function AgentPropertyCards({
             disabled={page === totalPages - 1}
             className="rounded-full"
           >
-            Siguiente <ChevronRight size={14} className="ml-1" />
+            Next <ChevronRight size={14} className="ml-1" />
           </Button>
         </div>
       )}
