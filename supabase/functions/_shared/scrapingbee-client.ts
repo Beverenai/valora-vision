@@ -73,13 +73,13 @@ export function buildIdealistaSearchUrl(params: {
 }): string {
   const { operation, propertyType, municipality, minPrice, maxPrice, minSize, maxSize, minRooms, page } = params;
   let url = `https://www.idealista.com/${operation}-${propertyType}/${municipality}/`;
-  const filters: string[] = [];
-  if (minPrice) filters.push(`precio-desde_${minPrice}`);
-  if (maxPrice) filters.push(`precio-hasta_${maxPrice}`);
-  if (minSize) filters.push(`metros-cuadrados-mas-de_${minSize}`);
-  if (maxSize) filters.push(`metros-cuadrados-menos-de_${maxSize}`);
-  if (minRooms) filters.push(`de-${minRooms}-habitaciones`);
-  if (filters.length > 0) url += `con-${filters.join(",")}/`;
+  const queryParams: string[] = [];
+  if (minPrice) queryParams.push(`precio-desde_${minPrice}`);
+  if (maxPrice) queryParams.push(`precio-hasta_${maxPrice}`);
+  if (minSize) queryParams.push(`metros-cuadrados-mas-de_${minSize}`);
+  if (maxSize) queryParams.push(`metros-cuadrados-menos-de_${maxSize}`);
+  if (minRooms) queryParams.push(`de-${minRooms}-habitaciones`);
+  if (queryParams.length > 0) url += `con-${queryParams.join(",")}/`;
   if (page && page > 1) url += `pagina-${page}.htm`;
   return url;
 }
