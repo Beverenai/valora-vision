@@ -277,9 +277,9 @@ function MobileDropdownNav({ active, onNav, badges }: { active: Section; onNav: 
 }
 
 /* ─── Overview Section ─── */
-function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSection, activeZonesCount, reviewCount }: {
+function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSection, activeZonesCount, reviewCount, salesCount, verifiedSalesCount }: {
   agent: Professional; leads: Lead[]; impressionsCount: number; onViewLeads: () => void; setSection: (s: Section) => void;
-  activeZonesCount?: number; reviewCount?: number;
+  activeZonesCount?: number; reviewCount?: number; salesCount?: number; verifiedSalesCount?: number;
 }) {
   const recentLeads = leads.slice(0, 5);
 
