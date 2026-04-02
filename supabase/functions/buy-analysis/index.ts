@@ -14,6 +14,13 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms)),
+  ]);
+}
+
 function detectMunicipality(address: string | null, title: string): string | null {
   const candidates = [address, title].filter(Boolean).join(" ").toLowerCase();
   for (const [key, slug] of Object.entries(MUNICIPALITY_SLUGS)) {
@@ -38,6 +45,8 @@ const FEATURE_LABELS: Record<string, string> = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  const DEADLINE = Date.now() + 55_000;
+
   try {
     const { url } = await req.json();
     if (!url || typeof url !== "string") {
@@ -56,26 +65,55 @@ Deno.serve(async (req) => {
     const API_KEY = Deno.env.get("SCRAPINGBEE_API_KEY");
     if (!API_KEY) return jsonResponse({ error: "ScrapingBee API key not configured" }, 500);
 
-    // Step 2: Scrape detail page
+    // Step 2: Scrape detail page — fast-first fallback
     const detailUrl = `https://www.idealista.com/inmueble/${propertyCode}/`;
-    let detailResult;
+    let detailCredits = 0;
+    let property;
+
+    // Attempt 1: no JS rendering (fast, ~5s)
     try {
-      console.log("Fetching detail page:", detailUrl);
+      console.log("Detail attempt 1 (no JS):", detailUrl);
       const t0 = Date.now();
-      detailResult = await fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
-      });
-      console.log(`Detail fetch took ${Date.now() - t0}ms, status=${detailResult.statusCode}, credits=${detailResult.creditsUsed}`);
+      const r = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
+        renderJs: false, premiumProxy: true, stealthProxy: true, countryCode: "es",
+      }), 25_000);
+      console.log(`Detail attempt 1 took ${Date.now() - t0}ms, status=${r.statusCode}, credits=${r.creditsUsed}`);
+      detailCredits += r.creditsUsed;
+      if (!r.error) {
+        const parsed = parsePropertyDetail(r.html);
+        if (parsed && parsed.price && parsed.sizeM2) {
+          property = parsed;
+        }
+      }
     } catch (e) {
-      console.error("Detail fetch error:", e);
-      return jsonResponse({ error: "Failed to fetch listing", detail: String(e) }, 502);
+      console.log("Detail attempt 1 failed:", String(e));
     }
 
-    if (detailResult.error) {
-      return jsonResponse({ error: "ScrapingBee error fetching listing", detail: detailResult.error }, 502);
+    // Attempt 2: with JS rendering (slower, ~20s)
+    if (!property) {
+      if (Date.now() > DEADLINE) {
+        return jsonResponse({ error: "Timed out fetching listing", detail: "Could not parse without JS and no time for retry" }, 504);
+      }
+      try {
+        console.log("Detail attempt 2 (with JS):", detailUrl);
+        const t0 = Date.now();
+        const r = await withTimeout(fetchWithScrapingBee(detailUrl, API_KEY, {
+          renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
+        }), 25_000);
+        console.log(`Detail attempt 2 took ${Date.now() - t0}ms, status=${r.statusCode}, credits=${r.creditsUsed}`);
+        detailCredits += r.creditsUsed;
+        if (!r.error) {
+          const parsed = parsePropertyDetail(r.html);
+          if (parsed && parsed.price && parsed.sizeM2) {
+            property = parsed;
+          }
+        }
+      } catch (e) {
+        console.error("Detail attempt 2 failed:", String(e));
+        return jsonResponse({ error: "Failed to fetch listing", detail: String(e) }, 502);
+      }
     }
 
-    const property = parsePropertyDetail(detailResult.html);
     if (!property || !property.price || !property.sizeM2) {
       return jsonResponse({
         error: "Could not parse property data. The listing may have been removed or the page structure changed.",
@@ -94,7 +132,23 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Step 4: Search comparables
+    // Step 4: Check deadline before comparables search
+    const timeLeft = DEADLINE - Date.now();
+    if (timeLeft < 28_000) {
+      console.log(`Only ${timeLeft}ms left, skipping comparables search`);
+      return jsonResponse({
+        property,
+        analysis: null,
+        comparables: [],
+        meta: {
+          platform: "idealista",
+          creditsUsed: detailCredits,
+          message: "Property data retrieved but ran out of time for comparables. Try again.",
+        },
+      });
+    }
+
+    // Search comparables
     const idealistaType = (PROPERTY_TYPE_MAP[property.propertyType || ""] || "viviendas") as "viviendas" | "chalets" | "pisos" | "aticos";
     const minSize = Math.round(property.sizeM2 * 0.7);
     const maxSize = Math.round(property.sizeM2 * 1.3);
@@ -109,16 +163,16 @@ Deno.serve(async (req) => {
     try {
       console.log("Fetching comparables:", searchUrl);
       const t1 = Date.now();
-      searchResult = await fetchWithScrapingBee(searchUrl, API_KEY, {
+      searchResult = await withTimeout(fetchWithScrapingBee(searchUrl, API_KEY, {
         renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
-      });
+      }), 25_000);
       console.log(`Search fetch took ${Date.now() - t1}ms, status=${searchResult.statusCode}, credits=${searchResult.creditsUsed}`);
     } catch (e) {
       return jsonResponse({
         property,
         analysis: null,
         comparables: [],
-        meta: { platform: "idealista", message: "Failed to fetch comparables", detail: String(e) },
+        meta: { platform: "idealista", message: "Failed to fetch comparables", detail: String(e), creditsUsed: detailCredits },
       }, 502);
     }
 
@@ -231,7 +285,7 @@ Deno.serve(async (req) => {
         searchUrl,
         totalSearchResults: allComps.length,
         comparablesFound: filtered.length,
-        creditsUsed: detailResult.creditsUsed + (searchResult?.creditsUsed || 0),
+        creditsUsed: detailCredits + (searchResult?.creditsUsed || 0),
         timestamp: new Date().toISOString(),
       },
     });
