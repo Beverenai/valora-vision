@@ -1685,6 +1685,9 @@ const ProDashboard = () => {
       {section === "analytics" && (
         <AnalyticsSection impressions={impressionsByDay} leads={leadsByDay} />
       )}
+      {section === "sales" && (
+        <SalesSection professionalId={agent.id} />
+      )}
       {section === "subscription" && <SubscriptionSection />}
       {section === "settings" && <SettingsSection agent={agent} />}
     </div>
