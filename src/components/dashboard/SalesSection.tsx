@@ -44,6 +44,7 @@ export default function SalesSection({ professionalId }: { professionalId: strin
   const [sales, setSales] = useState<AgentSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
 
   async function fetchSales() {
     setLoading(true);
@@ -57,6 +58,19 @@ export default function SalesSection({ professionalId }: { professionalId: strin
   }
 
   useEffect(() => { fetchSales(); }, [professionalId]);
+
+  useEffect(() => {
+    async function fetchTeam() {
+      const { data } = await supabase
+        .from("agent_team_members")
+        .select("id, name")
+        .eq("professional_id", professionalId)
+        .eq("is_active", true)
+        .order("sort_order");
+      if (data) setTeamMembers(data);
+    }
+    fetchTeam();
+  }, [professionalId]);
 
   async function handleDelete(id: string) {
     const { error } = await supabase.from("agent_sales").delete().eq("id", id);
@@ -238,6 +252,7 @@ export default function SalesSection({ professionalId }: { professionalId: strin
         onOpenChange={setDialogOpen}
         professionalId={professionalId}
         onSaleAdded={fetchSales}
+        teamMembers={teamMembers}
       />
     </div>
   );

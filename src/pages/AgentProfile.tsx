@@ -57,6 +57,7 @@ interface TeamMember {
   total_reviews: number;
   languages: string[] | null;
   email: string | null;
+  slug: string | null;
 }
 
 interface Review {
@@ -573,36 +574,47 @@ export default function AgentProfile() {
               <section>
                 <p className={SECTION_LABEL}>OUR TEAM</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {team.map(member => (
-                    <Card key={member.id} className="border-border/60">
-                      <CardContent className="p-5 flex items-start gap-4">
-                        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
-                          {member.photo_url ? (
-                            <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-sm font-semibold text-muted-foreground">{getInitials(member.name)}</span>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-sm text-foreground">{member.name}</p>
-                          {member.role && <p className="text-xs text-muted-foreground">{member.role}</p>}
-                          {member.total_reviews > 0 && (
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <StarRating rating={member.avg_rating} size={12} />
-                              <span className="text-[0.65rem] text-muted-foreground">({member.total_reviews})</span>
-                            </div>
-                          )}
-                          {member.languages && member.languages.length > 0 && (
-                            <div className="flex gap-1 mt-2 flex-wrap">
-                              {member.languages.map(l => (
-                                <Badge key={l} variant="secondary" className="text-[0.6rem] px-1.5 py-0">{l}</Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {team.map(member => {
+                    const memberCard = (
+                      <Card className="border-border/60 hover:shadow-md transition-shadow">
+                        <CardContent className="p-5 flex items-start gap-4">
+                          <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                            {member.photo_url ? (
+                              <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-sm font-semibold text-muted-foreground">{getInitials(member.name)}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm text-foreground">{member.name}</p>
+                            {member.role && <p className="text-xs text-muted-foreground">{member.role}</p>}
+                            {member.total_reviews > 0 && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <StarRating rating={member.avg_rating} size={12} />
+                                <span className="text-[0.65rem] text-muted-foreground">({member.total_reviews})</span>
+                              </div>
+                            )}
+                            {member.languages && member.languages.length > 0 && (
+                              <div className="flex gap-1 mt-2 flex-wrap">
+                                {member.languages.map(l => (
+                                  <Badge key={l} variant="secondary" className="text-[0.6rem] px-1.5 py-0">{l}</Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {member.slug && <ChevronRight size={16} className="text-muted-foreground shrink-0 mt-1" />}
+                        </CardContent>
+                      </Card>
+                    );
+
+                    return member.slug ? (
+                      <Link key={member.id} to={`/agentes/${professional.slug}/${member.slug}`}>
+                        {memberCard}
+                      </Link>
+                    ) : (
+                      <div key={member.id}>{memberCard}</div>
+                    );
+                  })}
                 </div>
               </section>
             )}

@@ -22,6 +22,7 @@ const BuyCompare = lazy(() => lazyRetry(() => import("./pages/BuyCompare.tsx")))
 const ValuationLookup = lazy(() => lazyRetry(() => import("./pages/ValuationLookup.tsx")));
 const Admin = lazy(() => lazyRetry(() => import("./pages/Admin.tsx")));
 const AgentProfile = lazy(() => lazyRetry(() => import("./pages/AgentProfile.tsx")));
+const TeamMemberProfile = lazy(() => lazyRetry(() => import("./pages/TeamMemberProfile.tsx")));
 const AgentDirectory = lazy(() => lazyRetry(() => import("./pages/AgentDirectory.tsx")));
 const ProLanding = lazy(() => lazyRetry(() => import("./pages/ProLanding.tsx")));
 const ProOnboard = lazy(() => lazyRetry(() => import("./pages/ProOnboard.tsx")));
@@ -79,6 +80,7 @@ const App = () => {
               <Route path="/lookup" element={<ValuationLookup />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/agentes" element={<AgentDirectory />} />
+              <Route path="/agentes/:slug/:memberSlug" element={<TeamMemberProfile />} />
               <Route path="/agentes/:slug" element={<AgentProfile />} />
               <Route path="/pro" element={<ProLanding />} />
               <Route path="/pro/onboard" element={<ProOnboard />} />

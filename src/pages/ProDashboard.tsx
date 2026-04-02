@@ -547,7 +547,7 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
   const [inviteForm, setInviteForm] = useState({ name: "", email: "", phone: "", role: "" });
   const [inviting, setInviting] = useState(false);
   const [editingMember, setEditingMember] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", role: "", email: "", phone: "", whatsapp: "", photo_url: "", languages: "" });
+  const [editForm, setEditForm] = useState({ name: "", role: "", email: "", phone: "", whatsapp: "", photo_url: "", languages: "", bio: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -637,12 +637,17 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
       whatsapp: member.whatsapp || "",
       photo_url: member.photo_url || "",
       languages: (member.languages || []).join(", "),
+      bio: member.bio || "",
     });
   };
 
   const handleSaveEdit = async () => {
     if (!editingMember) return;
     setSaving(true);
+    // Generate slug from name
+    const slug = editForm.name.trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     const { error } = await supabase.from("agent_team_members").update({
       name: editForm.name.trim(),
       role: editForm.role.trim() || null,
@@ -651,7 +656,9 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
       whatsapp: editForm.whatsapp.trim() || null,
       photo_url: editForm.photo_url.trim() || null,
       languages: editForm.languages ? editForm.languages.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
-    }).eq("id", editingMember.id);
+      bio: editForm.bio.trim() || null,
+      slug: slug || null,
+    } as any).eq("id", editingMember.id);
     setSaving(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Team member updated" });
@@ -666,6 +673,9 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
     }
     setInviting(true);
     const maxSort = teamMembers.reduce((max: number, m: any) => Math.max(max, m.sort_order || 0), 0);
+    const inviteSlug = inviteForm.name.trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     const { error } = await supabase.from("agent_team_members").insert({
       professional_id: agent.id,
       name: inviteForm.name.trim(),
@@ -674,7 +684,8 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
       role: inviteForm.role.trim() || null,
       sort_order: maxSort + 1,
       is_active: true,
-    });
+      slug: inviteSlug || null,
+    } as any);
     setInviting(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Team member added!" });
@@ -825,6 +836,10 @@ function TeamTab({ agent, isAdmin }: { agent: Professional; isAdmin: boolean }) 
             <div>
               <Label className="text-xs">Languages (comma-separated)</Label>
               <Input value={editForm.languages} onChange={(e) => setEditForm({ ...editForm, languages: e.target.value })} placeholder="English, Spanish" />
+            </div>
+            <div>
+              <Label className="text-xs">Bio</Label>
+              <Textarea value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} placeholder="Short personal bio…" rows={3} />
             </div>
             <Button onClick={handleSaveEdit} disabled={saving} className="w-full rounded-full">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}

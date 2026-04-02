@@ -23,18 +23,18 @@ interface AddSaleDialogProps {
   onOpenChange: (open: boolean) => void;
   professionalId: string;
   onSaleAdded: () => void;
+  teamMembers?: { id: string; name: string }[];
 }
 
-export default function AddSaleDialog({ open, onOpenChange, professionalId, onSaleAdded }: AddSaleDialogProps) {
+export default function AddSaleDialog({ open, onOpenChange, professionalId, onSaleAdded, teamMembers = [] }: AddSaleDialogProps) {
   const { toast } = useToast();
   const [mode, setMode] = useState<"link" | "manual">("link");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // Link mode
   const [listingUrl, setListingUrl] = useState("");
+  const [linkTeamMemberId, setLinkTeamMemberId] = useState("");
 
-  // Manual mode
   const [form, setForm] = useState({
     property_type: "apartment",
     bedrooms: "",
@@ -46,6 +46,7 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
     sale_date: "",
     photo_url: "",
     show_price: true,
+    team_member_id: "",
   });
 
   const updateForm = (field: string, value: string | boolean) => setForm(f => ({ ...f, [field]: value }));
@@ -85,7 +86,8 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
       professional_id: professionalId,
       listing_url: listingUrl.trim(),
       listing_source: source,
-    });
+      team_member_id: linkTeamMemberId || null,
+    } as any);
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
@@ -115,13 +117,14 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
       sale_date: form.sale_date || null,
       photo_url: form.photo_url || null,
       show_price: form.show_price,
-    });
+      team_member_id: form.team_member_id || null,
+    } as any);
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
     } else {
       toast({ title: "Sale registered!" });
-      setForm({ property_type: "apartment", bedrooms: "", bathrooms: "", built_size_sqm: "", address_text: "", city: "", sale_price: "", sale_date: "", photo_url: "", show_price: true });
+      setForm({ property_type: "apartment", bedrooms: "", bathrooms: "", built_size_sqm: "", address_text: "", city: "", sale_price: "", sale_date: "", photo_url: "", show_price: true, team_member_id: "" });
       onSaleAdded();
       onOpenChange(false);
     }
@@ -150,6 +153,21 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
               />
               <p className="text-xs text-muted-foreground mt-1">Paste a link from Idealista, Fotocasa, or another portal.</p>
             </div>
+            {teamMembers.length > 0 && (
+              <div>
+                <Label>Attributed to</Label>
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={linkTeamMemberId}
+                  onChange={e => setLinkTeamMemberId(e.target.value)}
+                >
+                  <option value="">Company (no specific agent)</option>
+                  {teamMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <Button onClick={handleSubmitLink} disabled={saving} className="w-full">
               {saving && <Loader2 size={14} className="mr-2 animate-spin" />}
               Register Sale
@@ -215,6 +233,23 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
               </div>
               <Switch checked={form.show_price} onCheckedChange={(v) => updateForm("show_price", v)} />
             </div>
+
+            {/* Team member attribution */}
+            {teamMembers.length > 0 && (
+              <div>
+                <Label>Attributed to</Label>
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form.team_member_id}
+                  onChange={e => updateForm("team_member_id", e.target.value)}
+                >
+                  <option value="">Company (no specific agent)</option>
+                  {teamMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Photo upload */}
             <div>
