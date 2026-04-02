@@ -524,7 +524,7 @@ export default function AgentProfile() {
           {professional.team_size && (
             <div className="flex items-center gap-2 shrink-0">
               <Users size={16} className="text-[#D4713B]" />
-              <span className="text-sm text-muted-foreground">{professional.team_size} miembros</span>
+              <span className="text-sm text-muted-foreground">{professional.team_size} members</span>
             </div>
           )}
           {professional.languages && professional.languages.length > 0 && (
@@ -536,7 +536,7 @@ export default function AgentProfile() {
           {recentSales.length > 0 && (
             <div className="flex items-center gap-2 shrink-0">
               <Home size={16} className="text-[#D4713B]" />
-              <span className="text-sm text-muted-foreground">{recentSales.length} ventas</span>
+              <span className="text-sm text-muted-foreground">{recentSales.length} sales</span>
             </div>
           )}
         </div>
@@ -545,7 +545,7 @@ export default function AgentProfile() {
       {/* ── Breadcrumbs ── */}
       <div className="max-w-5xl mx-auto px-4 md:px-8 pt-6">
         <AgentBreadcrumbs
-          agentName={professional.contact_name || professional.company_name}
+          agentName={professional.company_name}
           provincia={primaryProvince}
           ciudad={primaryCity !== "Costa del Sol" ? primaryCity : null}
           agencyName={agency?.company_name}
@@ -561,7 +561,7 @@ export default function AgentProfile() {
             {/* About */}
             {aboutText && (
               <section>
-                <p className={SECTION_LABEL}>SOBRE NOSOTROS</p>
+                <p className={SECTION_LABEL}>ABOUT US</p>
                 <div className="prose prose-sm max-w-none text-foreground/80 leading-relaxed whitespace-pre-line">
                   {aboutText}
                 </div>
@@ -681,7 +681,7 @@ export default function AgentProfile() {
             {/* Team */}
             {team.length > 0 && (
               <section>
-                <p className={SECTION_LABEL}>NUESTRO EQUIPO</p>
+                <p className={SECTION_LABEL}>OUR TEAM</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {team.map(member => {
                     const memberCard = (
@@ -757,7 +757,7 @@ export default function AgentProfile() {
 
             {/* Service areas */}
             <section>
-              <p className={SECTION_LABEL}>ZONAS DE SERVICIO</p>
+              <p className={SECTION_LABEL}>SERVICE AREAS</p>
               {zones.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {zones.map(z => (
@@ -768,13 +768,13 @@ export default function AgentProfile() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Zonas de servicio no especificadas</p>
+                <p className="text-sm text-muted-foreground">Service areas not specified</p>
               )}
             </section>
 
             {/* Reviews */}
             <section>
-              <p className={SECTION_LABEL}>OPINIONES DE CLIENTES</p>
+              <p className={SECTION_LABEL}>CLIENT REVIEWS</p>
 
               {reviews.length > 0 ? (
                 <>
@@ -782,7 +782,7 @@ export default function AgentProfile() {
                     <div className="text-center">
                       <p className="text-4xl font-serif font-light text-foreground">{professional.avg_rating.toFixed(1)}</p>
                       <StarRating rating={professional.avg_rating} size={14} />
-                      <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} opiniones</p>
+                      <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} reviews</p>
                     </div>
                     <div className="flex-1 space-y-1.5">
                       {starDist.map(d => (
@@ -826,7 +826,7 @@ export default function AgentProfile() {
                               )}
                             </div>
                             <span className="text-[0.65rem] text-muted-foreground">
-                              {new Date(review.created_at).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
+                              {new Date(review.created_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
                             </span>
                           </div>
                           <StarRating rating={review.rating} size={12} />
@@ -838,7 +838,7 @@ export default function AgentProfile() {
 
                   {reviews.length > (isMobile ? 3 : 5) && !showAllReviews && (
                     <Button variant="outline" className="w-full mt-4 rounded-full" onClick={() => setShowAllReviews(true)}>
-                      Ver todas las {reviews.length} opiniones
+                      View all {reviews.length} reviews
                     </Button>
                   )}
                 </>
@@ -846,15 +846,15 @@ export default function AgentProfile() {
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
                     <Star size={32} fill="hsl(var(--primary))" className="mx-auto text-primary mb-3 opacity-30" strokeWidth={0} />
-                    <p className="text-sm text-foreground/70">Opiniones disponibles pronto</p>
-                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews importadas</p>
+                    <p className="text-sm text-foreground/70">Reviews available soon</p>
+                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews imported</p>
                   </CardContent>
                 </Card>
               ) : (
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
                     <Star size={32} className="mx-auto text-muted-foreground/30 mb-3" />
-                    <p className="text-sm text-muted-foreground">Sé el primero en opinar sobre {professional.company_name}</p>
+                    <p className="text-sm text-muted-foreground">Be the first to review {professional.company_name}</p>
                   </CardContent>
                 </Card>
               )}
