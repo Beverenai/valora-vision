@@ -31,6 +31,7 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
   const [mode, setMode] = useState<"link" | "manual">("link");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [linkAdded, setLinkAdded] = useState(false);
 
   const [listingUrl, setListingUrl] = useState("");
   const [linkTeamMemberId, setLinkTeamMemberId] = useState("");
@@ -92,7 +93,6 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
     } else {
-      toast({ title: "Sale registered!", description: "Listing details are being imported…" });
       // Trigger async enrichment
       if (insertedData?.id) {
         supabase.functions.invoke("enrich-sale-listing", {
@@ -103,8 +103,10 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
         });
       }
       setListingUrl("");
+      setLinkTeamMemberId("");
       onSaleAdded();
-      onOpenChange(false);
+      setLinkAdded(true);
+      setTimeout(() => setLinkAdded(false), 3000);
     }
   }
 
@@ -175,6 +177,11 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>
+              </div>
+            )}
+            {linkAdded && (
+              <div className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 rounded-md px-3 py-2">
+                <span>✓</span> Added! Importing details… You can paste another link.
               </div>
             )}
             <Button onClick={handleSubmitLink} disabled={saving} className="w-full">
