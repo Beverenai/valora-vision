@@ -1,39 +1,47 @@
 
 
-# Fix Team Member Count + Improve Address Geocoding
+# Fix Build Error + Switch Maps from Mapbox to Google Maps
 
-## Two Issues
+## Two things to address
 
-### 1. Team member count shows wrong number
+### 1. Fix build error (quick)
+The `AgentProfile.tsx` references `teamMembers` but the state variable is called `team`. Replace `teamMembers` with `team` on lines 524, 527.
 
-**Root cause**: The agent profile page displays `professional.team_size` — a static column set once during onboarding. For "La Sala homes", this was set to `1` during signup, but the actual `agent_team_members` table has `2` active members.
+### 2. Switch all maps to Google Maps (already configured)
+The project already has a Google Maps API key in `src/config/google-maps.ts` and uses `@googlemaps/js-api-loader` for the address input. Currently, `AgentPropertyMap`, `NearbyPropertyMap`, and the Admin valuation map all use Mapbox. We'll replace them with Google Maps JS API using the same loader pattern already in `GoogleAddressInput.tsx`.
 
-**Fix**: In `AgentProfile.tsx`, replace `professional.team_size` with the actual count of loaded team members (`teamMembers.length`). Also pluralize correctly: "1 member" vs "2 members".
+**What changes per component:**
 
-**File**: `src/pages/AgentProfile.tsx` (line ~524-528)
-- Replace `professional.team_size` with `teamMembers.length`
-- Use `teamMembers.length === 1 ? "member" : "members"` for proper pluralization
-- Only show the badge when `teamMembers.length > 0`
+**AgentPropertyMap.tsx** — Replace Mapbox with Google Maps:
+- Use `@googlemaps/js-api-loader` with the existing API key
+- Create a `google.maps.Map` with `light` map style
+- Use `google.maps.marker.AdvancedMarkerElement` (or standard `Marker`) with terracotta-colored pins
+- Use `google.maps.InfoWindow` for popups showing photo, type, beds, city, price, sale date
+- Auto-fit bounds when multiple markers exist
 
-### 2. Geocode address from Idealista links for accurate map pins
+**NearbyPropertyMap.tsx** — Same conversion:
+- Replace Mapbox initialization with Google Maps
+- Blue marker for user's property, terracotta for nearby sales
+- InfoWindows with the same content (photo, type, beds, price, date, verified badge)
 
-**Root cause**: The enrich function asks Firecrawl to extract `latitude`/`longitude` directly, but Idealista pages rarely expose raw coordinates. So most enriched sales end up with no coordinates and don't appear on the map.
+**Admin.tsx (ValuationsMapTab)** — Same conversion:
+- Blue markers for sell valuations, green for rent
+- InfoWindows with address, value, date, type
 
-**Fix**: After Firecrawl extraction, if coordinates are missing but an address/city was found, use a **geocoding fallback** (Google Geocoding API or Mapbox Geocoding API) to convert the address string into precise lat/lng.
+**Geocoding in edge function** — Switch from Mapbox to Google Geocoding API:
+- Use `https://maps.googleapis.com/maps/api/geocode/json?address=...&key=...`
+- Need `GOOGLE_MAPS_API_KEY` as a server-side secret (same key value as the frontend one)
 
-**File**: `supabase/functions/enrich-sale-listing/index.ts`
-- After extracting data from Firecrawl, check if `latitude`/`longitude` are missing but `address` + `city` exist
-- Call the Mapbox Geocoding API (already have `VITE_MAPBOX_TOKEN` — will need it as a server-side secret `MAPBOX_TOKEN`) to geocode: `https://api.mapbox.com/geocoding/v5/mapbox.places/{address},{city},Spain.json?access_token=...`
-- Parse the first result's `center` coordinates `[lng, lat]`
-- Set `update.latitude` and `update.longitude` from the geocode result
-- This ensures every enriched sale with an address gets a map pin
-
-**Secret needed**: `MAPBOX_TOKEN` (same value as the frontend `VITE_MAPBOX_TOKEN`, but available server-side in the edge function)
-
-## Files to change
+### Files to change
 
 | File | Change |
 |------|--------|
-| `src/pages/AgentProfile.tsx` | Use `teamMembers.length` instead of `professional.team_size`; fix pluralization |
-| `supabase/functions/enrich-sale-listing/index.ts` | Add Mapbox geocoding fallback when Firecrawl doesn't return coordinates |
+| `src/pages/AgentProfile.tsx` | Fix `teamMembers` → `team` (build error) |
+| `src/components/agent/AgentPropertyMap.tsx` | Replace Mapbox with Google Maps JS API |
+| `src/components/shared/NearbyPropertyMap.tsx` | Replace Mapbox with Google Maps JS API |
+| `src/pages/Admin.tsx` | Replace Mapbox map in ValuationsMapTab with Google Maps |
+| `supabase/functions/enrich-sale-listing/index.ts` | Use Google Geocoding API instead of Mapbox for address→coordinates |
+
+### No new dependencies needed
+`@googlemaps/js-api-loader` is already installed. The Google Maps API key is already in the codebase. For the edge function geocoding, we'll need the same API key as a server-side secret (`GOOGLE_MAPS_API_KEY`).
 
