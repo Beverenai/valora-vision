@@ -355,13 +355,14 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
               </svg>
             </div>
           </div>
-          <div className="grid grid-cols-6 gap-2 mt-4 text-center">
+          <div className="grid grid-cols-7 gap-2 mt-4 text-center">
             <div><p className="text-xs text-muted-foreground">Profile</p><p className="text-sm font-medium">{profileMerit}</p></div>
             <div><p className="text-xs text-muted-foreground">Rating</p><p className="text-sm font-medium">{ratingMerit}</p></div>
             <div><p className="text-xs text-muted-foreground">Zones</p><p className="text-sm font-medium">{zoneMerit}</p></div>
             <div><p className="text-xs text-muted-foreground">Reviews</p><p className="text-sm font-medium">{reviewMerit}</p></div>
             <div><p className="text-xs text-muted-foreground">Response</p><p className="text-sm font-medium">{responseMerit}</p></div>
             <div><p className="text-xs text-muted-foreground">Conversion</p><p className="text-sm font-medium">{conversionMerit}</p></div>
+            <div><p className="text-xs text-muted-foreground">Sales</p><p className="text-sm font-medium">{salesMerit}</p></div>
           </div>
         </CardContent>
       </Card>
