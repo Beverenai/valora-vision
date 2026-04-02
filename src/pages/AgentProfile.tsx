@@ -768,7 +768,7 @@ export default function AgentProfile() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Zonas de servicio no especificadas</p>
+                <p className="text-sm text-muted-foreground">Service areas not specified</p>
               )}
             </section>
 
