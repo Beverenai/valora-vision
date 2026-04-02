@@ -545,7 +545,7 @@ export default function AgentProfile() {
       {/* ── Breadcrumbs ── */}
       <div className="max-w-5xl mx-auto px-4 md:px-8 pt-6">
         <AgentBreadcrumbs
-          agentName={professional.contact_name || professional.company_name}
+          agentName={professional.company_name}
           provincia={primaryProvince}
           ciudad={primaryCity !== "Costa del Sol" ? primaryCity : null}
           agencyName={agency?.company_name}
