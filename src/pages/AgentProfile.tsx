@@ -613,7 +613,7 @@ export default function AgentProfile() {
                           </div>
                         )}
                       </div>
-                      <span className="text-xs font-medium text-[#D4713B] shrink-0">Ver más →</span>
+                      <span className="text-xs font-medium text-[#D4713B] shrink-0">View more →</span>
                     </CardContent>
                   </Card>
                 </Link>
