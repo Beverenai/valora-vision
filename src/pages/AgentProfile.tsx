@@ -826,7 +826,7 @@ export default function AgentProfile() {
                               )}
                             </div>
                             <span className="text-[0.65rem] text-muted-foreground">
-                              {new Date(review.created_at).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
+                              {new Date(review.created_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
                             </span>
                           </div>
                           <StarRating rating={review.rating} size={12} />
