@@ -406,7 +406,7 @@ export default function AgentProfile() {
   const ContactFormSection = (
     <Card className="border-border/60">
       <CardContent className="p-6">
-        <p className={SECTION_LABEL}>CONTACTAR {professional.company_name.toUpperCase()}</p>
+        <p className={SECTION_LABEL}>CONTACT {professional.company_name.toUpperCase()}</p>
 
         {/* Show phone button */}
         {professional.phone && (
