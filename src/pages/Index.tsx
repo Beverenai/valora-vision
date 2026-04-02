@@ -7,6 +7,7 @@ import { Star, RotateCcw, MapPin, SlidersHorizontal, Sparkles, BedDouble, Bath, 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import ValuationTicketCard from "@/components/ValuationTicketCard";
 import PropertyShowcaseCarousel from "@/components/PropertyShowcaseCarousel";
 import Navbar from "@/components/Navbar";
