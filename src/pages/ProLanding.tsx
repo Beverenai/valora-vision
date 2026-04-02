@@ -158,6 +158,51 @@ const ProLanding = () => {
         </div>
       </section>
 
+      {/* What sellers look for */}
+      <section className="bg-accent/30 py-16 md:py-24">
+        <div className="max-w-[1100px] mx-auto px-6">
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] font-semibold text-primary text-center mb-3">Market Insight</p>
+          <h2 className="font-serif text-2xl md:text-3xl font-bold text-center mb-3">
+            What sellers look for in an agent
+          </h2>
+          <p className="text-center text-foreground/60 mb-12 max-w-lg mx-auto">
+            Based on research from property owners across Costa del Sol.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 max-w-3xl mx-auto">
+            {[
+              { icon: MapPin, label: "Proximity", pct: 29 },
+              { icon: Star, label: "Reviews", pct: 21 },
+              { icon: Home, label: "Recent Sales", pct: 19 },
+              { icon: Briefcase, label: "Experience", pct: 18 },
+              { icon: Award, label: "Brand", pct: 14 },
+            ].map((item) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{item.pct}%</p>
+                <p className="text-xs text-muted-foreground mt-1">{item.label}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button asChild className="rounded-full px-8">
+              <Link to="/pro/onboard">
+                Claim Your Zone <ArrowRight className="w-4 h-4 ml-1" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section className="bg-secondary/30 py-16 md:py-24">
         <div className="max-w-[1100px] mx-auto px-6">
