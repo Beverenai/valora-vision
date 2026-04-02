@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     }
 
     // Extract structured data - handle nested response
-    const extracted = scrapeData?.data?.json || scrapeData?.json || {};
+    const extracted = scrapeData?.data?.extract || scrapeData?.extract || scrapeData?.data?.json || {};
     const metadata = scrapeData?.data?.metadata || scrapeData?.metadata || {};
 
     console.log("Extracted data:", JSON.stringify(extracted));
