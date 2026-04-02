@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
       console.log(`Fetching comparables (timeout ${searchTimeout}ms):`, searchUrl);
       const t1 = Date.now();
       searchResult = await withTimeout(fetchWithScrapingBee(searchUrl, API_KEY, {
-        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
+        renderJs: false, premiumProxy: true, stealthProxy: true, countryCode: "es",
       }), searchTimeout);
       console.log(`Search took ${Date.now() - t1}ms, status=${searchResult.statusCode}, credits=${searchResult.creditsUsed}`);
     } catch (e) {
