@@ -757,7 +757,7 @@ export default function AgentProfile() {
 
             {/* Service areas */}
             <section>
-              <p className={SECTION_LABEL}>ZONAS DE SERVICIO</p>
+              <p className={SECTION_LABEL}>SERVICE AREAS</p>
               {zones.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {zones.map(z => (
