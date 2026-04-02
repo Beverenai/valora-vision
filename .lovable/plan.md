@@ -1,24 +1,45 @@
 
 
-# Standardize Team Member Cards
+# Create ScrapingBee Shared Utilities for Edge Functions
 
-## Changes to `src/pages/AgentProfile.tsx` (lines 613–691)
+## Overview
 
-Redesign each team member card to have a fixed-height layout with consistent structure regardless of content:
+Create three shared utility files under `supabase/functions/_shared/` that handle ScrapingBee API communication, Idealista HTML parsing, and property valuation calculations. Also add the `SCRAPINGBEE_API_KEY` secret.
 
-1. **Fixed card layout** — Replace the horizontal `flex items-start` layout with a vertical centered layout using fixed height (`h-[220px]` or similar) so all cards match.
+## Step 0: Add Secret
 
-2. **Content: Picture → Name/Title → Button only** — Remove variable-height content (bio, email/phone, languages, sales badge, star ratings) from the card. Keep only:
-   - Photo/avatar (centered, larger ~16x16)
-   - Name (single line, truncated)
-   - Role/title (single line, truncated)
-   - "View Profile" button (links to member profile) instead of "Contact" button
+Use the `add_secret` tool to store `SCRAPINGBEE_API_KEY` with the value provided.
 
-3. **Button behavior** — If member has a `slug`, the button navigates to `/agentes/${professional.slug}/${member.slug}`. If no slug, button is disabled or hidden. Remove the outer `<Link>` wrapper since the button itself handles navigation.
+## Files to Create
 
-## File
+### 1. `supabase/functions/_shared/scrapingbee-client.ts`
+- `fetchWithScrapingBee(url, apiKey, options)` — calls ScrapingBee API with configurable proxy, JS rendering, country code, and timeout (90s)
+- `buildIdealistaSearchUrl(params)` — constructs Idealista search URLs from operation, property type, municipality slug, price/size/room filters, and pagination
+- Default: `renderJs=false`, `premiumProxy=true`, `countryCode="es"`
 
-| File | Change |
-|------|--------|
-| `src/pages/AgentProfile.tsx` | Rewrite team card markup (lines ~613–691): vertical layout, fixed height, photo + name + role + "View Profile" button only |
+### 2. `supabase/functions/_shared/idealista-parser.ts`
+- Types: `ParsedProperty`, `PropertyFeatures`, `ParsedDetailProperty`
+- `parseSearchResults(html)` — extracts property listings from Idealista search page HTML using regex on article elements (property code, price in Spanish format, size, rooms, bathrooms, thumbnail, property type detection, feature detection)
+- `parsePropertyDetail(html)` — extracts full detail from a single listing page (images, GPS coords, energy rating, construction year, contact info)
+- `MUNICIPALITY_SLUGS` — mapping of city names to Idealista URL slugs (Marbella, Estepona, Málaga, etc.)
+- All parsing uses regex (no DOM parser needed in Deno)
+
+### 3. `supabase/functions/_shared/valuation-engine.ts`
+- `calculateValuation(input, comparables)` — computes estimated value using:
+  - MAD-based outlier removal on price/m² values
+  - Median price/m² × target size as base estimate
+  - Feature adjustments (pool +10%, sea views +20%, garage +5%, etc.) applied only when target differs significantly from comparable set (>70% or <30% thresholds)
+  - Confidence levels based on comparable count (high/medium/low/insufficient)
+  - Range of ±15%
+- `calculateBuyAnalysis(askingPrice, input, comparables)` — extends valuation with:
+  - Price deviation percentage
+  - Price score (below_market / good_value / fair_price / slightly_above / above_market)
+  - Color codes and negotiation hints with actual € amounts
+
+## Technical Notes
+
+- Files are pure utility modules (no HTTP handlers) — they export functions for use by edge functions
+- Consistent with existing patterns in `calculate-valuation/index.ts` (same MAD filtering, feature adjustment approach) but extracted into reusable modules
+- No frontend changes
+- No database changes
 
