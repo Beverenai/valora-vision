@@ -6,7 +6,8 @@ import {
   LayoutDashboard, User, MessageSquare, BarChart3, CreditCard, Settings,
   Star, Eye, TrendingUp, Loader2, ExternalLink, ChevronDown, Check, X,
   Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus, Shield,
-  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2, Building2, Users, Lock, Home
+  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2, Building2, Users, Lock, Home,
+  Info, CheckCircle2, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
