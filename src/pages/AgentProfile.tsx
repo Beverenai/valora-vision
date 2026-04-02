@@ -536,7 +536,7 @@ export default function AgentProfile() {
           {recentSales.length > 0 && (
             <div className="flex items-center gap-2 shrink-0">
               <Home size={16} className="text-[#D4713B]" />
-              <span className="text-sm text-muted-foreground">{recentSales.length} ventas</span>
+              <span className="text-sm text-muted-foreground">{recentSales.length} sales</span>
             </div>
           )}
         </div>
