@@ -44,6 +44,7 @@ export default function SalesSection({ professionalId }: { professionalId: strin
   const [sales, setSales] = useState<AgentSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
 
   async function fetchSales() {
     setLoading(true);
