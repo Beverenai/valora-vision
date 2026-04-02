@@ -681,7 +681,7 @@ export default function AgentProfile() {
             {/* Team */}
             {team.length > 0 && (
               <section>
-                <p className={SECTION_LABEL}>NUESTRO EQUIPO</p>
+                <p className={SECTION_LABEL}>OUR TEAM</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {team.map(member => {
                     const memberCard = (
