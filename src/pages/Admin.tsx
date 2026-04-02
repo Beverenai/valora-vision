@@ -569,8 +569,7 @@ function ZonesTab({ dark }: { dark: boolean }) {
                 <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{zone.total_properties || 0}</td>
                 <td className="px-4 py-3"><StatusBadge status={zone.last_scrape_status || "pending"} dark={dark} /></td>
                 <td className="px-4 py-3">
-                  <Button variant="outline" size="sm" disabled={!zone.idealista_location || scraping === zone.id} onClick={() => triggerScrape(zone)}
-                    className={cn(dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}>
+                  <Button variant={dark ? "outline-dark" : "outline"} size="sm" disabled={!zone.idealista_location || scraping === zone.id} onClick={() => triggerScrape(zone)}>
                     {scraping === zone.id ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
                     Scrape
                   </Button>
