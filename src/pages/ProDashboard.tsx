@@ -903,8 +903,21 @@ function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professi
     setCoverPhotoUrl(newUrl);
     setCoverFailed(false);
     setUploadingCover(false);
-    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl }).eq("id", agent.id);
+    setFocusX(50);
+    setFocusY(50);
+    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl, cover_photo_focus_x: 50, cover_photo_focus_y: 50 }).eq("id", agent.id);
     if (!error) toast({ title: "Cover photo updated!" });
+  };
+
+  const handleCoverFocusClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isAdmin || !coverPhotoUrl) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    setFocusX(x);
+    setFocusY(y);
+    await supabase.from("professionals").update({ cover_photo_focus_x: x, cover_photo_focus_y: y }).eq("id", agent.id);
+    toast({ title: "Focus point updated", description: "The crop will now center on this point." });
   };
 
   const handleSave = () => {
