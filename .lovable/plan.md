@@ -1,76 +1,70 @@
 
 
-# Auto-Import Reviews During Onboarding
+# Individual Team Member Profile Pages
 
 ## What This Does
-When an agency onboards and provides their website URL, we already scrape it with Firecrawl. We'll extend that to:
-1. Find Google Reviews and Trustpilot links on their website
-2. Scrape those review pages with Firecrawl
-3. Use AI to extract individual reviews (name, rating, comment, date)
-4. Insert them into `agent_reviews` with `source` tracking and `is_verified = true`
+Each team member gets their own public profile page at `/agentes/:company-slug/:member-slug`, similar to RealAdvisor's agent pages. The company page (`/agentes/:slug`) remains the agency overview, and each team member card links to their individual page showing their personal sales, stats, bio, and a contact form — all within the context of their parent agency.
+
+## Current State
+- Team members exist in `agent_team_members` table but have no individual pages
+- Team member cards on the agency profile are static (no links)
+- Sales are tied to `professional_id` only — no team member attribution
 
 ## Changes
 
 ### 1. Database Migration
-Add `source` column to `agent_reviews` to track where reviews came from:
-- `source TEXT DEFAULT 'manual'` — values: `manual`, `google`, `trustpilot`, `website`
-- Add `source_url TEXT` for the original review page URL
+Add columns to `agent_team_members`:
+- `slug TEXT` — URL-friendly identifier (generated from name)
+- `bio TEXT` — personal description
+- `phone TEXT` already exists
+- `whatsapp TEXT` already exists
 
-### 2. Update `onboard-agency/index.ts`
-After the existing website scrape (step 1), add a new step:
+Add column to `agent_sales`:
+- `team_member_id UUID` — optional link to the team member who made the sale
 
-**Step 1b: Find review page links**
-- From the already-scraped links array, detect:
-  - Google: links containing `google.com/maps` or `business.google.com`
-  - Trustpilot: links containing `trustpilot.com`
-  - Also check the scraped markdown for embedded review text
+### 2. New Route: `/agentes/:slug/:memberSlug`
+Add a new route in `App.tsx` that renders a new `TeamMemberProfile` page component.
 
-**Step 2b: Scrape review pages**
-- If Google/Trustpilot links found, scrape each with Firecrawl (markdown format)
-- Limit to 1 URL per source to stay within credit budget
+### 3. New Page: `src/pages/TeamMemberProfile.tsx`
+Inspired by the RealAdvisor layout:
+- **Hero**: Agency cover photo with member's personal photo overlaid (like RealAdvisor)
+- **Name + role + languages**
+- **Agency card**: Links back to parent company page
+- **Sales statistics**: Properties sold count, median price, breakdown by type
+- **Sold properties grid**: Cards with SOLD badge, photo, type, price, date
+- **Contact form**: "Contact [Name]" sticky sidebar card, submits to `agent_contact_requests`
+- **Reviews**: Show reviews linked to this member (if any)
 
-**Step 3b: Extract reviews with AI**
-- Send scraped review page content to Lovable AI with tool calling
-- Extract: `reviewer_name`, `rating` (1-5), `comment`, `source`
-- Cap at 20 reviews per source
+### 4. Update `AgentProfile.tsx` — Team Section
+Make each team member card clickable, linking to `/agentes/${professional.slug}/${member.slug}`.
 
-**Step 4b: Return reviews in result**
-- Add `reviews: []` array to the onboard response
-- The frontend (ProOnboard.tsx) will insert them into `agent_reviews` after profile creation
+### 5. Update `AddSaleDialog.tsx` — Team Member Attribution
+Add an optional "Attributed to" dropdown showing team members, saving `team_member_id` on the sale.
 
-### 3. Update `ProOnboard.tsx` — handlePublish
-After the professional is created, bulk-insert the returned reviews into `agent_reviews` with:
-- `professional_id` from the newly created professional
-- `is_verified: true` (imported from verified source)
-- `source: 'google' | 'trustpilot'`
-
-Add an onboarding step: "Importing reviews..." with count feedback.
-
-### 4. Update `AgentProfile.tsx` — Review Display
-Show a small badge on imported reviews indicating source (Google icon, Trustpilot icon) so visitors can see these are verified external reviews.
+### 6. Auto-generate slugs
+When team members are created/updated, generate a slug from their name (e.g., "David Manso Torres" → "david-manso-torres"). Handle in the frontend on save.
 
 ## Technical Details
 
-### AI extraction prompt (tool calling)
+### Route structure
 ```text
-Extract individual reviews from this review page content.
-Return reviewer name, rating (1-5), comment text, and approximate date.
+/agentes/la-sala-homes              → Agency profile (existing)
+/agentes/la-sala-homes/david-manso  → Team member profile (new)
 ```
 
-### Review insert shape
-```typescript
-{ professional_id, reviewer_name, rating, comment, 
-  is_verified: true, source: 'google', source_url: '...' }
+### Sales query for member page
+```sql
+SELECT * FROM agent_sales 
+WHERE professional_id = :agency_id 
+  AND team_member_id = :member_id
+ORDER BY sale_date DESC
 ```
 
 ### Files Modified
-- `supabase/migrations/` — add `source` and `source_url` columns to `agent_reviews`
-- `supabase/functions/onboard-agency/index.ts` — review scraping + AI extraction
-- `src/pages/ProOnboard.tsx` — insert reviews on publish
-- `src/pages/AgentProfile.tsx` — source badge on reviews
-
-### Limitations
-- Firecrawl may not capture all Google reviews (Google limits visible reviews)
-- Trustpilot pages are usually scrapeable and contain more review text
-- We cap at 20 reviews per source to avoid excessive AI token usage
+- `supabase/migrations/` — add `slug`, `bio` to `agent_team_members`; add `team_member_id` to `agent_sales`
+- `src/App.tsx` — add route `/agentes/:slug/:memberSlug`
+- `src/pages/TeamMemberProfile.tsx` — new page component
+- `src/pages/AgentProfile.tsx` — make team cards linkable
+- `src/components/dashboard/AddSaleDialog.tsx` — add team member dropdown
+- `src/pages/ProDashboard.tsx` — add slug generation for team members, bio field in team editing
 
