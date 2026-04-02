@@ -67,8 +67,9 @@ Deno.serve(async (req) => {
 
     const scrapeResult = await fetchWithScrapingBee(searchUrl, apiKey, {
       renderJs: true,
-      premiumProxy: true,
+      stealthProxy: true,
       countryCode: "es",
+      wait: 3000,
     });
 
     if (scrapeResult.error) {
