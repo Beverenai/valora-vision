@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { useSEO } from "@/hooks/use-seo";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,11 +12,23 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AgentBreadcrumbs from "@/components/agent/AgentBreadcrumbs";
+import AgentSalesStats from "@/components/agent/AgentSalesStats";
+import AgentPropertyCards from "@/components/agent/AgentPropertyCards";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Star, MapPin, Calendar, Users, Globe, Building2,
   Instagram, Facebook, Linkedin, ExternalLink, CheckCircle2,
-  ChevronRight, Send, Phone, Mail, Home,
+  Send, Phone, Mail, Home, Eye,
 } from "lucide-react";
+
+const AgentPropertyMap = lazy(() => import("@/components/agent/AgentPropertyMap"));
 
 // ── Types ──
 interface Professional {
@@ -72,6 +84,13 @@ interface Review {
   source_url: string | null;
 }
 
+interface ZoneInfo {
+  id: string;
+  name: string;
+  province: string | null;
+  municipality: string | null;
+}
+
 // ── Helpers ──
 function getInitials(name: string) {
   return name.split(/\s+/).filter(Boolean).map(w => w[0]).join("").slice(0, 2).toUpperCase();
@@ -108,8 +127,8 @@ function LogoWithFallback({ logoUrl, name, size = "md" }: { logoUrl: string | nu
     );
   }
   return (
-    <div className={`${sizeClass} bg-primary`}>
-      <span className={`font-bold text-primary-foreground ${size === "lg" ? "text-xl" : "text-sm"}`}>{initials}</span>
+    <div className={`${sizeClass} bg-[#D4713B]`}>
+      <span className={`font-bold text-white ${size === "lg" ? "text-xl" : "text-sm"}`}>{initials}</span>
     </div>
   );
 }
@@ -131,7 +150,7 @@ export default function AgentProfile() {
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [zones, setZones] = useState<{ id: string; name: string }[]>([]);
+  const [zones, setZones] = useState<ZoneInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -140,10 +159,17 @@ export default function AgentProfile() {
   const [agencyAgents, setAgencyAgents] = useState<Professional[]>([]);
   const [recentSales, setRecentSales] = useState<any[]>([]);
   const [showAllSales, setShowAllSales] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+  const [mobileContactOpen, setMobileContactOpen] = useState(false);
 
   const primaryCity = useMemo(() => {
     if (zones.length > 0) return zones[0].name;
     return "Costa del Sol";
+  }, [zones]);
+
+  const primaryProvince = useMemo(() => {
+    if (zones.length > 0 && zones[0].province) return zones[0].province;
+    return null;
   }, [zones]);
 
   useSEO({
@@ -153,7 +179,7 @@ export default function AgentProfile() {
 
   // Contact form state
   const [contactForm, setContactForm] = useState({
-    name: "", email: "", phone: "", interest: "selling",
+    name: "", email: "", phone: "", interest: "valuation",
     message: "I found you on ValoraCasa and would like to discuss...",
   });
 
@@ -175,7 +201,7 @@ export default function AgentProfile() {
       if (profError || !prof) { setLoading(false); setError(true); return; }
       setProfessional(prof as unknown as Professional);
 
-      // Fetch team, reviews, zones in parallel
+      // Fetch team, reviews in parallel
       const [teamRes, reviewRes] = await Promise.all([
         supabase
           .from("agent_team_members")
@@ -192,13 +218,13 @@ export default function AgentProfile() {
       setTeam((teamRes.data || []) as unknown as TeamMember[]);
       setReviews((reviewRes.data || []) as unknown as Review[]);
 
-      // Fetch zone names if service_zones exist
+      // Fetch zone names with province if service_zones exist
       if (prof.service_zones && (prof.service_zones as string[]).length > 0) {
         const { data: zoneData } = await supabase
           .from("zones")
-          .select("id, name")
+          .select("id, name, province, municipality")
           .in("id", prof.service_zones as string[]);
-        setZones(zoneData || []);
+        setZones((zoneData || []) as ZoneInfo[]);
       }
 
       // If this is an agent belonging to an agency, fetch agency info
@@ -227,7 +253,7 @@ export default function AgentProfile() {
         .select("*")
         .eq("professional_id", prof.id)
         .order("sale_date", { ascending: false, nullsFirst: false })
-        .limit(20);
+        .limit(50);
       if (salesData) setRecentSales(salesData);
 
       setLoading(false);
@@ -257,7 +283,8 @@ export default function AgentProfile() {
       toast({ title: "Error", description: "Could not send message. Please try again.", variant: "destructive" });
     } else {
       toast({ title: "Message sent!", description: `Your message has been sent to ${professional.company_name}.` });
-      setContactForm({ name: "", email: "", phone: "", interest: "selling", message: "" });
+      setContactForm({ name: "", email: "", phone: "", interest: "valuation", message: "" });
+      setMobileContactOpen(false);
     }
   }
 
@@ -274,7 +301,6 @@ export default function AgentProfile() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        {/* Skeleton loader */}
         <div className="animate-pulse">
           <div className="h-[30vh] md:h-[40vh] w-full bg-muted" />
           <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-12 relative z-10">
@@ -333,42 +359,83 @@ export default function AgentProfile() {
   const aboutText = professional.description || professional.bio;
 
   // ── Contact Form Component ──
+  const ContactFormContent = (
+    <form onSubmit={handleContactSubmit} className="space-y-4">
+      <Input placeholder="Nombre *" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} required />
+      <Input type="email" placeholder="Email *" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} required />
+      <Input type="tel" placeholder="Teléfono (opcional)" value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))} />
+      <select
+        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        value={contactForm.interest}
+        onChange={e => setContactForm(f => ({ ...f, interest: e.target.value }))}
+      >
+        <option value="valuation">Necesito una valoración</option>
+        <option value="selling">Quiero vender</option>
+        <option value="buying">Quiero comprar</option>
+        <option value="renting">Alquiler</option>
+        <option value="other">Otro</option>
+      </select>
+      <Textarea
+        placeholder="Tu mensaje..."
+        value={contactForm.message}
+        onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
+        rows={4}
+      />
+      <Button type="submit" className="w-full rounded-full bg-[#D4713B] hover:bg-[#c0612f] text-white" disabled={submitting}>
+        <Send size={16} className="mr-2" />
+        {submitting ? "Enviando..." : "Enviar mensaje"}
+      </Button>
+      <p className="text-[0.7rem] text-muted-foreground text-center leading-relaxed">
+        Tu mensaje va directamente a {professional.company_name}. ValoraCasa no comparte tus datos.
+      </p>
+    </form>
+  );
+
   const ContactFormSection = (
     <Card className="border-border/60">
       <CardContent className="p-6">
-        <p className={SECTION_LABEL}>CONTACT {professional.company_name.toUpperCase()}</p>
-        <form onSubmit={handleContactSubmit} className="space-y-4">
-          <Input placeholder="Your name *" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} required />
-          <Input type="email" placeholder="Email *" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} required />
-          <Input type="tel" placeholder="Phone (optional)" value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))} />
-          <select
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            value={contactForm.interest}
-            onChange={e => setContactForm(f => ({ ...f, interest: e.target.value }))}
-          >
-            <option value="selling">I'm interested in selling</option>
-            <option value="buying">I'm interested in buying</option>
-            <option value="renting">I'm interested in renting</option>
-            <option value="valuation">I want a valuation</option>
-            <option value="other">Other</option>
-          </select>
-          <Textarea
-            placeholder="Your message..."
-            value={contactForm.message}
-            onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
-            rows={4}
-          />
-          <Button type="submit" className="w-full rounded-full" disabled={submitting}>
-            <Send size={16} className="mr-2" />
-            {submitting ? "Sending..." : "Send Message"}
-          </Button>
-          <p className="text-[0.7rem] text-muted-foreground text-center leading-relaxed">
-            Your message goes directly to {professional.company_name}. ValoraCasa does not share your details.
-          </p>
-        </form>
+        <p className={SECTION_LABEL}>CONTACTAR {professional.company_name.toUpperCase()}</p>
+
+        {/* Show phone button */}
+        {professional.phone && (
+          <div className="mb-4">
+            {showPhone ? (
+              <a
+                href={`tel:${professional.phone}`}
+                className="flex items-center gap-2 w-full justify-center rounded-full border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+              >
+                <Phone size={16} className="text-[#D4713B]" />
+                {professional.phone}
+              </a>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full rounded-full"
+                onClick={() => setShowPhone(true)}
+              >
+                <Eye size={16} className="mr-2" />
+                Mostrar número
+              </Button>
+            )}
+          </div>
+        )}
+
+        {ContactFormContent}
       </CardContent>
     </Card>
   );
+
+  // Map center from zones
+  const mapCenter = useMemo(() => {
+    const salesWithCoords = recentSales.filter(s => s.latitude && s.longitude);
+    if (salesWithCoords.length > 0) {
+      return {
+        lat: salesWithCoords.reduce((sum: number, s: any) => sum + Number(s.latitude), 0) / salesWithCoords.length,
+        lng: salesWithCoords.reduce((sum: number, s: any) => sum + Number(s.longitude), 0) / salesWithCoords.length,
+      };
+    }
+    return { lat: 36.51, lng: -4.88 }; // Default Costa del Sol
+  }, [recentSales]);
 
   return (
     <ErrorBoundary>
@@ -377,7 +444,6 @@ export default function AgentProfile() {
 
       {/* ── Hero / Header ── */}
       <section className="relative">
-        {/* Cover */}
         <div
           className="h-[30vh] md:h-[40vh] w-full"
           style={{
@@ -387,9 +453,7 @@ export default function AgentProfile() {
           }}
         />
 
-        {/* Header content */}
         <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-12 relative z-10">
-          {/* Logo */}
           <LogoWithFallback logoUrl={professional.logo_url} name={professional.company_name} size="lg" />
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -406,8 +470,15 @@ export default function AgentProfile() {
                 )}
                 {professional.is_verified && (
                   <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[0.65rem] uppercase tracking-wider">
-                    <CheckCircle2 size={12} className="mr-1" /> Verified
+                    <CheckCircle2 size={12} className="mr-1" /> Verificado
                   </Badge>
+                )}
+                {professional.languages && professional.languages.length > 0 && (
+                  <div className="flex gap-1">
+                    {professional.languages.map(l => (
+                      <Badge key={l} variant="outline" className="text-[0.6rem] px-1.5 py-0 uppercase">{l}</Badge>
+                    ))}
+                  </div>
                 )}
               </div>
               {professional.tagline && (
@@ -417,15 +488,15 @@ export default function AgentProfile() {
 
             <div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">
               <Button
-                className="rounded-full"
+                className="rounded-full bg-[#D4713B] hover:bg-[#c0612f] text-white"
                 onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}
               >
-                Contact
+                Contactar
               </Button>
               {professional.website && (
                 <Button variant="outline" className="rounded-full" asChild>
                   <a href={professional.website} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink size={16} className="mr-2" /> Website
+                    <ExternalLink size={16} className="mr-2" /> Web
                   </a>
                 </Button>
               )}
@@ -439,32 +510,32 @@ export default function AgentProfile() {
         <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 flex gap-6 md:gap-10 overflow-x-auto">
           {professional.office_address && (
             <div className="flex items-center gap-2 shrink-0">
-              <MapPin size={16} className="text-primary" />
+              <MapPin size={16} className="text-[#D4713B]" />
               <span className="text-sm text-muted-foreground">{professional.office_address}</span>
             </div>
           )}
           {professional.founded_year && (
             <div className="flex items-center gap-2 shrink-0">
-              <Calendar size={16} className="text-primary" />
+              <Calendar size={16} className="text-[#D4713B]" />
               <span className="text-sm text-muted-foreground">Est. {professional.founded_year}</span>
             </div>
           )}
           {professional.team_size && (
             <div className="flex items-center gap-2 shrink-0">
-              <Users size={16} className="text-primary" />
-              <span className="text-sm text-muted-foreground">{professional.team_size} team members</span>
+              <Users size={16} className="text-[#D4713B]" />
+              <span className="text-sm text-muted-foreground">{professional.team_size} miembros</span>
             </div>
           )}
           {professional.languages && professional.languages.length > 0 && (
             <div className="flex items-center gap-2 shrink-0">
-              <Globe size={16} className="text-primary" />
+              <Globe size={16} className="text-[#D4713B]" />
               <span className="text-sm text-muted-foreground">{professional.languages.join(", ")}</span>
             </div>
           )}
           {recentSales.length > 0 && (
             <div className="flex items-center gap-2 shrink-0">
-              <Home size={16} className="text-primary" />
-              <span className="text-sm text-muted-foreground">{recentSales.length} sales</span>
+              <Home size={16} className="text-[#D4713B]" />
+              <span className="text-sm text-muted-foreground">{recentSales.length} ventas</span>
             </div>
           )}
         </div>
@@ -472,13 +543,13 @@ export default function AgentProfile() {
 
       {/* ── Breadcrumbs ── */}
       <div className="max-w-5xl mx-auto px-4 md:px-8 pt-6">
-        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
-          <ChevronRight size={12} />
-          <span>Agents</span>
-          <ChevronRight size={12} />
-          <span className="text-foreground">{professional.company_name}</span>
-        </nav>
+        <AgentBreadcrumbs
+          agentName={professional.contact_name || professional.company_name}
+          provincia={primaryProvince}
+          ciudad={primaryCity !== "Costa del Sol" ? primaryCity : null}
+          agencyName={agency?.company_name}
+          agencySlug={agency?.slug}
+        />
       </div>
 
       {/* ── Main Content (2-col on desktop) ── */}
@@ -489,7 +560,7 @@ export default function AgentProfile() {
             {/* About */}
             {aboutText && (
               <section>
-                <p className={SECTION_LABEL}>ABOUT</p>
+                <p className={SECTION_LABEL}>SOBRE NOSOTROS</p>
                 <div className="prose prose-sm max-w-none text-foreground/80 leading-relaxed whitespace-pre-line">
                   {aboutText}
                 </div>
@@ -497,25 +568,25 @@ export default function AgentProfile() {
                 <div className="flex gap-3 mt-6">
                   {professional.instagram_url && (
                     <a href={professional.instagram_url} target="_blank" rel="noopener noreferrer"
-                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-[#D4713B] hover:border-[#D4713B] transition-colors">
                       <Instagram size={16} />
                     </a>
                   )}
                   {professional.facebook_url && (
                     <a href={professional.facebook_url} target="_blank" rel="noopener noreferrer"
-                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-[#D4713B] hover:border-[#D4713B] transition-colors">
                       <Facebook size={16} />
                     </a>
                   )}
                   {professional.linkedin_url && (
                     <a href={professional.linkedin_url} target="_blank" rel="noopener noreferrer"
-                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-[#D4713B] hover:border-[#D4713B] transition-colors">
                       <Linkedin size={16} />
                     </a>
                   )}
                   {professional.website && (
                     <a href={professional.website} target="_blank" rel="noopener noreferrer"
-                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      className="w-9 h-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-[#D4713B] hover:border-[#D4713B] transition-colors">
                       <Globe size={16} />
                     </a>
                   )}
@@ -523,56 +594,93 @@ export default function AgentProfile() {
               </section>
             )}
 
-            {/* Recent Sales */}
-            {recentSales.length > 0 && (
+            {/* Agency context — enhanced */}
+            {agency && (
               <section>
-                <p className={SECTION_LABEL}>RECENT SALES</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {(showAllSales ? recentSales : recentSales.slice(0, 6)).map((sale: any) => (
-                    <Card key={sale.id} className="overflow-hidden border-border/60">
-                      <div className="relative h-28 bg-muted">
-                        {sale.photo_url ? (
-                          <img src={sale.photo_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Home size={20} className="text-muted-foreground/30" />
+                <p className={SECTION_LABEL}>AGENCIA</p>
+                <Link to={`/agentes/${agency.slug}`}>
+                  <Card className="border-border/60 hover:shadow-md transition-shadow">
+                    <CardContent className="p-5 flex items-center gap-4">
+                      <LogoWithFallback logoUrl={agency.logo_url} name={agency.company_name} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-serif font-semibold text-foreground">{agency.company_name}</p>
+                        {agency.tagline && <p className="text-xs text-muted-foreground">{agency.tagline}</p>}
+                        {agency.office_address && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <MapPin size={11} className="text-[#D4713B] shrink-0" />
+                            <p className="text-xs text-muted-foreground truncate">{agency.office_address}</p>
                           </div>
                         )}
-                        <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground border-0 text-[0.6rem] uppercase tracking-wider">
-                          Sold
-                        </Badge>
-                        {sale.verified && (
-                          <Badge className="absolute top-2 right-2 bg-emerald-600 text-white border-0 text-[0.6rem] gap-1">
-                            <CheckCircle2 size={10} /> Verified
-                          </Badge>
-                        )}
                       </div>
-                      <CardContent className="p-3">
-                        <p className="font-medium text-sm capitalize">{sale.property_type || "Property"}</p>
-                        <p className="text-xs text-muted-foreground">{sale.city || sale.address_text || "—"}</p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                          {sale.bedrooms != null && <span>{sale.bedrooms} bed</span>}
-                          {sale.built_size_sqm != null && <span>{sale.built_size_sqm} m²</span>}
-                          {sale.sale_date && (
-                            <span>{new Date(sale.sale_date).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span>
+                      <span className="text-xs font-medium text-[#D4713B] shrink-0">Ver más →</span>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                {/* Other agents in the agency */}
+                {agencyAgents.length > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap mt-4">
+                    {agencyAgents.slice(0, 4).map(agent => (
+                      <Link
+                        key={agent.id}
+                        to={`/agentes/${agent.slug}`}
+                        className="flex items-center gap-1.5 bg-secondary rounded-full pr-3 pl-1 py-1 hover:bg-accent transition-colors"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-[#D4713B] flex items-center justify-center overflow-hidden shrink-0">
+                          {agent.logo_url ? (
+                            <img src={agent.logo_url} alt={agent.contact_name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-[8px] font-bold text-white">{getInitials(agent.contact_name)}</span>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                {recentSales.length > 6 && !showAllSales && (
-                  <Button variant="outline" className="w-full mt-4 rounded-full" onClick={() => setShowAllSales(true)}>
-                    Show all {recentSales.length} sales
-                  </Button>
+                        <span className="text-xs font-medium text-foreground">{agent.contact_name}</span>
+                      </Link>
+                    ))}
+                    {agencyAgents.length > 4 && (
+                      <Link
+                        to={`/agentes/${agency.slug}`}
+                        className="text-xs font-medium text-[#D4713B] hover:underline"
+                      >
+                        +{agencyAgents.length - 4} más
+                      </Link>
+                    )}
+                  </div>
                 )}
               </section>
+            )}
+
+            {/* Sales Statistics */}
+            {recentSales.length > 0 && (
+              <AgentSalesStats
+                sales={recentSales}
+                agentName={professional.contact_name || professional.company_name}
+              />
+            )}
+
+            {/* Property Map */}
+            {recentSales.some((s: any) => s.latitude && s.longitude) && (
+              <Suspense fallback={<div className="h-[300px] bg-muted rounded-xl animate-pulse" />}>
+                <AgentPropertyMap
+                  sales={recentSales}
+                  centerLat={mapCenter.lat}
+                  centerLng={mapCenter.lng}
+                />
+              </Suspense>
+            )}
+
+            {/* Property Cards with Pagination */}
+            {recentSales.length > 0 && (
+              <AgentPropertyCards
+                sales={recentSales}
+                agentName={professional.contact_name || professional.company_name}
+                agencyName={agency?.company_name}
+              />
             )}
 
             {/* Team */}
             {team.length > 0 && (
               <section>
-                <p className={SECTION_LABEL}>OUR TEAM</p>
+                <p className={SECTION_LABEL}>NUESTRO EQUIPO</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {team.map(member => {
                     const memberCard = (
@@ -602,7 +710,6 @@ export default function AgentProfile() {
                               </div>
                             )}
                           </div>
-                          {member.slug && <ChevronRight size={16} className="text-muted-foreground shrink-0 mt-1" />}
                         </CardContent>
                       </Card>
                     );
@@ -619,29 +726,10 @@ export default function AgentProfile() {
               </section>
             )}
 
-            {/* Agency context — if this agent belongs to an agency */}
-            {agency && (
-              <section>
-                <p className={SECTION_LABEL}>AGENCY</p>
-                <Link to={`/agentes/${agency.slug}`}>
-                  <Card className="border-border/60 hover:shadow-md transition-shadow">
-                    <CardContent className="p-5 flex items-center gap-4">
-                      <LogoWithFallback logoUrl={agency.logo_url} name={agency.company_name} />
-                      <div>
-                        <p className="font-semibold text-foreground">{agency.company_name}</p>
-                        {agency.tagline && <p className="text-xs text-muted-foreground">{agency.tagline}</p>}
-                      </div>
-                      <ChevronRight size={16} className="ml-auto text-muted-foreground" />
-                    </CardContent>
-                  </Card>
-                </Link>
-              </section>
-            )}
-
             {/* Agency agents — if this is an agency profile */}
-            {agencyAgents.length > 0 && (
+            {!agency && agencyAgents.length > 0 && (
               <section>
-                <p className={SECTION_LABEL}>OUR AGENTS</p>
+                <p className={SECTION_LABEL}>NUESTROS AGENTES</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {agencyAgents.map(agent => (
                     <Link key={agent.id} to={`/agentes/${agent.slug}`}>
@@ -665,34 +753,35 @@ export default function AgentProfile() {
                 </div>
               </section>
             )}
+
+            {/* Service areas */}
             <section>
-              <p className={SECTION_LABEL}>SERVICE AREAS</p>
+              <p className={SECTION_LABEL}>ZONAS DE SERVICIO</p>
               {zones.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {zones.map(z => (
                     <Badge key={z.id} variant="outline" className="text-sm px-3 py-1.5">
-                      <MapPin size={12} className="mr-1.5 text-primary" />
+                      <MapPin size={12} className="mr-1.5 text-[#D4713B]" />
                       {z.name}
                     </Badge>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Service areas not specified</p>
+                <p className="text-sm text-muted-foreground">Zonas de servicio no especificadas</p>
               )}
             </section>
 
             {/* Reviews */}
             <section>
-              <p className={SECTION_LABEL}>CLIENT REVIEWS</p>
+              <p className={SECTION_LABEL}>OPINIONES DE CLIENTES</p>
 
               {reviews.length > 0 ? (
                 <>
-                  {/* Summary */}
                   <div className="flex items-start gap-6 mb-8">
                     <div className="text-center">
-                      <p className="text-4xl font-light text-foreground">{professional.avg_rating.toFixed(1)}</p>
+                      <p className="text-4xl font-serif font-light text-foreground">{professional.avg_rating.toFixed(1)}</p>
                       <StarRating rating={professional.avg_rating} size={14} />
-                      <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} reviews</p>
+                      <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} opiniones</p>
                     </div>
                     <div className="flex-1 space-y-1.5">
                       {starDist.map(d => (
@@ -708,7 +797,6 @@ export default function AgentProfile() {
                     </div>
                   </div>
 
-                  {/* Individual reviews */}
                   <div className="space-y-4">
                     {displayedReviews.map(review => (
                       <Card key={review.id} className="border-border/40">
@@ -737,7 +825,7 @@ export default function AgentProfile() {
                               )}
                             </div>
                             <span className="text-[0.65rem] text-muted-foreground">
-                              {new Date(review.created_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                              {new Date(review.created_at).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
                             </span>
                           </div>
                           <StarRating rating={review.rating} size={12} />
@@ -749,7 +837,7 @@ export default function AgentProfile() {
 
                   {reviews.length > (isMobile ? 3 : 5) && !showAllReviews && (
                     <Button variant="outline" className="w-full mt-4 rounded-full" onClick={() => setShowAllReviews(true)}>
-                      Show all {reviews.length} reviews
+                      Ver todas las {reviews.length} opiniones
                     </Button>
                   )}
                 </>
@@ -757,15 +845,15 @@ export default function AgentProfile() {
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
                     <Star size={32} fill="hsl(var(--primary))" className="mx-auto text-primary mb-3 opacity-30" strokeWidth={0} />
-                    <p className="text-sm text-foreground/70">Reviews coming soon</p>
-                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews imported — display coming shortly.</p>
+                    <p className="text-sm text-foreground/70">Opiniones disponibles pronto</p>
+                    <p className="text-xs text-muted-foreground mt-1">{professional.total_reviews} Google reviews importadas</p>
                   </CardContent>
                 </Card>
               ) : (
                 <Card className="border-border/40">
                   <CardContent className="p-8 text-center">
                     <Star size={32} className="mx-auto text-muted-foreground/30 mb-3" />
-                    <p className="text-sm text-muted-foreground">Be the first to review {professional.company_name}</p>
+                    <p className="text-sm text-muted-foreground">Sé el primero en opinar sobre {professional.company_name}</p>
                   </CardContent>
                 </Card>
               )}
@@ -773,7 +861,7 @@ export default function AgentProfile() {
           </div>
 
           {/* Right column — Contact Form (sticky on desktop) */}
-          <div className={isMobile ? "" : "sticky top-24"} id="contact-form">
+          <div className={isMobile ? "hidden" : "sticky top-24"} id="contact-form">
             {ContactFormSection}
           </div>
         </div>
@@ -783,15 +871,62 @@ export default function AgentProfile() {
       <div className="border-t border-border/60 py-8">
         <div className="max-w-5xl mx-auto px-4 md:px-8 text-center">
           <p className="text-xs text-muted-foreground">
-            Valuation powered by <Link to="/" className="text-primary hover:underline">ValoraCasa</Link>
+            Valoración por <Link to="/" className="text-[#D4713B] hover:underline">ValoraCasa</Link>
           </p>
           <p className="text-[0.65rem] text-muted-foreground/60 mt-2">
-            Information on this page is provided by the agency. ValoraCasa does not guarantee its accuracy.
+            La información de esta página es proporcionada por la agencia. ValoraCasa no garantiza su exactitud.
           </p>
         </div>
       </div>
 
       <Footer />
+
+      {/* Mobile fixed contact button */}
+      {isMobile && (
+        <Sheet open={mobileContactOpen} onOpenChange={setMobileContactOpen}>
+          <SheetTrigger asChild>
+            <Button
+              className="fixed bottom-4 left-4 right-4 z-50 rounded-full shadow-lg bg-[#D4713B] hover:bg-[#c0612f] text-white h-12 text-base"
+            >
+              <Mail size={18} className="mr-2" />
+              Contactar
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle className="font-serif text-lg">
+                Contactar {professional.company_name}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="px-1 py-4">
+              {/* Show phone button in mobile sheet */}
+              {professional.phone && (
+                <div className="mb-4">
+                  {showPhone ? (
+                    <a
+                      href={`tel:${professional.phone}`}
+                      className="flex items-center gap-2 w-full justify-center rounded-full border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                    >
+                      <Phone size={16} className="text-[#D4713B]" />
+                      {professional.phone}
+                    </a>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="w-full rounded-full"
+                      onClick={() => setShowPhone(true)}
+                    >
+                      <Eye size={16} className="mr-2" />
+                      Mostrar número
+                    </Button>
+                  )}
+                </div>
+              )}
+              {ContactFormContent}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
     </ErrorBoundary>
   );
