@@ -1,22 +1,44 @@
 
 
-# Update `buy-analysis` with sell-valuation fixes
+# Buy-Analysis Timeout Fallback Strategy
+
+## Problem
+The function times out (Supabase 60s limit) because two sequential JS-rendered ScrapingBee requests exceed the budget.
 
 ## Changes to `supabase/functions/buy-analysis/index.ts`
 
-1. **Property type mapping** (line 26): Change `apartment: "pisos"` → `apartment: "viviendas"`, `duplex: "pisos"` → `duplex: "viviendas"`, `studio: "pisos"` → `studio: "viviendas"`
+### 1. Global deadline tracking
+Add `const DEADLINE = Date.now() + 55_000` at the start of the handler. Before each major step, check `if (Date.now() > DEADLINE)` and return a partial response.
 
-2. **ScrapingBee settings for detail scrape** (line 63-64): Change to `renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 3000`
+### 2. Detail scrape: fast-first fallback (Step 2)
+- **First attempt**: `renderJs: false`, `premiumProxy: true`, `stealthProxy: true`, `countryCode: "es"` with `AbortSignal.timeout(25_000)`
+- Parse result with `parsePropertyDetail()`. If valid (has `price` and `sizeM2`), proceed.
+- **If null/invalid**: retry with `renderJs: true`, `stealthProxy: true`, `wait: 1000`, same 25s timeout.
+- If both fail, return 502/422.
 
-3. **ScrapingBee settings for search scrape** (line 109-110): Same: `renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 3000`
+### 3. Comparables search (Step 4)
+- Use `renderJs: true`, `stealthProxy: true`, `premiumProxy: true`, `countryCode: "es"`, `wait: 1000` with `AbortSignal.timeout(25_000)`.
+- Before starting, check deadline. If close to expiry, return property data with `analysis: null` and timeout message.
 
-4. **Remove price filters from search URL** (lines 97-104): Remove `minPrice`/`maxPrice` variables and their usage in `buildIdealistaSearchUrl()`. Keep only `minSize`/`maxSize`.
+### 4. Per-request timeout
+Change from relying on the client's internal 120s timeout to passing explicit `AbortSignal.timeout(25_000)` — this requires updating the `fetchWithScrapingBee` call in `scrapingbee-client.ts` to accept an optional `signal` parameter override, OR simply wrapping each call with `Promise.race` against a 25s timer.
 
-## No changes needed to shared files
+**Approach**: Use `Promise.race` pattern in `buy-analysis/index.ts` itself (no shared file changes needed):
+```
+const withTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+]);
+```
 
-The `scrapingbee-client.ts` already has `stealthProxy` and `wait` support (added during sell-valuation fixes).
+### 5. Timeout guard before comparables search
+After detail scrape completes, check remaining time. If `Date.now() + 28_000 > DEADLINE` (not enough time for search), return partial response with property data only.
 
-## Test after deploy
+## Files changed
 
-Call `POST /functions/v1/buy-analysis` with `{ "url": "https://www.idealista.com/inmueble/106583498/" }`.
+| File | Change |
+|------|--------|
+| `supabase/functions/buy-analysis/index.ts` | Add deadline, fast-first detail scrape, 25s per-request timeout, deadline check before comparables |
+
+No shared file changes. Will test with `{ "url": "https://www.idealista.com/inmueble/106583498/" }` after deploy.
 
