@@ -94,14 +94,11 @@ Deno.serve(async (req) => {
     const idealistaType = (PROPERTY_TYPE_MAP[property.propertyType || ""] || "viviendas") as "viviendas" | "chalets" | "pisos" | "aticos";
     const minSize = Math.round(property.sizeM2 * 0.7);
     const maxSize = Math.round(property.sizeM2 * 1.3);
-    const minPrice = Math.round(property.price * 0.5);
-    const maxPrice = Math.round(property.price * 1.8);
-
     const searchUrl = buildIdealistaSearchUrl({
       operation: "venta",
       municipality: municipalitySlug,
       propertyType: idealistaType,
-      minPrice, maxPrice, minSize, maxSize,
+      minSize, maxSize,
     });
 
     let searchResult;
