@@ -209,35 +209,27 @@ const Admin = () => {
   );
 };
 
-// ─── LEADS TAB ────────────────────────────────────────────
+// ─── VALUATIONS TAB (formerly Leads) ──────────────────────
 function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>; dark: boolean }) {
   const [leads, setLeads] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [cityFilter, setCityFilter] = useState("all");
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
     try {
-      const [sellRes, rentRes, buyRes] = await Promise.all([
-        supabase.from("leads_sell").select("id, full_name, email, address, city, property_type, status, estimated_value, created_at").order("created_at", { ascending: false }).limit(200),
-        supabase.from("leads_rent").select("id, full_name, email, address, city, property_type, status, annual_income_estimate, created_at").order("created_at", { ascending: false }).limit(200),
-        supabase.from("buy_analyses").select("id, email, address, city, property_type, status, estimated_value, asking_price, price_score, source_url, created_at").order("created_at", { ascending: false }).limit(200),
+      const [sellRes, rentRes] = await Promise.all([
+        supabase.from("leads_sell").select("id, full_name, email, address, city, property_type, status, estimated_value, created_at").order("created_at", { ascending: false }).limit(500),
+        supabase.from("leads_rent").select("id, full_name, email, address, city, property_type, status, annual_income_estimate, created_at").order("created_at", { ascending: false }).limit(500),
       ]);
 
-      const sellLeads: LeadRow[] = (sellRes.data || []).map((l) => ({ ...l, type: "sell" as const, annual_income_estimate: null, asking_price: null, price_score: null, full_name: l.full_name }));
+      const sellLeads: LeadRow[] = (sellRes.data || []).map((l) => ({ ...l, type: "sell" as const, annual_income_estimate: null, asking_price: null, price_score: null }));
       const rentLeads: LeadRow[] = (rentRes.data || []).map((l) => ({ ...l, type: "rent" as const, estimated_value: null, asking_price: null, price_score: null }));
-      const buyLeads: LeadRow[] = (buyRes.data || []).map((l) => ({
-        ...l,
-        type: "buy" as const,
-        full_name: l.email || "—",
-        email: l.email || "",
-        annual_income_estimate: null,
-        asking_price: l.asking_price as number | null,
-        price_score: l.price_score as string | null,
-      }));
 
-      const all = [...sellLeads, ...rentLeads, ...buyLeads].sort(
+      const all = [...sellLeads, ...rentLeads].sort(
         (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
       );
       setLeads(all);
@@ -248,26 +240,42 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
 
   useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
+  const cities = Array.from(new Set(leads.map(l => l.city).filter(Boolean) as string[])).sort();
+
   const filtered = leads.filter((l) => {
     if (typeFilter !== "all" && l.type !== typeFilter) return false;
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
+    if (cityFilter !== "all" && l.city !== cityFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const match = [l.full_name, l.email, l.address, l.city].some(f => f?.toLowerCase().includes(q));
+      if (!match) return false;
+    }
     return true;
   });
 
   return (
     <div>
       <div className="flex gap-3 mb-4 flex-wrap items-center">
+        <div className="relative">
+          <Search size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", dark ? "text-white/30" : "text-muted-foreground")} />
+          <Input
+            placeholder="Search name, email, address..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={cn("pl-9 w-[240px]", dark && "bg-white/5 border-white/10 text-white placeholder:text-white/30")}
+          />
+        </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[120px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="sell">Sell</SelectItem>
             <SelectItem value="rent">Rent</SelectItem>
-            <SelectItem value="buy">Buy</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className={cn("w-[120px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -275,17 +283,26 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
             <SelectItem value="ready">Ready</SelectItem>
           </SelectContent>
         </Select>
+        {cities.length > 0 && (
+          <Select value={cityFilter} onValueChange={setCityFilter}>
+            <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="City" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cities</SelectItem>
+              {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
         <Button variant="outline" size="sm" onClick={fetchLeads} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </Button>
-        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} leads</span>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} valuations</span>
       </div>
 
       <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
         <table className="w-full text-sm">
           <thead>
             <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
-              {["Ref", "Date", "Type", "Name", "Email", "Address", "Status", "Value", ""].map((h) => (
+              {["Ref", "Date", "Type", "Name", "Email", "Address", "City", "Status", "Value", ""].map((h) => (
                 <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
               ))}
             </tr>
@@ -297,37 +314,199 @@ function LeadsTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>
                 <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{lead.created_at ? new Date(lead.created_at).toLocaleDateString() : "—"}</td>
                 <td className="px-4 py-3">
                   <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                    lead.type === "sell" ? "bg-primary/10 text-primary"
-                    : lead.type === "buy" ? "bg-blue-500/10 text-blue-600"
-                    : "bg-emerald-500/10 text-emerald-600"
+                    lead.type === "sell" ? "bg-primary/10 text-primary" : "bg-emerald-500/10 text-emerald-600"
                   }`}>{lead.type}</span>
                 </td>
                 <td className={cn("px-4 py-3", dark ? "text-white" : "text-foreground")}>{lead.full_name}</td>
                 <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{lead.email}</td>
                 <td className={cn("px-4 py-3 max-w-[200px] truncate", dark ? "text-white/50" : "text-muted-foreground")}>{lead.address}</td>
+                <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{lead.city || "—"}</td>
                 <td className="px-4 py-3"><StatusBadge status={lead.status || "pending"} dark={dark} /></td>
                 <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>
                   {lead.type === "sell" && lead.estimated_value ? `€${lead.estimated_value.toLocaleString()}`
-                    : lead.type === "buy" && lead.asking_price ? `€${lead.asking_price.toLocaleString()}`
                     : lead.type === "rent" && lead.annual_income_estimate ? `€${lead.annual_income_estimate.toLocaleString()}/yr`
                     : "—"}
                 </td>
                 <td className="px-4 py-3">
-                  <Button variant="ghost" size="sm" onClick={() => {
-                    if (lead.type === "buy") navigate(`/buy/result/${lead.id}`);
-                    else navigate(`/${lead.type}/result/${lead.id}`);
-                  }} className={cn(dark && "text-white/40 hover:text-white hover:bg-white/10")}>
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/${lead.type}/result/${lead.id}`)} className={cn(dark && "text-white/40 hover:text-white hover:bg-white/10")}>
                     <ExternalLink size={14} />
                   </Button>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={9} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No leads found"}</td></tr>
+              <tr><td colSpan={10} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No valuations found"}</td></tr>
             )}
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+// ─── BUY ANALYSES TAB ─────────────────────────────────────
+interface BuyAnalysisRow {
+  id: string;
+  email: string | null;
+  address: string | null;
+  city: string | null;
+  property_type: string | null;
+  status: string | null;
+  price_score: string | null;
+  asking_price: number;
+  estimated_value: number | null;
+  source_url: string;
+  created_at: string | null;
+}
+
+function BuyAnalysesTab({ navigate, dark }: { navigate: ReturnType<typeof useNavigate>; dark: boolean }) {
+  const [analyses, setAnalyses] = useState<BuyAnalysisRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [cityFilter, setCityFilter] = useState("all");
+  const [scoreFilter, setScoreFilter] = useState("all");
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 50;
+
+  const fetchAnalyses = useCallback(async (pageNum: number, append = false) => {
+    setLoading(true);
+    try {
+      const from = pageNum * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data } = await supabase
+        .from("buy_analyses")
+        .select("id, email, address, city, property_type, status, price_score, asking_price, estimated_value, source_url, created_at")
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      const rows = (data || []) as BuyAnalysisRow[];
+      if (append) {
+        setAnalyses(prev => [...prev, ...rows]);
+      } else {
+        setAnalyses(rows);
+      }
+      setHasMore(rows.length === PAGE_SIZE);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAnalyses(0); }, [fetchAnalyses]);
+
+  const loadMore = () => {
+    const next = page + 1;
+    setPage(next);
+    fetchAnalyses(next, true);
+  };
+
+  const cities = Array.from(new Set(analyses.map(a => a.city).filter(Boolean) as string[])).sort();
+  const scores = Array.from(new Set(analyses.map(a => a.price_score).filter(Boolean) as string[])).sort();
+
+  const filtered = analyses.filter((a) => {
+    if (cityFilter !== "all" && a.city !== cityFilter) return false;
+    if (scoreFilter !== "all" && a.price_score !== scoreFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const match = [a.email, a.address, a.city].some(f => f?.toLowerCase().includes(q));
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  const scoreColor = (score: string | null) => {
+    if (!score) return "";
+    const s = score.toLowerCase();
+    if (s.includes("below")) return "bg-emerald-500/10 text-emerald-600";
+    if (s.includes("good")) return "bg-emerald-500/10 text-emerald-600";
+    if (s.includes("fair")) return "bg-blue-500/10 text-blue-600";
+    if (s.includes("slightly")) return "bg-amber-500/10 text-amber-600";
+    if (s.includes("above")) return "bg-red-500/10 text-red-600";
+    return "bg-muted text-muted-foreground";
+  };
+
+  return (
+    <div>
+      <div className="flex gap-3 mb-4 flex-wrap items-center">
+        <div className="relative">
+          <Search size={14} className={cn("absolute left-3 top-1/2 -translate-y-1/2", dark ? "text-white/30" : "text-muted-foreground")} />
+          <Input
+            placeholder="Search email, address..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={cn("pl-9 w-[220px]", dark && "bg-white/5 border-white/10 text-white placeholder:text-white/30")}
+          />
+        </div>
+        {cities.length > 0 && (
+          <Select value={cityFilter} onValueChange={setCityFilter}>
+            <SelectTrigger className={cn("w-[140px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="City" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cities</SelectItem>
+              {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
+        {scores.length > 0 && (
+          <Select value={scoreFilter} onValueChange={setScoreFilter}>
+            <SelectTrigger className={cn("w-[160px]", dark && "bg-white/5 border-white/10 text-white")}><SelectValue placeholder="Price Score" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Scores</SelectItem>
+              {scores.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
+        <Button variant="outline" size="sm" onClick={() => { setPage(0); fetchAnalyses(0); }} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+        </Button>
+        <span className={cn("text-sm ml-auto", dark ? "text-white/40" : "text-muted-foreground")}>{filtered.length} analyses</span>
+      </div>
+
+      <div className={cn("rounded-xl overflow-x-auto", dark ? "border border-white/10" : "border border-border")}>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className={cn("border-b", dark ? "border-white/10 bg-white/5" : "border-border bg-muted/50")}>
+              {["Date", "Email", "Address", "City", "Score", "Asking", "Estimated", "Status", ""].map((h) => (
+                <th key={h} className={cn("text-left px-4 py-3 font-medium text-xs uppercase tracking-wider", dark ? "text-white/40" : "text-muted-foreground")}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((a) => (
+              <tr key={a.id} className={cn("border-b transition-colors", dark ? "border-white/5 hover:bg-white/5" : "border-border/50 hover:bg-muted/30")}>
+                <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{a.created_at ? new Date(a.created_at).toLocaleDateString() : "—"}</td>
+                <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{a.email || "—"}</td>
+                <td className={cn("px-4 py-3 max-w-[200px] truncate", dark ? "text-white" : "text-foreground")}>{a.address || "—"}</td>
+                <td className={cn("px-4 py-3", dark ? "text-white/50" : "text-muted-foreground")}>{a.city || "—"}</td>
+                <td className="px-4 py-3">
+                  {a.price_score ? (
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${scoreColor(a.price_score)}`}>{a.price_score}</span>
+                  ) : "—"}
+                </td>
+                <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>€{a.asking_price?.toLocaleString()}</td>
+                <td className={cn("px-4 py-3 font-medium", dark ? "text-white" : "text-foreground")}>{a.estimated_value ? `€${a.estimated_value.toLocaleString()}` : "—"}</td>
+                <td className="px-4 py-3"><StatusBadge status={a.status || "pending"} dark={dark} /></td>
+                <td className="px-4 py-3">
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/buy/result/${a.id}`)} className={cn(dark && "text-white/40 hover:text-white hover:bg-white/10")}>
+                    <ExternalLink size={14} />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={9} className={cn("text-center py-12", dark ? "text-white/40" : "text-muted-foreground")}>{loading ? "Loading..." : "No buy analyses found"}</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {hasMore && filtered.length > 0 && (
+        <div className="flex justify-center mt-4">
+          <Button variant="outline" size="sm" onClick={loadMore} disabled={loading} className={cn(dark && "border-white/10 text-white/60 hover:text-white hover:bg-white/5")}>
+            {loading ? <RefreshCw size={14} className="animate-spin" /> : null}
+            Load More
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
