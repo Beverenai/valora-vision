@@ -1660,7 +1660,7 @@ const ProDashboard = () => {
       </div>
 
       {section === "overview" && (
-        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} activeZonesCount={activeZones.length} reviewCount={reviews.length} />
+        <OverviewSection agent={agent} leads={leads} impressionsCount={impressionsCount} onViewLeads={() => setSection("leads")} setSection={setSection} activeZonesCount={activeZones.length} reviewCount={reviews.length} salesCount={salesCount} verifiedSalesCount={verifiedSalesCount} />
       )}
       {section === "profile" && (
         <div className="space-y-6 max-w-2xl">
