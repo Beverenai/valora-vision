@@ -86,8 +86,8 @@ export default function AgentPropertyCards({
                 {sale.city || sale.address_text || "—"}
               </p>
               {sale.show_price && sale.sale_price && (
-                <p className="text-sm font-semibold text-foreground mt-2">
-                  €{sale.sale_price.toLocaleString("es-ES")}
+              <p className="text-sm font-semibold text-foreground mt-2">
+                  €{sale.sale_price.toLocaleString("en-GB")}
                 </p>
               )}
               <p className="text-[0.6rem] text-muted-foreground mt-2">
