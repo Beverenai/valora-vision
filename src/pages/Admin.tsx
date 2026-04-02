@@ -820,7 +820,7 @@ function ResalesTab({ dark }: { dark: boolean }) {
                 <p>Last sync: {config.last_sync_at ? timeAgo(config.last_sync_at) : "Never"}</p>
                 <p>Interval: {config.sync_interval_hours}h</p>
               </div>
-              <Button variant="outline" size="sm" className={cn("w-full", dark && "border-white/10 text-white/80 hover:text-white hover:bg-white/5")}
+              <Button variant={dark ? "outline-dark" : "outline"} size="sm" className="w-full"
                 onClick={() => handleSync(config.id)} disabled={syncing !== null}>
                 {syncing === config.id ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />}
                 Sync Now
