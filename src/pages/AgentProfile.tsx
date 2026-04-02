@@ -67,6 +67,8 @@ interface Review {
   comment: string | null;
   is_verified: boolean;
   created_at: string;
+  source: string | null;
+  source_url: string | null;
 }
 
 // ── Helpers ──
