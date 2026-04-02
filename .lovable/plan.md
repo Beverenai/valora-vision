@@ -1,50 +1,47 @@
 
 
-# Scale Sales Portfolio for 100-300+ Sales
+# Add Sale Date to Map Popups + Admin Valuations Map
 
-## Problem
-The current SalesSection renders ALL sales as a flat card grid with no pagination, filtering, or inline editing. At 100+ sales this becomes unusable — slow rendering, no way to find a specific sale, and editing requires deleting and re-adding.
+## Three changes needed
 
-## Plan
+### 1. Show sale date in map popups (AgentPropertyMap + NearbyPropertyMap)
 
-### 1. Table View with Pagination (default for 10+ sales)
-Replace the card grid with a **sortable data table** when sales count exceeds ~10. Show columns: photo thumbnail, type, city, price, date, beds, size, verified status, and actions. Include:
-- **Pagination** (25 per page) using existing `Pagination` component
-- **Search/filter bar**: text search across city/address/type, filter by year, filter by verified status
-- **Toggle**: grid view (cards) vs table view, remembering preference
-- Keep the card grid as an option for agents who prefer visual browsing
+The `AgentPropertyMap` and `NearbyPropertyMap` components already render popups with photo, type, bedrooms, city, and price — but not the sale date. The `sale_date` field is already available in the data.
 
-### 2. Inline Edit via Sheet/Dialog
-Add an **Edit** button (pencil icon) on each sale row/card. Opens a `Sheet` (slide-in panel) pre-populated with all sale fields — same form as the manual AddSaleDialog but in edit mode. Fields: property type, beds, baths, size, city, address, price, date, show_price toggle, photo, team member attribution. Saves via `supabase.update()`.
+**AgentPropertyMap.tsx**:
+- Add `sale_date: string | null` to the `PropertyMarker` interface
+- Add sale date line to the popup HTML: `Sold: Mar 2025`
 
-### 3. Bulk Actions
-Add a checkbox column in table view. When items are selected, show a floating action bar with:
-- **Bulk delete** (with confirmation)
-- **Assign to team member** (dropdown)
-- Select all / deselect all
+**NearbyPropertyMap.tsx**:
+- Add `sale_date` to the `SaleMarker` interface and the RPC data mapping
+- Add sale date line to the popup HTML
+- Update the `find_nearby_agent_sales` RPC return type if needed (it returns `SETOF agent_sales` so `sale_date` is already included)
 
-### 4. Stats Stay Compact
-The stats cards and milestones section remain at the top (unchanged). They already compute from the full `sales` array which will now be fetched with pagination metadata.
+### 2. Translate remaining Spanish strings in AgentPropertyMap
 
-### 5. Server-Side Pagination
-Switch from fetching ALL sales to paginated fetches:
-- `supabase.from("agent_sales").select("*", { count: "exact" })` with `.range(from, to)`
-- Stats (total, verified, last12, avgDays) computed via a separate lightweight query or kept from the full count
-- Search filter applied via `.ilike("city", "%term%")` or `.or(...)` clauses
+The fallback text still says "UBICACIÓN DE VENTAS" and "Mapa de propiedades disponible próximamente" — change to English: "SALES LOCATIONS" and "Property map available soon". Also fix popup text: "Propiedad" → "Property", "dormitorios" → "bedrooms".
 
-## Files to Change
+### 3. Admin Valuations Map (new section in Admin.tsx)
+
+Add a new "Map" tab/section to the Admin page that shows all completed valuations on a Mapbox map. This creates a geographic overview of where valuations have been requested.
+
+**Implementation**:
+- Add a new `MapTab` component inside `Admin.tsx`
+- Fetch `leads_sell` and `leads_rent` where `status = 'completed'` and `latitude`/`longitude` are not null
+- Render a Mapbox map with markers (blue for sell, green for rent)
+- Popup shows: address, city, estimated value, date, property type
+- Add "map" to the `AdminSection` type and sidebar navigation
+
+**Data**: The `leads_sell` and `leads_rent` tables already have `latitude`, `longitude`, `estimated_value`, `address`, `city`, `property_type`, and `created_at` columns.
+
+## Files to change
 
 | File | Change |
 |------|--------|
-| `src/components/dashboard/SalesSection.tsx` | Major rewrite: add table view, pagination, search/filter, view toggle, bulk actions, edit trigger |
-| `src/components/dashboard/EditSaleSheet.tsx` | **New** — Sheet component with edit form, pre-populated fields, save/cancel |
-| `src/components/dashboard/AddSaleDialog.tsx` | Minor — share form field components with EditSaleSheet |
+| `src/components/agent/AgentPropertyMap.tsx` | Add `sale_date` to interface + popup; translate Spanish → English |
+| `src/components/shared/NearbyPropertyMap.tsx` | Add `sale_date` to interface + popup |
+| `src/pages/Admin.tsx` | Add "Map" section with valuations Mapbox map |
+| `src/components/admin/AdminSidebar.tsx` | Add "map" to section type + nav item |
 
-## Technical Details
-- Table uses Shadcn `Table` component with sticky header
-- Pagination uses `select("*", { count: "exact" })` + `.range()` for true server-side paging
-- Search debounced (300ms) before triggering re-fetch
-- Edit sheet uses `supabase.from("agent_sales").update({...}).eq("id", saleId)`
-- Enriching sales (skeleton cards) still shown at the top of the list regardless of view mode
-- Polling logic preserved for enriching sales
+No database changes needed — all data already exists.
 
