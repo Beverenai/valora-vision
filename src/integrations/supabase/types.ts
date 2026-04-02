@@ -2258,6 +2258,50 @@ export type Database = {
           thumbnail_url: string
         }[]
       }
+      find_nearby_agent_sales: {
+        Args: {
+          p_lat: number
+          p_limit?: number
+          p_lng: number
+          p_radius_km?: number
+        }
+        Returns: {
+          address_text: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          built_size_sqm: number | null
+          city: string | null
+          created_at: string
+          days_on_market: number | null
+          enriched_description: string | null
+          enriched_title: string | null
+          id: string
+          latitude: number | null
+          listed_date: string | null
+          listing_source: string | null
+          listing_url: string | null
+          location_point: unknown
+          longitude: number | null
+          photo_url: string | null
+          plot_size_sqm: number | null
+          professional_id: string
+          property_type: string | null
+          sale_date: string | null
+          sale_price: number | null
+          show_price: boolean
+          team_member_id: string | null
+          updated_at: string
+          verification_method: string | null
+          verified: boolean
+          zone_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "agent_sales"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       find_potential_duplicates: {
         Args: never
         Returns: {
