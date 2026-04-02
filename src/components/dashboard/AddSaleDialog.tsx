@@ -234,6 +234,23 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
               <Switch checked={form.show_price} onCheckedChange={(v) => updateForm("show_price", v)} />
             </div>
 
+            {/* Team member attribution */}
+            {teamMembers.length > 0 && (
+              <div>
+                <Label>Attributed to</Label>
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={form.team_member_id}
+                  onChange={e => updateForm("team_member_id", e.target.value)}
+                >
+                  <option value="">Company (no specific agent)</option>
+                  {teamMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Photo upload */}
             <div>
               <Label>Property Photo</Label>
