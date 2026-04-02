@@ -851,6 +851,8 @@ function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professi
   });
   const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState(agent.cover_photo_url || "");
+  const [focusX, setFocusX] = useState<number>((agent as any).cover_photo_focus_x ?? 50);
+  const [focusY, setFocusY] = useState<number>((agent as any).cover_photo_focus_y ?? 50);
   const [uploading, setUploading] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
