@@ -112,11 +112,11 @@ export default function AgentSalesStats({ sales, agentName }: AgentSalesStatsPro
 
       {/* Summary text */}
       <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-        En los últimos 24 meses, <span className="font-semibold text-foreground">{agentName}</span> vendió{" "}
-        <span className="font-semibold text-foreground">{stats.totalSold}</span> propiedades
+        In the last 24 months, <span className="font-semibold text-foreground">{agentName}</span> sold{" "}
+        <span className="font-semibold text-foreground">{stats.totalSold}</span> properties
         {stats.medianPrice && (
           <>
-            {" "}con un precio de venta mediano de{" "}
+            {" "}with a median sale price of{" "}
             <span className="font-semibold text-foreground">€{formatPrice(stats.medianPrice)}</span>
           </>
         )}
