@@ -3,9 +3,11 @@ const SCRAPINGBEE_BASE = "https://app.scrapingbee.com/api/v1/";
 export interface ScrapingBeeOptions {
   renderJs?: boolean;
   premiumProxy?: boolean;
+  stealthProxy?: boolean;
   countryCode?: string;
   blockAds?: boolean;
   waitForSelector?: string;
+  wait?: number;
 }
 
 export interface ScrapingBeeResult {
@@ -24,9 +26,11 @@ export async function fetchWithScrapingBee(
   const {
     renderJs = false,
     premiumProxy = true,
+    stealthProxy = false,
     countryCode = "es",
     blockAds = true,
     waitForSelector,
+    wait,
   } = options;
 
   const params = new URLSearchParams({
@@ -38,13 +42,20 @@ export async function fetchWithScrapingBee(
     block_ads: String(blockAds),
   });
 
+  if (stealthProxy) {
+    params.set("stealth_proxy", "true");
+  }
   if (waitForSelector) {
     params.set("wait_for", waitForSelector);
   }
+  if (wait) {
+    params.set("wait", String(wait));
+  }
 
+  const timeoutMs = renderJs ? 120000 : 90000;
   const response = await fetch(`${SCRAPINGBEE_BASE}?${params.toString()}`, {
     method: "GET",
-    signal: AbortSignal.timeout(90000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   const html = await response.text();
@@ -73,13 +84,13 @@ export function buildIdealistaSearchUrl(params: {
 }): string {
   const { operation, propertyType, municipality, minPrice, maxPrice, minSize, maxSize, minRooms, page } = params;
   let url = `https://www.idealista.com/${operation}-${propertyType}/${municipality}/`;
-  const filters: string[] = [];
-  if (minPrice) filters.push(`precio-desde_${minPrice}`);
-  if (maxPrice) filters.push(`precio-hasta_${maxPrice}`);
-  if (minSize) filters.push(`metros-cuadrados-mas-de_${minSize}`);
-  if (maxSize) filters.push(`metros-cuadrados-menos-de_${maxSize}`);
-  if (minRooms) filters.push(`de-${minRooms}-habitaciones`);
-  if (filters.length > 0) url += `con-${filters.join(",")}/`;
+  const queryParams: string[] = [];
+  if (minPrice) queryParams.push(`precio-desde_${minPrice}`);
+  if (maxPrice) queryParams.push(`precio-hasta_${maxPrice}`);
+  if (minSize) queryParams.push(`metros-cuadrados-mas-de_${minSize}`);
+  if (maxSize) queryParams.push(`metros-cuadrados-menos-de_${maxSize}`);
+  if (minRooms) queryParams.push(`de-${minRooms}-habitaciones`);
+  if (queryParams.length > 0) url += `con-${queryParams.join(",")}/`;
   if (page && page > 1) url += `pagina-${page}.htm`;
   return url;
 }
