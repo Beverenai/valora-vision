@@ -200,7 +200,7 @@ const Index = () => {
               <span className="text-[0.65rem] tracking-[0.15em] uppercase text-white/50 font-semibold mb-3">
                 {isRent ? "Free Rental Estimate" : isSell ? "Free Property Valuation" : "Free Price Analysis"}
               </span>
-              <h1 className="text-4xl md:text-[3.5rem] lg:text-[3.75rem] font-normal text-white leading-[1.1] tracking-tight max-w-3xl">
+              <h1 className="text-4xl md:text-[3.5rem] lg:text-[3.75rem] font-normal text-white leading-[1.1] tracking-tight max-w-3xl min-h-[2.5em]">
                 {isRent ? (
                   <TypewriterText
                     phrases={[
