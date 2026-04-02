@@ -15,16 +15,6 @@ import Footer from "@/components/Footer";
 
 /* ─── DATA ─── */
 
-const AGENCIES = [
-  { name: "Engel & Völkers", x: "5%", y: 0, opacity: 0.35, size: "text-base", dur: 4.2 },
-  { name: "Sotheby's", x: "55%", y: -8, opacity: 0.25, size: "text-lg", dur: 3.6 },
-  { name: "Panorama", x: "25%", y: 6, opacity: 0.3, size: "text-sm", dur: 5.0 },
-  { name: "DM Properties", x: "70%", y: -4, opacity: 0.2, size: "text-base", dur: 4.8 },
-  { name: "Terra Meridiana", x: "10%", y: 10, opacity: 0.28, size: "text-sm", dur: 3.8 },
-  { name: "Drumelia", x: "48%", y: -2, opacity: 0.22, size: "text-lg", dur: 4.5 },
-  { name: "La Sala Estates", x: "75%", y: 4, opacity: 0.32, size: "text-sm", dur: 3.4 },
-];
-
 const SERVICES = [
   { icon: Home, title: "Free Valuation", desc: "Get an instant property valuation based on real comparable data." },
   { icon: BarChart3, title: "Comparable Sales", desc: "See recently sold and listed properties in your area." },
