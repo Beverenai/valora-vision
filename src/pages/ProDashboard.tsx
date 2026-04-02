@@ -1494,6 +1494,8 @@ const ProDashboard = () => {
   const [activeZones, setActiveZones] = useState<ZoneWithDetails[]>([]);
   const [availableZones, setAvailableZones] = useState<ZoneWithDetails[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [salesCount, setSalesCount] = useState(0);
+  const [verifiedSalesCount, setVerifiedSalesCount] = useState(0);
   useSEO({ title: "Agent Dashboard | ValoraCasa", description: "Manage your profile, leads, and analytics." });
   const [saving, setSaving] = useState(false);
 
