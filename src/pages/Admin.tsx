@@ -122,10 +122,8 @@ const Admin = () => {
   const [section, setSection] = useState<AdminSection>("leads");
   const navigate = useNavigate();
 
-  // Stats data for the stats bar
   const [leadCount, setLeadCount] = useState(0);
-  const [zoneCount, setZoneCount] = useState(0);
-  const [jobCount, setJobCount] = useState(0);
+  const [buyCount, setBuyCount] = useState(0);
   const [healthScore, setHealthScore] = useState("—");
 
   const handleLogin = () => {
@@ -136,16 +134,13 @@ const Admin = () => {
   useEffect(() => {
     if (!authenticated) return;
     const fetchStats = async () => {
-      const [sellRes, rentRes, buyRes, zonesRes, jobsRes] = await Promise.all([
+      const [sellRes, rentRes, buyRes] = await Promise.all([
         supabase.from("leads_sell").select("id", { count: "exact", head: true }),
         supabase.from("leads_rent").select("id", { count: "exact", head: true }),
         supabase.from("buy_analyses").select("id", { count: "exact", head: true }),
-        supabase.from("zones").select("id", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("scrape_jobs").select("id", { count: "exact", head: true }).eq("status", "completed"),
       ]);
-      setLeadCount((sellRes.count || 0) + (rentRes.count || 0) + (buyRes.count || 0));
-      setZoneCount(zonesRes.count || 0);
-      setJobCount(jobsRes.count || 0);
+      setLeadCount((sellRes.count || 0) + (rentRes.count || 0));
+      setBuyCount(buyRes.count || 0);
     };
     fetchStats();
   }, [authenticated]);
