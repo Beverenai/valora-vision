@@ -15,7 +15,7 @@ import Footer from "@/components/Footer";
 import {
   Star, MapPin, Calendar, Users, Globe, Building2,
   Instagram, Facebook, Linkedin, ExternalLink, CheckCircle2,
-  ChevronRight, Send, Phone, Mail,
+  ChevronRight, Send, Phone, Mail, Home,
 } from "lucide-react";
 
 // ── Types ──
