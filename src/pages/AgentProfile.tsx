@@ -218,6 +218,15 @@ export default function AgentProfile() {
         if (agentsData) setAgencyAgents(agentsData as unknown as Professional[]);
       }
 
+      // Fetch recent sales
+      const { data: salesData } = await supabase
+        .from("agent_sales")
+        .select("*")
+        .eq("professional_id", prof.id)
+        .order("sale_date", { ascending: false, nullsFirst: false })
+        .limit(20);
+      if (salesData) setRecentSales(salesData);
+
       setLoading(false);
     }
 
