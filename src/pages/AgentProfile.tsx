@@ -598,7 +598,7 @@ export default function AgentProfile() {
             {/* Agency context — enhanced */}
             {agency && (
               <section>
-                <p className={SECTION_LABEL}>AGENCIA</p>
+                <p className={SECTION_LABEL}>AGENCY</p>
                 <Link to={`/agentes/${agency.slug}`}>
                   <Card className="border-border/60 hover:shadow-md transition-shadow">
                     <CardContent className="p-5 flex items-center gap-4">
