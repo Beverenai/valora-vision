@@ -1,18 +1,26 @@
 
 
-# Fix Typewriter Text Layout Shift
+# Remove "Used Every Day" Section + Add FAQ
 
-## Problem
-The typewriter text changes length as it types/deletes, causing the page content below it to shift up and down.
+## Changes to `src/pages/Index.tsx`
 
-## Solution
-Reserve a fixed height for the `<h1>` element containing the `TypewriterText` so the layout stays stable regardless of text length.
+### 1. Remove the floating agencies section (lines 258–286)
+Delete the entire "FLOATING AGENCIES" `<section>` block and the `AGENCIES` data array (lines 17–25).
 
-## Change
+### 2. Add FAQ section before the Final CTA
+Insert an FAQ accordion section (using the existing `Accordion` component from `@radix-ui/react-accordion`) between the testimonials and the final CTA. Include 4–5 questions:
+
+- **"Why is this free?"** — Answer: ValoraCasa is 100% free for homeowners. We are funded by carefully vetted real estate professionals who pay to feature their brand on the platform. Every agent is reviewed and approved before joining, so you only see trusted, qualified professionals.
+- **"How accurate is the valuation?"** — Based on real comparable data from current listings in your area.
+- **"Is my data shared?"** — Your information is kept confidential and only shared with agents you choose to connect with.
+- **"How do you choose which agents appear?"** — All agents are carefully vetted for local expertise, track record, and professionalism before being approved.
+
+### 3. Add import
+Add `Accordion, AccordionItem, AccordionTrigger, AccordionContent` import from `@/components/ui/accordion`.
+
+## Files
 
 | File | Change |
 |------|--------|
-| `src/pages/Index.tsx` (line 203) | Add `min-h-[2.5em]` to the `<h1>` className so it always reserves space for the tallest phrase (which wraps to ~2 lines on smaller screens). This prevents content below from jumping. |
-
-The `min-h` approach is simplest — it reserves vertical space equal to roughly 2 lines of the heading text, which accommodates all the phrases at every breakpoint. No changes to the `TypewriterText` component itself.
+| `src/pages/Index.tsx` | Remove AGENCIES data + floating section; add FAQ accordion section with "Why is this free?" as first item |
 
