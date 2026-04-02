@@ -84,6 +84,10 @@ const LazyAgentBundle = lazy(() =>
   )
 );
 
+const LazyNearbyMap = lazy(() =>
+  lazyRetry(() => import("@/components/shared/NearbyPropertyMap"))
+);
+
 
 // ── Static Data ──
 const PRICE_TREND_DATA = [
@@ -386,6 +390,19 @@ const SellResult: React.FC = () => {
           
           <AIAnalysisSection content={lead?.analysis || MOCK_ANALYSIS} />
           
+          <div className="w-full h-px bg-border" />
+
+          {/* Nearby sales map — only when we have coordinates */}
+          {lead?.latitude && lead?.longitude && (
+            <Suspense fallback={<SectionSkeleton rows={2} />}>
+              <LazyNearbyMap
+                latitude={lead.latitude}
+                longitude={lead.longitude}
+                city={lead.city}
+              />
+            </Suspense>
+          )}
+
           <div className="w-full h-px bg-border" />
 
           {/* Group 2: Lazy — features, comparables, area comparison, market trends */}
