@@ -6,7 +6,7 @@ import {
   LayoutDashboard, User, MessageSquare, BarChart3, CreditCard, Settings,
   Star, Eye, TrendingUp, Loader2, ExternalLink, ChevronDown, Check, X,
   Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus, Shield,
-  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2, Building2, Users, Lock
+  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2, Building2, Users, Lock, Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,8 +37,9 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import SalesSection from "@/components/dashboard/SalesSection";
 
-type Section = "overview" | "profile" | "team" | "company" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings";
+type Section = "overview" | "profile" | "team" | "company" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings" | "sales";
 
 interface Professional {
   id: string;
@@ -92,6 +93,7 @@ const navGroups = [
     label: "Business",
     items: [
       { key: "leads" as Section, label: "Leads", icon: MessageSquare },
+      { key: "sales" as Section, label: "My Sales", icon: Home },
       { key: "zones" as Section, label: "My Zones", icon: MapPin },
       { key: "reviews" as Section, label: "Reviews", icon: Star },
       { key: "analytics" as Section, label: "Performance", icon: BarChart3 },
@@ -1682,6 +1684,9 @@ const ProDashboard = () => {
       )}
       {section === "analytics" && (
         <AnalyticsSection impressions={impressionsByDay} leads={leadsByDay} />
+      )}
+      {section === "sales" && (
+        <SalesSection professionalId={agent.id} />
       )}
       {section === "subscription" && <SubscriptionSection />}
       {section === "settings" && <SettingsSection agent={agent} />}

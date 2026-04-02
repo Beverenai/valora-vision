@@ -102,6 +102,111 @@ export type Database = {
           },
         ]
       }
+      agent_sales: {
+        Row: {
+          address_text: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          built_size_sqm: number | null
+          city: string | null
+          created_at: string
+          days_on_market: number | null
+          enriched_description: string | null
+          enriched_title: string | null
+          id: string
+          latitude: number | null
+          listed_date: string | null
+          listing_source: string | null
+          listing_url: string | null
+          location_point: unknown
+          longitude: number | null
+          photo_url: string | null
+          plot_size_sqm: number | null
+          professional_id: string
+          property_type: string | null
+          sale_date: string | null
+          sale_price: number | null
+          show_price: boolean
+          updated_at: string
+          verification_method: string | null
+          verified: boolean
+          zone_id: string | null
+        }
+        Insert: {
+          address_text?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          built_size_sqm?: number | null
+          city?: string | null
+          created_at?: string
+          days_on_market?: number | null
+          enriched_description?: string | null
+          enriched_title?: string | null
+          id?: string
+          latitude?: number | null
+          listed_date?: string | null
+          listing_source?: string | null
+          listing_url?: string | null
+          location_point?: unknown
+          longitude?: number | null
+          photo_url?: string | null
+          plot_size_sqm?: number | null
+          professional_id: string
+          property_type?: string | null
+          sale_date?: string | null
+          sale_price?: number | null
+          show_price?: boolean
+          updated_at?: string
+          verification_method?: string | null
+          verified?: boolean
+          zone_id?: string | null
+        }
+        Update: {
+          address_text?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          built_size_sqm?: number | null
+          city?: string | null
+          created_at?: string
+          days_on_market?: number | null
+          enriched_description?: string | null
+          enriched_title?: string | null
+          id?: string
+          latitude?: number | null
+          listed_date?: string | null
+          listing_source?: string | null
+          listing_url?: string | null
+          location_point?: unknown
+          longitude?: number | null
+          photo_url?: string | null
+          plot_size_sqm?: number | null
+          professional_id?: string
+          property_type?: string | null
+          sale_date?: string | null
+          sale_price?: number | null
+          show_price?: boolean
+          updated_at?: string
+          verification_method?: string | null
+          verified?: boolean
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_sales_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_sales_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_team_members: {
         Row: {
           avg_rating: number | null
@@ -1737,6 +1842,25 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_sales_summary: {
+        Row: {
+          avg_days_on_market: number | null
+          last_sale_date: string | null
+          professional_id: string | null
+          sales_last_12_months: number | null
+          total_sales: number | null
+          verified_sales: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_sales_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
             referencedColumns: ["id"]
           },
         ]
