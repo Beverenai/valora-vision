@@ -92,7 +92,6 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
     } else {
-      toast({ title: "Sale registered!", description: "Listing details are being imported…" });
       // Trigger async enrichment
       if (insertedData?.id) {
         supabase.functions.invoke("enrich-sale-listing", {
@@ -103,8 +102,10 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
         });
       }
       setListingUrl("");
+      setLinkTeamMemberId("");
       onSaleAdded();
-      onOpenChange(false);
+      setLinkAdded(true);
+      setTimeout(() => setLinkAdded(false), 3000);
     }
   }
 
