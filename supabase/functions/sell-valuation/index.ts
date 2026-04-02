@@ -1,4 +1,7 @@
-import { corsHeaders } from "@supabase/supabase-js/cors";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 import { fetchWithScrapingBee, buildIdealistaSearchUrl } from "../_shared/scrapingbee-client.ts";
 import { parseSearchResults, MUNICIPALITY_SLUGS } from "../_shared/idealista-parser.ts";
 import { calculateValuation, type ValuationInput, type ComparableProperty } from "../_shared/valuation-engine.ts";
