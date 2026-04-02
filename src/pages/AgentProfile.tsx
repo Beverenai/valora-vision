@@ -57,6 +57,7 @@ interface TeamMember {
   total_reviews: number;
   languages: string[] | null;
   email: string | null;
+  slug: string | null;
 }
 
 interface Review {
