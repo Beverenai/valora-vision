@@ -3,9 +3,11 @@ const SCRAPINGBEE_BASE = "https://app.scrapingbee.com/api/v1/";
 export interface ScrapingBeeOptions {
   renderJs?: boolean;
   premiumProxy?: boolean;
+  stealthProxy?: boolean;
   countryCode?: string;
   blockAds?: boolean;
   waitForSelector?: string;
+  wait?: number;
 }
 
 export interface ScrapingBeeResult {
