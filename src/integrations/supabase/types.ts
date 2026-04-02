@@ -767,6 +767,8 @@ export type Database = {
           bio: string | null
           company_name: string
           contact_name: string
+          cover_photo_focus_x: number
+          cover_photo_focus_y: number
           cover_photo_url: string | null
           created_at: string | null
           description: string | null
@@ -799,6 +801,8 @@ export type Database = {
           bio?: string | null
           company_name: string
           contact_name: string
+          cover_photo_focus_x?: number
+          cover_photo_focus_y?: number
           cover_photo_url?: string | null
           created_at?: string | null
           description?: string | null
@@ -831,6 +835,8 @@ export type Database = {
           bio?: string | null
           company_name?: string
           contact_name?: string
+          cover_photo_focus_x?: number
+          cover_photo_focus_y?: number
           cover_photo_url?: string | null
           created_at?: string | null
           description?: string | null
