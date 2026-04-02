@@ -780,6 +780,51 @@ const Index = () => {
           </div>
         </section>
 
+        {/* ═══════════ FAQ ═══════════ */}
+        <section className="w-full py-12 md:py-20 px-5 md:px-8">
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-10 text-center"
+            >
+              <SectionLabel>FAQ</SectionLabel>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
+                Frequently Asked Questions
+              </h2>
+            </motion.div>
+
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="free">
+                <AccordionTrigger>Why is this free?</AccordionTrigger>
+                <AccordionContent>
+                  ValoraCasa is 100% free for homeowners and buyers. We are funded by carefully vetted real estate professionals who pay to feature their brand on the platform. Every agent is reviewed and approved before joining, so you only see trusted, qualified professionals — never random ads.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="accuracy">
+                <AccordionTrigger>How accurate is the valuation?</AccordionTrigger>
+                <AccordionContent>
+                  Our valuations are based on real comparable data from current and recent listings in your area, combined with AI-powered analysis of property features, location, and market trends. While no automated valuation replaces a full appraisal, our estimates typically fall within a few percent of actual market value.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="data">
+                <AccordionTrigger>Is my data shared with anyone?</AccordionTrigger>
+                <AccordionContent>
+                  Your information is kept confidential. We only share your details with agents you explicitly choose to connect with. We never sell your data to third parties.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="agents">
+                <AccordionTrigger>How do you choose which agents appear?</AccordionTrigger>
+                <AccordionContent>
+                  All agents on ValoraCasa are carefully vetted for local expertise, track record, and professionalism before being approved. We only work with established professionals who meet our quality standards, ensuring you get the best advice for your area.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </section>
+
         {/* ═══════════ FINAL CTA ═══════════ */}
         <section
           className="w-full py-12 md:py-20 px-5 md:px-8 pb-32"
