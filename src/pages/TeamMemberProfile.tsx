@@ -196,7 +196,7 @@ export default function TeamMemberProfile() {
     );
   }
 
-  const displayedSales = showAllSales ? sales : sales.slice(0, 6);
+  
 
   const ContactFormSection = (
     <Card className="border-border/60">
