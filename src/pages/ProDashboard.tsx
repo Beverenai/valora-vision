@@ -37,6 +37,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { StatsBar, type StatTile } from "@/components/admin/StatsBar";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import SalesSection from "@/components/dashboard/SalesSection";
 
 type Section = "overview" | "profile" | "team" | "company" | "leads" | "zones" | "reviews" | "analytics" | "subscription" | "settings" | "sales";
 
