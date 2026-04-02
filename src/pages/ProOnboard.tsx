@@ -210,6 +210,7 @@ const ProOnboard = () => {
         if (data.cover_photo_url) setCoverPhotoUrl(data.cover_photo_url);
         if (data.google_rating) setGoogleRating(data.google_rating);
         if (data.google_review_count) setGoogleReviewCount(data.google_review_count);
+        if (data.reviews?.length) setImportedReviews(data.reviews);
         if (data.lat) setLat(data.lat);
         if (data.lng) setLng(data.lng);
 
