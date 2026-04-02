@@ -402,6 +402,27 @@ const ProOnboard = () => {
       if (publishError) throw publishError;
       if (publishData?.error) throw new Error(publishData.error);
 
+      // Insert imported reviews if any
+      const professionalId = publishData?.id;
+      if (professionalId && importedReviews.length > 0) {
+        try {
+          const reviewInserts = importedReviews.map((r) => ({
+            professional_id: professionalId,
+            reviewer_name: r.reviewer_name,
+            rating: r.rating,
+            comment: r.comment,
+            is_verified: true,
+            source: r.source,
+            source_url: r.source_url,
+          }));
+          await supabase.from("agent_reviews").insert(reviewInserts);
+          console.log(`[ProOnboard] Inserted ${reviewInserts.length} imported reviews`);
+        } catch (reviewErr) {
+          console.error("Failed to insert reviews:", reviewErr);
+          // Non-blocking — profile still published
+        }
+      }
+
       navigate(`/pro/onboard/success?slug=${slug}`);
     } catch (e: any) {
       console.error("Publish error:", e);
