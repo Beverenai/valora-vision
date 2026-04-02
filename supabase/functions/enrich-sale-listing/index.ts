@@ -43,32 +43,29 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         url: listing_url,
-        formats: [
-          "markdown",
-          {
-            type: "json",
-            schema: {
-              type: "object",
-              properties: {
-                title: { type: "string" },
-                description: { type: "string" },
-                price: { type: "number" },
-                bedrooms: { type: "number" },
-                bathrooms: { type: "number" },
-                built_size_sqm: { type: "number" },
-                plot_size_sqm: { type: "number" },
-                property_type: { type: "string" },
-                address: { type: "string" },
-                city: { type: "string" },
-                latitude: { type: "number" },
-                longitude: { type: "number" },
-                image_url: { type: "string" },
-              },
+        formats: ["markdown", "extract"],
+        extract: {
+          schema: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              description: { type: "string" },
+              price: { type: "number" },
+              bedrooms: { type: "number" },
+              bathrooms: { type: "number" },
+              built_size_sqm: { type: "number" },
+              plot_size_sqm: { type: "number" },
+              property_type: { type: "string" },
+              address: { type: "string" },
+              city: { type: "string" },
+              latitude: { type: "number" },
+              longitude: { type: "number" },
+              image_url: { type: "string" },
             },
-            prompt:
-              "Extract property listing details. property_type should be one of: apartment, villa, townhouse, penthouse, finca, plot. image_url should be the main/hero property photo URL. latitude and longitude are the property coordinates if available.",
           },
-        ],
+          prompt:
+            "Extract property listing details. property_type should be one of: apartment, villa, townhouse, penthouse, finca, plot. image_url should be the main/hero property photo URL. latitude and longitude are the property coordinates if available.",
+        },
         onlyMainContent: true,
         waitFor: 3000,
       }),
@@ -85,7 +82,7 @@ Deno.serve(async (req) => {
     }
 
     // Extract structured data - handle nested response
-    const extracted = scrapeData?.data?.json || scrapeData?.json || {};
+    const extracted = scrapeData?.data?.extract || scrapeData?.extract || scrapeData?.data?.json || {};
     const metadata = scrapeData?.data?.metadata || scrapeData?.metadata || {};
 
     console.log("Extracted data:", JSON.stringify(extracted));
