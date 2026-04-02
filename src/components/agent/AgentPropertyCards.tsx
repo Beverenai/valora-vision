@@ -91,8 +91,8 @@ export default function AgentPropertyCards({
                 </p>
               )}
               <p className="text-[0.6rem] text-muted-foreground mt-2">
-                Vendido por <span className="font-medium">{agentName}</span>
-                {agencyName && <> de <span className="font-medium">{agencyName}</span></>}
+                Sold by <span className="font-medium">{agentName}</span>
+                {agencyName && <> from <span className="font-medium">{agencyName}</span></>}
               </p>
             </CardContent>
           </Card>
