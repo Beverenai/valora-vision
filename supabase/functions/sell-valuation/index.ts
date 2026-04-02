@@ -61,8 +61,6 @@ Deno.serve(async (req) => {
       operation: "venta",
       propertyType: idealistaType as "viviendas" | "chalets" | "pisos" | "aticos",
       municipality: slug,
-      minPrice,
-      maxPrice,
       minSize,
       maxSize,
       minRooms: Math.max(1, rooms - 1),
