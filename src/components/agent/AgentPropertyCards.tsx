@@ -109,7 +109,7 @@ export default function AgentPropertyCards({
             disabled={page === 0}
             className="rounded-full"
           >
-            <ChevronLeft size={14} className="mr-1" /> Anterior
+            <ChevronLeft size={14} className="mr-1" /> Previous
           </Button>
 
           {Array.from({ length: totalPages }, (_, i) => (
