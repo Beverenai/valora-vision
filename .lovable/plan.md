@@ -1,34 +1,72 @@
 
+# AgentProfile Enhancement Plan
 
-# Fix: Make Team Member Cards Clickable on Company Profile
+## Overview
+Enhance the agent profile page with 7 features while preserving ALL existing functionality (contact form, team, reviews, social links, skeleton, error states).
 
-## Problem
-The linking code already exists in `AgentProfile.tsx` — members with a `slug` get wrapped in a `<Link>` to `/agentes/:slug/:memberSlug`. However, the existing team members (e.g., "Sal" and "August raae" under La Sala Homes) have `slug = NULL` because they were created before the slug-generation feature was added.
+## Database
+✅ `agent_sales` table already exists with all needed fields (sale_price, property_type, sale_date, latitude, longitude, bedrooms, city, address_text, photo_url, verified, show_price, team_member_id, professional_id).
+✅ `zones` table has `province` and `name` fields for breadcrumb data.
+**No migrations needed.**
 
-## Solution
+## Implementation Steps
 
-### 1. Database Migration — Backfill Slugs
-Run a migration that generates slugs for all `agent_team_members` where `slug IS NULL`:
-```sql
-UPDATE agent_team_members 
-SET slug = lower(regexp_replace(
-  translate(name, 'áéíóúñÁÉÍÓÚÑ', 'aeiounAEIOUN'),
-  '[^a-z0-9]+', '-', 'gi'
-))
-WHERE slug IS NULL;
-```
-Also add a `NOT NULL DEFAULT ''` or keep nullable but ensure the onboard function always sets it.
+### Step 1: Enhanced Breadcrumbs
+- Replace current simple breadcrumb (lines 473-482) with Shadcn `Breadcrumb` components
+- Path: `Inicio > Agentes > [Provincia] > [Ciudad] > [Agencia] > [Agent Name]`
+- Fetch province/city from zones data (zones table has `province` field — need to expand the zones query to include it)
+- Agency name from existing `agency` state
+- Mobile: collapse middle levels with `BreadcrumbEllipsis`
+- Font-serif text, terracotta `#D4713B` hover color
 
-### 2. Update `onboard-agency/index.ts`
-When team members are created during onboarding, auto-generate slugs from names (same logic as dashboard).
+### Step 2: Sales Statistics Section
+- New section after agency card showing sales analytics
+- Total sold (last 24 months), median sale price, breakdown by property type
+- Animated count-up effect with framer-motion `useInView`
+- Two stat boxes side by side, type breakdown underneath
+- Uses existing `recentSales` state — no new queries
 
-### 3. Update `publish-agent-profile/index.ts`
-Same — when upserting team members, generate slugs if not provided.
+### Step 3: Property Map (Mapbox)
+- Interactive map under sales stats showing sold properties
+- Terracotta markers for sold, green for active
+- Click popup with photo, type, bedrooms, price, location
+- Centered on agent's service zones
+- Fallback static placeholder if no VITE_MAPBOX_TOKEN
+- Lazy-loaded with `React.lazy`
+
+### Step 4: Property Cards with Pagination
+- Horizontal card grid under map
+- Status badge: "VENDIDO" (terracotta) or "EN VENTA" (green)
+- Sale date, property type + bedrooms, location
+- "Vendido por [agent] de [agency]" attribution
+- Pagination: 5 per page with Anterior/1 2 3/Siguiente
+
+### Step 5: Enhanced Agency Linking
+- Improve agency card: add MapPin icon + address, "Ver más" link
+- Below agency card: avatar chips of other agents in agency
+- `[photo] María López [photo] Juan García +3 más`
+- Click navigates to agent profile
+
+### Step 6: Improved Contact Form
+- Desktop: already sticky (✅ exists at line 776)
+- Mobile: fixed "Contactar" button at bottom opening sheet/modal with form
+- "Mostrar número" button (reveals phone on click)
+- Enhanced service dropdown: Valoración, Vender, Comprar, Alquiler, Otro
+
+### Step 7: Responsive Polish
+- Mobile-first layouts for all new sections
+- Lazy-load map and stats sections
+- framer-motion entrance animations
+- Consistent terracotta accent and font-serif headings
 
 ## Files Modified
-- `supabase/migrations/` — backfill existing null slugs
-- `supabase/functions/onboard-agency/index.ts` — add slug generation for team members
-- `supabase/functions/publish-agent-profile/index.ts` — add slug generation for team members
+- `src/pages/AgentProfile.tsx` — main changes
+- New: `src/components/agent/AgentSalesStats.tsx`
+- New: `src/components/agent/AgentPropertyMap.tsx`  
+- New: `src/components/agent/AgentPropertyCards.tsx`
+- New: `src/components/agent/AgentBreadcrumbs.tsx`
 
-This is a small change — the UI linking already works, just the data is missing.
-
+## Design Tokens
+- Terracotta: `#D4713B` (used as inline or via existing `--primary`)
+- Font: `font-serif` for section headings
+- Shadcn/UI components throughout
