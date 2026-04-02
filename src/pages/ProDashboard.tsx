@@ -851,6 +851,8 @@ function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professi
   });
   const [logoUrl, setLogoUrl] = useState(agent.logo_url || "");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState(agent.cover_photo_url || "");
+  const [focusX, setFocusX] = useState<number>((agent as any).cover_photo_focus_x ?? 50);
+  const [focusY, setFocusY] = useState<number>((agent as any).cover_photo_focus_y ?? 50);
   const [uploading, setUploading] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
@@ -901,12 +903,25 @@ function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professi
     setCoverPhotoUrl(newUrl);
     setCoverFailed(false);
     setUploadingCover(false);
-    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl }).eq("id", agent.id);
+    setFocusX(50);
+    setFocusY(50);
+    const { error } = await supabase.from("professionals").update({ cover_photo_url: newUrl, cover_photo_focus_x: 50, cover_photo_focus_y: 50 }).eq("id", agent.id);
     if (!error) toast({ title: "Cover photo updated!" });
   };
 
+  const handleCoverFocusClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isAdmin || !coverPhotoUrl) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    setFocusX(x);
+    setFocusY(y);
+    await supabase.from("professionals").update({ cover_photo_focus_x: x, cover_photo_focus_y: y }).eq("id", agent.id);
+    toast({ title: "Focus point updated", description: "The crop will now center on this point." });
+  };
+
   const handleSave = () => {
-    onSave({ ...form, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null });
+    onSave({ ...form, logo_url: logoUrl || null, cover_photo_url: coverPhotoUrl || null, cover_photo_focus_x: focusX, cover_photo_focus_y: focusY } as any);
   };
 
   const initials = agent.company_name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -944,7 +959,28 @@ function CompanyProfileTab({ agent, onSave, saving, isAdmin }: { agent: Professi
         <Label className="mb-2 block">Cover Photo</Label>
         <p className="text-xs text-muted-foreground mb-2">This appears as the hero banner on your public profile</p>
         {coverPhotoUrl && !coverFailed ? (
-          <img src={coverPhotoUrl} alt="Cover" className="w-full h-36 rounded-xl object-cover border mb-2" onError={() => setCoverFailed(true)} />
+          <div
+            className="relative w-full h-36 rounded-xl border mb-2 overflow-hidden cursor-crosshair group"
+            onClick={handleCoverFocusClick}
+          >
+            <img
+              src={coverPhotoUrl}
+              alt="Cover"
+              className="w-full h-full object-cover"
+              style={{ objectPosition: `${focusX}% ${focusY}%` }}
+              onError={() => setCoverFailed(true)}
+            />
+            {/* Focus point indicator */}
+            <div
+              className="absolute w-5 h-5 rounded-full border-2 border-white shadow-lg pointer-events-none transition-all duration-150"
+              style={{ left: `${focusX}%`, top: `${focusY}%`, transform: "translate(-50%, -50%)", background: "rgba(255,255,255,0.4)" }}
+            >
+              <div className="absolute inset-1 rounded-full bg-white/80" />
+            </div>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-end justify-center pb-2 opacity-0 group-hover:opacity-100">
+              <span className="text-xs text-white bg-black/50 px-2 py-1 rounded-full">Click to set focus point</span>
+            </div>
+          </div>
         ) : (
           <div className="w-full h-36 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-dashed border-border flex items-center justify-center mb-2">
             <span className="text-sm text-muted-foreground">No cover photo</span>
