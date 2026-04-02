@@ -1,31 +1,30 @@
 
 
-# Fix Low-Contrast Select Dropdown Highlights
+# Fix Low-Contrast Admin Controls (Dark Mode)
 
 ## Problem
 
-The `SelectItem` component uses `focus:bg-accent focus:text-accent-foreground` for the highlighted/selected state. Since `--accent` is the brand magenta (`328 100% 39%`), the focused item gets a saturated pink background. While the main text turns white via `focus:text-accent-foreground`, nested elements like description text (`text-muted-foreground`) and icons (`text-muted-foreground`) don't inherit this override — they stay gray/dark and become nearly invisible against the pink.
-
-This affects every `Select` dropdown across the app: PropertyTypeSelector, furnishing options, rental situation, etc.
+All inputs, select triggers, and buttons on the admin panel use `bg-white/5 border-white/10` — that's 5% white background with 10% white border on a near-black background. Nearly invisible. The refresh button uses `text-white/60` which is also too dim.
 
 ## Fix
 
-Change the `SelectItem` focus style from the intense brand accent to a soft, neutral highlight that keeps all text readable:
+Increase opacity levels across all admin dark-mode controls in `src/pages/Admin.tsx`:
 
-**`src/components/ui/select.tsx`** — line 108, change:
-```
-focus:bg-accent focus:text-accent-foreground
-```
-to:
-```
-focus:bg-muted focus:text-foreground
-```
+| Current | Replacement | Element |
+|---------|-------------|---------|
+| `bg-white/5 border-white/10` | `bg-white/10 border-white/20` | Inputs, SelectTriggers, form fields |
+| `placeholder:text-white/30` | `placeholder:text-white/50` | Input placeholders |
+| `text-white/60` | `text-white/80` | Refresh button text |
+| `text-white/30` (search icon) | `text-white/50` | Search icon |
+| `text-white/40` (count text) | `text-white/60` | "6 valuations" counter |
 
-This uses the light gray muted background (`245 20% 95%`) with standard dark text, so all nested text (descriptions, icons) remains perfectly readable. The checkmark indicator already shows which item is selected, so a subtle highlight is sufficient.
+This is a bulk find-and-replace across the file — roughly 57 occurrences of `bg-white/5 border-white/10` become `bg-white/10 border-white/20`, and similar for the other opacity values.
 
-**Additionally**, in `PropertyTypeSelector.tsx`, the icon inside the category selector uses `text-muted-foreground` which will now stay visible. No changes needed there.
+## Files to change
 
-## Scope
+| File | Change |
+|------|--------|
+| `src/pages/Admin.tsx` | Increase all dark-mode opacity values for inputs, selects, buttons, icons, and helper text |
 
-One line change in one file. Affects all `Select` dropdowns globally — consistent fix across sell, rent, buy, onboarding, and admin forms.
+No database or component changes needed — the issue is purely opacity values in inline class strings.
 
