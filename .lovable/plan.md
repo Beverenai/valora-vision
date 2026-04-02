@@ -1,58 +1,38 @@
 
 
-# Forbedringer for Agent Sales Portfolio
+# Cover Photo Focal Point Picker
 
-Basert på spec-dokumentet vs. det som er implementert, er dette det som mangler eller kan forbedres:
+## Problem
+When a team cover photo is cropped (e.g., from a wide landscape to a narrow banner), `object-cover` centers the crop by default — often cutting off faces at the top or bottom.
 
-## 1. Merit Score mangler "Sales"-faktor
-Spec sier: 0 sales = 0pts, 1-5 = 30, 6-15 = 60, 16-30 = 80, 30+ = 100, +10 bonus if >50% verified. Nåværende merit score har 6 faktorer uten sales. Vi legger til en 7. faktor og justerer vektene.
+## Solution
+Add a clickable focal point selector on the cover photo preview in the Company Profile section. The agent clicks where the important content is (e.g., faces), and we store that position as `cover_photo_focus_x` and `cover_photo_focus_y` (0-100 percentages). Both the dashboard preview and the public AgentProfile page use `object-position` with these values.
 
-## 2. Incentive-kort mangler checklist fra spec
-Spec viser en detaljert incentive-checklist med progressive milestones:
-- "Appear in Recent Sales on your public profile" (1+ sale)
-- "Unlock sales map on your profile" (3+ sales)
-- "+30 merit points and higher search ranking" (5+ sales)
-- "Top Seller badge on valuation results" (10+ sales)
-- "Verified Track Record trust badge" (5+ verified)
+## How It Works
+1. After uploading a cover photo, the preview becomes clickable
+2. A small crosshair dot appears where the agent clicks
+3. The x/y percentage is saved to the `professionals` table
+4. The public profile uses `object-position: {x}% {y}%` instead of default `center`
 
-Nåværende implementering har bare en enkel progress bar. Erstatt med spec-designet.
+## Changes
 
-## 3. Action item for 0 sales
-Legg til i overview action items: "Register your first sale" når agent har 0 sales.
+### Database Migration
+- Add two columns to `professionals`: `cover_photo_focus_x SMALLINT DEFAULT 50` and `cover_photo_focus_y SMALLINT DEFAULT 50`
 
-## 4. Photo upload mangler — bare URL-felt
-Spec sier photo upload step (optional). Nåværende dialog har bare et "Photo URL" tekstfelt. Legg til faktisk bilde-opplasting via storage.
+### ProDashboard.tsx — Company Profile Section
+- Add state for `focusX` / `focusY` (default 50/50)
+- Make the cover photo preview clickable — on click, compute % position relative to image bounds
+- Show a small dot overlay at the focal point
+- Apply `object-position: {focusX}% {focusY}%` to the preview
+- Save focus values alongside cover photo URL on handleSave
+- Add helper text: "Click on the photo to set the focus point"
 
-## 5. show_price toggle mangler i AddSaleDialog
-Spec legger vekt på at agenten velger om prisen vises offentlig. Legg til en Switch for dette.
-
----
-
-## Tekniske detaljer
+### AgentProfile.tsx — Hero Banner
+- Read `cover_photo_focus_x` and `cover_photo_focus_y` from the professional record
+- Apply as `background-position: {x}% {y}%` on the hero div (which uses `background: url(...) center/cover`)
 
 ### Files Modified
-- `src/pages/ProDashboard.tsx` — merit score: legg til salesMerit-faktor, juster vekter, legg til action item for 0 sales
-- `src/components/dashboard/SalesSection.tsx` — erstatt enkel milestone-kort med detaljert checklist fra spec
-- `src/components/dashboard/AddSaleDialog.tsx` — legg til show_price switch, foto-opplasting via storage bucket
-
-### Merit Score nye vekter (7 faktorer)
-```text
-Profile:     8%  (was 10%)
-Rating:     20%  (was 25%)
-Zones:      12%  (was 15%)
-Reviews:    12%  (was 15%)
-Response:   18%  (was 20%)
-Conversion: 12%  (was 15%)
-Sales:      18%  (new)
-```
-
-### Sales scoring
-```text
-0 sales     → 0
-1-5 sales   → 30
-6-15 sales  → 60
-16-30 sales → 80
-30+ sales   → 100
-+10 bonus if >50% verified (cap 100)
-```
+- `supabase/migrations/` — add 2 columns
+- `src/pages/ProDashboard.tsx` — focal point picker UI + save logic
+- `src/pages/AgentProfile.tsx` — use focal point in hero background-position
 
