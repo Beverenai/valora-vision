@@ -124,7 +124,7 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
     } else {
       toast({ title: "Sale registered!" });
-      setForm({ property_type: "apartment", bedrooms: "", bathrooms: "", built_size_sqm: "", address_text: "", city: "", sale_price: "", sale_date: "", photo_url: "", show_price: true });
+      setForm({ property_type: "apartment", bedrooms: "", bathrooms: "", built_size_sqm: "", address_text: "", city: "", sale_price: "", sale_date: "", photo_url: "", show_price: true, team_member_id: "" });
       onSaleAdded();
       onOpenChange(false);
     }
