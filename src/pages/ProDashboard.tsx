@@ -6,7 +6,8 @@ import {
   LayoutDashboard, User, MessageSquare, BarChart3, CreditCard, Settings,
   Star, Eye, TrendingUp, Loader2, ExternalLink, ChevronDown, Check, X,
   Mail, Phone, MapPin, Globe, Instagram, Facebook, Linkedin, Edit2, Plus, Shield,
-  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2, Building2, Users, Lock, Home
+  LogOut, Upload, ArrowUpDown, Archive, ArrowRight, Bell, Trash2, Building2, Users, Lock, Home,
+  Info, CheckCircle2, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -323,11 +324,98 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
     salesMerit * 0.18
   );
 
-  const actionItems: { icon: React.ElementType; label: string; desc: string; section: Section; color: string }[] = [];
-  if (!agent.bio && !agent.description) actionItems.push({ icon: Edit2, label: "Add a company description", desc: "+15 merit points", section: "profile", color: "text-amber-600" });
-  if (!agent.logo_url) actionItems.push({ icon: Eye, label: "Upload your logo", desc: "+20 merit points", section: "profile", color: "text-amber-600" });
-  if (sc === 0) actionItems.push({ icon: Home, label: "Register your first sale", desc: "Build trust with potential clients", section: "sales", color: "text-emerald-600" });
-  actionItems.push({ icon: MapPin, label: "Select your service zones", desc: "Required to appear in valuation results", section: "zones", color: "text-blue-600" });
+  const meritCategories = [
+    {
+      key: "profile",
+      label: "Profile Completeness",
+      icon: Edit2,
+      score: profileMerit,
+      weight: 8,
+      weightedScore: Math.round(profileMerit * 0.08),
+      maxWeighted: 8,
+      hint: "Add bio, logo, tagline, cover photo",
+      fullHint: "Maintain a complete profile to build trust",
+      navTarget: "company" as Section,
+    },
+    {
+      key: "rating",
+      label: "Client Rating",
+      icon: Star,
+      score: ratingMerit,
+      weight: 20,
+      weightedScore: Math.round(ratingMerit * 0.20),
+      maxWeighted: 20,
+      hint: "Great reviews boost your rating",
+      fullHint: "Maintain great service to keep your rating high",
+      navTarget: "reviews" as Section,
+    },
+    {
+      key: "zones",
+      label: "Zone Coverage",
+      icon: MapPin,
+      score: zoneMerit,
+      weight: 12,
+      weightedScore: Math.round(zoneMerit * 0.12),
+      maxWeighted: 12,
+      hint: "Select service zones to appear in results",
+      fullHint: "You're visible in all your zones",
+      navTarget: "zones" as Section,
+    },
+    {
+      key: "reviews",
+      label: "Review Volume",
+      icon: MessageSquare,
+      score: reviewMerit,
+      weight: 12,
+      weightedScore: Math.round(reviewMerit * 0.12),
+      maxWeighted: 12,
+      hint: "Ask satisfied clients for reviews",
+      fullHint: "Great review volume — keep it up",
+      navTarget: "reviews" as Section,
+    },
+    {
+      key: "response",
+      label: "Lead Response",
+      icon: Zap,
+      score: responseMerit,
+      weight: 18,
+      weightedScore: Math.round(responseMerit * 0.18),
+      maxWeighted: 18,
+      hint: "Respond to new leads promptly",
+      fullHint: "Excellent responsiveness",
+      navTarget: "leads" as Section,
+    },
+    {
+      key: "conversion",
+      label: "Conversion Rate",
+      icon: TrendingUp,
+      score: conversionMerit,
+      weight: 12,
+      weightedScore: Math.round(conversionMerit * 0.12),
+      maxWeighted: 12,
+      hint: "Mark leads as converted when you close deals",
+      fullHint: "Strong conversion performance",
+      navTarget: "leads" as Section,
+    },
+    {
+      key: "sales",
+      label: "Sales Portfolio",
+      icon: Home,
+      score: salesMerit,
+      weight: 18,
+      weightedScore: Math.round(salesMerit * 0.18),
+      maxWeighted: 18,
+      hint: "Add more verified sales to your portfolio",
+      fullHint: "Impressive sales portfolio",
+      navTarget: "sales" as Section,
+    },
+  ];
+
+  const getBarColor = (pct: number) => {
+    if (pct >= 80) return "bg-emerald-500";
+    if (pct >= 40) return "bg-amber-500";
+    return "bg-red-400";
+  };
 
   return (
     <div className="space-y-6">
@@ -336,59 +424,92 @@ function OverviewSection({ agent, leads, impressionsCount, onViewLeads, setSecti
         {agent.is_verified && <Shield size={18} className="text-primary" />}
       </div>
 
-      {/* Merit Score */}
-      <Card className="bg-gradient-to-r from-primary/5 to-transparent border-primary/20">
-        <CardContent className="pt-6">
+      {/* Gamified Merit Score */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Merit Score</p>
-              <p className="text-3xl font-bold mt-1">{meritScore}</p>
-              <p className="text-xs text-muted-foreground mt-1">Profile completeness & engagement</p>
+              <CardTitle className="text-lg font-serif flex items-center gap-2">
+                Merit Score
+                <span className="relative group">
+                  <Info size={14} className="text-muted-foreground cursor-help" />
+                  <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2 rounded-lg bg-popover border text-xs text-popover-foreground shadow-md hidden group-hover:block z-10">
+                    Higher scores = more prominent placement in valuation results
+                  </span>
+                </span>
+              </CardTitle>
+              <CardDescription className="text-xs mt-1">
+                Your Merit Score determines your visibility to property sellers — combined with your subscription tier
+              </CardDescription>
             </div>
-            <div className="w-16 h-16">
+            <div className="w-16 h-16 shrink-0">
               <svg viewBox="0 0 36 36" className="w-full h-full">
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none" stroke="hsl(var(--primary))" strokeWidth="3"
                   strokeDasharray={`${meritScore}, 100`} strokeLinecap="round" />
+                <text x="18" y="20" textAnchor="middle" className="text-[0.55rem] font-bold fill-foreground">{meritScore}</text>
               </svg>
             </div>
           </div>
-          <div className="grid grid-cols-7 gap-2 mt-4 text-center">
-            <div><p className="text-xs text-muted-foreground">Profile</p><p className="text-sm font-medium">{profileMerit}</p></div>
-            <div><p className="text-xs text-muted-foreground">Rating</p><p className="text-sm font-medium">{ratingMerit}</p></div>
-            <div><p className="text-xs text-muted-foreground">Zones</p><p className="text-sm font-medium">{zoneMerit}</p></div>
-            <div><p className="text-xs text-muted-foreground">Reviews</p><p className="text-sm font-medium">{reviewMerit}</p></div>
-            <div><p className="text-xs text-muted-foreground">Response</p><p className="text-sm font-medium">{responseMerit}</p></div>
-            <div><p className="text-xs text-muted-foreground">Conversion</p><p className="text-sm font-medium">{conversionMerit}</p></div>
-            <div><p className="text-xs text-muted-foreground">Sales</p><p className="text-sm font-medium">{salesMerit}</p></div>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          {meritCategories.map((cat) => {
+            const pct = cat.score;
+            const isMaxed = pct >= 100;
+            return (
+              <div key={cat.key} className="p-3 rounded-lg hover:bg-muted/30 transition-colors">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <cat.icon size={14} className="text-muted-foreground shrink-0" />
+                    <span className="text-sm font-medium">{cat.label}</span>
+                    {isMaxed && <CheckCircle2 size={14} className="text-emerald-500" />}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium tabular-nums">
+                      {cat.weightedScore} / {cat.maxWeighted} pts
+                    </span>
+                    {!isMaxed && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-2 text-xs text-primary"
+                        onClick={() => setSection(cat.navTarget)}
+                      >
+                        Improve <ArrowRight size={12} className="ml-1" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={cn("h-full rounded-full transition-all", getBarColor(pct))}
+                    style={{ width: `${Math.min(pct, 100)}%` }}
+                  />
+                </div>
+                <p className="text-[0.65rem] text-muted-foreground mt-1">
+                  {isMaxed ? cat.fullHint : cat.hint}
+                </p>
+              </div>
+            );
+          })}
+
+          {/* Visibility Explainer */}
+          <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/10">
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Visibility ranking = Merit Score × Subscription Tier.</span>{" "}
+              Upgrade your plan for maximum exposure.{" "}
+              <button
+                onClick={() => setSection("subscription")}
+                className="text-primary font-medium hover:underline"
+              >
+                View plans →
+              </button>
+            </p>
           </div>
         </CardContent>
       </Card>
-
-      {/* Action Items */}
-      {actionItems.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-serif">Action Items</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {actionItems.map((item, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                <item.icon className={`h-4 w-4 ${item.color} shrink-0`} />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => setSection(item.section)}>
-                  {item.section === "zones" ? "Set up" : "Edit"}
-                </Button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
       <Card>
         <CardHeader className="pb-3">
