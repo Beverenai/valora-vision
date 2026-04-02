@@ -182,7 +182,7 @@ const Admin = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar — hidden on mobile, shown via dropdown in content area */}
-        <div className="hidden md:flex h-full">
+        <div className="hidden md:flex self-stretch">
           <AdminSidebar active={section} onNav={setSection} dark={dark} badges={{ leads: leadCount, buy: buyCount }} />
         </div>
 
