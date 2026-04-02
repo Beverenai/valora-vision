@@ -53,21 +53,25 @@ Deno.serve(async (req) => {
     }
     const propertyCode = codeMatch[1];
 
-    // Step 2: Scrape detail page
     const API_KEY = Deno.env.get("SCRAPINGBEE_API_KEY");
     if (!API_KEY) return jsonResponse({ error: "ScrapingBee API key not configured" }, 500);
 
+    // Step 2: Scrape detail page
     const detailUrl = `https://www.idealista.com/inmueble/${propertyCode}/`;
-    let detailHtml: string;
+    let detailResult;
     try {
-      detailHtml = await fetchWithScrapingBee(API_KEY, detailUrl, {
+      detailResult = await fetchWithScrapingBee(detailUrl, API_KEY, {
         renderJs: false, premiumProxy: true, countryCode: "es",
       });
     } catch (e) {
       return jsonResponse({ error: "Failed to fetch listing", detail: String(e) }, 502);
     }
 
-    const property = parsePropertyDetail(detailHtml);
+    if (detailResult.error) {
+      return jsonResponse({ error: "ScrapingBee error fetching listing", detail: detailResult.error }, 502);
+    }
+
+    const property = parsePropertyDetail(detailResult.html);
     if (!property || !property.price || !property.sizeM2) {
       return jsonResponse({
         error: "Could not parse property data. The listing may have been removed or the page structure changed.",
@@ -87,21 +91,22 @@ Deno.serve(async (req) => {
     }
 
     // Step 4: Search comparables
-    const idealistaType = PROPERTY_TYPE_MAP[property.propertyType || ""] || "viviendas";
+    const idealistaType = (PROPERTY_TYPE_MAP[property.propertyType || ""] || "viviendas") as "viviendas" | "chalets" | "pisos" | "aticos";
     const minSize = Math.round(property.sizeM2 * 0.7);
     const maxSize = Math.round(property.sizeM2 * 1.3);
     const minPrice = Math.round(property.price * 0.5);
     const maxPrice = Math.round(property.price * 1.8);
 
     const searchUrl = buildIdealistaSearchUrl({
+      operation: "venta",
       municipality: municipalitySlug,
       propertyType: idealistaType,
       minPrice, maxPrice, minSize, maxSize,
     });
 
-    let searchHtml: string;
+    let searchResult;
     try {
-      searchHtml = await fetchWithScrapingBee(API_KEY, searchUrl, {
+      searchResult = await fetchWithScrapingBee(searchUrl, API_KEY, {
         renderJs: false, premiumProxy: true, countryCode: "es",
       });
     } catch (e) {
@@ -113,7 +118,7 @@ Deno.serve(async (req) => {
       }, 502);
     }
 
-    const allComps = parseSearchResults(searchHtml);
+    const allComps = searchResult.error ? [] : parseSearchResults(searchResult.html);
     const targetRooms = property.rooms || 0;
     const filtered = allComps.filter((c) => {
       if (c.propertyCode === propertyCode) return false;
@@ -153,10 +158,7 @@ Deno.serve(async (req) => {
     }));
 
     const result = calculateBuyAnalysis(property.price, input, compsForEngine);
-
     const totalAdjPct = result.featureAdjustments.reduce((s, a) => s + a.adjustment, 0);
-
-    // Step 6: Build response
     const targetPricePerM2 = property.pricePerM2 || (property.sizeM2 ? Math.round(property.price / property.sizeM2) : null);
 
     const comparablesOut = filtered.slice(0, 10).map((c) => {
@@ -225,7 +227,7 @@ Deno.serve(async (req) => {
         searchUrl,
         totalSearchResults: allComps.length,
         comparablesFound: filtered.length,
-        creditsUsed: 10,
+        creditsUsed: detailResult.creditsUsed + (searchResult?.creditsUsed || 0),
         timestamp: new Date().toISOString(),
       },
     });
