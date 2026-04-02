@@ -743,6 +743,23 @@ export default function AgentProfile() {
                                   ))}
                                 </div>
                               )}
+                              <Button
+                                size="sm"
+                                className="mt-3 w-full rounded-full text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setContactForm(f => ({
+                                    ...f,
+                                    message: `I found ${member.name} on ValoraCasa and would like to get in touch...`,
+                                  }));
+                                  setTimeout(() => {
+                                    document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" });
+                                  }, 100);
+                                }}
+                              >
+                                <Mail size={12} /> Contact {member.name.split(" ")[0]}
+                              </Button>
                             </div>
                           </CardContent>
                         </Card>
