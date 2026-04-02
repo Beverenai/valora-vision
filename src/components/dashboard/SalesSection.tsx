@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Home, CheckCircle2, Calendar, TrendingUp, Award, Loader2, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Home, CheckCircle2, Calendar, TrendingUp, Loader2, Trash2, ExternalLink, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddSaleDialog from "./AddSaleDialog";
 import {
@@ -31,11 +31,13 @@ interface AgentSale {
 }
 
 const MILESTONES = [
-  { count: 1, label: "First sale registered", emoji: "🏠" },
-  { count: 3, label: "Rising agent", emoji: "📈" },
-  { count: 5, label: "Established agent", emoji: "⭐" },
-  { count: 10, label: "Top performer", emoji: "🏆" },
+  { count: 1, label: "Appear in Recent Sales on your public profile", emoji: "🏠" },
+  { count: 3, label: "Unlock sales map on your profile", emoji: "🗺️" },
+  { count: 5, label: "+30 merit points and higher search ranking", emoji: "📈" },
+  { count: 10, label: "Top Seller badge on valuation results", emoji: "🏆" },
 ];
+
+const VERIFIED_MILESTONE = { count: 5, label: "Verified Track Record trust badge", emoji: "✅" };
 
 export default function SalesSection({ professionalId }: { professionalId: string }) {
   const { toast } = useToast();
@@ -79,8 +81,6 @@ export default function SalesSection({ professionalId }: { professionalId: strin
     return d >= cutoff;
   }).length;
 
-  const nextMilestone = MILESTONES.find(m => totalSales < m.count) || MILESTONES[MILESTONES.length - 1];
-
   if (loading) {
     return <div className="flex items-center justify-center py-20"><Loader2 className="animate-spin text-muted-foreground" /></div>;
   }
@@ -114,21 +114,40 @@ export default function SalesSection({ professionalId }: { professionalId: strin
         ))}
       </div>
 
-      {/* Milestone incentive */}
-      {totalSales < 10 && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="pt-4 pb-4 px-5 flex items-center gap-4">
-            <span className="text-2xl">{nextMilestone.emoji}</span>
+      {/* Milestone checklist */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-serif">Sales Milestones</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {MILESTONES.map((m) => {
+            const unlocked = totalSales >= m.count;
+            return (
+              <div key={m.count} className={`flex items-center gap-3 ${unlocked ? "opacity-100" : "opacity-50"}`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${unlocked ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                  {unlocked ? <Check size={14} /> : m.count}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{m.label}</p>
+                  <p className="text-xs text-muted-foreground">{m.count}+ sale{m.count > 1 ? "s" : ""} required</p>
+                </div>
+                <span className="text-lg">{m.emoji}</span>
+              </div>
+            );
+          })}
+          {/* Verified milestone */}
+          <div className={`flex items-center gap-3 ${verifiedCount >= VERIFIED_MILESTONE.count ? "opacity-100" : "opacity-50"}`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${verifiedCount >= VERIFIED_MILESTONE.count ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+              {verifiedCount >= VERIFIED_MILESTONE.count ? <Check size={14} /> : VERIFIED_MILESTONE.count}
+            </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">Next milestone: {nextMilestone.label}</p>
-              <p className="text-xs text-muted-foreground">{totalSales}/{nextMilestone.count} sales registered</p>
+              <p className="text-sm font-medium">{VERIFIED_MILESTONE.label}</p>
+              <p className="text-xs text-muted-foreground">{VERIFIED_MILESTONE.count}+ verified sales required ({verifiedCount}/{VERIFIED_MILESTONE.count})</p>
             </div>
-            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min((totalSales / nextMilestone.count) * 100, 100)}%` }} />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            <span className="text-lg">{VERIFIED_MILESTONE.emoji}</span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Sales grid */}
       {sales.length === 0 ? (
@@ -146,7 +165,6 @@ export default function SalesSection({ professionalId }: { professionalId: strin
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {sales.map(sale => (
             <Card key={sale.id} className="overflow-hidden group">
-              {/* Photo */}
               <div className="relative h-36 bg-muted">
                 {sale.photo_url ? (
                   <img src={sale.photo_url} alt="" className="w-full h-full object-cover" />

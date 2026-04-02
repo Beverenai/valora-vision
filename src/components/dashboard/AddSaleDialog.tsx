@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link2, PenLine, Loader2 } from "lucide-react";
+import { Link2, PenLine, Loader2, Upload, X } from "lucide-react";
 
 const PROPERTY_TYPES = [
   { value: "apartment", label: "Apartment" },
@@ -28,6 +29,7 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
   const { toast } = useToast();
   const [mode, setMode] = useState<"link" | "manual">("link");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   // Link mode
   const [listingUrl, setListingUrl] = useState("");
@@ -43,9 +45,31 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
     sale_price: "",
     sale_date: "",
     photo_url: "",
+    show_price: true,
   });
 
-  const updateForm = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
+  const updateForm = (field: string, value: string | boolean) => setForm(f => ({ ...f, [field]: value }));
+
+  async function handlePhotoUpload(file: File) {
+    setUploading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const ext = file.name.split('.').pop();
+      const path = `${session.user.id}/${Date.now()}.${ext}`;
+      
+      const { error } = await supabase.storage.from("sale-photos").upload(path, file);
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage.from("sale-photos").getPublicUrl(path);
+      updateForm("photo_url", publicUrl);
+      toast({ title: "Photo uploaded" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+    setUploading(false);
+  }
 
   async function handleSubmitLink() {
     if (!listingUrl.trim()) {
@@ -89,14 +113,15 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
       city: form.city.trim(),
       sale_price: form.sale_price ? parseFloat(form.sale_price) : null,
       sale_date: form.sale_date || null,
-      photo_url: form.photo_url.trim() || null,
+      photo_url: form.photo_url || null,
+      show_price: form.show_price,
     });
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
     } else {
       toast({ title: "Sale registered!" });
-      setForm({ property_type: "apartment", bedrooms: "", bathrooms: "", built_size_sqm: "", address_text: "", city: "", sale_price: "", sale_date: "", photo_url: "" });
+      setForm({ property_type: "apartment", bedrooms: "", bathrooms: "", built_size_sqm: "", address_text: "", city: "", sale_price: "", sale_date: "", photo_url: "", show_price: true });
       onSaleAdded();
       onOpenChange(false);
     }
@@ -182,9 +207,50 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
               </div>
             </div>
 
+            {/* Show price toggle */}
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <p className="text-sm font-medium">Show price publicly</p>
+                <p className="text-xs text-muted-foreground">Display the sale price on your public profile</p>
+              </div>
+              <Switch checked={form.show_price} onCheckedChange={(v) => updateForm("show_price", v)} />
+            </div>
+
+            {/* Photo upload */}
             <div>
-              <Label>Photo URL (optional)</Label>
-              <Input value={form.photo_url} onChange={e => updateForm("photo_url", e.target.value)} placeholder="https://..." />
+              <Label>Property Photo</Label>
+              {form.photo_url ? (
+                <div className="relative mt-1 rounded-lg overflow-hidden h-32 bg-muted">
+                  <img src={form.photo_url} alt="" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => updateForm("photo_url", "")}
+                    className="absolute top-1 right-1 p-1 rounded-full bg-background/80 hover:bg-background"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <label className="mt-1 flex flex-col items-center justify-center h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  {uploading ? (
+                    <Loader2 size={20} className="animate-spin text-muted-foreground" />
+                  ) : (
+                    <>
+                      <Upload size={20} className="text-muted-foreground mb-1" />
+                      <span className="text-xs text-muted-foreground">Click to upload photo</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) handlePhotoUpload(file);
+                    }}
+                  />
+                </label>
+              )}
             </div>
 
             <Button onClick={handleSubmitManual} disabled={saving} className="w-full">
