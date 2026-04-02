@@ -115,6 +115,7 @@ const ProOnboard = () => {
   const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
+  const [importedReviews, setImportedReviews] = useState<Array<{ reviewer_name: string; rating: number; comment: string; source: string; source_url: string }>>([]);
 
   const progressPercentage = ((step + 1) / wizardSteps.length) * 100;
 
