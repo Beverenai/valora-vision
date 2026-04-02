@@ -709,6 +709,17 @@ export default function AgentProfile() {
                                   {review.reviewer_role.charAt(0).toUpperCase() + review.reviewer_role.slice(1)}
                                 </Badge>
                               )}
+                              {review.source && review.source !== "manual" && (
+                                <Badge variant="outline" className="text-[0.55rem] px-1.5 py-0 gap-1 font-normal">
+                                  {review.source === "google" && (
+                                    <img src="https://www.google.com/favicon.ico" alt="Google" className="w-3 h-3" />
+                                  )}
+                                  {review.source === "trustpilot" && (
+                                    <img src="https://www.trustpilot.com/favicon.ico" alt="Trustpilot" className="w-3 h-3" />
+                                  )}
+                                  {review.source.charAt(0).toUpperCase() + review.source.slice(1)}
+                                </Badge>
+                              )}
                               {review.is_verified && (
                                 <CheckCircle2 size={14} className="text-emerald-500" />
                               )}
