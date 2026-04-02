@@ -1,15 +1,16 @@
-import { Users, Database, Zap, Activity, ChevronDown, Globe, Map } from "lucide-react";
+import { Users, Database, Zap, Activity, ChevronDown, Globe, Map, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export type AdminSection = "leads" | "zones" | "jobs" | "resales" | "health" | "map";
+export type AdminSection = "leads" | "buy" | "zones" | "jobs" | "resales" | "health" | "map";
 
 const groups = [
   {
-    label: "Leads",
+    label: "Valuations",
     items: [
-      { key: "leads" as AdminSection, label: "All Leads", icon: Users },
+      { key: "leads" as AdminSection, label: "All Valuations", icon: Users },
+      { key: "buy" as AdminSection, label: "Buy Analyses", icon: ShoppingCart },
     ],
   },
   {
@@ -112,7 +113,7 @@ export function AdminSidebar({ active, onNav, dark, badges }: AdminSidebarProps)
 
   return (
     <aside className={cn(
-      "w-56 shrink-0 border-r flex flex-col py-4",
+      "w-56 shrink-0 border-r flex flex-col py-4 h-full",
       dark ? "border-white/10 bg-[hsl(220,18%,7%)]" : "border-border bg-card"
     )}>
       {groups.map((group) => (
