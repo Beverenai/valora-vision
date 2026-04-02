@@ -7,10 +7,10 @@ import { parseSearchResults, MUNICIPALITY_SLUGS } from "../_shared/idealista-par
 import { calculateValuation, type ValuationInput, type ComparableProperty } from "../_shared/valuation-engine.ts";
 
 const PROPERTY_TYPE_MAP: Record<string, string> = {
-  apartment: "pisos",
-  duplex: "pisos",
-  studio: "pisos",
-  penthouse: "aticos",
+  apartment: "viviendas",
+  duplex: "viviendas",
+  studio: "viviendas",
+  penthouse: "viviendas",
   villa: "chalets",
   house: "chalets",
   chalet: "chalets",
