@@ -595,95 +595,6 @@ export default function AgentProfile() {
               </section>
             )}
 
-            {/* Agency context — enhanced */}
-            {agency && (
-              <section>
-                <p className={SECTION_LABEL}>AGENCY</p>
-                <Link to={`/agentes/${agency.slug}`}>
-                  <Card className="border-border/60 hover:shadow-md transition-shadow">
-                    <CardContent className="p-5 flex items-center gap-4">
-                      <LogoWithFallback logoUrl={agency.logo_url} name={agency.company_name} />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-serif font-semibold text-foreground">{agency.company_name}</p>
-                        {agency.tagline && <p className="text-xs text-muted-foreground">{agency.tagline}</p>}
-                        {agency.office_address && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <MapPin size={11} className="text-[#D4713B] shrink-0" />
-                            <p className="text-xs text-muted-foreground truncate">{agency.office_address}</p>
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-xs font-medium text-[#D4713B] shrink-0">View more →</span>
-                    </CardContent>
-                  </Card>
-                </Link>
-
-                {/* Other agents in the agency */}
-                {agencyAgents.length > 0 && (
-                  <div className="flex items-center gap-2 flex-wrap mt-4">
-                    {agencyAgents.slice(0, 4).map(agent => (
-                      <Link
-                        key={agent.id}
-                        to={`/agentes/${agent.slug}`}
-                        className="flex items-center gap-1.5 bg-secondary rounded-full pr-3 pl-1 py-1 hover:bg-accent transition-colors"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-[#D4713B] flex items-center justify-center overflow-hidden shrink-0">
-                          {agent.logo_url ? (
-                            <img src={agent.logo_url} alt={agent.contact_name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-[8px] font-bold text-white">{getInitials(agent.contact_name)}</span>
-                          )}
-                        </div>
-                        <span className="text-xs font-medium text-foreground">{agent.contact_name}</span>
-                      </Link>
-                    ))}
-                    {agencyAgents.length > 4 && (
-                      <Link
-                        to={`/agentes/${agency.slug}`}
-                        className="text-xs font-medium text-[#D4713B] hover:underline"
-                      >
-                        +{agencyAgents.length - 4} more
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </section>
-            )}
-
-            {/* Sales Statistics */}
-            {recentSales.length > 0 && (
-              <AgentSalesStats
-                sales={recentSales}
-                agentName={professional.contact_name || professional.company_name}
-              />
-            )}
-
-            {/* Property Map */}
-            {recentSales.length > 0 && (
-              <Suspense fallback={<div className="h-[300px] bg-muted rounded-xl animate-pulse" />}>
-                <AgentPropertyMap
-                  sales={recentSales.map((s: any) => ({
-                    ...s,
-                    latitude: s.latitude ? Number(s.latitude) : null,
-                    longitude: s.longitude ? Number(s.longitude) : null,
-                    sale_price: s.sale_price ? Number(s.sale_price) : null,
-                    address_text: s.address_text || null,
-                  }))}
-                  centerLat={mapCenter.lat}
-                  centerLng={mapCenter.lng}
-                />
-              </Suspense>
-            )}
-
-            {/* Property Cards with Pagination */}
-            {recentSales.length > 0 && (
-              <AgentPropertyCards
-                sales={recentSales}
-                agentName={professional.contact_name || professional.company_name}
-                agencyName={agency?.company_name}
-              />
-            )}
-
             {/* Team */}
             {team.length > 0 && (() => {
               const salesByMember = recentSales.reduce<Record<string, number>>((acc, s) => {
@@ -783,6 +694,95 @@ export default function AgentProfile() {
                 </section>
               );
             })()}
+
+            {/* Agency context — enhanced */}
+            {agency && (
+              <section>
+                <p className={SECTION_LABEL}>AGENCY</p>
+                <Link to={`/agentes/${agency.slug}`}>
+                  <Card className="border-border/60 hover:shadow-md transition-shadow">
+                    <CardContent className="p-5 flex items-center gap-4">
+                      <LogoWithFallback logoUrl={agency.logo_url} name={agency.company_name} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-serif font-semibold text-foreground">{agency.company_name}</p>
+                        {agency.tagline && <p className="text-xs text-muted-foreground">{agency.tagline}</p>}
+                        {agency.office_address && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <MapPin size={11} className="text-[#D4713B] shrink-0" />
+                            <p className="text-xs text-muted-foreground truncate">{agency.office_address}</p>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-xs font-medium text-[#D4713B] shrink-0">View more →</span>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                {/* Other agents in the agency */}
+                {agencyAgents.length > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap mt-4">
+                    {agencyAgents.slice(0, 4).map(agent => (
+                      <Link
+                        key={agent.id}
+                        to={`/agentes/${agent.slug}`}
+                        className="flex items-center gap-1.5 bg-secondary rounded-full pr-3 pl-1 py-1 hover:bg-accent transition-colors"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-[#D4713B] flex items-center justify-center overflow-hidden shrink-0">
+                          {agent.logo_url ? (
+                            <img src={agent.logo_url} alt={agent.contact_name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-[8px] font-bold text-white">{getInitials(agent.contact_name)}</span>
+                          )}
+                        </div>
+                        <span className="text-xs font-medium text-foreground">{agent.contact_name}</span>
+                      </Link>
+                    ))}
+                    {agencyAgents.length > 4 && (
+                      <Link
+                        to={`/agentes/${agency.slug}`}
+                        className="text-xs font-medium text-[#D4713B] hover:underline"
+                      >
+                        +{agencyAgents.length - 4} more
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Sales Statistics */}
+            {recentSales.length > 0 && (
+              <AgentSalesStats
+                sales={recentSales}
+                agentName={professional.contact_name || professional.company_name}
+              />
+            )}
+
+            {/* Property Map */}
+            {recentSales.length > 0 && (
+              <Suspense fallback={<div className="h-[300px] bg-muted rounded-xl animate-pulse" />}>
+                <AgentPropertyMap
+                  sales={recentSales.map((s: any) => ({
+                    ...s,
+                    latitude: s.latitude ? Number(s.latitude) : null,
+                    longitude: s.longitude ? Number(s.longitude) : null,
+                    sale_price: s.sale_price ? Number(s.sale_price) : null,
+                    address_text: s.address_text || null,
+                  }))}
+                  centerLat={mapCenter.lat}
+                  centerLng={mapCenter.lng}
+                />
+              </Suspense>
+            )}
+
+            {/* Property Cards with Pagination */}
+            {recentSales.length > 0 && (
+              <AgentPropertyCards
+                sales={recentSales}
+                agentName={professional.contact_name || professional.company_name}
+                agencyName={agency?.company_name}
+              />
+            )}
 
             {/* Agency agents — if this is an agency profile */}
             {!agency && agencyAgents.length > 0 && (
