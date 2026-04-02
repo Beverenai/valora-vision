@@ -1,41 +1,20 @@
 
 
-# Revamp /pro "Market Insight" Section with KPMG Seller Behaviour Data
+# Fix: Admin Map Shows No Valuations
 
-## Concept
+## Root Cause
 
-Instead of quoting RealAdvisor's traffic numbers, we use the KPMG study to tell a story about **how Spanish homeowners behave before selling** — and why that makes ValoraCasa valuable. Two parts:
+The `ValuationsMapTab` queries leads with `.eq("status", "completed")`, but all 6 leads in the database have `status: "ready"`. The statuses never match, so zero points are returned and the map shows "No valuation data found."
 
-### Part A — "How sellers start their journey" (KPMG-backed)
-A bento grid showing general market behaviour insights sourced from KPMG Spain:
+## Duplicate Addresses
 
-| Card | Stat | Copy |
-|------|------|------|
-| Wide card | "1 in 2" | "One in two sellers uses an online valuation tool before contacting an agent" |
-| Card | "87%" | "of agents who join online platforms renew their subscription" |
-| Card | "14%" | "of clients come through referrals from other satisfied clients" |
-| Banner | — | "Sellers today research online first. If you're not visible where they look, you're invisible." |
+5 of the 6 leads share the same address ("Avenida del Prado 5"). These should be deduplicated on the map so only one pin appears per unique address.
 
-Source line: "Source: KPMG Spain, 2025"
+## Fix (1 file)
 
-Each card uses the same rounded-2xl border bg-card style from Index.tsx bento grid.
+**`src/pages/Admin.tsx` — ValuationsMapTab function (lines 810-817)**
 
-### Part B — "What sellers look for in an agent" (keep + upgrade)
-Keep the existing 5 factors (Proximity 29%, Reviews 21%, Recent Sales 19%, Experience 18%, Brand 14%) but upgrade the visual to bento-style cards instead of plain circles. Each card gets:
-- Icon + percentage in large bold text
-- Label + one-line explanation of why it matters
-- Subtle progress bar showing the percentage
+1. Change `.eq("status", "completed")` to `.in("status", ["completed", "ready"])` for both `leads_sell` and `leads_rent` queries — this catches all finished valuations regardless of the status label used.
 
-SectionLabel "Market Insight" above the whole section. Subtitle references the KPMG study properly.
-
-### Part C — Vertical timeline for "How it works"
-Adopt the Index.tsx vertical timeline pattern (numbered circles, icon pills, connecting line) instead of the current 3-column grid.
-
-## Files to change
-
-| File | Change |
-|------|--------|
-| `src/pages/ProLanding.tsx` | Replace "What sellers look for" with two-part KPMG section (seller journey + agent factors); upgrade "How it works" to vertical timeline; add SectionLabel components |
-
-No database changes needed.
+2. After merging `sellPoints` and `rentPoints`, deduplicate by address: group points by `address` (lowercased, trimmed), keep only the most recent entry per address (by `created_at`). This prevents 5 overlapping pins for the same property.
 
