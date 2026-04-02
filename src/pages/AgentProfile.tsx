@@ -838,7 +838,7 @@ export default function AgentProfile() {
 
                   {reviews.length > (isMobile ? 3 : 5) && !showAllReviews && (
                     <Button variant="outline" className="w-full mt-4 rounded-full" onClick={() => setShowAllReviews(true)}>
-                      Ver todas las {reviews.length} opiniones
+                      View all {reviews.length} reviews
                     </Button>
                   )}
                 </>
