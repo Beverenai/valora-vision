@@ -86,7 +86,8 @@ export default function AddSaleDialog({ open, onOpenChange, professionalId, onSa
       professional_id: professionalId,
       listing_url: listingUrl.trim(),
       listing_source: source,
-    });
+      team_member_id: linkTeamMemberId || null,
+    } as any);
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: "Could not save. Try again.", variant: "destructive" });
