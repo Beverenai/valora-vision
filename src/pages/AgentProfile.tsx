@@ -492,7 +492,7 @@ export default function AgentProfile() {
                 className="rounded-full bg-[#D4713B] hover:bg-[#c0612f] text-white"
                 onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}
               >
-                Contactar
+                Contact
               </Button>
               {professional.website && (
                 <Button variant="outline" className="rounded-full" asChild>
