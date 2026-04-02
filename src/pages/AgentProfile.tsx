@@ -872,10 +872,10 @@ export default function AgentProfile() {
       <div className="border-t border-border/60 py-8">
         <div className="max-w-5xl mx-auto px-4 md:px-8 text-center">
           <p className="text-xs text-muted-foreground">
-            Valoración por <Link to="/" className="text-[#D4713B] hover:underline">ValoraCasa</Link>
+            Powered by <Link to="/" className="text-[#D4713B] hover:underline">ValoraCasa</Link>
           </p>
           <p className="text-[0.65rem] text-muted-foreground/60 mt-2">
-            La información de esta página es proporcionada por la agencia. ValoraCasa no garantiza su exactitud.
+            The information on this page is provided by the agency. ValoraCasa does not guarantee its accuracy.
           </p>
         </div>
       </div>
