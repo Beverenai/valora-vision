@@ -381,11 +381,11 @@ export default function AgentProfile() {
         value={contactForm.interest}
         onChange={e => setContactForm(f => ({ ...f, interest: e.target.value }))}
       >
-        <option value="valuation">Necesito una valoración</option>
-        <option value="selling">Quiero vender</option>
-        <option value="buying">Quiero comprar</option>
-        <option value="renting">Alquiler</option>
-        <option value="other">Otro</option>
+        <option value="valuation">I need a valuation</option>
+        <option value="selling">I want to sell</option>
+        <option value="buying">I want to buy</option>
+        <option value="renting">Rental</option>
+        <option value="other">Other</option>
       </select>
       <Textarea
         placeholder="Tu mensaje..."
