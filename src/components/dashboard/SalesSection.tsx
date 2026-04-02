@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Home, CheckCircle2, Calendar, TrendingUp, Loader2, Trash2, ExternalLink, Check } from "lucide-react";
+import { Plus, Home, CheckCircle2, Calendar, TrendingUp, Loader2, Trash2, ExternalLink, Check, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import AddSaleDialog from "./AddSaleDialog";
 import {
