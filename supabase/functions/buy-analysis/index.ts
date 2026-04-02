@@ -23,7 +23,7 @@ function detectMunicipality(address: string | null, title: string): string | nul
 }
 
 const PROPERTY_TYPE_MAP: Record<string, string> = {
-  apartment: "pisos", duplex: "pisos", studio: "pisos",
+  apartment: "viviendas", duplex: "viviendas", studio: "viviendas",
   penthouse: "aticos",
   villa: "chalets", house: "chalets", chalet: "chalets",
   townhouse: "chalets", "semi-detached": "chalets", country_house: "chalets",
@@ -60,10 +60,14 @@ Deno.serve(async (req) => {
     const detailUrl = `https://www.idealista.com/inmueble/${propertyCode}/`;
     let detailResult;
     try {
+      console.log("Fetching detail page:", detailUrl);
+      const t0 = Date.now();
       detailResult = await fetchWithScrapingBee(detailUrl, API_KEY, {
-        renderJs: false, premiumProxy: true, countryCode: "es",
+        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
       });
+      console.log(`Detail fetch took ${Date.now() - t0}ms, status=${detailResult.statusCode}, credits=${detailResult.creditsUsed}`);
     } catch (e) {
+      console.error("Detail fetch error:", e);
       return jsonResponse({ error: "Failed to fetch listing", detail: String(e) }, 502);
     }
 
@@ -94,21 +98,21 @@ Deno.serve(async (req) => {
     const idealistaType = (PROPERTY_TYPE_MAP[property.propertyType || ""] || "viviendas") as "viviendas" | "chalets" | "pisos" | "aticos";
     const minSize = Math.round(property.sizeM2 * 0.7);
     const maxSize = Math.round(property.sizeM2 * 1.3);
-    const minPrice = Math.round(property.price * 0.5);
-    const maxPrice = Math.round(property.price * 1.8);
-
     const searchUrl = buildIdealistaSearchUrl({
       operation: "venta",
       municipality: municipalitySlug,
       propertyType: idealistaType,
-      minPrice, maxPrice, minSize, maxSize,
+      minSize, maxSize,
     });
 
     let searchResult;
     try {
+      console.log("Fetching comparables:", searchUrl);
+      const t1 = Date.now();
       searchResult = await fetchWithScrapingBee(searchUrl, API_KEY, {
-        renderJs: false, premiumProxy: true, countryCode: "es",
+        renderJs: true, premiumProxy: true, stealthProxy: true, countryCode: "es", wait: 1000,
       });
+      console.log(`Search fetch took ${Date.now() - t1}ms, status=${searchResult.statusCode}, credits=${searchResult.creditsUsed}`);
     } catch (e) {
       return jsonResponse({
         property,
