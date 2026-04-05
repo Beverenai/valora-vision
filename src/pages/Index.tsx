@@ -663,12 +663,15 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground mb-4">Local experts matched to your area.</p>
                 {/* Visual: agent avatars */}
                 <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((a) => (
-                    <div key={a} className="w-9 h-9 rounded-full bg-primary/15 border-2 border-card flex items-center justify-center">
-                      <Users className="h-3.5 w-3.5 text-primary/60" />
-                    </div>
+                  {[
+                    "https://randomuser.me/api/portraits/women/44.jpg",
+                    "https://randomuser.me/api/portraits/men/32.jpg",
+                    "https://randomuser.me/api/portraits/women/68.jpg",
+                    "https://randomuser.me/api/portraits/men/75.jpg",
+                  ].map((src, i) => (
+                    <img key={i} src={src} alt="Agent" className="w-9 h-9 rounded-full border-2 border-card object-cover" />
                   ))}
-                  <div className="w-9 h-9 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[10px] font-bold text-white">
+                  <div className="w-9 h-9 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                     +8
                   </div>
                 </div>
