@@ -446,21 +446,18 @@ const Index = () => {
                   </p>
                   {/* Visual: Agent avatars */}
                   <div className="flex items-center gap-4">
-                    <div className="flex -space-x-3">
+                  <div className="flex -space-x-3">
                       {[
-                        "bg-primary/20",
-                        "bg-accent/60",
-                        "bg-primary/30",
-                      ].map((bg, i) => (
-                        <div
+                        "https://randomuser.me/api/portraits/women/44.jpg",
+                        "https://randomuser.me/api/portraits/men/32.jpg",
+                        "https://randomuser.me/api/portraits/women/68.jpg",
+                      ].map((src, i) => (
+                        <img
                           key={i}
-                          className={cn(
-                            "w-10 h-10 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold text-primary",
-                            bg
-                          )}
-                        >
-                          {["EV", "SP", "DM"][i]}
-                        </div>
+                          src={src}
+                          alt="Agent"
+                          className="w-10 h-10 rounded-full border-2 border-background object-cover"
+                        />
                       ))}
                     </div>
                     <div className="flex flex-col gap-1">
@@ -666,12 +663,15 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground mb-4">Local experts matched to your area.</p>
                 {/* Visual: agent avatars */}
                 <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((a) => (
-                    <div key={a} className="w-9 h-9 rounded-full bg-primary/15 border-2 border-card flex items-center justify-center">
-                      <Users className="h-3.5 w-3.5 text-primary/60" />
-                    </div>
+                  {[
+                    "https://randomuser.me/api/portraits/women/44.jpg",
+                    "https://randomuser.me/api/portraits/men/32.jpg",
+                    "https://randomuser.me/api/portraits/women/68.jpg",
+                    "https://randomuser.me/api/portraits/men/75.jpg",
+                  ].map((src, i) => (
+                    <img key={i} src={src} alt="Agent" className="w-9 h-9 rounded-full border-2 border-card object-cover" />
                   ))}
-                  <div className="w-9 h-9 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[10px] font-bold text-white">
+                  <div className="w-9 h-9 rounded-full bg-primary border-2 border-card flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                     +8
                   </div>
                 </div>
