@@ -446,21 +446,18 @@ const Index = () => {
                   </p>
                   {/* Visual: Agent avatars */}
                   <div className="flex items-center gap-4">
-                    <div className="flex -space-x-3">
+                  <div className="flex -space-x-3">
                       {[
-                        "bg-primary/20",
-                        "bg-accent/60",
-                        "bg-primary/30",
-                      ].map((bg, i) => (
-                        <div
+                        "https://randomuser.me/api/portraits/women/44.jpg",
+                        "https://randomuser.me/api/portraits/men/32.jpg",
+                        "https://randomuser.me/api/portraits/women/68.jpg",
+                      ].map((src, i) => (
+                        <img
                           key={i}
-                          className={cn(
-                            "w-10 h-10 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold text-primary",
-                            bg
-                          )}
-                        >
-                          {["EV", "SP", "DM"][i]}
-                        </div>
+                          src={src}
+                          alt="Agent"
+                          className="w-10 h-10 rounded-full border-2 border-background object-cover"
+                        />
                       ))}
                     </div>
                     <div className="flex flex-col gap-1">
