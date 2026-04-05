@@ -1,26 +1,22 @@
 
 
-# Remove "Used Every Day" Section + Add FAQ
+# Fix Build Error + Replace Agent Matching Placeholder Faces
 
-## Changes to `src/pages/Index.tsx`
+## 1. Fix dependency version mismatch (critical — site is down)
 
-### 1. Remove the floating agencies section (lines 258–286)
-Delete the entire "FLOATING AGENCIES" `<section>` block and the `AGENCIES` data array (lines 17–25).
+**File**: `package.json`
 
-### 2. Add FAQ section before the Final CTA
-Insert an FAQ accordion section (using the existing `Accordion` component from `@radix-ui/react-accordion`) between the testimonials and the final CTA. Include 4–5 questions:
+The `@tanstack/react-query` is at `^5.83.0` but `@tanstack/query-sync-storage-persister` and `@tanstack/react-query-persist-client` are at `^5.96.0`, which requires `@tanstack/query-core@5.96.2` that doesn't resolve. Fix by bumping `@tanstack/react-query` to `^5.96.0` to match.
 
-- **"Why is this free?"** — Answer: ValoraCasa is 100% free for homeowners. We are funded by carefully vetted real estate professionals who pay to feature their brand on the platform. Every agent is reviewed and approved before joining, so you only see trusted, qualified professionals.
-- **"How accurate is the valuation?"** — Based on real comparable data from current listings in your area.
-- **"Is my data shared?"** — Your information is kept confidential and only shared with agents you choose to connect with.
-- **"How do you choose which agents appear?"** — All agents are carefully vetted for local expertise, track record, and professionalism before being approved.
+## 2. Replace placeholder initials with face images in Agent Matching
 
-### 3. Add import
-Add `Accordion, AccordionItem, AccordionTrigger, AccordionContent` import from `@/components/ui/accordion`.
+**File**: `src/pages/Index.tsx`
 
-## Files
+Two locations show placeholder avatar circles:
 
-| File | Change |
-|------|--------|
-| `src/pages/Index.tsx` | Remove AGENCIES data + floating section; add FAQ accordion section with "Why is this free?" as first item |
+**Step 4 "How it works" timeline (lines 448-475)**: Currently shows circles with "EV", "SP", "DM" initials. Replace with `<img>` tags using royalty-free avatar placeholder images (e.g., `https://randomuser.me/api/portraits/` or use inline SVG silhouettes) to look like real agent photos.
+
+**Bento grid Card 6 (lines 668-677)**: Currently shows Users icons in circles. Replace with the same avatar images for consistency.
+
+Both will use small circular images with `object-cover rounded-full` styling to look like real agent headshots.
 
